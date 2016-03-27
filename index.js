@@ -1,8 +1,11 @@
-/*jshint node:true */
+/*jshint node:true, esnext: true */
 
 'use strict';
 
+const Modelico = require('./src/Modelico');
+const Enum = require('./src/Enum');
+
 module.exports = {
-  Modelico: require('./src/Modelico'),
-  Enum: require('./src/Enum')
+  Modelico,
+  Enum
 };
