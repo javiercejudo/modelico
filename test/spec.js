@@ -75,7 +75,7 @@ describe('cloning', function() {
     const author = new Person({
       givenName: 'Javier',
       familyName: 'Cejudo',
-      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')}),
+      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')})
       // equivalent but perhaps more convenient:
       // birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
     });
