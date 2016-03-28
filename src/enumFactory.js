@@ -8,8 +8,8 @@ module.exports = function(values) {
   let valuesAsObject = values;
 
   if (Array.isArray(values)) {
-    valuesAsObject = values.reduce((acc, value) => {
-      acc[value] = {code: value};
+    valuesAsObject = values.reduce((acc, code) => {
+      acc[code] = {code};
 
       return acc;
     }, {});
