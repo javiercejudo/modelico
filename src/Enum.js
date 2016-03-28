@@ -11,6 +11,16 @@ class Enum extends Modelico {
     Object.getOwnPropertyNames(fields)
       .forEach(field => this[field].toJSON = () => field);
   }
+
+  static buildReviver(values) {
+    return function reviver(k, v) {
+      if (v === null) {
+        return null;
+      }
+
+      return values[v];
+    };
+  }
 }
 
 module.exports = Enum;

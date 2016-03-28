@@ -2,30 +2,17 @@
 
 'use strict';
 
-const Enum = require('../../').Enum;
+const enumFactory = require('../../').enumFactory;
 
-const ANY = {minTime: 0, maxTime: 1440};
-const MORNING = {minTime: 0, maxTime: 720};
-const AFTERNOON = {minTime: 720, maxTime: 1080};
-const EVENING = {minTime: 1080, maxTime: 1440};
+const range = (min, max) => {
+  return {minTime: min, maxTime: max};
+};
 
-const values = new Enum({ANY, MORNING, AFTERNOON, EVENING});
-
-class PartOfDay extends Enum {
-  static values() { return values; }
-
-  static get ANY() { return ANY; }
-  static get MORNING() { return MORNING; }
-  static get AFTERNOON() { return AFTERNOON; }
-  static get EVENING() { return EVENING; }
-
-  static reviver(k, v) {
-    if (v === null) {
-      return null;
-    }
-
-    return values[v];
-  }
-}
+const PartOfDay = enumFactory({
+  ANY: range(0, 1440),
+  MORNING: range(0, 720),
+  AFTERNOON: range(720, 1080),
+  EVENING: range(1080, 1440)
+});
 
 module.exports = PartOfDay;

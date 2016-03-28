@@ -2,8 +2,7 @@
 
 'use strict';
 
-require('should');
-
+const should = require('should');
 const fs = require('fs');
 const Modelico = require('../').Modelico;
 const Person = require('./fixtures/Person');
@@ -12,6 +11,7 @@ const PartOfDay = require('./fixtures/PartOfDay');
 const Sex = require('./fixtures/Sex');
 
 const authorJson = fs.readFileSync(__dirname + '/fixtures/author.json').toString();
+const author2Json = fs.readFileSync(__dirname + '/fixtures/author2.json').toString();
 
 describe('stringifying', function() {
   it('should stringify types correctly', function() {
@@ -25,6 +25,19 @@ describe('stringifying', function() {
 
     JSON.stringify(author).concat("\n")
       .should.be.exactly(authorJson);
+  });
+
+  it('should support null in Enum', function() {
+    const author2 = new Person({
+      givenName: 'Javier',
+      familyName: 'Cejudo',
+      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')}),
+      favouritePartOfDay: null,
+      sex: Sex.MALE
+    });
+
+    JSON.stringify(author2).concat("\n")
+      .should.be.exactly(author2Json);
   });
 });
 
@@ -49,6 +62,12 @@ describe('parsing', function() {
       .should.be.exactly(author.sex)
       .and.exactly(authorAlt.sex);
   });
+
+  it('should support null in Enum', function() {
+    const author2 = Modelico.fromJSON(Person, author2Json);
+
+    should(author2.favouritePartOfDay).be.exactly(null);
+  });
 });
 
 describe('cloning', function() {
@@ -56,7 +75,7 @@ describe('cloning', function() {
     const author = new Person({
       givenName: 'Javier',
       familyName: 'Cejudo',
-      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')})
+      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')}),
       // equivalent but perhaps more convenient:
       // birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
     });
