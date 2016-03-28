@@ -12,9 +12,12 @@ const EVENING = {minTime: 1080, maxTime: 1440};
 const values = new Enum({ANY, MORNING, AFTERNOON, EVENING});
 
 class PartOfDay extends Enum {
-  static values() {
-    return values;
-  }
+  static values() { return values; }
+
+  static get ANY() { return ANY; }
+  static get MORNING() { return MORNING; }
+  static get AFTERNOON() { return AFTERNOON; }
+  static get EVENING() { return EVENING; }
 
   static reviver(k, v) {
     if (v === null) {

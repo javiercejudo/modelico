@@ -19,8 +19,8 @@ describe('stringifying', function() {
       givenName: 'Javier',
       familyName: 'Cejudo',
       birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')}),
-      favouritePartOfDay: PartOfDay.values().EVENING,
-      sex: Sex.values().MALE
+      favouritePartOfDay: PartOfDay.EVENING,
+      sex: Sex.MALE
     });
 
     JSON.stringify(author).concat("\n")
@@ -41,18 +41,18 @@ describe('parsing', function() {
       .should.be.exactly(author.birthday.date.getFullYear())
       .and.exactly(authorAlt.birthday.date.getFullYear());
 
-    (PartOfDay.values().EVENING.minTime)
+    (PartOfDay.EVENING.minTime)
       .should.be.exactly(author.favouritePartOfDay.minTime)
       .and.exactly(authorAlt.favouritePartOfDay.minTime);
 
-    (Sex.values().MALE)
+    (Sex.MALE)
       .should.be.exactly(author.sex)
       .and.exactly(authorAlt.sex);
   });
 });
 
 describe('cloning', function() {
-  it('should clone the instance', function() {
+  it('should support cloning', function() {
     const author = new Person({
       givenName: 'Javier',
       familyName: 'Cejudo',
@@ -84,22 +84,24 @@ describe('comparing', function() {
     const author1 = new Person({
       givenName: 'Javier',
       familyName: 'Cejudo',
-      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')})
+      birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
     });
 
     const author2 = new Person({
       givenName: 'Javier',
       familyName: 'Cejudo',
-      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')})
+      birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
     });
 
     const author3 = new Person({
       givenName: 'Javier',
       familyName: 'Cejudo Goñi',
-      birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')})
+      birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
     });
 
     author1.equals(author2).should.be.exactly(true);
     author1.equals(author3).should.be.exactly(false);
+
+    author1.should.not.be.exactly(author2);
   });
 });
