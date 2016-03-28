@@ -7,6 +7,8 @@ const SerialisableDate = require('./SerialisableDate');
 const PartOfDay = require('./PartOfDay');
 const Sex = require('./Sex');
 
+const joinWithSpace = (arr) => arr.filter(x => x !== null && x !== undefined).join(' ');
+
 class Person extends Modelico {
   constructor(fields) {
     super(Person, fields);
@@ -21,10 +23,7 @@ class Person extends Modelico {
   }
 
   fullName() {
-    return [
-      this.givenName,
-      this.familyName
-    ].filter(x => x !== null && x !== undefined).join(' ');
+    return joinWithSpace([this.givenName, this.familyName]);
   }
 }
 

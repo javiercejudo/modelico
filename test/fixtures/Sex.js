@@ -4,6 +4,4 @@
 
 const enumFactory = require('../../').enumFactory;
 
-const Sex = enumFactory(['FEMALE', 'MALE']);
-
-module.exports = Sex;
+module.exports = enumFactory(['FEMALE', 'MALE']);

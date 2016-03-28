@@ -4,15 +4,11 @@
 
 const enumFactory = require('../../').enumFactory;
 
-const range = (min, max) => {
-  return {minTime: min, maxTime: max};
-};
+const range = (minTime, maxTime) => ({minTime, maxTime});
 
-const PartOfDay = enumFactory({
+module.exports = enumFactory({
   ANY: range(0, 1440),
   MORNING: range(0, 720),
   AFTERNOON: range(720, 1080),
   EVENING: range(1080, 1440)
 });
-
-module.exports = PartOfDay;

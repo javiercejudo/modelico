@@ -13,11 +13,7 @@ class Enum extends Modelico {
   }
 
   static reviver(values, k, v) {
-    if (v === null) {
-      return null;
-    }
-
-    return values[v];
+    return (v === null) ? null : values[v];
   }
 }
 

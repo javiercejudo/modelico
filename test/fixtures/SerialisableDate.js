@@ -10,19 +10,11 @@ class SerialisableDate extends Modelico {
   }
 
   toJSON() {
-    if (this.date === null) {
-      return null;
-    }
-
-    return this.date.toISOString();
+    return (this.date === null) ? null : this.date.toISOString();
   }
 
   static reviver(k, v) {
-    let date = null;
-
-    if (v !== null) {
-      date = new Date(v);
-    }
+    const date = (v === null) ? null : new Date(v);
 
     return new SerialisableDate({date});
   }

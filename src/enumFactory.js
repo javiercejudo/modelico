@@ -4,16 +4,16 @@
 
 const Enum = require('./Enum');
 
-module.exports = function(values) {
-  let valuesAsObject = values;
+const valuesReducer = (acc, code) => {
+  acc[code] = {code};
 
-  if (Array.isArray(values)) {
-    valuesAsObject = values.reduce((acc, code) => {
-      acc[code] = {code};
+  return acc;
+};
 
-      return acc;
-    }, {});
-  }
+module.exports = values => {
+  const valuesAsObject = Array.isArray(values) ?
+    values.reduce(valuesReducer, {}) :
+    values;
 
   const myEnum = new Enum(valuesAsObject);
   myEnum.reviver = Enum.reviver.bind(undefined, valuesAsObject);
