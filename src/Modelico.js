@@ -4,14 +4,14 @@
 
 class Modelico {
   constructor(Type, fields) {
-    this.Type = Type;
+    this.type = () => Type;
 
     Object.getOwnPropertyNames(fields)
       .forEach(field => this[field] = fields[field]);
   }
 
   clone() {
-    return Modelico.fromJSON(this.Type, JSON.stringify(this));
+    return Modelico.fromJSON(this.type(), JSON.stringify(this));
   }
 
   equals(other) {
