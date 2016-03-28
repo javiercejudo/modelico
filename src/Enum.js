@@ -12,14 +12,12 @@ class Enum extends Modelico {
       .forEach(field => this[field].toJSON = () => field);
   }
 
-  static buildReviver(values) {
-    return function reviver(k, v) {
-      if (v === null) {
-        return null;
-      }
+  static reviver(values, k, v) {
+    if (v === null) {
+      return null;
+    }
 
-      return values[v];
-    };
+    return values[v];
   }
 }
 

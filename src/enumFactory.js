@@ -16,7 +16,7 @@ module.exports = function(values) {
   }
 
   const myEnum = new Enum(valuesAsObject);
-  myEnum.reviver = Enum.buildReviver(valuesAsObject);
+  myEnum.reviver = Enum.reviver.bind(undefined, valuesAsObject);
 
   return myEnum;
 };
