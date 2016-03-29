@@ -4,11 +4,13 @@
 
 const should = require('should');
 const fs = require('fs');
-const Modelico = require('../').Modelico;
+const M = require('../');
 const Person = require('./fixtures/Person');
-const SerialisableDate = require('./fixtures/SerialisableDate');
 const PartOfDay = require('./fixtures/PartOfDay');
 const Sex = require('./fixtures/Sex');
+
+const Modelico = M.Modelico;
+const ModelicoDate = M.ModelicoDate;
 
 const authorJson = fs.readFileSync(__dirname + '/fixtures/author.json').toString();
 const author2Json = fs.readFileSync(__dirname + '/fixtures/author2.json').toString();
@@ -19,7 +21,7 @@ describe('Modelico', function() {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')}),
+        birthday: new ModelicoDate({date: new Date('1988-04-16T00:00:00.000Z')}),
         favouritePartOfDay: PartOfDay.EVENING,
         sex: Sex.MALE
       });
@@ -32,7 +34,7 @@ describe('Modelico', function() {
       const author2 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')}),
+        birthday: new ModelicoDate({date: new Date('1988-04-16T00:00:00.000Z')}),
         favouritePartOfDay: null,
         sex: Sex.MALE
       });
@@ -76,7 +78,7 @@ describe('Modelico', function() {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new SerialisableDate({date: new Date('1988-04-16T00:00:00.000Z')})
+        birthday: new ModelicoDate({date: new Date('1988-04-16T00:00:00.000Z')})
         // equivalent but perhaps more convenient:
         // birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
@@ -104,19 +106,19 @@ describe('Modelico', function() {
       const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
+        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
 
       const author2 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
+        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
 
       const author3 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo Goñi',
-        birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
+        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
 
       author1.equals(author2).should.be.exactly(true);

@@ -2,11 +2,11 @@
 
 'use strict';
 
-const Modelico = require('../../').Modelico;
+const Modelico = require('./Modelico');
 
-class SerialisableDate extends Modelico {
+class ModelicoDate extends Modelico {
   constructor(fields) {
-    super(SerialisableDate, fields);
+    super(ModelicoDate, fields);
   }
 
   toJSON() {
@@ -16,8 +16,8 @@ class SerialisableDate extends Modelico {
   static reviver(k, v) {
     const date = (v === null) ? null : new Date(v);
 
-    return new SerialisableDate({date});
+    return new ModelicoDate({date});
   }
 }
 
-module.exports = SerialisableDate;
+module.exports = ModelicoDate;

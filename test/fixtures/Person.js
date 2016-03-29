@@ -2,10 +2,12 @@
 
 'use strict';
 
-const Modelico = require('../../').Modelico;
-const SerialisableDate = require('./SerialisableDate');
+const M = require('../../');
 const PartOfDay = require('./PartOfDay');
 const Sex = require('./Sex');
+
+const Modelico = M.Modelico;
+const ModelicoDate = M.ModelicoDate;
 
 const joinWithSpace = (arr) => arr.filter(x => x !== null && x !== undefined).join(' ');
 
@@ -16,7 +18,7 @@ class Person extends Modelico {
 
   static get types() {
     return {
-      'birthday': SerialisableDate,
+      'birthday': ModelicoDate,
       'favouritePartOfDay': PartOfDay,
       'sex': Sex
     };

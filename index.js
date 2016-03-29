@@ -4,12 +4,14 @@
 
 const Modelico = require('./src/Modelico');
 const ModelicoMap = require('./src/Map');
-const Enum = require('./src/Enum');
+const ModelicoEnum = require('./src/Enum');
+const ModelicoDate = require('./src/Date');
 const enumFactory = require('./src/enumFactory');
 
 module.exports = {
   Modelico,
   ModelicoMap,
-  Enum,
+  ModelicoDate,
+  ModelicoEnum,
   enumFactory
 };
