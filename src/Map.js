@@ -8,8 +8,14 @@ const stringifyReducer = (acc, pair) => acc.concat({key: pair[0], value: pair[1]
 const parseReducer = (acc, pairObject) => acc.concat([[pairObject.key, pairObject.value]]);
 
 class ModelicoMap extends Modelico {
-  constructor(fields) {
-    super(ModelicoMap, fields);
+  constructor(key, value, map) {
+    super(ModelicoMap, {map});
+
+    this.subtypes = () => ({key, value});
+  }
+
+  clone() {
+    return JSON.parse(JSON.stringify(this), ModelicoMap.reviver.bind(undefined, this.subtypes()));
   }
 
   toJSON() {
@@ -20,15 +26,15 @@ class ModelicoMap extends Modelico {
     return ModelicoMap.reviver.bind(undefined, {key, value});
   }
 
-  static reviver(types, k, v) {
+  static reviver(subtypes, k, v) {
     if (k === '') {
       const map = (v === null) ? null : new Map(v.reduce(parseReducer, []));
 
-      return new ModelicoMap({map});
+      return new ModelicoMap(subtypes.key, subtypes.value, map);
     }
 
-    if (types && types[k] && 'reviver' in types[k]) {
-      return Modelico.buildReviver(types[k])('', v);
+    if (subtypes && subtypes[k] && 'reviver' in subtypes[k]) {
+      return Modelico.buildReviver(subtypes[k])('', v);
     }
 
     return v;

@@ -5,8 +5,8 @@
 const Modelico = require('./Modelico');
 
 class ModelicoDate extends Modelico {
-  constructor(fields) {
-    super(ModelicoDate, fields);
+  constructor(date) {
+    super(ModelicoDate, {date});
   }
 
   toJSON() {
@@ -16,7 +16,7 @@ class ModelicoDate extends Modelico {
   static reviver(k, v) {
     const date = (v === null) ? null : new Date(v);
 
-    return new ModelicoDate({date});
+    return new ModelicoDate(date);
   }
 }
 

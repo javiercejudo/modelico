@@ -21,7 +21,7 @@ describe('Modelico', function() {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new ModelicoDate({date: new Date('1988-04-16T00:00:00.000Z')}),
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING,
         sex: Sex.MALE
       });
@@ -34,7 +34,7 @@ describe('Modelico', function() {
       const author2 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new ModelicoDate({date: new Date('1988-04-16T00:00:00.000Z')}),
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: null,
         sex: Sex.MALE
       });
@@ -78,7 +78,7 @@ describe('Modelico', function() {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new ModelicoDate({date: new Date('1988-04-16T00:00:00.000Z')})
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))
         // equivalent but perhaps more convenient:
         // birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
