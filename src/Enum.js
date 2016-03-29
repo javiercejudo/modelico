@@ -4,9 +4,9 @@
 
 const Modelico = require('./Modelico');
 
-class Enum extends Modelico {
+class ModelicoEnum extends Modelico {
   constructor(fields) {
-    super(Enum, fields);
+    super(ModelicoEnum, fields);
 
     Object.getOwnPropertyNames(fields)
       .forEach(field => this[field].toJSON = () => field);
@@ -17,4 +17,4 @@ class Enum extends Modelico {
   }
 }
 
-module.exports = Enum;
+module.exports = ModelicoEnum;

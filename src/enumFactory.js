@@ -2,7 +2,7 @@
 
 'use strict';
 
-const Enum = require('./Enum');
+const ModelicoEnum = require('./Enum');
 
 const valuesReducer = (acc, code) => {
   acc[code] = {code};
@@ -15,8 +15,8 @@ module.exports = values => {
     values.reduce(valuesReducer, {}) :
     values;
 
-  const myEnum = new Enum(valuesAsObject);
-  myEnum.reviver = Enum.reviver.bind(undefined, valuesAsObject);
+  const myEnum = new ModelicoEnum(valuesAsObject);
+  myEnum.reviver = ModelicoEnum.reviver.bind(undefined, valuesAsObject);
 
   return myEnum;
 };
