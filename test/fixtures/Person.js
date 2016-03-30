@@ -7,6 +7,7 @@ const PartOfDay = require('./PartOfDay');
 const Sex = require('./Sex');
 
 const Modelico = M.Modelico;
+const ModelicoPrimitive = M.ModelicoPrimitive;
 const ModelicoDate = M.ModelicoDate;
 const ModelicoMap = M.ModelicoMap;
 
@@ -25,7 +26,7 @@ class Person extends Modelico {
     return {
       'birthday': ModelicoDate.metadata(),
       'favouritePartOfDay': PartOfDay.metadata(),
-      'lifeEvents': ModelicoMap.metadata(String, ModelicoDate),
+      'lifeEvents': ModelicoMap.metadata(ModelicoPrimitive.metadata(String), ModelicoDate.metadata()),
       'sex': Sex.metadata()
     };
   }

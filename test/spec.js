@@ -15,9 +15,9 @@ const ModelicoDate = M.ModelicoDate;
 const authorJson = fs.readFileSync(__dirname + '/fixtures/author.json').toString();
 const author2Json = fs.readFileSync(__dirname + '/fixtures/author2.json').toString();
 
-describe('Modelico', function() {
-  describe('stringifying', function() {
-    it('should stringify types correctly', function() {
+describe('Modelico', () => {
+  describe('stringifying', () => {
+    it('should stringify types correctly', () => {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
@@ -30,7 +30,7 @@ describe('Modelico', function() {
         .should.be.exactly(authorJson);
     });
 
-    it('should support null in Enum', function() {
+    it('should support null in Enum', () => {
       const author2 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
@@ -44,8 +44,8 @@ describe('Modelico', function() {
     });
   });
 
-  describe('parsing', function() {
-    it('should parse types correctly', function() {
+  describe('parsing', () => {
+    it('should parse types correctly', () => {
       const author = Modelico.fromJSON(Person, authorJson);
       const authorAlt = JSON.parse(authorJson, Modelico.buildReviver(Person));
 
@@ -66,15 +66,15 @@ describe('Modelico', function() {
         .and.exactly(authorAlt.sex);
     });
 
-    it('should support null in Enum', function() {
+    it('should support null in Enum', () => {
       const author2 = Modelico.fromJSON(Person, author2Json);
 
       should(author2.favouritePartOfDay).be.exactly(null);
     });
   });
 
-  describe('cloning', function() {
-    it('should support cloning', function() {
+  describe('cloning', () => {
+    it('should support cloning', () => {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
@@ -101,8 +101,8 @@ describe('Modelico', function() {
     });
   });
 
-  describe('comparing', function() {
-    it('should identify equal instances', function() {
+  describe('comparing', () => {
+    it('should identify equal instances', () => {
       const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
