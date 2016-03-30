@@ -18,6 +18,10 @@ class ModelicoDate extends Modelico {
 
     return new ModelicoDate(date);
   }
+
+  static metadata() {
+    return {type: ModelicoDate, reviver: ModelicoDate.reviver};
+  }
 }
 
 module.exports = ModelicoDate;

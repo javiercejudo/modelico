@@ -17,6 +17,7 @@ module.exports = values => {
 
   const myEnum = new ModelicoEnum(valuesAsObject);
   myEnum.reviver = ModelicoEnum.reviver.bind(undefined, valuesAsObject);
+  myEnum.metadata = () => ({type: ModelicoEnum, reviver: myEnum.reviver});
 
   return myEnum;
 };

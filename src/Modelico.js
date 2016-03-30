@@ -35,8 +35,8 @@ class Modelico {
       return new Type(v);
     }
 
-    if (Type.types && Type.types[k] && 'reviver' in Type.types[k]) {
-      return Modelico.buildReviver(Type.types[k])('', v);
+    if (Type.metadata && Type.metadata[k]) {
+      return Type.metadata[k].reviver('', v);
     }
 
     return v;

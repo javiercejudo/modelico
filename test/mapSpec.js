@@ -3,8 +3,10 @@
 'use strict';
 
 const should = require('should');
+const Person = require('./fixtures/Person');
 const M = require('../');
 
+const Modelico = M.Modelico;
 const ModelicoMap = M.ModelicoMap;
 const ModelicoDate = M.ModelicoDate;
 
@@ -43,6 +45,14 @@ describe('ModelicoMap', function() {
 
       should(modelicoMap.map.get('b').date)
         .be.exactly(null);
+    });
+
+    it('should be parsed correctly when used within another class', function() {
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+
+      const author = Modelico.fromJSON(Person, authorJson);
+
+      author.lifeEvents.map.get('wedding').date.getFullYear().should.be.exactly(2013);
     });
 
     it('should support null maps', function() {
