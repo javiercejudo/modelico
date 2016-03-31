@@ -17,7 +17,7 @@ class ModelicoList extends Modelico {
   }
 
   toJSON() {
-    return (this.map === null) ? null : this.list;
+    return this.list;
   }
 
   static buildReviver(subtypeMetadata) {
