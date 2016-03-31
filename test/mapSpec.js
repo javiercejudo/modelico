@@ -12,6 +12,55 @@ const ModelicoMap = M.ModelicoMap;
 const ModelicoDate = M.ModelicoDate;
 
 describe('ModelicoMap', () => {
+  describe('setting', () => {
+    it('should set fields returning a new object', () => {
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+
+      const author = Modelico.fromJSON(Person, authorJson);
+
+      // sanity check
+      JSON.stringify(author)
+        .should.be.exactly(authorJson);
+
+      author.givenName().should.be.exactly('Javier');
+      author.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
+
+      (function() {
+        author.lifeEvents = 1;
+      }).should.throw();
+
+      // field setting
+      const authorAlt = author.set('givenName', 'Javi');
+
+      // date is protected by always returning a new one
+      author.lifeEvents().map().get('wedding').date().setFullYear(2001);
+
+      // objects are protected with Object.freeze
+      (function() {
+        authorAlt.lifeEvents = 1;
+      }).should.throw();
+
+
+      // repeat sanity check
+      JSON.stringify(author)
+        .should.be.exactly(authorJson);
+
+      author.givenName().should.be.exactly('Javier');
+      author.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
+
+      // new object checks
+      (authorAlt === author).should.be.exactly(false);
+      (authorAlt.lifeEvents().map() === author.lifeEvents().map()).should.be.exactly(false);
+      authorAlt.equals(author).should.be.exactly(false);
+
+      authorAlt.givenName().should.be.exactly('Javi');
+      authorAlt.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
+
+      JSON.stringify(authorAlt)
+        .should.be.exactly('{"givenName":"Javi","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}');
+    });
+  });
+
   describe('stringifying', () => {
     it('should stringify the map correctly', () => {
       const map = new Map([
@@ -41,10 +90,10 @@ describe('ModelicoMap', () => {
         ModelicoMap.buildReviver(ModelicoPrimitive.metadata(String), ModelicoDate.metadata())
       );
 
-      modelicoMap.map.get('a').date.getFullYear()
+      modelicoMap.map().get('a').date().getFullYear()
         .should.be.exactly(1988);
 
-      should(modelicoMap.map.get('b').date)
+      should(modelicoMap.map().get('b').date())
         .be.exactly(null);
     });
 
@@ -53,13 +102,13 @@ describe('ModelicoMap', () => {
 
       const author = Modelico.fromJSON(Person, authorJson);
 
-      author.lifeEvents.map.get('wedding').date.getFullYear().should.be.exactly(2013);
+      author.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
     });
 
     it('should support null maps', () => {
       const modelicoMap = JSON.parse('null', ModelicoMap.buildReviver(ModelicoPrimitive.metadata(String), ModelicoDate.metadata()));
 
-      should(modelicoMap.map)
+      should(modelicoMap.map())
         .be.exactly(null);
     });
   });
@@ -76,10 +125,10 @@ describe('ModelicoMap', () => {
 
       modelicoMap.should.not.be.exactly(modelicoMapClone);
 
-      modelicoMap.map.get('a').date.getFullYear()
+      modelicoMap.map().get('a').date().getFullYear()
         .should.be.exactly(1988);
 
-      modelicoMapClone.map.get('a').date.getFullYear()
+      modelicoMapClone.map().get('a').date().getFullYear()
         .should.be.exactly(1988);
     });
   });

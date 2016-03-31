@@ -4,11 +4,7 @@
 
 const ModelicoEnum = require('./Enum');
 
-const valuesReducer = (acc, code) => {
-  acc[code] = {code};
-
-  return acc;
-};
+const valuesReducer = (acc, code) => (acc[code] = {code}) && acc;
 
 module.exports = values => {
   const valuesAsObject = Array.isArray(values) ?
@@ -19,5 +15,5 @@ module.exports = values => {
   myEnum.reviver = ModelicoEnum.reviver.bind(undefined, valuesAsObject);
   myEnum.metadata = () => ({type: ModelicoEnum, reviver: myEnum.reviver});
 
-  return myEnum;
+  return Object.freeze(myEnum);
 };

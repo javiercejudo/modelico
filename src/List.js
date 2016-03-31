@@ -13,11 +13,11 @@ class ModelicoList extends Modelico {
   }
 
   clone() {
-    return JSON.parse(JSON.stringify(this), ModelicoList.reviver.bind(undefined, this.subtype()));
+    return JSON.parse(JSON.stringify(this), ModelicoList.buildReviver(this.subtype()));
   }
 
   toJSON() {
-    return this.list;
+    return this.list();
   }
 
   static buildReviver(subtypeMetadata) {
@@ -28,7 +28,7 @@ class ModelicoList extends Modelico {
     if (k === '') {
       const list = (v === null) ? null : v.map(subtypeMetadata.reviver.bind(undefined, ''));
 
-      return new ModelicoList(subtypeMetadata, list);
+      return Object.freeze(new ModelicoList(subtypeMetadata, list));
     }
 
     return v;
