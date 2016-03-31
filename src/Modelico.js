@@ -2,12 +2,27 @@
 
 'use strict';
 
+const assignReducer = (acc, pair) => {
+  acc[pair.field] = pair.value;
+
+  return acc;
+};
+
 class Modelico {
   constructor(Type, fields) {
     this.type = () => Type;
+    this.fields = () => fields;
 
     Object.getOwnPropertyNames(fields)
-      .forEach(field => this[field] = fields[field]);
+      .forEach(field => this[field] = () => fields[field]);
+  }
+
+  set(field, value) {
+    const fieldValue = assignReducer({}, {field, value});
+    const newFields = Object.assign({}, this.clone().fields(), fieldValue);
+    const newInstance = new Modelico(this.type(), newFields);
+
+    return Object.freeze(newInstance);
   }
 
   clone() {
@@ -16,6 +31,10 @@ class Modelico {
 
   equals(other) {
     return (JSON.stringify(this) === JSON.stringify(other));
+  }
+
+  toJSON() {
+    return this.fields();
   }
 
   static fromJSON(Type, json) {
@@ -32,7 +51,7 @@ class Modelico {
 
   static reviver(Type, k, v) {
     if (k === '') {
-      return new Type(v);
+      return Object.freeze(new Type(v));
     }
 
     if (Type.metadata && Type.metadata[k]) {

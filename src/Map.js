@@ -23,7 +23,7 @@ class ModelicoMap extends Modelico {
   }
 
   toJSON() {
-    return (this.map === null) ? null : Array.from(this.map).map(stringifyMapper);
+    return (this.map() === null) ? null : Array.from(this.map()).map(stringifyMapper);
   }
 
   static buildReviver(keyMetadata, valueMetadata) {
@@ -34,7 +34,7 @@ class ModelicoMap extends Modelico {
     if (k === '') {
       const map = (v === null) ? null : new Map(v.map(parseMapper(subtypes)));
 
-      return new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map);
+      return Object.freeze(new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map));
     }
 
     return v;

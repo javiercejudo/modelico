@@ -9,7 +9,7 @@ class ModelicoEnum extends Modelico {
     super(ModelicoEnum, fields);
 
     Object.getOwnPropertyNames(fields)
-      .forEach(field => this[field].toJSON = () => field);
+      .forEach(field => this[field]().toJSON = () => field);
   }
 
   static reviver(values, k, v) {

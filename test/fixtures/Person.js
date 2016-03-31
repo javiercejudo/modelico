@@ -14,7 +14,7 @@ const ModelicoDate = M.ModelicoDate.metadata;
 const ModelicoMap = M.ModelicoMap.metadata;
 const ModelicoList = M.ModelicoList.metadata;
 
-const joinWithSpace = (arr) => arr.filter(x => x !== null && x !== undefined).join(' ');
+const joinWithSpace = arr => arr.filter(x => x !== null && x !== undefined).join(' ');
 
 class Person extends Modelico {
   constructor(fields) {
@@ -22,7 +22,7 @@ class Person extends Modelico {
   }
 
   fullName() {
-    return joinWithSpace([this.givenName, this.familyName]);
+    return joinWithSpace([this.givenName(), this.familyName()]);
   }
 
   static get metadata() {

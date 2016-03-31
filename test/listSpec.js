@@ -41,10 +41,10 @@ describe('ModelicoList', () => {
         ModelicoList.buildReviver(ModelicoDate.metadata())
       );
 
-      modelicoList.list[0].date.getFullYear()
+      modelicoList.list()[0].date().getFullYear()
         .should.be.exactly(1988);
 
-      should(modelicoList.list[1].date)
+      should(modelicoList.list()[1].date())
         .be.exactly(null);
     });
 
@@ -53,13 +53,13 @@ describe('ModelicoList', () => {
 
       const author = Modelico.fromJSON(Person, authorJson);
 
-      author.importantDatesList.list[0].date.getFullYear().should.be.exactly(2013);
+      author.importantDatesList().list()[0].date().getFullYear().should.be.exactly(2013);
     });
 
     it('should support null lists', () => {
       const modelicoList = JSON.parse('null', ModelicoList.buildReviver(ModelicoDate.metadata()));
 
-      should(modelicoList.list)
+      should(modelicoList.list())
         .be.exactly(null);
     });
   });
@@ -76,10 +76,10 @@ describe('ModelicoList', () => {
 
       modelicoList.should.not.be.exactly(modelicoListClone);
 
-      modelicoList.list[0].date.getFullYear()
+      modelicoList.list()[0].date().getFullYear()
         .should.be.exactly(1988);
 
-      modelicoListClone.list[0].date.getFullYear()
+      modelicoListClone.list()[0].date().getFullYear()
         .should.be.exactly(1988);
     });
   });
