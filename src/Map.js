@@ -4,13 +4,12 @@
 
 const Modelico = require('./Modelico');
 
-const stringifyReducer = (acc, pair) => acc.concat({key: pair[0], value: pair[1]});
-const parseSingle = (reviver, value) => reviver('', value);
+const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
-const parseReducer = subtypes => (acc, pairObject) => acc.concat([[
-  parseSingle(subtypes.keyMetadata.reviver, pairObject.key),
-  parseSingle(subtypes.valueMetadata.reviver, pairObject.value)
-]]);
+const parseMapper = subtypes => pairObject => [
+  subtypes.keyMetadata.reviver('', pairObject.key),
+  subtypes.valueMetadata.reviver('', pairObject.value)
+];
 
 class ModelicoMap extends Modelico {
   constructor(keyMetadata, valueMetadata, map) {
@@ -24,7 +23,7 @@ class ModelicoMap extends Modelico {
   }
 
   toJSON() {
-    return (this.map === null) ? null : Array.from(this.map).reduce(stringifyReducer, []);
+    return (this.map === null) ? null : Array.from(this.map).map(stringifyMapper);
   }
 
   static buildReviver(keyMetadata, valueMetadata) {
@@ -33,7 +32,7 @@ class ModelicoMap extends Modelico {
 
   static reviver(subtypes, k, v) {
     if (k === '') {
-      const map = (v === null) ? null : new Map(v.reduce(parseReducer(subtypes), []));
+      const map = (v === null) ? null : new Map(v.map(parseMapper(subtypes)));
 
       return new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map);
     }
