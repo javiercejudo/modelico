@@ -3,13 +3,16 @@
 'use strict';
 
 const M = require('../../');
-const PartOfDay = require('./PartOfDay');
-const Sex = require('./Sex');
+
+const PartOfDay = require('./PartOfDay').metadata;
+const Sex = require('./Sex').metadata;
 
 const Modelico = M.Modelico;
-const ModelicoPrimitive = M.ModelicoPrimitive;
-const ModelicoDate = M.ModelicoDate;
-const ModelicoMap = M.ModelicoMap;
+
+const ModelicoPrimitive = M.ModelicoPrimitive.metadata;
+const ModelicoDate = M.ModelicoDate.metadata;
+const ModelicoMap = M.ModelicoMap.metadata;
+const ModelicoList = M.ModelicoList.metadata;
 
 const joinWithSpace = (arr) => arr.filter(x => x !== null && x !== undefined).join(' ');
 
@@ -24,10 +27,11 @@ class Person extends Modelico {
 
   static get metadata() {
     return {
-      'birthday': ModelicoDate.metadata(),
-      'favouritePartOfDay': PartOfDay.metadata(),
-      'lifeEvents': ModelicoMap.metadata(ModelicoPrimitive.metadata(String), ModelicoDate.metadata()),
-      'sex': Sex.metadata()
+      'birthday': ModelicoDate(),
+      'favouritePartOfDay': PartOfDay(),
+      'lifeEvents': ModelicoMap(ModelicoPrimitive(String), ModelicoDate()),
+      'importantDatesList': ModelicoList(ModelicoDate()),
+      'sex': Sex()
     };
   }
 }

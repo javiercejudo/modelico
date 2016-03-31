@@ -87,14 +87,12 @@ describe('ModelicoMap', () => {
   describe('comparing', () => {
     it('should identify equal instances', () => {
       const modelicoMap = new ModelicoMap(ModelicoPrimitive.metadata(String), ModelicoDate.metadata(), new Map([
-          ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
-        ])
-      );
+        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
+      ]));
 
       const modelicoMap2 = new ModelicoMap(ModelicoPrimitive.metadata(String), ModelicoDate.metadata(), new Map([
-          ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
-        ])
-      );
+        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
+      ]));
 
       modelicoMap.should.not.be.exactly(modelicoMap2);
       modelicoMap.should.not.equal(modelicoMap2);
