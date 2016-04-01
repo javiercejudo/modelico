@@ -2,6 +2,6 @@
 
 'use strict';
 
-const enumFactory = require('../../').enumFactory;
-
-module.exports = enumFactory(['FEMALE', 'MALE']);
+module.exports = M => {
+  return M.enumFactory(['FEMALE', 'MALE', 'OTHER']);
+};

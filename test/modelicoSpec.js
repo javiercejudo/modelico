@@ -2,20 +2,17 @@
 
 'use strict';
 
-const should = require('should');
-const fs = require('fs');
-const M = require('../');
-const Person = require('./fixtures/Person');
-const PartOfDay = require('./fixtures/PartOfDay');
-const Sex = require('./fixtures/Sex');
+module.exports = (should, M) => () => {
+  const Person = require('./fixtures/Person')(M);
+  const PartOfDay = require('./fixtures/PartOfDay')(M);
+  const Sex = require('./fixtures/Sex')(M);
 
-const Modelico = M.Modelico;
-const ModelicoDate = M.ModelicoDate;
+  const Modelico = M.Modelico;
+  const ModelicoDate = M.ModelicoDate;
 
-const authorJson = fs.readFileSync(__dirname + '/fixtures/author.json').toString();
-const author2Json = fs.readFileSync(__dirname + '/fixtures/author2.json').toString();
+  const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","sex":"MALE"}';
+  const author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
 
-describe('Modelico', () => {
   describe('setting', () => {
     it('should set fields returning a new object', () => {
       const author = new Person({
@@ -27,7 +24,7 @@ describe('Modelico', () => {
       });
 
       // sanity check
-      JSON.stringify(author).concat("\n")
+      JSON.stringify(author)
         .should.be.exactly(authorJson);
 
       author.givenName().should.be.exactly('Javier');
@@ -38,11 +35,11 @@ describe('Modelico', () => {
       // repeat sanity check
       author.givenName().should.be.exactly('Javier');
 
-      JSON.stringify(author).concat("\n")
+      JSON.stringify(author)
         .should.be.exactly(authorJson);
 
       // new object checks
-      authorAlt.should.not.be.exactly(author);
+      (authorAlt === author).should.be.exactly(false);
       authorAlt.givenName().should.be.exactly('Javi');
       authorAlt.equals(author).should.be.exactly(false, 'Oops, they are equal');
     });
@@ -58,7 +55,7 @@ describe('Modelico', () => {
         sex: Sex.MALE()
       });
 
-      JSON.stringify(author).concat("\n")
+      JSON.stringify(author)
         .should.be.exactly(authorJson);
     });
 
@@ -71,7 +68,7 @@ describe('Modelico', () => {
         sex: Sex.MALE()
       });
 
-      JSON.stringify(author2).concat("\n")
+      JSON.stringify(author2)
         .should.be.exactly(author2Json);
     });
   });
@@ -93,15 +90,15 @@ describe('Modelico', () => {
         .should.be.exactly(author.favouritePartOfDay().minTime)
         .and.exactly(authorAlt.favouritePartOfDay().minTime);
 
-      (Sex.MALE())
-        .should.be.exactly(author.sex())
-        .and.exactly(authorAlt.sex());
+      (Sex.MALE().code)
+        .should.be.exactly(author.sex().code)
+        .and.exactly(authorAlt.sex().code);
     });
 
     it('should support null in Enum', () => {
       const author2 = Modelico.fromJSON(Person, author2Json);
 
-      should(author2.favouritePartOfDay()).be.exactly(null);
+      (author2.favouritePartOfDay() === null).should.be.exactly(true);
     });
   });
 
@@ -159,4 +156,4 @@ describe('Modelico', () => {
       author1.should.not.be.exactly(author2);
     });
   });
-});
+};

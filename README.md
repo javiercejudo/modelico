@@ -12,4 +12,4 @@ Serialisable model classes
 
 ## Usage
 
-See [spec](test/spec.js).
+See [spec](test/index.js).

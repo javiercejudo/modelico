@@ -2,13 +2,13 @@
 
 'use strict';
 
-const enumFactory = require('../../').enumFactory;
-
 const range = (minTime, maxTime) => ({minTime, maxTime});
 
-module.exports = enumFactory({
-  ANY: range(0, 1440),
-  MORNING: range(0, 720),
-  AFTERNOON: range(720, 1080),
-  EVENING: range(1080, 1440)
-});
+module.exports = M => {
+  return M.enumFactory({
+    ANY: range(0, 1440),
+    MORNING: range(0, 720),
+    AFTERNOON: range(720, 1080),
+    EVENING: range(1080, 1440)
+  });
+};

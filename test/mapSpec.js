@@ -2,16 +2,14 @@
 
 'use strict';
 
-const should = require('should');
-const Person = require('./fixtures/Person');
-const M = require('../');
+module.exports = (should, M) => () => {
+  const Person = require('./fixtures/Person')(M);
 
-const Modelico = M.Modelico;
-const ModelicoPrimitive = M.ModelicoPrimitive;
-const ModelicoMap = M.ModelicoMap;
-const ModelicoDate = M.ModelicoDate;
+  const Modelico = M.Modelico;
+  const ModelicoPrimitive = M.ModelicoPrimitive;
+  const ModelicoMap = M.ModelicoMap;
+  const ModelicoDate = M.ModelicoDate;
 
-describe('ModelicoMap', () => {
   describe('setting', () => {
     it('should set fields returning a new object', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
@@ -149,4 +147,4 @@ describe('ModelicoMap', () => {
       modelicoMap.equals(modelicoMap2).should.be.exactly(true);
     });
   });
-});
+};
