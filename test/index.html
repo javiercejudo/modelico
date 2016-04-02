@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Test</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.2.5/mocha.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.2.5/mocha.js"></script>
+  <script src="https://cdn.rawgit.com/shouldjs/should.js/6.0.3/should.js"></script>
+
+  <script src="../dist/modelico.js"></script>
+  <script src="../tmp/modelico-spec.js"></script>
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <script>
+    mocha.setup('bdd');
+
+    describe('all', require('modelico-spec')(Should, Modelico));
+
+    mocha.checkLeaks();
+    mocha.run();
+  </script>
+</body>
+</html>

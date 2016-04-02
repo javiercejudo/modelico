@@ -2,16 +2,14 @@
 
 'use strict';
 
-const should = require('should');
-const Person = require('./fixtures/Person');
-const M = require('../');
+module.exports = (should, M) => () => {
+  const Person = require('./fixtures/Person')(M);
 
-const Modelico = M.Modelico;
-const ModelicoPrimitive = M.ModelicoPrimitive;
-const ModelicoList = M.ModelicoList;
-const ModelicoDate = M.ModelicoDate;
+  const Modelico = M.Modelico;
+  const ModelicoPrimitive = M.ModelicoPrimitive;
+  const ModelicoList = M.ModelicoList;
+  const ModelicoDate = M.ModelicoDate;
 
-describe('ModelicoList', () => {
   describe('stringifying', () => {
     it('should stringify the list correctly', () => {
       const list = [
@@ -100,4 +98,4 @@ describe('ModelicoList', () => {
       modelicoList.equals(modelicoList2).should.be.exactly(true);
     });
   });
-});
+};
