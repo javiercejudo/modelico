@@ -3,25 +3,9 @@
 
 'use strict';
 
-var Modelico = require('./src/Modelico');
-var ModelicoPrimitive = require('./src/Primitive');
-var ModelicoMap = require('./src/Map');
-var ModelicoList = require('./src/List');
-var ModelicoEnum = require('./src/Enum');
-var ModelicoDate = require('./src/Date');
-var enumFactory = require('./src/enumFactory');
+module.exports = require('./src');
 
-module.exports = {
-  Modelico: Modelico,
-  ModelicoPrimitive: ModelicoPrimitive,
-  ModelicoMap: ModelicoMap,
-  ModelicoList: ModelicoList,
-  ModelicoDate: ModelicoDate,
-  ModelicoEnum: ModelicoEnum,
-  enumFactory: enumFactory
-};
-
-},{"./src/Date":2,"./src/Enum":3,"./src/List":4,"./src/Map":5,"./src/Modelico":6,"./src/Primitive":7,"./src/enumFactory":8}],2:[function(require,module,exports){
+},{"./src":9}],2:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -34,47 +18,57 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var U = require('./U');
 var Modelico = require('./Modelico');
 
-var ModelicoDate = function (_Modelico) {
-  _inherits(ModelicoDate, _Modelico);
+var cloneViaJSON = function cloneViaJSON(x) {
+  return JSON.parse(JSON.stringify(x));
+};
 
-  function ModelicoDate(date) {
-    _classCallCheck(this, ModelicoDate);
+var ModelicoAsIs = function (_Modelico) {
+  _inherits(ModelicoAsIs, _Modelico);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoDate).call(this, ModelicoDate, { date: date }));
+  function ModelicoAsIs(type, value) {
+    _classCallCheck(this, ModelicoAsIs);
 
-    _this.date = function () {
-      return date === null ? null : new Date(date.toISOString());
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoAsIs).call(this, type, { value: value }));
+
+    _this.value = function () {
+      return cloneViaJSON(value);
     };
+
+    Object.freeze(_this);
     return _this;
   }
 
-  _createClass(ModelicoDate, [{
+  _createClass(ModelicoAsIs, [{
     key: 'toJSON',
     value: function toJSON() {
-      return this.date() === null ? null : this.date().toISOString();
+      return this.value();
     }
   }], [{
+    key: 'buildReviver',
+    value: function buildReviver(type) {
+      return U.bind(ModelicoAsIs.reviver, type);
+    }
+  }, {
     key: 'reviver',
-    value: function reviver(k, v) {
-      var date = v === null ? null : new Date(v);
-
-      return Object.freeze(new ModelicoDate(date));
+    value: function reviver(type, k, v) {
+      return v;
     }
   }, {
     key: 'metadata',
-    value: function metadata() {
-      return { type: ModelicoDate, reviver: ModelicoDate.reviver };
+    value: function metadata(type) {
+      return Object.freeze({ type: type, reviver: ModelicoAsIs.buildReviver(type) });
     }
   }]);
 
-  return ModelicoDate;
+  return ModelicoAsIs;
 }(Modelico);
 
-module.exports = ModelicoDate;
+module.exports = Object.freeze(ModelicoAsIs);
 
-},{"./Modelico":6}],3:[function(require,module,exports){
+},{"./Modelico":6,"./U":7}],3:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -87,6 +81,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var U = require('./U');
 var Modelico = require('./Modelico');
 
 var ModelicoEnum = function (_Modelico) {
@@ -106,6 +101,11 @@ var ModelicoEnum = function (_Modelico) {
   }
 
   _createClass(ModelicoEnum, null, [{
+    key: 'buildReviver',
+    value: function buildReviver(values) {
+      return U.bind(ModelicoEnum.reviver, values);
+    }
+  }, {
     key: 'reviver',
     value: function reviver(values, k, v) {
       return v === null ? null : values[v];
@@ -115,9 +115,9 @@ var ModelicoEnum = function (_Modelico) {
   return ModelicoEnum;
 }(Modelico);
 
-module.exports = ModelicoEnum;
+module.exports = Object.freeze(ModelicoEnum);
 
-},{"./Modelico":6}],4:[function(require,module,exports){
+},{"./Modelico":6,"./U":7}],4:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -130,8 +130,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var U = require('./U');
 var Modelico = require('./Modelico');
-var ModelicoPrimitive = require('./Primitive');
 
 var ModelicoList = function (_Modelico) {
   _inherits(ModelicoList, _Modelico);
@@ -144,6 +144,8 @@ var ModelicoList = function (_Modelico) {
     _this.subtype = function () {
       return subtypeMetadata;
     };
+
+    Object.freeze(_this);
     return _this;
   }
 
@@ -160,15 +162,15 @@ var ModelicoList = function (_Modelico) {
   }], [{
     key: 'buildReviver',
     value: function buildReviver(subtypeMetadata) {
-      return ModelicoList.reviver.bind(undefined, subtypeMetadata);
+      return U.bind(ModelicoList.reviver, subtypeMetadata);
     }
   }, {
     key: 'reviver',
     value: function reviver(subtypeMetadata, k, v) {
       if (k === '') {
-        var list = v === null ? null : v.map(subtypeMetadata.reviver.bind(undefined, ''));
+        var list = v === null ? null : v.map(U.bind(subtypeMetadata.reviver, ''));
 
-        return Object.freeze(new ModelicoList(subtypeMetadata, list));
+        return new ModelicoList(subtypeMetadata, list);
       }
 
       return v;
@@ -183,9 +185,9 @@ var ModelicoList = function (_Modelico) {
   return ModelicoList;
 }(Modelico);
 
-module.exports = ModelicoList;
+module.exports = Object.freeze(ModelicoList);
 
-},{"./Modelico":6,"./Primitive":7}],5:[function(require,module,exports){
+},{"./Modelico":6,"./U":7}],5:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -198,15 +200,22 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var U = require('./U');
 var Modelico = require('./Modelico');
 
 var stringifyMapper = function stringifyMapper(pair) {
   return { key: pair[0], value: pair[1] };
 };
+var identityReviver = function identityReviver(k, v) {
+  return v;
+};
+var reviverOrDefault = function reviverOrDefault(metadata) {
+  return metadata.reviver || identityReviver;
+};
 
 var parseMapper = function parseMapper(subtypes) {
   return function (pairObject) {
-    return [subtypes.keyMetadata.reviver('', pairObject.key), subtypes.valueMetadata.reviver('', pairObject.value)];
+    return [reviverOrDefault(subtypes.keyMetadata)('', pairObject.key), reviverOrDefault(subtypes.valueMetadata)('', pairObject.value)];
   };
 };
 
@@ -219,15 +228,17 @@ var ModelicoMap = function (_Modelico) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoMap).call(this, ModelicoMap, { map: map }));
 
     _this.subtypes = function () {
-      return { keyMetadata: keyMetadata, valueMetadata: valueMetadata };
+      return Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata });
     };
+
+    Object.freeze(_this);
     return _this;
   }
 
   _createClass(ModelicoMap, [{
     key: 'clone',
     value: function clone() {
-      return JSON.parse(JSON.stringify(this), ModelicoMap.reviver.bind(undefined, this.subtypes()));
+      return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.subtypes()));
     }
   }, {
     key: 'toJSON',
@@ -237,7 +248,7 @@ var ModelicoMap = function (_Modelico) {
   }], [{
     key: 'buildReviver',
     value: function buildReviver(keyMetadata, valueMetadata) {
-      return ModelicoMap.reviver.bind(undefined, { keyMetadata: keyMetadata, valueMetadata: valueMetadata });
+      return U.bind(ModelicoMap.reviver, { keyMetadata: keyMetadata, valueMetadata: valueMetadata });
     }
   }, {
     key: 'reviver',
@@ -245,7 +256,7 @@ var ModelicoMap = function (_Modelico) {
       if (k === '') {
         var map = v === null ? null : new Map(v.map(parseMapper(subtypes)));
 
-        return Object.freeze(new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map));
+        return new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map);
       }
 
       return v;
@@ -260,9 +271,9 @@ var ModelicoMap = function (_Modelico) {
   return ModelicoMap;
 }(Modelico);
 
-module.exports = ModelicoMap;
+module.exports = Object.freeze(ModelicoMap);
 
-},{"./Modelico":6}],6:[function(require,module,exports){
+},{"./Modelico":6,"./U":7}],6:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -270,6 +281,8 @@ module.exports = ModelicoMap;
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var U = require('./U');
 
 var assignReducer = function assignReducer(acc, pair) {
   acc[pair.field] = pair.value;
@@ -300,8 +313,7 @@ var Modelico = function () {
   _createClass(Modelico, [{
     key: 'set',
     value: function set(field, value) {
-      var fieldValue = assignReducer({}, { field: field, value: value });
-      var newFields = Object.assign({}, this.clone().fields(), fieldValue);
+      var newFields = Object.assign(this.clone().fields(), assignReducer({}, { field: field, value: value }));
       var newInstance = new Modelico(this.type(), newFields);
 
       return Object.freeze(newInstance);
@@ -333,17 +345,19 @@ var Modelico = function () {
         return Type.reviver;
       }
 
-      return Modelico.reviver.bind(undefined, Type);
+      return U.bind(Modelico.reviver, Type);
     }
   }, {
     key: 'reviver',
     value: function reviver(Type, k, v) {
       if (k === '') {
-        return Object.freeze(new Type(v));
+        return new Type(v);
       }
 
-      if (Type.metadata && Type.metadata[k]) {
-        return Type.metadata[k].reviver('', v);
+      var subtypeMetadata = Type.subtypes()[k];
+
+      if (subtypeMetadata) {
+        return subtypeMetadata.reviver('', v);
       }
 
       return v;
@@ -353,50 +367,20 @@ var Modelico = function () {
   return Modelico;
 }();
 
-module.exports = Modelico;
+module.exports = Object.freeze(Modelico);
 
-},{}],7:[function(require,module,exports){
+},{"./U":7}],7:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Modelico = require('./Modelico');
-
-var ModelicoPrimitive = function (_Modelico) {
-  _inherits(ModelicoPrimitive, _Modelico);
-
-  function ModelicoPrimitive() {
-    _classCallCheck(this, ModelicoPrimitive);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoPrimitive).apply(this, arguments));
+module.exports = Object.freeze({
+  bind: function bind(fn, _1) {
+    return fn.bind(undefined, _1);
   }
+});
 
-  _createClass(ModelicoPrimitive, null, [{
-    key: 'reviver',
-    value: function reviver(k, v) {
-      return v;
-    }
-  }, {
-    key: 'metadata',
-    value: function metadata(primitiveType) {
-      return { type: primitiveType, reviver: ModelicoPrimitive.reviver };
-    }
-  }]);
-
-  return ModelicoPrimitive;
-}(Modelico);
-
-module.exports = ModelicoPrimitive;
-
-},{"./Modelico":6}],8:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -411,13 +395,35 @@ module.exports = function (values) {
   var valuesAsObject = Array.isArray(values) ? values.reduce(valuesReducer, {}) : values;
 
   var myEnum = new ModelicoEnum(valuesAsObject);
-  myEnum.reviver = ModelicoEnum.reviver.bind(undefined, valuesAsObject);
+
+  myEnum.reviver = ModelicoEnum.buildReviver(valuesAsObject);
   myEnum.metadata = function () {
-    return { type: ModelicoEnum, reviver: myEnum.reviver };
+    return Object.freeze({ type: ModelicoEnum, reviver: myEnum.reviver });
   };
 
   return Object.freeze(myEnum);
 };
 
-},{"./Enum":3}]},{},[1])(1)
+},{"./Enum":3}],9:[function(require,module,exports){
+/*jshint node:true, esnext: true */
+
+'use strict';
+
+var Modelico = require('./Modelico');
+var ModelicoAsIs = require('./AsIs');
+var ModelicoMap = require('./Map');
+var ModelicoList = require('./List');
+var ModelicoEnum = require('./Enum');
+var enumFactory = require('./enumFactory');
+
+module.exports = {
+  Modelico: Modelico,
+  ModelicoAsIs: ModelicoAsIs,
+  ModelicoMap: ModelicoMap,
+  ModelicoList: ModelicoList,
+  ModelicoEnum: ModelicoEnum,
+  enumFactory: enumFactory
+};
+
+},{"./AsIs":2,"./Enum":3,"./List":4,"./Map":5,"./Modelico":6,"./enumFactory":8}]},{},[1])(1)
 });
