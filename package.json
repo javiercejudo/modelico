@@ -1,6 +1,6 @@
 {
   "name": "modelico",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Serialisable model classes",
   "main": "index.js",
   "scripts": {
