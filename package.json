@@ -1,7 +1,7 @@
 {
   "name": "modelico",
   "version": "2.0.0",
-  "description": "Serialisable model classes",
+  "description": "Universal library for serialisable immutable models",
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
@@ -19,8 +19,14 @@
     "url": "https://github.com/javiercejudo/modelico.git"
   },
   "keywords": [
-    "time",
-    "conversion"
+    "model",
+    "immutable",
+    "reviver",
+    "objects",
+    "serialization",
+    "json",
+    "stringify",
+    "parse"
   ],
   "author": "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)",
   "license": "MIT",

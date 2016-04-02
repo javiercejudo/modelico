@@ -6,6 +6,8 @@ Universal library for serialisable immutable models.
 [![Coverage Status](https://coveralls.io/repos/javiercejudo/modelico/badge.svg?branch=master)](https://coveralls.io/r/javiercejudo/modelico?branch=master)
 [![Code Climate](https://codeclimate.com/github/javiercejudo/modelico/badges/gpa.svg)](https://codeclimate.com/github/javiercejudo/modelico)
 
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/modelico.svg)](https://saucelabs.com/u/modelico)
+
 ## Installation
 
     npm i modelico
