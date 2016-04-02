@@ -2,6 +2,8 @@
 
 'use strict';
 
+const U = require('./U');
+
 const assignReducer = (acc, pair) => {
   acc[pair.field] = pair.value;
 
@@ -18,8 +20,7 @@ class Modelico {
   }
 
   set(field, value) {
-    const fieldValue = assignReducer({}, {field, value});
-    const newFields = Object.assign({}, this.clone().fields(), fieldValue);
+    const newFields = Object.assign(this.clone().fields(), assignReducer({}, {field, value}));
     const newInstance = new Modelico(this.type(), newFields);
 
     return Object.freeze(newInstance);
@@ -46,20 +47,22 @@ class Modelico {
       return Type.reviver;
     }
 
-    return Modelico.reviver.bind(undefined, Type);
+    return U.bind(Modelico.reviver, Type);
   }
 
   static reviver(Type, k, v) {
     if (k === '') {
-      return Object.freeze(new Type(v));
+      return new Type(v);
     }
 
-    if (Type.metadata && Type.metadata[k]) {
-      return Type.metadata[k].reviver('', v);
+    const subtypeMetadata = Type.subtypes()[k];
+
+    if (subtypeMetadata) {
+      return subtypeMetadata.reviver('', v);
     }
 
     return v;
   }
 }
 
-module.exports = Modelico;
+module.exports = Object.freeze(Modelico);

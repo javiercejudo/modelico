@@ -5,11 +5,10 @@
 module.exports = M => {
   const PartOfDay = require('./PartOfDay')(M).metadata;
   const Sex = require('./Sex')(M).metadata;
+  const SerialisableDate = require('./Date')(M).metadata;
 
   const Modelico = M.Modelico;
 
-  const ModelicoPrimitive = M.ModelicoPrimitive.metadata;
-  const ModelicoDate = M.ModelicoDate.metadata;
   const ModelicoMap = M.ModelicoMap.metadata;
   const ModelicoList = M.ModelicoList.metadata;
 
@@ -18,22 +17,24 @@ module.exports = M => {
   class Person extends Modelico {
     constructor(fields) {
       super(Person, fields);
+
+      Object.freeze(this);
     }
 
     fullName() {
       return joinWithSpace([this.givenName(), this.familyName()]);
     }
 
-    static get metadata() {
-      return {
-        'birthday': ModelicoDate(),
+    static subtypes() {
+      return Object.freeze({
+        'birthday': SerialisableDate(),
         'favouritePartOfDay': PartOfDay(),
-        'lifeEvents': ModelicoMap(ModelicoPrimitive(String), ModelicoDate()),
-        'importantDatesList': ModelicoList(ModelicoDate()),
+        'lifeEvents': ModelicoMap(String, SerialisableDate()),
+        'importantDatesList': ModelicoList(SerialisableDate()),
         'sex': Sex()
-      };
+      });
     }
   }
 
-  return Person;
+  return Object.freeze(Person);
 };

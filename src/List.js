@@ -2,14 +2,16 @@
 
 'use strict';
 
+const U = require('./U');
 const Modelico = require('./Modelico');
-const ModelicoPrimitive = require('./Primitive');
 
 class ModelicoList extends Modelico {
   constructor(subtypeMetadata, list) {
     super(ModelicoList, {list});
 
     this.subtype = () => subtypeMetadata;
+
+    Object.freeze(this);
   }
 
   clone() {
@@ -21,14 +23,14 @@ class ModelicoList extends Modelico {
   }
 
   static buildReviver(subtypeMetadata) {
-    return ModelicoList.reviver.bind(undefined, subtypeMetadata);
+    return U.bind(ModelicoList.reviver, subtypeMetadata);
   }
 
   static reviver(subtypeMetadata, k, v) {
     if (k === '') {
-      const list = (v === null) ? null : v.map(subtypeMetadata.reviver.bind(undefined, ''));
+      const list = (v === null) ? null : v.map(U.bind(subtypeMetadata.reviver, ''));
 
-      return Object.freeze(new ModelicoList(subtypeMetadata, list));
+      return new ModelicoList(subtypeMetadata, list);
     }
 
     return v;
@@ -39,4 +41,4 @@ class ModelicoList extends Modelico {
   }
 }
 
-module.exports = ModelicoList;
+module.exports = Object.freeze(ModelicoList);

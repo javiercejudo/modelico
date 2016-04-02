@@ -2,24 +2,29 @@
 
 'use strict';
 
+const U = require('./U');
 const Modelico = require('./Modelico');
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
+const identityReviver = (k, v) => v;
+const reviverOrDefault = metadata => (metadata.reviver || identityReviver);
 
 const parseMapper = subtypes => pairObject => [
-  subtypes.keyMetadata.reviver('', pairObject.key),
-  subtypes.valueMetadata.reviver('', pairObject.value)
+  reviverOrDefault(subtypes.keyMetadata)('', pairObject.key),
+  reviverOrDefault(subtypes.valueMetadata)('', pairObject.value)
 ];
 
 class ModelicoMap extends Modelico {
   constructor(keyMetadata, valueMetadata, map) {
     super(ModelicoMap, {map});
 
-    this.subtypes = () => ({keyMetadata, valueMetadata});
+    this.subtypes = () => Object.freeze({keyMetadata, valueMetadata});
+
+    Object.freeze(this);
   }
 
   clone() {
-    return JSON.parse(JSON.stringify(this), ModelicoMap.reviver.bind(undefined, this.subtypes()));
+    return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.subtypes()));
   }
 
   toJSON() {
@@ -27,14 +32,14 @@ class ModelicoMap extends Modelico {
   }
 
   static buildReviver(keyMetadata, valueMetadata) {
-    return ModelicoMap.reviver.bind(undefined, {keyMetadata, valueMetadata});
+    return U.bind(ModelicoMap.reviver, {keyMetadata, valueMetadata});
   }
 
   static reviver(subtypes, k, v) {
     if (k === '') {
       const map = (v === null) ? null : new Map(v.map(parseMapper(subtypes)));
 
-      return Object.freeze(new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map));
+      return new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map);
     }
 
     return v;
@@ -45,4 +50,4 @@ class ModelicoMap extends Modelico {
   }
 }
 
-module.exports = ModelicoMap;
+module.exports = Object.freeze(ModelicoMap);
