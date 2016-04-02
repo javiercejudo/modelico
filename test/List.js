@@ -4,20 +4,19 @@
 
 module.exports = (should, M) => () => {
   const Person = require('./fixtures/Person')(M);
+  const SerialisableDate = require('./fixtures/Date')(M);
 
   const Modelico = M.Modelico;
-  const ModelicoPrimitive = M.ModelicoPrimitive;
   const ModelicoList = M.ModelicoList;
-  const ModelicoDate = M.ModelicoDate;
 
   describe('stringifying', () => {
     it('should stringify the list correctly', () => {
       const list = [
-        new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
-        new ModelicoDate(null)
+        new SerialisableDate(new Date('1988-04-16T00:00:00.000Z')),
+        new SerialisableDate(null)
       ];
 
-      const modelicoList = new ModelicoList(ModelicoDate.metadata(), list);
+      const modelicoList = new ModelicoList(SerialisableDate.metadata(), list);
 
       JSON.stringify(modelicoList)
         .should.be.exactly('["1988-04-16T00:00:00.000Z",null]');
@@ -25,7 +24,7 @@ module.exports = (should, M) => () => {
 
     it('should support null lists', () => {
       const list = null;
-      const modelicoList = new ModelicoList(ModelicoDate.metadata(), list);
+      const modelicoList = new ModelicoList(SerialisableDate.metadata(), list);
 
       JSON.stringify(modelicoList)
         .should.be.exactly('null');
@@ -36,7 +35,7 @@ module.exports = (should, M) => () => {
     it('should parse the list correctly', () => {
       const modelicoList = JSON.parse(
         '["1988-04-16T00:00:00.000Z",null]',
-        ModelicoList.buildReviver(ModelicoDate.metadata())
+        ModelicoList.buildReviver(SerialisableDate.metadata())
       );
 
       modelicoList.list()[0].date().getFullYear()
@@ -55,7 +54,7 @@ module.exports = (should, M) => () => {
     });
 
     it('should support null lists', () => {
-      const modelicoList = JSON.parse('null', ModelicoList.buildReviver(ModelicoDate.metadata()));
+      const modelicoList = JSON.parse('null', ModelicoList.buildReviver(SerialisableDate.metadata()));
 
       should(modelicoList.list())
         .be.exactly(null);
@@ -65,11 +64,11 @@ module.exports = (should, M) => () => {
   describe('cloning', () => {
     it('should clone the map correctly', () => {
       const map = [
-        new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
-        'b', new ModelicoDate(null)
+        new SerialisableDate(new Date('1988-04-16T00:00:00.000Z')),
+        'b', new SerialisableDate(null)
       ];
 
-      const modelicoList = new ModelicoList(ModelicoDate.metadata(), map);
+      const modelicoList = new ModelicoList(SerialisableDate.metadata(), map);
       const modelicoListClone = modelicoList.clone();
 
       modelicoList.should.not.be.exactly(modelicoListClone);
@@ -84,12 +83,12 @@ module.exports = (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoList = new ModelicoList(ModelicoDate.metadata(), [
-        new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))
+      const modelicoList = new ModelicoList(SerialisableDate.metadata(), [
+        new SerialisableDate(new Date('1988-04-16T00:00:00.000Z'))
       ]);
 
-      const modelicoList2 = new ModelicoList(ModelicoDate.metadata(), [
-        new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))
+      const modelicoList2 = new ModelicoList(SerialisableDate.metadata(), [
+        new SerialisableDate(new Date('1988-04-16T00:00:00.000Z'))
       ]);
 
       modelicoList.should.not.be.exactly(modelicoList2);

@@ -4,11 +4,11 @@
 
 module.exports = (should, M) => () => {
   const Person = require('./fixtures/Person')(M);
+  const SerialisableDate = require('./fixtures/Date')(M);
 
   const Modelico = M.Modelico;
-  const ModelicoPrimitive = M.ModelicoPrimitive;
+  const ModelicoAsIs = M.ModelicoAsIs;
   const ModelicoMap = M.ModelicoMap;
-  const ModelicoDate = M.ModelicoDate;
 
   describe('setting', () => {
     it('should set fields returning a new object', () => {
@@ -62,11 +62,11 @@ module.exports = (should, M) => () => {
   describe('stringifying', () => {
     it('should stringify the map correctly', () => {
       const map = new Map([
-        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))],
-        ['b', new ModelicoDate(null)]
+        ['a', new SerialisableDate(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', new SerialisableDate(null)]
       ]);
 
-      const modelicoMap = new ModelicoMap(ModelicoPrimitive.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), SerialisableDate.metadata(), map);
 
       JSON.stringify(modelicoMap)
         .should.be.exactly('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]');
@@ -74,7 +74,7 @@ module.exports = (should, M) => () => {
 
     it('should support null maps', () => {
       const map = null;
-      const modelicoMap = new ModelicoMap(ModelicoPrimitive.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), SerialisableDate.metadata(), map);
 
       JSON.stringify(modelicoMap)
         .should.be.exactly('null');
@@ -85,7 +85,7 @@ module.exports = (should, M) => () => {
     it('should parse the map correctly', () => {
       const modelicoMap = JSON.parse(
         '[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]',
-        ModelicoMap.buildReviver(ModelicoPrimitive.metadata(String), ModelicoDate.metadata())
+        ModelicoMap.buildReviver(ModelicoAsIs.metadata(String), SerialisableDate.metadata())
       );
 
       modelicoMap.map().get('a').date().getFullYear()
@@ -104,7 +104,7 @@ module.exports = (should, M) => () => {
     });
 
     it('should support null maps', () => {
-      const modelicoMap = JSON.parse('null', ModelicoMap.buildReviver(ModelicoPrimitive.metadata(String), ModelicoDate.metadata()));
+      const modelicoMap = JSON.parse('null', ModelicoMap.buildReviver(ModelicoAsIs.metadata(String), SerialisableDate.metadata()));
 
       should(modelicoMap.map())
         .be.exactly(null);
@@ -114,11 +114,11 @@ module.exports = (should, M) => () => {
   describe('cloning', () => {
     it('should clone the map correctly', () => {
       const map = new Map([
-        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))],
-        ['b', new ModelicoDate(null)]
+        ['a', new SerialisableDate(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', new SerialisableDate(null)]
       ]);
 
-      const modelicoMap = new ModelicoMap(ModelicoPrimitive.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), SerialisableDate.metadata(), map);
       const modelicoMapClone = modelicoMap.clone();
 
       modelicoMap.should.not.be.exactly(modelicoMapClone);
@@ -133,12 +133,12 @@ module.exports = (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoMap = new ModelicoMap(ModelicoPrimitive.metadata(String), ModelicoDate.metadata(), new Map([
-        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
+      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), SerialisableDate.metadata(), new Map([
+        ['a', new SerialisableDate(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 
-      const modelicoMap2 = new ModelicoMap(ModelicoPrimitive.metadata(String), ModelicoDate.metadata(), new Map([
-        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
+      const modelicoMap2 = new ModelicoMap(ModelicoAsIs.metadata(String), SerialisableDate.metadata(), new Map([
+        ['a', new SerialisableDate(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 
       modelicoMap.should.not.be.exactly(modelicoMap2);
