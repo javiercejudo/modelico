@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
+    "test-browsers": "./scripts/browser_tester.sh",
     "prebuild": "mkdir -p dist",
     "build": "npm run build-dev && npm run build-min",
     "build-dev": "browserify ./index.js -s Modelico -t babelify -o dist/modelico.js",

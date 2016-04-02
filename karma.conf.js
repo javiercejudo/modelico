@@ -59,7 +59,7 @@ module.exports = function(config) {
       accessKey: process.env.SAUCE_ACCESS_KEY,
       build: process.env.TRAVIS_BUILD_NUMBER,
       tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
-      startConnect: true,
+      startConnect: false,
       testName: 'modelico: browser tests'
     },
 

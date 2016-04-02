@@ -11,5 +11,8 @@ addons:
   sauce_connect: true
 before_install:
   - npm install -g gulp
+script:
+  - npm test
+  - npm run test-browsers
 after_success:
   - gulp coveralls
