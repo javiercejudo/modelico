@@ -15,7 +15,7 @@ gulp.task('instrument', function () {
 });
 
 gulp.task('test', ['clean', 'instrument'], function () {
-  return gulp.src(['test/index.js'])
+  return gulp.src(['test/spec.js'])
     .pipe(mocha())
     .pipe(istanbul.writeReports());
 });

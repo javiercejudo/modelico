@@ -6,17 +6,16 @@
   "scripts": {
     "test": "gulp test",
     "prebuild": "mkdir -p dist",
-    "build": "npm run build-modern && npm run build-es5 && npm run build-ie8",
-    "build-modern": "browserify ./index.js -s Modelico -o dist/modelico.js",
-    "build-es5": "browserify ./index.es5.js -s Modelico -t babelify -o dist/modelico.es5.js",
-    "build-ie8": "browserify ./index.ie8.js -s Modelico -t babelify -o dist/modelico.ie8.js",
+    "build": "npm run build-dev && npm run build-min",
+    "build-dev": "browserify ./index.js -s Modelico -t babelify -o dist/modelico.js",
+    "build-min": "browserify ./index.js -s Modelico -t babelify -o -g uglifyify | uglifyjs -c -m > dist/modelico.min.js",
     "prebuild-browser-spec": "mkdir -p tmp",
-    "build-browser-spec": "browserify -r ./test/allSpec.js:modelico-spec -o tmp/modelico-spec.js",
+    "build-browser-spec": "browserify ./test/modelicoSpec.js -s modelicoSpec -o tmp/modelico-spec.js",
     "version": "npm run build && git add -A dist"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/javiercejudo/modelico.git"
+    "url": "https://github.com/javiercejudo/modelico.git"
   },
   "keywords": [
     "time",
@@ -39,6 +38,8 @@
     "gulp-istanbul": "^0.10.2",
     "gulp-mocha": "^2.1.3",
     "rimraf": "^2.4.3",
-    "should": "^8.3.0"
+    "should": "^8.3.0",
+    "uglify-js": "^2.6.2",
+    "uglifyify": "^3.0.1"
   }
 }
