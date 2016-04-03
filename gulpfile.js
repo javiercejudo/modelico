@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var mocha = require('gulp-mocha');
 var istanbul = require('gulp-istanbul');
 var rimraf = require('rimraf');
-var coveralls = require('gulp-coveralls');
+var codecov = require('gulp-codecov');
 
 gulp.task('clean', function (cb) {
   rimraf('./coverage', cb);
@@ -20,9 +20,9 @@ gulp.task('test', ['clean', 'instrument'], function () {
     .pipe(istanbul.writeReports());
 });
 
-gulp.task('coveralls', function () {
+gulp.task('codecov', function () {
   gulp.src('coverage/lcov.info')
-    .pipe(coveralls());
+    .pipe(codecov());
 });
 
 gulp.task('default', ['test']);
