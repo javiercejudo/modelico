@@ -1,13 +1,9 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Modelico = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*jshint node:true, esnext: true */
-
 'use strict';
 
 module.exports = require('./src');
 
 },{"./src":10}],2:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -69,8 +65,6 @@ var ModelicoAsIs = function (_Modelico) {
 module.exports = Object.freeze(ModelicoAsIs);
 
 },{"./Modelico":7,"./U":8}],3:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -108,7 +102,7 @@ var ModelicoDate = function (_Modelico) {
     value: function reviver(k, v) {
       var date = v === null ? null : new Date(v);
 
-      return Object.freeze(new ModelicoDate(date));
+      return new ModelicoDate(date);
     }
   }, {
     key: 'metadata',
@@ -126,8 +120,6 @@ var ModelicoDate = function (_Modelico) {
 module.exports = Object.freeze(ModelicoDate);
 
 },{"./Modelico":7}],4:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -175,8 +167,6 @@ var ModelicoEnum = function (_Modelico) {
 module.exports = Object.freeze(ModelicoEnum);
 
 },{"./Modelico":7,"./U":8}],5:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -245,8 +235,6 @@ var ModelicoList = function (_Modelico) {
 module.exports = Object.freeze(ModelicoList);
 
 },{"./Modelico":7,"./U":8}],6:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -331,8 +319,6 @@ var ModelicoMap = function (_Modelico) {
 module.exports = Object.freeze(ModelicoMap);
 
 },{"./Modelico":7,"./U":8}],7:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -427,8 +413,6 @@ var Modelico = function () {
 module.exports = Object.freeze(Modelico);
 
 },{"./U":8}],8:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 module.exports = Object.freeze({
@@ -438,8 +422,6 @@ module.exports = Object.freeze({
 });
 
 },{}],9:[function(require,module,exports){
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 var ModelicoEnum = require('./Enum');
@@ -462,8 +444,6 @@ module.exports = function (values) {
 };
 
 },{"./Enum":4}],10:[function(require,module,exports){
-/*jshint node:true, esnext: true */
-
 'use strict';
 
 var Modelico = require('./Modelico');
@@ -474,7 +454,7 @@ var List = require('./List');
 var Enum = require('./Enum');
 var enumFactory = require('./enumFactory');
 
-module.exports = {
+module.exports = Object.freeze({
   Modelico: Modelico,
   Map: ModelicoMap,
   Date: ModelicoDate,
@@ -482,7 +462,7 @@ module.exports = {
   List: List,
   Enum: Enum,
   enumFactory: enumFactory
-};
+});
 
 },{"./AsIs":2,"./Date":3,"./Enum":4,"./List":5,"./Map":6,"./Modelico":7,"./enumFactory":9}]},{},[1])(1)
 });
