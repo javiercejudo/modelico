@@ -14,7 +14,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'node_modules/should/should.js',
+      'node_modules/should/should.min.js',
+      'node_modules/babel-polyfill/dist/polyfill.min.js',
       'dist/modelico.min.js',
       'tmp/modelico-spec.js',
       'test/karmaEntry.js'
@@ -59,7 +60,7 @@ module.exports = function(config) {
       accessKey: process.env.SAUCE_ACCESS_KEY,
       build: process.env.TRAVIS_BUILD_NUMBER,
       tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
-      startConnect: false,
+      startConnect: true,
       testName: 'modelico: browser tests'
     },
 
@@ -101,39 +102,39 @@ function customLaunchers() {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
       platform: 'Windows 10'
-    }
-    // 'SL_Safari': {
-    //   base: 'SauceLabs',
-    //   browserName: 'safari',
-    //   platform: 'OS X 10.10'
-    // },
+    },
+    'SL_Safari': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'OS X 10.10'
+    },
     // 'SL_IE_11': {
     //   base: 'SauceLabs',
     //   browserName: 'internet explorer',
     //   platform: 'Windows 8.1',
     //   version: '11'
     // },
-    // 'SL_Opera': {
-    //   base: 'SauceLabs',
-    //   browserName: 'opera',
-    //   platform: 'Windows 7',
-    //   version: '12.12'
-    // },
-    // 'SL_Android': {
-    //   base: 'SauceLabs',
-    //   browserName: 'android',
-    //   deviceName: 'Samsung Galaxy S4 Emulator',
-    //   deviceOrientation: 'portrait',
-    //   platform: 'Linux',
-    //   version: '4.4'
-    // },
-    // 'SL_iOS': {
-    //   base: 'SauceLabs',
-    //   browserName: 'iphone',
-    //   deviceName: 'iPhone Simulator',
-    //   deviceOrientation: 'portrait',
-    //   platform: 'OS X 10.10',
-    //   version: '8.2'
-    // }
+    'SL_Opera': {
+      base: 'SauceLabs',
+      browserName: 'opera',
+      platform: 'Windows 7',
+      version: '12.12'
+    },
+    'SL_Android': {
+      base: 'SauceLabs',
+      browserName: 'android',
+      deviceName: 'Samsung Galaxy S4 Emulator',
+      deviceOrientation: 'portrait',
+      platform: 'Linux',
+      version: '4.4'
+    },
+    'SL_iOS': {
+      base: 'SauceLabs',
+      browserName: 'iphone',
+      deviceName: 'iPhone Simulator',
+      deviceOrientation: 'portrait',
+      platform: 'OS X 10.10',
+      version: '8.2'
+    }
   };
 }

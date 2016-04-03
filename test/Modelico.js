@@ -6,10 +6,10 @@ module.exports = (should, M) => () => {
   const Person = require('./fixtures/Person')(M);
   const PartOfDay = require('./fixtures/PartOfDay')(M);
   const Sex = require('./fixtures/Sex')(M);
-  const SerialisableDate = require('./fixtures/Date')(M);
   const Animal = require('./fixtures/Animal')(M);
 
   const Modelico = M.Modelico;
+  const ModelicoDate = M.Date;
 
   const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","sex":"MALE"}';
   const author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
@@ -19,7 +19,7 @@ module.exports = (should, M) => () => {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new SerialisableDate(new Date('1988-04-16T00:00:00.000Z')),
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
         sex: Sex.MALE()
       });
@@ -51,7 +51,7 @@ module.exports = (should, M) => () => {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new SerialisableDate(new Date('1988-04-16T00:00:00.000Z')),
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
         sex: Sex.MALE()
       });
@@ -64,7 +64,7 @@ module.exports = (should, M) => () => {
       const author2 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new SerialisableDate(new Date('1988-04-16T00:00:00.000Z')),
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: null,
         sex: Sex.MALE()
       });
@@ -114,9 +114,9 @@ module.exports = (should, M) => () => {
       const author = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new SerialisableDate(new Date('1988-04-16T00:00:00.000Z'))
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))
         // equivalent but perhaps more convenient:
-        // birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
+        // birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
 
       const authorClone = author.clone();
@@ -142,19 +142,19 @@ module.exports = (should, M) => () => {
       const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
+        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
 
       const author2 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
+        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
 
       const author3 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo Goñi',
-        birthday: SerialisableDate.reviver('', '1988-04-16T00:00:00.000Z')
+        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
       });
 
       author1.equals(author2).should.be.exactly(true);
