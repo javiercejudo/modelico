@@ -5,7 +5,7 @@
 
 module.exports = require('./src');
 
-},{"./src":9}],2:[function(require,module,exports){
+},{"./src":10}],2:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -68,7 +68,64 @@ var ModelicoAsIs = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoAsIs);
 
-},{"./Modelico":6,"./U":7}],3:[function(require,module,exports){
+},{"./Modelico":7,"./U":8}],3:[function(require,module,exports){
+/*jshint node:true, esnext:true */
+
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Modelico = require('./Modelico');
+
+var ModelicoDate = function (_Modelico) {
+  _inherits(ModelicoDate, _Modelico);
+
+  function ModelicoDate(date) {
+    _classCallCheck(this, ModelicoDate);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoDate).call(this, ModelicoDate, { date: date }));
+
+    _this.date = function () {
+      return date === null ? null : new Date(date.toISOString());
+    };
+    Object.freeze(_this);
+    return _this;
+  }
+
+  _createClass(ModelicoDate, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return this.date() === null ? null : this.date().toISOString();
+    }
+  }], [{
+    key: 'reviver',
+    value: function reviver(k, v) {
+      var date = v === null ? null : new Date(v);
+
+      return Object.freeze(new ModelicoDate(date));
+    }
+  }, {
+    key: 'metadata',
+    value: function metadata() {
+      return Object.freeze({
+        type: ModelicoDate,
+        reviver: ModelicoDate.reviver
+      });
+    }
+  }]);
+
+  return ModelicoDate;
+}(Modelico);
+
+module.exports = Object.freeze(ModelicoDate);
+
+},{"./Modelico":7}],4:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -117,7 +174,7 @@ var ModelicoEnum = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoEnum);
 
-},{"./Modelico":6,"./U":7}],4:[function(require,module,exports){
+},{"./Modelico":7,"./U":8}],5:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -187,7 +244,7 @@ var ModelicoList = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoList);
 
-},{"./Modelico":6,"./U":7}],5:[function(require,module,exports){
+},{"./Modelico":7,"./U":8}],6:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -273,7 +330,7 @@ var ModelicoMap = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoMap);
 
-},{"./Modelico":6,"./U":7}],6:[function(require,module,exports){
+},{"./Modelico":7,"./U":8}],7:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -369,7 +426,7 @@ var Modelico = function () {
 
 module.exports = Object.freeze(Modelico);
 
-},{"./U":7}],7:[function(require,module,exports){
+},{"./U":8}],8:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -380,7 +437,7 @@ module.exports = Object.freeze({
   }
 });
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*jshint node:true, esnext:true */
 
 'use strict';
@@ -404,26 +461,28 @@ module.exports = function (values) {
   return Object.freeze(myEnum);
 };
 
-},{"./Enum":3}],9:[function(require,module,exports){
+},{"./Enum":4}],10:[function(require,module,exports){
 /*jshint node:true, esnext: true */
 
 'use strict';
 
 var Modelico = require('./Modelico');
-var ModelicoAsIs = require('./AsIs');
 var ModelicoMap = require('./Map');
-var ModelicoList = require('./List');
-var ModelicoEnum = require('./Enum');
+var ModelicoDate = require('./Date');
+var AsIs = require('./AsIs');
+var List = require('./List');
+var Enum = require('./Enum');
 var enumFactory = require('./enumFactory');
 
 module.exports = {
   Modelico: Modelico,
-  ModelicoAsIs: ModelicoAsIs,
-  ModelicoMap: ModelicoMap,
-  ModelicoList: ModelicoList,
-  ModelicoEnum: ModelicoEnum,
+  Map: ModelicoMap,
+  Date: ModelicoDate,
+  AsIs: AsIs,
+  List: List,
+  Enum: Enum,
   enumFactory: enumFactory
 };
 
-},{"./AsIs":2,"./Enum":3,"./List":4,"./Map":5,"./Modelico":6,"./enumFactory":8}]},{},[1])(1)
+},{"./AsIs":2,"./Date":3,"./Enum":4,"./List":5,"./Map":6,"./Modelico":7,"./enumFactory":9}]},{},[1])(1)
 });
