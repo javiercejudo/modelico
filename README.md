@@ -16,4 +16,6 @@ Universal library for serialisable immutable models.
 
 ## Usage
 
+*Coming soon*
+
 See [spec](test).
