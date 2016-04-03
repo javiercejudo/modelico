@@ -8,6 +8,8 @@ Universal library for serialisable immutable models.
 
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/modelico.svg)](https://saucelabs.com/u/modelico)
 
+*Note: [babel-polyfill](https://babeljs.io/docs/usage/polyfill/) might be required for browsers other than Chrome, Firefox and Edge*
+
 ## Installation
 
     npm i modelico

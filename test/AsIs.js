@@ -3,7 +3,7 @@
 'use strict';
 
 module.exports = (should, M) => () => {
-  const AsIs = M.ModelicoAsIs;
+  const AsIs = M.AsIs;
 
   describe('constructor', () => {
     it('should create a simple wrapper for the value', () => {
