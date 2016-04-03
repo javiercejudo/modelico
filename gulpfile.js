@@ -20,9 +20,9 @@ gulp.task('test', ['clean', 'instrument'], function () {
     .pipe(istanbul.writeReports());
 });
 
-gulp.task('coveralls', function () {
+gulp.task('codecov', function () {
   gulp.src('coverage/coverage-final.json')
-    .pipe(coveralls());
+    .pipe(codecov());
 });
 
 gulp.task('default', ['test']);
