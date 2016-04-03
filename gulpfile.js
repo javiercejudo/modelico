@@ -21,7 +21,7 @@ gulp.task('test', ['clean', 'instrument'], function () {
 });
 
 gulp.task('coveralls', function () {
-  gulp.src('coverage/lcov.info')
+  gulp.src('coverage/coverage-final.json')
     .pipe(coveralls());
 });
 
