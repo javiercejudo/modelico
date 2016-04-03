@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var mocha = require('gulp-mocha');
 var istanbul = require('gulp-istanbul');
 var rimraf = require('rimraf');
-var codecov = require('gulp-codecov');
+var coveralls = require('gulp-coveralls');
 
 gulp.task('clean', function (cb) {
   rimraf('./coverage', cb);
