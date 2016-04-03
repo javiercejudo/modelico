@@ -1,5 +1,3 @@
-/*jshint node:true, esnext:true, mocha:true */
-
 'use strict';
 
 const Should = require('should');

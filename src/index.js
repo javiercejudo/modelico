@@ -1,5 +1,3 @@
-/*jshint node:true, esnext: true */
-
 'use strict';
 
 const Modelico = require('./Modelico');
@@ -10,7 +8,7 @@ const List = require('./List');
 const Enum = require('./Enum');
 const enumFactory = require('./enumFactory');
 
-module.exports = {
+module.exports = Object.freeze({
   Modelico,
   Map: ModelicoMap,
   Date: ModelicoDate,
@@ -18,4 +16,4 @@ module.exports = {
   List,
   Enum,
   enumFactory
-};
+});

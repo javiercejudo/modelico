@@ -1,5 +1,3 @@
-/*jshint node:true, esnext:true, mocha:true */
-
 'use strict';
 
 module.exports = (should, M) => () => {

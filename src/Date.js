@@ -1,5 +1,3 @@
-/*jshint node:true, esnext:true */
-
 'use strict';
 
 const Modelico = require('./Modelico');
@@ -19,7 +17,7 @@ class ModelicoDate extends Modelico {
   static reviver(k, v) {
     const date = (v === null) ? null : new Date(v);
 
-    return Object.freeze(new ModelicoDate(date));
+    return new ModelicoDate(date);
   }
 
   static metadata() {
