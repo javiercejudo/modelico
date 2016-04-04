@@ -36,8 +36,8 @@ module.exports = (should, M) => () => {
         ModelicoList.buildReviver(ModelicoDate.metadata())
       );
 
-      modelicoList.list()[0].date().getFullYear()
-        .should.be.exactly(1988);
+      should(modelicoList.list()[0].date().getFullYear())
+        .be.exactly(1988);
 
       should(modelicoList.list()[1].date())
         .be.exactly(null);
@@ -48,7 +48,7 @@ module.exports = (should, M) => () => {
 
       const author = Modelico.fromJSON(Person, authorJson);
 
-      author.importantDatesList().list()[0].date().getFullYear().should.be.exactly(2013);
+      should(author.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
     });
 
     it('should support null lists', () => {
@@ -71,11 +71,11 @@ module.exports = (should, M) => () => {
 
       modelicoList.should.not.be.exactly(modelicoListClone);
 
-      modelicoList.list()[0].date().getFullYear()
-        .should.be.exactly(1988);
+      should(modelicoList.list()[0].date().getFullYear())
+        .be.exactly(1988);
 
-      modelicoListClone.list()[0].date().getFullYear()
-        .should.be.exactly(1988);
+      should(modelicoListClone.list()[0].date().getFullYear())
+        .be.exactly(1988);
     });
   });
 

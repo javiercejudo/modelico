@@ -8,9 +8,7 @@ module.exports = (should, M) => () => {
       const asIsNumber = new AsIs(Number, 1);
       const asIsObject = new AsIs(Object, {two: 2});
 
-      asIsNumber.should.be.an.instanceOf(M.Modelico);
-
-      asIsNumber.value().should.be.exactly(1);
+      should(asIsNumber.value()).be.exactly(1);
       asIsObject.value().should.eql({two: 2});
     });
 
@@ -21,7 +19,7 @@ module.exports = (should, M) => () => {
       (_ => asIsObject.value = 3).should.throw();
 
       asIsObject.value().two = 3;
-      asIsObject.value().two.should.be.exactly(2);
+      should(asIsObject.value().two).be.exactly(2);
     });
   });
 
@@ -39,8 +37,7 @@ module.exports = (should, M) => () => {
     it('should revive the value as is, without the wrapper', () => {
       const asIsObject = JSON.parse('{"two":2}', AsIs.buildReviver(Object));
 
-      asIsObject.should.not.be.an.instanceOf(AsIs);
-      asIsObject.two.should.be.exactly(2);
+      should(asIsObject.two).be.exactly(2);
     });
   });
 
