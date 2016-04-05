@@ -18,7 +18,7 @@ module.exports = function(config) {
       'node_modules/babel-polyfill/dist/polyfill.min.js',
       'dist/modelico.min.js',
       'tmp/modelico-spec.js',
-      'test/karmaEntry.js'
+      'test/browser/index.js'
     ],
 
 
