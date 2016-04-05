@@ -81,12 +81,12 @@ module.exports = (should, M) => () => {
         .should.be.exactly(author.fullName())
         .and.exactly(authorAlt.fullName());
 
-      (1988)
-        .should.be.exactly(author.birthday().date().getFullYear())
+      should(1988)
+        .be.exactly(author.birthday().date().getFullYear())
         .and.exactly(authorAlt.birthday().date().getFullYear());
 
-      (PartOfDay.EVENING().minTime)
-        .should.be.exactly(author.favouritePartOfDay().minTime)
+      should(PartOfDay.EVENING().minTime)
+        .be.exactly(author.favouritePartOfDay().minTime)
         .and.exactly(authorAlt.favouritePartOfDay().minTime);
 
       (Sex.MALE().code)
@@ -126,8 +126,8 @@ module.exports = (should, M) => () => {
 
       author.should.not.be.exactly(authorClone);
 
-      (1988)
-        .should.be.exactly(author.birthday().date().getFullYear())
+      should(1988)
+        .be.exactly(author.birthday().date().getFullYear())
         .and.exactly(birthdayClone.date().getFullYear());
 
       author.birthday()

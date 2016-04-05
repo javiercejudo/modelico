@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Modelico Browser Tests</title>
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.4.5/mocha.min.css">
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.4.5/mocha.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/should.js/8.3.0/should.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.7.4/polyfill.min.js"></script>
+
+  <script type="text/javascript">
+    (function() {
+      'use strict';
+
+      var call = Function.call;
+      var prototypeOfObject = Object.prototype;
+      var toStr = call.bind(prototypeOfObject.toString);
+
+      // https://github.com/es-shims/es5-shim/issues#issue/2
+      // http://ejohn.org/blog/objectgetprototypeof/
+      // recommended by fschaefer on github
+      //
+      // sure, and webreflection says ^_^
+      // ... this will nerever possibly return null
+      // ... Opera Mini breaks here with infinite loops
+      Object.getPrototypeOf = function getPrototypeOf(object) {
+        /* eslint-disable no-proto */
+        var proto = object.__proto__;
+        /* eslint-enable no-proto */
+
+        if (proto || proto === null) {
+          return proto;
+        }
+
+        if (toStr(object.constructor) === '[object Function]') {
+          return object.constructor.prototype;
+        }
+
+        if (object instanceof Object) {
+          return prototypeOfObject;
+        }
+
+        // Correctly return null for Objects created with `Object.create(null)`
+        // (shammed or native) or `{ __proto__: null}`.  Also returns null for
+        // cross-realm objects on browsers that lack `__proto__` support (like
+        // IE <11), but that's the best we can do.
+        return null;
+      };
+    }());
+  </script>
+
+  <script src="../../dist/modelico.min.js"></script>
+  <script src="../../tmp/modelico-spec.js"></script>
+
+  <script>
+    mocha.setup('bdd');
+
+    describe('Modelico', modelicoSpec(Should, Modelico));
+
+    mocha.checkLeaks();
+    mocha.run();
+  </script>
+</body>
+</html>

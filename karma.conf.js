@@ -108,12 +108,12 @@ function customLaunchers() {
       browserName: 'safari',
       platform: 'OS X 10.10'
     },
-    // 'SL_IE_11': {
-    //   base: 'SauceLabs',
-    //   browserName: 'internet explorer',
-    //   platform: 'Windows 8.1',
-    //   version: '11'
-    // },
+    'SL_IE_11': {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 8.1',
+      version: '11'
+    },
     'SL_Opera': {
       base: 'SauceLabs',
       browserName: 'opera',

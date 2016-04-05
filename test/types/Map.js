@@ -19,11 +19,7 @@ module.exports = (should, M) => () => {
         .should.be.exactly(authorJson);
 
       author.givenName().should.be.exactly('Javier');
-      author.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
-
-      (function() {
-        author.lifeEvents = 1;
-      }).should.throw();
+      should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
 
       // field setting
       const authorAlt = author.set('givenName', 'Javi');
@@ -31,18 +27,13 @@ module.exports = (should, M) => () => {
       // date is protected by always returning a new one
       author.lifeEvents().map().get('wedding').date().setFullYear(2001);
 
-      // objects are protected with Object.freeze
-      (function() {
-        authorAlt.lifeEvents = 1;
-      }).should.throw();
-
 
       // repeat sanity check
       JSON.stringify(author)
         .should.be.exactly(authorJson);
 
       author.givenName().should.be.exactly('Javier');
-      author.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
+      should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
 
       // new object checks
       (authorAlt === author).should.be.exactly(false);
@@ -50,7 +41,7 @@ module.exports = (should, M) => () => {
       authorAlt.equals(author).should.be.exactly(false);
 
       authorAlt.givenName().should.be.exactly('Javi');
-      authorAlt.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
+      should(authorAlt.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
 
       JSON.stringify(authorAlt)
         .should.be.exactly('{"givenName":"Javi","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}');
@@ -86,8 +77,8 @@ module.exports = (should, M) => () => {
         ModelicoMap.buildReviver(ModelicoAsIs.metadata(String), ModelicoDate.metadata())
       );
 
-      modelicoMap.map().get('a').date().getFullYear()
-        .should.be.exactly(1988);
+      should(modelicoMap.map().get('a').date().getFullYear())
+        .be.exactly(1988);
 
       should(modelicoMap.map().get('b').date())
         .be.exactly(null);
@@ -98,7 +89,7 @@ module.exports = (should, M) => () => {
 
       const author = Modelico.fromJSON(Person, authorJson);
 
-      author.lifeEvents().map().get('wedding').date().getFullYear().should.be.exactly(2013);
+      should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
     });
 
     it('should support null maps', () => {
@@ -121,11 +112,11 @@ module.exports = (should, M) => () => {
 
       modelicoMap.should.not.be.exactly(modelicoMapClone);
 
-      modelicoMap.map().get('a').date().getFullYear()
-        .should.be.exactly(1988);
+      should(modelicoMap.map().get('a').date().getFullYear())
+        .be.exactly(1988);
 
-      modelicoMapClone.map().get('a').date().getFullYear()
-        .should.be.exactly(1988);
+      should(modelicoMapClone.map().get('a').date().getFullYear())
+        .be.exactly(1988);
     });
   });
 
