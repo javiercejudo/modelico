@@ -44,7 +44,7 @@ class ModelicoMap extends Modelico {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return {type: ModelicoMap, reviver: ModelicoMap.buildReviver(keyMetadata, valueMetadata)};
+    return Object.freeze({type: ModelicoMap, reviver: ModelicoMap.buildReviver(keyMetadata, valueMetadata)});
   }
 }
 

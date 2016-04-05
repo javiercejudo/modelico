@@ -21,10 +21,7 @@ class ModelicoDate extends Modelico {
   }
 
   static metadata() {
-    return Object.freeze({
-      type: ModelicoDate,
-      reviver: ModelicoDate.reviver
-    });
+    return Object.freeze({type: ModelicoDate, reviver: ModelicoDate.reviver});
   }
 }
 

@@ -26,7 +26,7 @@ class ModelicoList extends Modelico {
 
   static reviver(subtypeMetadata, k, v) {
     if (k === '') {
-      const list = (v === null) ? null : v.map(U.bind(subtypeMetadata.reviver, ''));
+      const list = (v === null) ? null : v.map(U.bind(subtypeMetadata.reviver, k));
 
       return new ModelicoList(subtypeMetadata, list);
     }
@@ -35,7 +35,7 @@ class ModelicoList extends Modelico {
   }
 
   static metadata(subtypeMetadata) {
-    return {type: ModelicoList, reviver: ModelicoList.buildReviver(subtypeMetadata)};
+    return Object.freeze({type: ModelicoList, reviver: ModelicoList.buildReviver(subtypeMetadata)});
   }
 }
 
