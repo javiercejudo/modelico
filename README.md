@@ -134,5 +134,6 @@ person.pets().list().shift().speak(); //=> 'My name is Robbie!'
 
 // So when called again, the list is still intact
 person.pets().list().shift().speak(); //=> 'My name is Robbie!'
+```
 
 See [spec](test).
