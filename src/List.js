@@ -8,6 +8,7 @@ class ModelicoList extends Modelico {
     super(ModelicoList, {list});
 
     this.subtype = () => subtypeMetadata;
+    this.list = () => list === null ? null : list.slice();
 
     Object.freeze(this);
   }

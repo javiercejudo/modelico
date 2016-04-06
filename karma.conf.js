@@ -17,7 +17,7 @@ module.exports = function(config) {
       'node_modules/should/should.min.js',
       'node_modules/babel-polyfill/dist/polyfill.min.js',
       'dist/modelico.min.js',
-      'tmp/modelico-spec.js',
+      'dist/modelico-spec.js',
       'test/browser/index.js'
     ],
 

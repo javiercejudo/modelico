@@ -74,6 +74,11 @@ module.exports = (should, M) => () => {
       should(modelicoList.list()[0].date().getFullYear())
         .be.exactly(1988);
 
+      modelicoList.list().length = 0;
+
+      should(modelicoList.list()[0].date().getFullYear())
+        .be.exactly(1988);
+
       should(modelicoListClone.list()[0].date().getFullYear())
         .be.exactly(1988);
     });

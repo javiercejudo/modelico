@@ -107,10 +107,7 @@ var ModelicoDate = function (_Modelico) {
   }, {
     key: 'metadata',
     value: function metadata() {
-      return Object.freeze({
-        type: ModelicoDate,
-        reviver: ModelicoDate.reviver
-      });
+      return Object.freeze({ type: ModelicoDate, reviver: ModelicoDate.reviver });
     }
   }]);
 
@@ -191,6 +188,9 @@ var ModelicoList = function (_Modelico) {
     _this.subtype = function () {
       return subtypeMetadata;
     };
+    _this.list = function () {
+      return list === null ? null : list.slice();
+    };
 
     Object.freeze(_this);
     return _this;
@@ -215,7 +215,7 @@ var ModelicoList = function (_Modelico) {
     key: 'reviver',
     value: function reviver(subtypeMetadata, k, v) {
       if (k === '') {
-        var list = v === null ? null : v.map(U.bind(subtypeMetadata.reviver, ''));
+        var list = v === null ? null : v.map(U.bind(subtypeMetadata.reviver, k));
 
         return new ModelicoList(subtypeMetadata, list);
       }
@@ -225,7 +225,7 @@ var ModelicoList = function (_Modelico) {
   }, {
     key: 'metadata',
     value: function metadata(subtypeMetadata) {
-      return { type: ModelicoList, reviver: ModelicoList.buildReviver(subtypeMetadata) };
+      return Object.freeze({ type: ModelicoList, reviver: ModelicoList.buildReviver(subtypeMetadata) });
     }
   }]);
 
@@ -309,7 +309,7 @@ var ModelicoMap = function (_Modelico) {
   }, {
     key: 'metadata',
     value: function metadata(keyMetadata, valueMetadata) {
-      return { type: ModelicoMap, reviver: ModelicoMap.buildReviver(keyMetadata, valueMetadata) };
+      return Object.freeze({ type: ModelicoMap, reviver: ModelicoMap.buildReviver(keyMetadata, valueMetadata) });
     }
   }]);
 
@@ -343,7 +343,7 @@ var Modelico = function () {
       return Type;
     };
     this.fields = function () {
-      return fields;
+      return Object.freeze(fields);
     };
 
     Object.getOwnPropertyNames(fields).forEach(function (field) {
@@ -356,7 +356,7 @@ var Modelico = function () {
   _createClass(Modelico, [{
     key: 'set',
     value: function set(field, value) {
-      var newFields = Object.assign(this.clone().fields(), assignReducer({}, { field: field, value: value }));
+      var newFields = Object.assign({}, this.clone().fields(), assignReducer({}, { field: field, value: value }));
       var newInstance = new Modelico(this.type(), newFields);
 
       return Object.freeze(newInstance);

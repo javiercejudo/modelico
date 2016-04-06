@@ -11,14 +11,14 @@ const assignReducer = (acc, pair) => {
 class Modelico {
   constructor(Type, fields) {
     this.type = () => Type;
-    this.fields = () => fields;
+    this.fields = () => Object.freeze(fields);
 
     Object.getOwnPropertyNames(fields)
       .forEach(field => this[field] = () => fields[field]);
   }
 
   set(field, value) {
-    const newFields = Object.assign(this.clone().fields(), assignReducer({}, {field, value}));
+    const newFields = Object.assign({}, this.clone().fields(), assignReducer({}, {field, value}));
     const newInstance = new Modelico(this.type(), newFields);
 
     return Object.freeze(newInstance);
