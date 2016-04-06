@@ -12,7 +12,13 @@ module.exports = (should, M) => () => {
     }
 
     speak() {
-      return `my name is ${this.name()}!`;
+      const name = this.fields().name;
+
+      if (name === undefined) {
+        return `I don't have a name`;
+      }
+
+      return `My name is ${name}!`;
     }
 
     static metadata() {
@@ -28,7 +34,9 @@ module.exports = (should, M) => () => {
     }
 
     fullName() {
-      return [this.givenName(), this.familyName()].join(' ').trim();
+      const fields = this.fields();
+
+      return [fields.givenName, fields.familyName].join(' ').trim();
     }
 
     static subtypes() {
@@ -62,9 +70,9 @@ module.exports = (should, M) => () => {
     person.fullName().should.be.exactly('Javier Cejudo');
 
     person.pets().list().shift().speak()
-      .should.be.exactly('my name is Robbie!');
+      .should.be.exactly('My name is Robbie!');
 
     person.pets().list().shift().speak()
-      .should.be.exactly('my name is Robbie!');
+      .should.be.exactly('My name is Robbie!');
   });
 };
