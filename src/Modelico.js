@@ -19,9 +19,9 @@ class Modelico {
 
   set(field, value) {
     const newFields = Object.assign({}, this.clone().fields(), assignReducer({}, {field, value}));
-    const newInstance = new Modelico(this.type(), newFields);
+    const Type = this.type();
 
-    return Object.freeze(newInstance);
+    return new Type(newFields);
   }
 
   clone() {
@@ -53,10 +53,12 @@ class Modelico {
       return new Type(v);
     }
 
-    const subtypeMetadata = Type.subtypes()[k];
+    if (Type.subtypes) {
+      const subtypeMetadata = Type.subtypes()[k];
 
-    if (subtypeMetadata) {
-      return subtypeMetadata.reviver('', v);
+      if (subtypeMetadata) {
+        return subtypeMetadata.reviver('', v);
+      }
     }
 
     return v;
