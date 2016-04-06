@@ -106,7 +106,7 @@ function customLaunchers() {
     'SL_Safari': {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'OS X 10.10'
+      platform: 'OS X 10.11'
     },
     'SL_IE_11': {
       base: 'SauceLabs',
@@ -123,10 +123,9 @@ function customLaunchers() {
     'SL_Android': {
       base: 'SauceLabs',
       browserName: 'android',
-      deviceName: 'Samsung Galaxy S4 Emulator',
       deviceOrientation: 'portrait',
       platform: 'Linux',
-      version: '4.4'
+      version: '5.1'
     },
     'SL_iOS': {
       base: 'SauceLabs',
@@ -134,7 +133,7 @@ function customLaunchers() {
       deviceName: 'iPhone Simulator',
       deviceOrientation: 'portrait',
       platform: 'OS X 10.10',
-      version: '8.2'
+      version: '9.2'
     }
   };
 }
