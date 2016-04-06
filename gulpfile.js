@@ -6,8 +6,6 @@ const istanbul = require('gulp-istanbul');
 const rimraf = require('rimraf');
 const codecov = require('gulp-codecov');
 
-const plumber = require('gulp-plumber');
-
 let coverageVariable;
 
 gulp.task('clean', function (cb) {
@@ -24,8 +22,11 @@ gulp.task('instrument', ['clean'], function () {
 
 gulp.task('test', ['clean', 'instrument'], function () {
   return gulp.src(['test/index.js'])
-    .pipe(plumber())
     .pipe(mocha())
+    .on('error', function handleMochaError(err) {
+      console.error(err.toString());
+      this.emit('end');
+    })
     .pipe(istanbul.writeReports({ coverageVariable }));
 });
 
