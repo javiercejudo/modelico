@@ -101,9 +101,10 @@ module.exports = (should, M) => () => {
     });
 
     it('should work with plain classes extending Modelico', () => {
-      const animal = JSON.parse('{}', Modelico.buildReviver(Animal));
+      const animal = JSON.parse('{"name": "Sam"}', Modelico.buildReviver(Animal));
 
       animal.speak().should.be.exactly('hello');
+      animal.name().should.be.exactly('Sam');
     });
   });
 
