@@ -10,7 +10,7 @@ Universal library for serialisable immutable models.
 
 *Note: [babel-polyfill](https://babeljs.io/docs/usage/polyfill/) might be required
 for browsers other than Chrome, Firefox and Edge. See [browser tests](test/browser)
-for more details.*
+for more details or [run the current tests directly on your browser](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html).*
 
 ## Installation
 
