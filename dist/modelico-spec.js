@@ -1,6 +1,101 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.modelicoSpec = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+module.exports = function (should, M) {
+  return function () {
+
+    var Modelico = M.Modelico;
+    var AsIs = M.AsIs;
+    var List = M.List;
+
+    var Animal = function (_Modelico) {
+      _inherits(Animal, _Modelico);
+
+      function Animal(fields) {
+        _classCallCheck(this, Animal);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Animal).call(this, Animal, fields));
+      }
+
+      _createClass(Animal, [{
+        key: 'speak',
+        value: function speak() {
+          return 'my name is ' + this.name() + '!';
+        }
+      }], [{
+        key: 'metadata',
+        value: function metadata() {
+          return Object.freeze({ type: Animal, reviver: Modelico.buildReviver(Animal) });
+        }
+      }]);
+
+      return Animal;
+    }(Modelico);
+
+    var Person = function (_Modelico2) {
+      _inherits(Person, _Modelico2);
+
+      function Person(fields) {
+        _classCallCheck(this, Person);
+
+        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Person).call(this, Person, fields));
+
+        Object.freeze(_this2);
+        return _this2;
+      }
+
+      _createClass(Person, [{
+        key: 'fullName',
+        value: function fullName() {
+          return [this.givenName(), this.familyName()].join(' ').trim();
+        }
+      }], [{
+        key: 'subtypes',
+        value: function subtypes() {
+          return Object.freeze({
+            // JSON compatible types don't need to be declared
+            // 'givenName': AsIs.metadata(String),
+            'familyName': AsIs.metadata(String),
+            'pets': List.metadata(Animal.metadata())
+          });
+        }
+      }]);
+
+      return Person;
+    }(Modelico);
+
+    Object.freeze(Animal);
+    Object.freeze(Person);
+
+    it('should showcase the main features', function () {
+      var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
+
+      var person = Modelico.fromJSON(Person, personJson);
+
+      person.fullName().should.be.exactly('Javier Cejudo');
+
+      var person2 = person.set('givenName', 'Javi');
+      person2.fullName().should.be.exactly('Javi Cejudo');
+      person.fullName().should.be.exactly('Javier Cejudo');
+
+      person.pets().list().shift().speak().should.be.exactly('my name is Robbie!');
+
+      person.pets().list().shift().speak().should.be.exactly('my name is Robbie!');
+    });
+  };
+};
+
+},{}],2:[function(require,module,exports){
+'use strict';
+
 module.exports = function (should, M) {
   return function (_) {
     var deps = [should, M];
@@ -9,10 +104,11 @@ module.exports = function (should, M) {
     describe('ModelicoAsIs', require('./types/AsIs').apply(_, deps));
     describe('ModelicoMap', require('./types/Map').apply(_, deps));
     describe('ModelicoList', require('./types/List').apply(_, deps));
+    describe('Readme Example', require('./example/').apply(_, deps));
   };
 };
 
-},{"./types/AsIs":2,"./types/List":3,"./types/Map":4,"./types/Modelico":5}],2:[function(require,module,exports){
+},{"./example/":1,"./types/AsIs":3,"./types/List":4,"./types/Map":5,"./types/Modelico":6}],3:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -77,7 +173,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -163,7 +259,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":8}],4:[function(require,module,exports){
+},{"./fixtures/Person":9}],5:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -282,7 +378,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":8}],5:[function(require,module,exports){
+},{"./fixtures/Person":9}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -375,9 +471,10 @@ module.exports = function (should, M) {
       });
 
       it('should work with plain classes extending Modelico', function () {
-        var animal = JSON.parse('{}', Modelico.buildReviver(Animal));
+        var animal = JSON.parse('{"name": "Sam"}', Modelico.buildReviver(Animal));
 
         animal.speak().should.be.exactly('hello');
+        animal.name().should.be.exactly('Sam');
       });
     });
 
@@ -433,7 +530,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Animal":6,"./fixtures/PartOfDay":7,"./fixtures/Person":8,"./fixtures/Sex":9}],6:[function(require,module,exports){
+},{"./fixtures/Animal":7,"./fixtures/PartOfDay":8,"./fixtures/Person":9,"./fixtures/Sex":10}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -469,7 +566,7 @@ module.exports = function (M) {
   return Object.freeze(Animal);
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 var range = function range(minTime, maxTime) {
@@ -485,7 +582,7 @@ module.exports = function (M) {
   });
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -548,12 +645,12 @@ module.exports = function (M) {
   return Object.freeze(Person);
 };
 
-},{"./PartOfDay":7,"./Sex":9}],9:[function(require,module,exports){
+},{"./PartOfDay":8,"./Sex":10}],10:[function(require,module,exports){
 'use strict';
 
 module.exports = function (M) {
   return M.enumFactory(['FEMALE', 'MALE', 'OTHER']);
 };
 
-},{}]},{},[1])(1)
+},{}]},{},[2])(2)
 });

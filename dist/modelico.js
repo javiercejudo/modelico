@@ -357,9 +357,9 @@ var Modelico = function () {
     key: 'set',
     value: function set(field, value) {
       var newFields = Object.assign({}, this.clone().fields(), assignReducer({}, { field: field, value: value }));
-      var newInstance = new Modelico(this.type(), newFields);
+      var Type = this.type();
 
-      return Object.freeze(newInstance);
+      return new Type(newFields);
     }
   }, {
     key: 'clone',
@@ -397,10 +397,12 @@ var Modelico = function () {
         return new Type(v);
       }
 
-      var subtypeMetadata = Type.subtypes()[k];
+      if (Type.subtypes) {
+        var subtypeMetadata = Type.subtypes()[k];
 
-      if (subtypeMetadata) {
-        return subtypeMetadata.reviver('', v);
+        if (subtypeMetadata) {
+          return subtypeMetadata.reviver('', v);
+        }
       }
 
       return v;
