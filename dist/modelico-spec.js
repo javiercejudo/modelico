@@ -28,7 +28,8 @@ module.exports = function (should, M) {
       _createClass(Animal, [{
         key: 'speak',
         value: function speak() {
-          return 'my name is ' + this.name() + '!';
+          var name = this.fields().name;
+          return name === undefined ? 'I don\'t have a name' : 'My name is ' + name + '!';
         }
       }], [{
         key: 'metadata',
@@ -46,23 +47,20 @@ module.exports = function (should, M) {
       function Person(fields) {
         _classCallCheck(this, Person);
 
-        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Person).call(this, Person, fields));
-
-        Object.freeze(_this2);
-        return _this2;
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Person).call(this, Person, fields));
       }
 
       _createClass(Person, [{
         key: 'fullName',
         value: function fullName() {
-          return [this.givenName(), this.familyName()].join(' ').trim();
+          var fields = this.fields();
+          return [fields.givenName, fields.familyName].join(' ').trim();
         }
       }], [{
         key: 'subtypes',
         value: function subtypes() {
           return Object.freeze({
-            // JSON compatible types don't need to be declared
-            // 'givenName': AsIs.metadata(String),
+            'givenName': AsIs.metadata(String),
             'familyName': AsIs.metadata(String),
             'pets': List.metadata(Animal.metadata())
           });
@@ -86,14 +84,62 @@ module.exports = function (should, M) {
       person2.fullName().should.be.exactly('Javi Cejudo');
       person.fullName().should.be.exactly('Javier Cejudo');
 
-      person.pets().list().shift().speak().should.be.exactly('my name is Robbie!');
+      person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
 
-      person.pets().list().shift().speak().should.be.exactly('my name is Robbie!');
+      person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
     });
   };
 };
 
 },{}],2:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+module.exports = function (should, M) {
+  return function () {
+
+    var Modelico = M.Modelico;
+    var AsIs = M.AsIs;
+    var List = M.List;
+
+    var Animal = function (_Modelico) {
+      _inherits(Animal, _Modelico);
+
+      function Animal(fields) {
+        _classCallCheck(this, Animal);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Animal).call(this, Animal, fields));
+      }
+
+      _createClass(Animal, [{
+        key: 'speak',
+        value: function speak() {
+          var name = this.fields().name;
+          return name === undefined ? 'I don\'t have a name' : 'My name is ' + name + '!';
+        }
+      }]);
+
+      return Animal;
+    }(Modelico);
+
+    it('should showcase the main features', function () {
+      var petJson = '{"name": "Robbie"}';
+
+      var pet = Modelico.fromJSON(Animal, petJson);
+
+      pet.speak().should.be.exactly('My name is Robbie!');
+    });
+  };
+};
+
+},{}],3:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -104,11 +150,12 @@ module.exports = function (should, M) {
     describe('ModelicoAsIs', require('./types/AsIs').apply(_, deps));
     describe('ModelicoMap', require('./types/Map').apply(_, deps));
     describe('ModelicoList', require('./types/List').apply(_, deps));
-    describe('Readme Example', require('./example/').apply(_, deps));
+    describe('Readme Simple Example', require('./example/simple').apply(_, deps));
+    describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
   };
 };
 
-},{"./example/":1,"./types/AsIs":3,"./types/List":4,"./types/Map":5,"./types/Modelico":6}],3:[function(require,module,exports){
+},{"./example/advanced":1,"./example/simple":2,"./types/AsIs":4,"./types/List":5,"./types/Map":6,"./types/Modelico":7}],4:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -173,7 +220,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -259,7 +306,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":9}],5:[function(require,module,exports){
+},{"./fixtures/Person":10}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -378,7 +425,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":9}],6:[function(require,module,exports){
+},{"./fixtures/Person":10}],7:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -530,7 +577,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Animal":7,"./fixtures/PartOfDay":8,"./fixtures/Person":9,"./fixtures/Sex":10}],7:[function(require,module,exports){
+},{"./fixtures/Animal":8,"./fixtures/PartOfDay":9,"./fixtures/Person":10,"./fixtures/Sex":11}],8:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -566,7 +613,7 @@ module.exports = function (M) {
   return Object.freeze(Animal);
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var range = function range(minTime, maxTime) {
@@ -582,7 +629,7 @@ module.exports = function (M) {
   });
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -645,12 +692,12 @@ module.exports = function (M) {
   return Object.freeze(Person);
 };
 
-},{"./PartOfDay":8,"./Sex":10}],10:[function(require,module,exports){
+},{"./PartOfDay":9,"./Sex":11}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = function (M) {
   return M.enumFactory(['FEMALE', 'MALE', 'OTHER']);
 };
 
-},{}]},{},[2])(2)
+},{}]},{},[3])(3)
 });
