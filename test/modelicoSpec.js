@@ -9,4 +9,5 @@ module.exports = (should, M) => _ => {
   describe('ModelicoList', require('./types/List').apply(_, deps));
   describe('Readme Simple Example', require('./example/simple').apply(_, deps));
   describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
+  describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
 };

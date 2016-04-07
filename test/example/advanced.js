@@ -40,9 +40,6 @@ module.exports = (should, M) => () => {
     }
   }
 
-  Object.freeze(Animal);
-  Object.freeze(Person);
-
   it('should showcase the main features', () => {
     const personJson = `{
       "givenName": "Javier",

@@ -141,7 +141,7 @@ person2.fullName(); //=> 'Javi Cejudo'
 person.fullName();  //=> 'Javier Cejudo'
 ```
 
-The same principle applies accross all Modelico classes:
+The same principle applies across all Modelico classes:
 
 ```js
 // While person.pets().list() is a plain array,
@@ -152,6 +152,29 @@ person.pets().list().shift().speak(); //=> 'My name is Robbie!'
 
 // When called again, the list is still intact
 person.pets().list().shift().speak(); //=> 'My name is Robbie!'
+```
+
+## ES5 classes
+
+To support legacy browsers without transpiling, Modelico can be used
+with ES5-style classes. In the case of our `Animal` class:
+
+```js
+function Animal(fields) {
+  // Object.assign is ES6, but can be polyfilled
+  Object.assign(this, new Modelico(Animal, fields));
+}
+
+Animal.prototype = Object.create(Modelico.prototype);
+
+Animal.prototype.speak = function() {
+  var name = this.fields().name;
+  return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
+};
+
+Animal.metadata = function() {
+  return Object.freeze({type: Animal, reviver: Modelico.buildReviver(Animal)});
+};
 ```
 
 See [spec](test).
