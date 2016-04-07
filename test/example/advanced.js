@@ -13,12 +13,7 @@ module.exports = (should, M) => () => {
 
     speak() {
       const name = this.fields().name;
-
-      if (name === undefined) {
-        return `I don't have a name`;
-      }
-
-      return `My name is ${name}!`;
+      return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
     }
 
     static metadata() {
@@ -29,20 +24,16 @@ module.exports = (should, M) => () => {
   class Person extends Modelico {
     constructor(fields) {
       super(Person, fields);
-
-      Object.freeze(this);
     }
 
     fullName() {
       const fields = this.fields();
-
       return [fields.givenName, fields.familyName].join(' ').trim();
     }
 
     static subtypes() {
       return Object.freeze({
-        // JSON compatible types don't need to be declared
-        // 'givenName': AsIs.metadata(String),
+        'givenName': AsIs.metadata(String),
         'familyName': AsIs.metadata(String),
         'pets': List.metadata(Animal.metadata())
       });
