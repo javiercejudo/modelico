@@ -32,9 +32,9 @@ The goal is to parse JSON strings like the following into JavaScript classes
 so that we can do things like this:
 
 ```js
-const pet = Modelico.fromJSON(Animal, animalJson);
+const pet = JSON.parse(petJson, Modelico.buildReviver(Animal));
 
-pets.speak(); //=> 'my name is Robbie!'
+pet.speak(); //=> 'my name is Robbie!'
 ```
 
 Here is how `Animal` would look like:
@@ -78,7 +78,7 @@ Again, our goal is to parse JSON into JavaScript classes
 to be able to do things like
 
 ```js
-const person = Modelico.fromJSON(Person, personJson);
+const person = JSON.parse(personJson, Modelico.buildReviver(Person));
 
 person.fullName(); //=> 'Javier Cejudo'
 person.pets().list()[0].speak(); //=> 'my name is Robbie!'

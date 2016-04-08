@@ -20,7 +20,7 @@ module.exports = (should, M) => () => {
   it('should showcase the main features', () => {
     const petJson = `{"name": "Robbie"}`;
 
-    const pet = Modelico.fromJSON(Animal, petJson);
+    const pet = JSON.parse(petJson, Modelico.buildReviver(Animal));
 
     pet.speak()
       .should.be.exactly('My name is Robbie!');

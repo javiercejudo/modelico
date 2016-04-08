@@ -49,7 +49,7 @@ module.exports = (should, M) => () => {
       }]
     }`;
 
-    const person = Modelico.fromJSON(Person, personJson);
+    const person = JSON.parse(personJson, Modelico.buildReviver(Person));
 
     person.fullName().should.be.exactly('Javier Cejudo');
 
