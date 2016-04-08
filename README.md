@@ -86,7 +86,7 @@ person.pets().list()[0].speak(); //=> 'my name is Robbie!'
 
 We are going to need a `Person` class much like the `Animal`
 class we have already defined. Since `Person` contains a list
-of `Animal`, we use the static method `subtypes` to specify
+of `Animal`, we use the static method `innerTypes` to specify
 that.
 
 ```js
@@ -105,7 +105,7 @@ class Person extends Modelico {
     return [fields.givenName, fields.familyName].join(' ').trim();
   }
 
-  static subtypes() {
+  static innerTypes() {
     return Object.freeze({
       'givenName': AsIs.metadata(String),  // can be omitted since it is a string
       'familyName': AsIs.metadata(String), // can be omitted since it is a string
