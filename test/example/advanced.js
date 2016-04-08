@@ -31,7 +31,7 @@ module.exports = (should, M) => () => {
       return [fields.givenName, fields.familyName].join(' ').trim();
     }
 
-    static subtypes() {
+    static innerTypes() {
       return Object.freeze({
         'givenName': AsIs.metadata(String),
         'familyName': AsIs.metadata(String),
