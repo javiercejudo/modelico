@@ -23,7 +23,7 @@ module.exports = M => {
       return joinWithSpace([this.givenName(), this.familyName()]);
     }
 
-    static subtypes() {
+    static innerTypes() {
       return Object.freeze({
         'birthday': ModelicoDate(),
         'favouritePartOfDay': PartOfDay(),

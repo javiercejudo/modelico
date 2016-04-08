@@ -53,11 +53,11 @@ class Modelico {
       return new Type(v);
     }
 
-    if (Type.subtypes) {
-      const subtypeMetadata = Type.subtypes()[k];
+    if (Type.innerTypes) {
+      const innerTypeMetadata = Type.innerTypes()[k];
 
-      if (subtypeMetadata) {
-        return subtypeMetadata.reviver('', v);
+      if (innerTypeMetadata) {
+        return innerTypeMetadata.reviver('', v);
       }
     }
 

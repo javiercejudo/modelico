@@ -32,7 +32,7 @@ module.exports = (should, M) => () => {
     return [fields.givenName, fields.familyName].join(' ').trim();
   };
 
-  Person.subtypes = function() {
+  Person.innerTypes = function() {
     return Object.freeze({
       'givenName': AsIs.metadata(String),
       'familyName': AsIs.metadata(String),

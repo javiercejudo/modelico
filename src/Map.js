@@ -16,13 +16,13 @@ class ModelicoMap extends Modelico {
   constructor(keyMetadata, valueMetadata, map) {
     super(ModelicoMap, {map});
 
-    this.subtypes = () => Object.freeze({keyMetadata, valueMetadata});
+    this.innerTypes = () => Object.freeze({keyMetadata, valueMetadata});
 
     Object.freeze(this);
   }
 
   clone() {
-    return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.subtypes()));
+    return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.innerTypes()));
   }
 
   toJSON() {
@@ -33,11 +33,11 @@ class ModelicoMap extends Modelico {
     return U.bind(ModelicoMap.reviver, {keyMetadata, valueMetadata});
   }
 
-  static reviver(subtypes, k, v) {
+  static reviver(innerTypes, k, v) {
     if (k === '') {
-      const map = (v === null) ? null : new Map(v.map(parseMapper(subtypes)));
+      const map = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
 
-      return new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map);
+      return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
     }
 
     return v;
