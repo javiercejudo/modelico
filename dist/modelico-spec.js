@@ -34,7 +34,7 @@ module.exports = function (should, M) {
       return [fields.givenName, fields.familyName].join(' ').trim();
     };
 
-    Person.subtypes = function () {
+    Person.innerTypes = function () {
       return Object.freeze({
         'givenName': AsIs.metadata(String),
         'familyName': AsIs.metadata(String),
@@ -45,7 +45,7 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
 
-      var person = Modelico.fromJSON(Person, personJson);
+      var person = JSON.parse(personJson, Modelico.buildReviver(Person));
 
       person.fullName().should.be.exactly('Javier Cejudo');
 
@@ -119,8 +119,8 @@ module.exports = function (should, M) {
           return [fields.givenName, fields.familyName].join(' ').trim();
         }
       }], [{
-        key: 'subtypes',
-        value: function subtypes() {
+        key: 'innerTypes',
+        value: function innerTypes() {
           return Object.freeze({
             'givenName': AsIs.metadata(String),
             'familyName': AsIs.metadata(String),
@@ -135,7 +135,7 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
 
-      var person = Modelico.fromJSON(Person, personJson);
+      var person = JSON.parse(personJson, Modelico.buildReviver(Person));
 
       person.fullName().should.be.exactly('Javier Cejudo');
 
@@ -191,7 +191,7 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var petJson = '{"name": "Robbie"}';
 
-      var pet = Modelico.fromJSON(Animal, petJson);
+      var pet = JSON.parse(petJson, Modelico.buildReviver(Animal));
 
       pet.speak().should.be.exactly('My name is Robbie!');
     });
@@ -734,8 +734,8 @@ module.exports = function (M) {
         return joinWithSpace([this.givenName(), this.familyName()]);
       }
     }], [{
-      key: 'subtypes',
-      value: function subtypes() {
+      key: 'innerTypes',
+      value: function innerTypes() {
         return Object.freeze({
           'birthday': ModelicoDate(),
           'favouritePartOfDay': PartOfDay(),

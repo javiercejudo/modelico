@@ -180,13 +180,13 @@ var Modelico = require('./Modelico');
 var ModelicoList = function (_Modelico) {
   _inherits(ModelicoList, _Modelico);
 
-  function ModelicoList(subtypeMetadata, list) {
+  function ModelicoList(itemMetadata, list) {
     _classCallCheck(this, ModelicoList);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoList).call(this, ModelicoList, { list: list }));
 
-    _this.subtype = function () {
-      return subtypeMetadata;
+    _this.itemMetadata = function () {
+      return itemMetadata;
     };
     _this.list = function () {
       return list === null ? null : list.slice();
@@ -199,7 +199,7 @@ var ModelicoList = function (_Modelico) {
   _createClass(ModelicoList, [{
     key: 'clone',
     value: function clone() {
-      return JSON.parse(JSON.stringify(this), ModelicoList.buildReviver(this.subtype()));
+      return JSON.parse(JSON.stringify(this), ModelicoList.buildReviver(this.itemMetadata()));
     }
   }, {
     key: 'toJSON',
@@ -208,16 +208,16 @@ var ModelicoList = function (_Modelico) {
     }
   }], [{
     key: 'buildReviver',
-    value: function buildReviver(subtypeMetadata) {
-      return U.bind(ModelicoList.reviver, subtypeMetadata);
+    value: function buildReviver(itemMetadata) {
+      return U.bind(ModelicoList.reviver, itemMetadata);
     }
   }, {
     key: 'reviver',
-    value: function reviver(subtypeMetadata, k, v) {
+    value: function reviver(itemMetadata, k, v) {
       if (k === '') {
-        var list = v === null ? null : v.map(U.bind(subtypeMetadata.reviver, k));
+        var list = v === null ? null : v.map(U.bind(itemMetadata.reviver, k));
 
-        return new ModelicoList(subtypeMetadata, list);
+        return new ModelicoList(itemMetadata, list);
       }
 
       return v;
@@ -272,7 +272,7 @@ var ModelicoMap = function (_Modelico) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoMap).call(this, ModelicoMap, { map: map }));
 
-    _this.subtypes = function () {
+    _this.innerTypes = function () {
       return Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata });
     };
 
@@ -283,7 +283,7 @@ var ModelicoMap = function (_Modelico) {
   _createClass(ModelicoMap, [{
     key: 'clone',
     value: function clone() {
-      return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.subtypes()));
+      return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.innerTypes()));
     }
   }, {
     key: 'toJSON',
@@ -297,11 +297,11 @@ var ModelicoMap = function (_Modelico) {
     }
   }, {
     key: 'reviver',
-    value: function reviver(subtypes, k, v) {
+    value: function reviver(innerTypes, k, v) {
       if (k === '') {
-        var map = v === null ? null : new Map(v.map(parseMapper(subtypes)));
+        var map = v === null ? null : new Map(v.map(parseMapper(innerTypes)));
 
-        return new ModelicoMap(subtypes.keyMetadata, subtypes.valueMetadata, map);
+        return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
       }
 
       return v;
@@ -397,11 +397,11 @@ var Modelico = function () {
         return new Type(v);
       }
 
-      if (Type.subtypes) {
-        var subtypeMetadata = Type.subtypes()[k];
+      if (Type.innerTypes) {
+        var innerTypeMetadata = Type.innerTypes()[k];
 
-        if (subtypeMetadata) {
-          return subtypeMetadata.reviver('', v);
+        if (innerTypeMetadata) {
+          return innerTypeMetadata.reviver('', v);
         }
       }
 
