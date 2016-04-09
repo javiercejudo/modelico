@@ -2,6 +2,7 @@
 
 const U = require('./U');
 const Modelico = require('./Modelico');
+const AsIs = require('./AsIs').metadata;
 
 class ModelicoList extends Modelico {
   constructor(itemMetadata, list) {
@@ -31,6 +32,10 @@ class ModelicoList extends Modelico {
 
   toJSON() {
     return this.list();
+  }
+
+  static fromArray(arr) {
+    return new ModelicoList(AsIs(), arr);
   }
 
   static buildReviver(itemMetadata) {
