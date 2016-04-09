@@ -10,6 +10,14 @@ class ModelicoDate extends Modelico {
     Object.freeze(this);
   }
 
+  set(date) {
+    return new ModelicoDate(date);
+  }
+
+  setPath(path, date) {
+    return this.set(date);
+  }
+
   toJSON() {
     return (this.date() === null) ? null : this.date().toISOString();
   }

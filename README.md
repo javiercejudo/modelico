@@ -35,6 +35,11 @@ so that we can do things like this:
 const pet = JSON.parse(petJson, Modelico.buildReviver(Animal));
 
 pet.speak(); //=> 'my name is Robbie!'
+
+const pet2 = pet.set('name', 'Baine');
+
+pet2.name(); //=> 'Baine'
+pet.name(); //=> 'Robbie'
 ```
 
 Here is how `Animal` would look like:
@@ -139,6 +144,11 @@ const person2 = person.set('givenName', 'Javi');
 // set to 'Javi', but person is not mutated
 person2.fullName(); //=> 'Javi Cejudo'
 person.fullName();  //=> 'Javier Cejudo'
+
+const person3 = person.setPath(['pets', 0, 'name'], 'Baine');
+
+person3.pets().list()[0].name(); //=> 'Baine'
+person.pets().list()[0].name();  //=> 'Robbie'
 ```
 
 The same principle applies across all Modelico classes:

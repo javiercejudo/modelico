@@ -24,5 +24,10 @@ module.exports = (should, M) => () => {
 
     pet.speak()
       .should.be.exactly('My name is Robbie!');
+
+    const pet2 = pet.set('name', 'Baine');
+
+    pet2.name().should.be.exactly('Baine');
+    pet.name().should.be.exactly('Robbie');
   });
 };

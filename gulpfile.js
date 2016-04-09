@@ -5,6 +5,7 @@ const mocha = require('gulp-mocha');
 const istanbul = require('gulp-istanbul');
 const rimraf = require('rimraf');
 const codecov = require('gulp-codecov');
+const plumber = require('gulp-plumber');
 
 let coverageVariable;
 
@@ -16,6 +17,7 @@ gulp.task('instrument', ['clean'], function () {
   coverageVariable = '$$cov_' + new Date().getTime() + '$$';
 
   return gulp.src(['src/**/*.js'])
+    .pipe(plumber())
     .pipe(istanbul({ coverageVariable }))
     .pipe(istanbul.hookRequire());
 });

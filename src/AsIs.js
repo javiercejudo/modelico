@@ -14,6 +14,14 @@ class ModelicoAsIs extends Modelico {
     Object.freeze(this);
   }
 
+  set(value) {
+    return new ModelicoAsIs(this.type(), value);
+  }
+
+  setPath(path, value) {
+    return this.set(value);
+  }
+
   toJSON() {
     return this.value();
   }

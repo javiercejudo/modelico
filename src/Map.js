@@ -21,6 +21,19 @@ class ModelicoMap extends Modelico {
     Object.freeze(this);
   }
 
+  set(key, value) {
+    const innerTypes = this.innerTypes();
+    const newMap = this.clone().map();
+    newMap.set(key, value);
+
+    return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
+  }
+
+  setPath(path, value) {
+    const item = this.map().get(path[0]);
+    return this.set(path[0], item.setPath(path.slice(1), value));
+  }
+
   clone() {
     return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.innerTypes()));
   }
