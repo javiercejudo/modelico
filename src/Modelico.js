@@ -9,12 +9,13 @@ const assignReducer = (acc, pair) => {
 };
 
 class Modelico {
-  constructor(Type, fields) {
-    this.type = () => Type;
-    this.fields = () => Object.freeze(fields);
+  constructor(Type, fields, thisArg) {
+    thisArg = U.default(thisArg, this);
+    thisArg.type = () => Type;
+    thisArg.fields = () => Object.freeze(fields);
 
     Object.getOwnPropertyNames(fields)
-      .forEach(field => this[field] = () => fields[field]);
+      .forEach(field => thisArg[field] = () => fields[field]);
   }
 
   set(field, value) {
@@ -46,6 +47,10 @@ class Modelico {
 
   static fromJSON(Type, json) {
     return JSON.parse(json, Modelico.buildReviver(Type));
+  }
+
+  static factory(Type, fields, thisArg) {
+    return new Modelico(Type, fields, thisArg);
   }
 
   static buildReviver(Type) {

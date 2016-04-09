@@ -7,7 +7,7 @@ module.exports = (should, M) => () => {
   const List = M.List;
 
   function Animal(fields) {
-    Object.assign(this, new Modelico(Animal, fields));
+    Modelico.factory(Animal, fields, this);
   }
 
   Animal.prototype = Object.create(Modelico.prototype);
@@ -22,7 +22,7 @@ module.exports = (should, M) => () => {
   };
 
   function Person(fields) {
-    Object.assign(this, new Modelico(Person, fields));
+    Modelico.factory(Person, fields, this);
   }
 
   Person.prototype = Object.create(Modelico.prototype);
