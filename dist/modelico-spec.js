@@ -1,6 +1,135 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.modelicoSpec = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+var objToArr = function objToArr(obj) {
+  return Object.keys(obj).map(function (k) {
+    return [k, obj[k]];
+  });
+};
+
+module.exports = function (should, M) {
+  return function () {
+    it('Getting started', function () {
+      var AsIs = M.AsIs.metadata;
+
+      var map1 = new M.Map(AsIs(String), AsIs(Number), new Map([['a', 1], ['b', 2], ['c', 3]]));
+
+      var map2 = map1.set('b', 50);
+      map1.map().get('b').should.be.exactly(2);
+      map2.map().get('b').should.be.exactly(50);
+    });
+
+    it('The case for Immutability', function () {
+      var AsIs = M.AsIs.metadata;
+
+      var map1 = new M.Map(AsIs(String), AsIs(Number), new Map([['a', 1], ['b', 2], ['c', 3]]));
+
+      var map2 = map1.set('b', 2);
+      map1.equals(map2).should.be.exactly(true);
+      var map3 = map1.set('b', 50);
+      map1.equals(map3).should.be.exactly(false);
+    });
+
+    it('JavaScript-first API', function () {
+      var AsIs = M.AsIs.metadata;
+      var list1 = new M.List(AsIs(Number), [1, 2]);
+
+      var list2Array = list1.list();
+      list2Array.push(3, 4, 5);
+      var list2 = new M.List(AsIs(Number), list2Array);
+
+      var list3Array = list2.list();
+      list3Array.unshift(0);
+      var list3 = new M.List(AsIs(Number), list3Array);
+
+      var list4Array = list1.list();
+      var list4 = new M.List(AsIs(Number), list1.list().concat(list2.list(), list3.list()));
+
+      (list1.list().length === 2).should.be.exactly(true);
+      (list2.list().length === 5).should.be.exactly(true);
+      (list3.list().length === 6).should.be.exactly(true);
+      (list4.list().length === 13).should.be.exactly(true);
+      (list4.list()[0] === 1).should.be.exactly(true);
+    });
+
+    it('JavaScript-first API (2)', function () {
+      var AsIs = M.AsIs.metadata;
+
+      var alpha = new M.Map(AsIs(String), AsIs(Number), new Map([['a', 1], ['b', 2], ['c', 3], ['d', 4]]));
+
+      [].concat(_toConsumableArray(alpha.map())).map(function (kv) {
+        return kv[0].toUpperCase();
+      }).join().should.be.exactly('A,B,C,D');
+    });
+
+    it('Accepts raw JavaScript objects.', function () {
+      var AsIs = M.AsIs.metadata;
+
+      var map1 = new M.Map(AsIs(String), AsIs(Number), new Map(objToArr({ a: 1, b: 2, c: 3, d: 4 })));
+
+      var map2 = new M.Map(AsIs(String), AsIs(Number), new Map(objToArr({ c: 10, a: 20, t: 30 })));
+
+      var obj = { d: 100, o: 200, g: 300 };
+
+      var map3 = new M.Map(AsIs(String), AsIs(Number), new Map([].concat(_toConsumableArray(map1.map())).concat([].concat(_toConsumableArray(map2.map())), objToArr(obj))));
+
+      map3.equals(new M.Map(AsIs(String), AsIs(Number), new Map([['a', 20], ['b', 2], ['c', 10], ['d', 100], ['t', 30], ['o', 200], ['g', 300]]))).should.be.exactly(true);
+    });
+
+    it('Accepts raw JavaScript objects. (2)', function () {
+      var myObject = { a: 1, b: 2, c: 3 };
+
+      objToArr(myObject).reduce(function (acc, kv) {
+        acc[kv[0]] = Math.pow(kv[1], 2);
+        return acc;
+      }, {}).should.eql({ a: 1, b: 4, c: 9 });
+    });
+
+    it('Accepts raw JavaScript objects. (3)', function () {
+      var obj = { 1: "one" };
+      Object.keys(obj)[0].should.be.exactly('1');
+      obj["1"].should.be.exactly('one');
+      obj[1].should.be.exactly('one');
+
+      var AsIs = M.AsIs.metadata;
+
+      var map = new M.Map(AsIs(String), AsIs(String), new Map(objToArr(obj)));
+      map.map().get('1').should.be.exactly('one');
+      should(map.map().get(1)).be.exactly(undefined);
+    });
+
+    it('Equality treats Collections as Data', function () {
+      var AsIs = M.AsIs.metadata;
+
+      var map1 = new M.Map(AsIs(String), AsIs(Number), new Map(objToArr({ a: 1, b: 1, c: 1 })));
+      var map2 = new M.Map(AsIs(String), AsIs(Number), new Map(objToArr({ a: 1, b: 1, c: 1 })));
+
+      (map1 !== map2).should.be.exactly(true); // two different instances
+      map1.equals(map2).should.be.exactly(true); // have equivalent values
+    });
+
+    it('Batching Mutations', function () {
+      var AsIs = M.AsIs.metadata;
+      var list1 = new M.List(AsIs(Number), [1, 2, 3]);
+      var list2Array = list1.list();
+
+      list2Array.push(4);
+      list2Array.push(5);
+      list2Array.push(6);
+
+      var list2 = new M.List(AsIs(Number), list2Array);
+
+      (list1.list().length === 3).should.be.exactly(true);
+      (list2.list().length === 6).should.be.exactly(true);
+    });
+  };
+};
+
+},{}],2:[function(require,module,exports){
+'use strict';
+
 module.exports = function (should, M) {
   return function () {
 
@@ -60,7 +189,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -146,11 +275,17 @@ module.exports = function (should, M) {
       person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
 
       person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
+
+      var person3 = person.setPath(['pets', 0, 'name'], 'Baine');
+
+      person3.pets().list()[0].name().should.be.exactly('Baine');
+
+      person.pets().list()[0].name().should.be.exactly('Robbie');
     });
   };
 };
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -194,11 +329,16 @@ module.exports = function (should, M) {
       var pet = JSON.parse(petJson, Modelico.buildReviver(Animal));
 
       pet.speak().should.be.exactly('My name is Robbie!');
+
+      var pet2 = pet.set('name', 'Baine');
+
+      pet2.name().should.be.exactly('Baine');
+      pet.name().should.be.exactly('Robbie');
     });
   };
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -212,15 +352,17 @@ module.exports = function (should, M) {
     describe('Readme Simple Example', require('./example/simple').apply(_, deps));
     describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
     describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
+    describe('Immutable.js examples', require('./Immutable.js/').apply(_, deps));
   };
 };
 
-},{"./example/advanced":2,"./example/advanced.es5":1,"./example/simple":3,"./types/AsIs":5,"./types/List":6,"./types/Map":7,"./types/Modelico":8}],5:[function(require,module,exports){
+},{"./Immutable.js/":1,"./example/advanced":3,"./example/advanced.es5":2,"./example/simple":4,"./types/AsIs":6,"./types/List":7,"./types/Map":8,"./types/Modelico":9}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
   return function () {
     var AsIs = M.AsIs;
+    var List = M.List;
 
     describe('constructor', function () {
       it('should create a simple wrapper for the value', function () {
@@ -243,6 +385,30 @@ module.exports = function (should, M) {
 
         asIsObject.value().two = 3;
         should(asIsObject.value().two).be.exactly(2);
+      });
+    });
+
+    describe('setting', function () {
+      it('should set the entity correctly', function () {
+        var asIsNumber = new AsIs(Number, 1);
+        var asIsNumber2 = asIsNumber.set(2);
+
+        should(asIsNumber2.value()).be.exactly(2);
+
+        // verify that asIsNumber was not mutated
+        should(asIsNumber.value()).be.exactly(1);
+      });
+
+      it('should set the entity correctly when part of a path', function () {
+        var list = [new AsIs(String, 'a'), new AsIs(String, 'b')];
+
+        var modelicoList = new List(AsIs.metadata(String), list);
+        var modelicoList2 = modelicoList.setPath([1], 'B');
+
+        modelicoList2.list()[1].value().should.be.exactly('B');
+
+        // verify that modelicoList was not mutated
+        modelicoList.list()[1].value().should.be.exactly('b');
       });
     });
 
@@ -269,6 +435,8 @@ module.exports = function (should, M) {
         AsIs.metadata(String).type.should.be.exactly(String);
 
         var asIsObject = JSON.parse('{"two":2}', AsIs.metadata(Object).reviver);
+
+        should(asIsObject.two).be.exactly(2);
       });
 
       it('should be immutable', function () {
@@ -280,7 +448,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -288,21 +456,48 @@ module.exports = function (should, M) {
     var Person = require('./fixtures/Person')(M);
 
     var Modelico = M.Modelico;
-    var ModelicoList = M.List;
+    var List = M.List;
     var ModelicoDate = M.Date;
+
+    describe('setting', function () {
+      it('should set items in the list correctly', function () {
+        var list = [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')), new ModelicoDate(null)];
+
+        var modelicoList = new List(ModelicoDate.metadata(), list);
+
+        var modelicoList2 = modelicoList.set(0, new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
+
+        should(modelicoList2.list()[0].date().getFullYear()).be.exactly(1989);
+
+        // verify that modelicoList was not mutated
+        should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
+      });
+
+      it('should set items in the list correctly when part of a path', function () {
+        var list = [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')), new ModelicoDate(null)];
+
+        var modelicoList = new List(ModelicoDate.metadata(), list);
+        var modelicoList2 = modelicoList.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
+
+        should(modelicoList2.list()[0].date().getFullYear()).be.exactly(1989);
+
+        // verify that modelicoList was not mutated
+        should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
+      });
+    });
 
     describe('stringifying', function () {
       it('should stringify the list correctly', function () {
         var list = [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')), new ModelicoDate(null)];
 
-        var modelicoList = new ModelicoList(ModelicoDate.metadata(), list);
+        var modelicoList = new List(ModelicoDate.metadata(), list);
 
         JSON.stringify(modelicoList).should.be.exactly('["1988-04-16T00:00:00.000Z",null]');
       });
 
       it('should support null lists', function () {
         var list = null;
-        var modelicoList = new ModelicoList(ModelicoDate.metadata(), list);
+        var modelicoList = new List(ModelicoDate.metadata(), list);
 
         JSON.stringify(modelicoList).should.be.exactly('null');
       });
@@ -310,7 +505,7 @@ module.exports = function (should, M) {
 
     describe('parsing', function () {
       it('should parse the list correctly', function () {
-        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z",null]', ModelicoList.buildReviver(ModelicoDate.metadata()));
+        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z",null]', List.buildReviver(ModelicoDate.metadata()));
 
         should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
 
@@ -319,14 +514,13 @@ module.exports = function (should, M) {
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
-
         var author = Modelico.fromJSON(Person, authorJson);
 
         should(author.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
       });
 
       it('should support null lists', function () {
-        var modelicoList = JSON.parse('null', ModelicoList.buildReviver(ModelicoDate.metadata()));
+        var modelicoList = JSON.parse('null', List.buildReviver(ModelicoDate.metadata()));
 
         should(modelicoList.list()).be.exactly(null);
       });
@@ -336,7 +530,7 @@ module.exports = function (should, M) {
       it('should clone the map correctly', function () {
         var map = [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')), 'b', new ModelicoDate(null)];
 
-        var modelicoList = new ModelicoList(ModelicoDate.metadata(), map);
+        var modelicoList = new List(ModelicoDate.metadata(), map);
         var modelicoListClone = modelicoList.clone();
 
         modelicoList.should.not.be.exactly(modelicoListClone);
@@ -353,9 +547,9 @@ module.exports = function (should, M) {
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoList = new ModelicoList(ModelicoDate.metadata(), [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoList = new List(ModelicoDate.metadata(), [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]);
 
-        var modelicoList2 = new ModelicoList(ModelicoDate.metadata(), [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoList2 = new List(ModelicoDate.metadata(), [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]);
 
         modelicoList.should.not.be.exactly(modelicoList2);
         modelicoList.should.not.equal(modelicoList2);
@@ -366,7 +560,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":11}],7:[function(require,module,exports){
+},{"./fixtures/Person":12}],8:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -379,38 +573,27 @@ module.exports = function (should, M) {
     var ModelicoDate = M.Date;
 
     describe('setting', function () {
-      it('should set fields returning a new object', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+      it('should set fields returning a new map', function () {
+        var map = new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))], ['b', new ModelicoDate(null)]]);
 
+        var modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+        var modelicoMap2 = modelicoMap.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
+
+        should(modelicoMap2.map().get('a').date().getFullYear()).be.exactly(1989);
+
+        // verify that modelicoMap was not mutated
+        should(modelicoMap.map().get('a').date().getFullYear()).be.exactly(1988);
+      });
+
+      it('should set fields returning a new map when part of a path', function () {
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
         var author = Modelico.fromJSON(Person, authorJson);
+        var author2 = author.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
 
-        // sanity check
-        JSON.stringify(author).should.be.exactly(authorJson);
+        should(author2.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
 
-        author.givenName().should.be.exactly('Javier');
-        should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
-
-        // field setting
-        var authorAlt = author.set('givenName', 'Javi');
-
-        // date is protected by always returning a new one
-        author.lifeEvents().map().get('wedding').date().setFullYear(2001);
-
-        // repeat sanity check
-        JSON.stringify(author).should.be.exactly(authorJson);
-
-        author.givenName().should.be.exactly('Javier');
-        should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
-
-        // new object checks
-        (authorAlt === author).should.be.exactly(false);
-        (authorAlt.lifeEvents().map() === author.lifeEvents().map()).should.be.exactly(false);
-        authorAlt.equals(author).should.be.exactly(false);
-
-        authorAlt.givenName().should.be.exactly('Javi');
-        should(authorAlt.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
-
-        JSON.stringify(authorAlt).should.be.exactly('{"givenName":"Javi","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}');
+        // verify that author was not mutated
+        should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2012);
       });
     });
 
@@ -442,7 +625,6 @@ module.exports = function (should, M) {
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
-
         var author = Modelico.fromJSON(Person, authorJson);
 
         should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
@@ -485,7 +667,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":11}],8:[function(require,module,exports){
+},{"./fixtures/Person":12}],9:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -528,6 +710,23 @@ module.exports = function (should, M) {
         (authorAlt === author).should.be.exactly(false);
         authorAlt.givenName().should.be.exactly('Javi');
         authorAlt.equals(author).should.be.exactly(false, 'Oops, they are equal');
+      });
+
+      it('should set fields recursively returning a new object', function () {
+        var author = new Person({
+          givenName: 'Javier',
+          familyName: 'Cejudo',
+          birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          sex: Sex.MALE()
+        });
+
+        var author2 = author.setPath(['givenName'], 'Javi').setPath(['birthday', 'date'], new Date('1989-04-16T00:00:00.000Z'));
+
+        should(author2.birthday().date().getFullYear()).be.exactly(1989);
+
+        // verify that the original author was not mutated
+        should(author.birthday().date().getFullYear()).be.exactly(1988);
       });
     });
 
@@ -637,7 +836,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Animal":9,"./fixtures/PartOfDay":10,"./fixtures/Person":11,"./fixtures/Sex":12}],9:[function(require,module,exports){
+},{"./fixtures/Animal":10,"./fixtures/PartOfDay":11,"./fixtures/Person":12,"./fixtures/Sex":13}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -673,7 +872,7 @@ module.exports = function (M) {
   return Object.freeze(Animal);
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var range = function range(minTime, maxTime) {
@@ -689,7 +888,7 @@ module.exports = function (M) {
   });
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -752,12 +951,12 @@ module.exports = function (M) {
   return Object.freeze(Person);
 };
 
-},{"./PartOfDay":10,"./Sex":12}],12:[function(require,module,exports){
+},{"./PartOfDay":11,"./Sex":13}],13:[function(require,module,exports){
 'use strict';
 
 module.exports = function (M) {
   return M.enumFactory(['FEMALE', 'MALE', 'OTHER']);
 };
 
-},{}]},{},[4])(4)
+},{}]},{},[5])(5)
 });

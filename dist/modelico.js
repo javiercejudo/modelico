@@ -38,6 +38,16 @@ var ModelicoAsIs = function (_Modelico) {
   }
 
   _createClass(ModelicoAsIs, [{
+    key: 'set',
+    value: function set(value) {
+      return new ModelicoAsIs(this.type(), value);
+    }
+  }, {
+    key: 'setPath',
+    value: function setPath(path, value) {
+      return this.set(value);
+    }
+  }, {
     key: 'toJSON',
     value: function toJSON() {
       return this.value();
@@ -93,6 +103,16 @@ var ModelicoDate = function (_Modelico) {
   }
 
   _createClass(ModelicoDate, [{
+    key: 'set',
+    value: function set(date) {
+      return new ModelicoDate(date);
+    }
+  }, {
+    key: 'setPath',
+    value: function setPath(path, date) {
+      return this.set(date);
+    }
+  }, {
     key: 'toJSON',
     value: function toJSON() {
       return this.date() === null ? null : this.date().toISOString();
@@ -197,6 +217,20 @@ var ModelicoList = function (_Modelico) {
   }
 
   _createClass(ModelicoList, [{
+    key: 'set',
+    value: function set(index, value) {
+      var newList = this.list();
+      newList[index] = value;
+
+      return new ModelicoList(this.itemMetadata(), newList);
+    }
+  }, {
+    key: 'setPath',
+    value: function setPath(path, value) {
+      var item = this.list()[path[0]];
+      return this.set(path[0], item.setPath(path.slice(1), value));
+    }
+  }, {
     key: 'clone',
     value: function clone() {
       return JSON.parse(JSON.stringify(this), ModelicoList.buildReviver(this.itemMetadata()));
@@ -281,6 +315,21 @@ var ModelicoMap = function (_Modelico) {
   }
 
   _createClass(ModelicoMap, [{
+    key: 'set',
+    value: function set(key, value) {
+      var innerTypes = this.innerTypes();
+      var newMap = this.clone().map();
+      newMap.set(key, value);
+
+      return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
+    }
+  }, {
+    key: 'setPath',
+    value: function setPath(path, value) {
+      var item = this.map().get(path[0]);
+      return this.set(path[0], item.setPath(path.slice(1), value));
+    }
+  }, {
     key: 'clone',
     value: function clone() {
       return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.innerTypes()));
@@ -360,6 +409,15 @@ var Modelico = function () {
       var Type = this.type();
 
       return new Type(newFields);
+    }
+  }, {
+    key: 'setPath',
+    value: function setPath(path, value) {
+      if (path.length === 1) {
+        return this.set(path[0], value);
+      }
+
+      return this.set(path[0], this[path[0]]().setPath(path.slice(1), value));
     }
   }, {
     key: 'clone',

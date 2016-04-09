@@ -1,6 +1,6 @@
 {
   "name": "modelico",
-  "version": "5.0.2",
+  "version": "6.0.0",
   "description": "Universal library for serialisable immutable models",
   "main": "index.js",
   "scripts": {
