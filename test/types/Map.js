@@ -9,42 +9,34 @@ module.exports = (should, M) => () => {
   const ModelicoDate = M.Date;
 
   describe('setting', () => {
-    it('should set fields returning a new object', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+    it('should set fields returning a new map', () => {
+      const map = new Map([
+        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', new ModelicoDate(null)]
+      ]);
 
+      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap2 = modelicoMap.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
+
+      should(modelicoMap2.map().get('a').date().getFullYear())
+        .be.exactly(1989);
+
+      // verify that modelicoMap was not mutated
+      should(modelicoMap.map().get('a').date().getFullYear())
+        .be.exactly(1988);
+    });
+
+    it('should set fields returning a new map when part of a path', () => {
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
       const author = Modelico.fromJSON(Person, authorJson);
+      const author2 = author.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
 
-      // sanity check
-      JSON.stringify(author)
-        .should.be.exactly(authorJson);
+      should(author2.lifeEvents().map().get('wedding').date().getFullYear())
+        .be.exactly(2013);
 
-      author.givenName().should.be.exactly('Javier');
-      should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
-
-      // field setting
-      const authorAlt = author.set('givenName', 'Javi');
-
-      // date is protected by always returning a new one
-      author.lifeEvents().map().get('wedding').date().setFullYear(2001);
-
-
-      // repeat sanity check
-      JSON.stringify(author)
-        .should.be.exactly(authorJson);
-
-      author.givenName().should.be.exactly('Javier');
-      should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
-
-      // new object checks
-      (authorAlt === author).should.be.exactly(false);
-      (authorAlt.lifeEvents().map() === author.lifeEvents().map()).should.be.exactly(false);
-      authorAlt.equals(author).should.be.exactly(false);
-
-      authorAlt.givenName().should.be.exactly('Javi');
-      should(authorAlt.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
-
-      JSON.stringify(authorAlt)
-        .should.be.exactly('{"givenName":"Javi","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}');
+      // verify that author was not mutated
+      should(author.lifeEvents().map().get('wedding').date().getFullYear())
+        .be.exactly(2012);
     });
   });
 
@@ -86,7 +78,6 @@ module.exports = (should, M) => () => {
 
     it('should be parsed correctly when used within another class', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
-
       const author = Modelico.fromJSON(Person, authorJson);
 
       should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);

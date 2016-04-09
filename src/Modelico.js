@@ -24,6 +24,14 @@ class Modelico {
     return new Type(newFields);
   }
 
+  setPath(path, value) {
+    if (path.length === 1) {
+      return this.set(path[0], value);
+    }
+
+    return this.set(path[0], this[path[0]]().setPath(path.slice(1), value));
+  }
+
   clone() {
     return Modelico.fromJSON(this.type(), JSON.stringify(this));
   }

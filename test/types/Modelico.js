@@ -42,6 +42,26 @@ module.exports = (should, M) => () => {
       authorAlt.givenName().should.be.exactly('Javi');
       authorAlt.equals(author).should.be.exactly(false, 'Oops, they are equal');
     });
+    
+    it('should set fields recursively returning a new object', () => {
+      const author = new Person({
+        givenName: 'Javier',
+        familyName: 'Cejudo',
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+        favouritePartOfDay: PartOfDay.EVENING(),
+        sex: Sex.MALE()
+      });
+
+      const author2 = author.setPath(['givenName'], 'Javi')
+        .setPath(['birthday', 'date'], new Date('1989-04-16T00:00:00.000Z'));
+
+      should(author2.birthday().date().getFullYear())
+        .be.exactly(1989);
+
+      // verify that the original author was not mutated
+      should(author.birthday().date().getFullYear())
+        .be.exactly(1988);
+    });
   });
 
   describe('stringifying', () => {

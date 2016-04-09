@@ -62,5 +62,13 @@ module.exports = (should, M) => () => {
 
     person.pets().list().shift().speak()
       .should.be.exactly('My name is Robbie!');
+
+    const person3 = person.setPath(['pets', 0, 'name'], 'Baine');
+
+    person3.pets().list()[0].name()
+      .should.be.exactly('Baine');
+
+    person.pets().list()[0].name()
+      .should.be.exactly('Robbie');
   });
 };
