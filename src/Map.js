@@ -2,6 +2,7 @@
 
 const U = require('./U');
 const Modelico = require('./Modelico');
+const AsIs = require('./AsIs').metadata;
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 const identityReviver = (k, v) => v;
@@ -40,6 +41,14 @@ class ModelicoMap extends Modelico {
 
   toJSON() {
     return (this.map() === null) ? null : Array.from(this.map()).map(stringifyMapper);
+  }
+
+  static fromObject(obj) {
+    return ModelicoMap.fromMap(new Map(U.objToArr(obj)));
+  }
+
+  static fromMap(map) {
+    return new ModelicoMap(AsIs(String), AsIs(), map);
   }
 
   static buildReviver(keyMetadata, valueMetadata) {
