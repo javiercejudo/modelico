@@ -10,4 +10,5 @@ module.exports = (should, M) => _ => {
   describe('Readme Simple Example', require('./example/simple').apply(_, deps));
   describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
   describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
+  describe('Immutable.js examples', require('./Immutable.js/').apply(_, deps));
 };
