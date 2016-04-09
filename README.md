@@ -171,8 +171,7 @@ with ES5-style classes. In the case of our `Animal` class:
 
 ```js
 function Animal(fields) {
-  // Object.assign is ES6, but can be polyfilled
-  Object.assign(this, new Modelico(Animal, fields));
+  Modelico.factory(Animal, fields, this);
 }
 
 Animal.prototype = Object.create(Modelico.prototype);
