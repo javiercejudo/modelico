@@ -6,8 +6,8 @@ module.exports = (should, M) => () => {
   it('Getting started', () => {
     var map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
     var map2 = map1.set('b', 50);
-    map1.map().get('b').should.be.exactly(2);
-    map2.map().get('b').should.be.exactly(50);
+    should(map1.map().get('b')).be.exactly(2);
+    should(map2.map().get('b')).be.exactly(50);
   });
 
   it('The case for Immutability', () => {
