@@ -14,8 +14,8 @@ module.exports = function (should, M) {
     it('Getting started', function () {
       var map1 = M.Map.fromObject({ a: 1, b: 2, c: 3 });
       var map2 = map1.set('b', 50);
-      map1.map().get('b').should.be.exactly(2);
-      map2.map().get('b').should.be.exactly(50);
+      should(map1.map().get('b')).be.exactly(2);
+      should(map2.map().get('b')).be.exactly(50);
     });
 
     it('The case for Immutability', function () {
@@ -126,9 +126,7 @@ module.exports = function (should, M) {
       return name === undefined ? "I don't have a name" : 'My name is ' + name + '!';
     };
 
-    Animal.metadata = function () {
-      return Object.freeze({ type: Animal, reviver: Modelico.buildReviver(Animal) });
-    };
+    Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 
     function Person(fields) {
       Modelico.factory(Person, fields, this);
@@ -152,7 +150,7 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
 
-      var person = JSON.parse(personJson, Modelico.buildReviver(Person));
+      var person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
       person.fullName().should.be.exactly('Javier Cejudo');
 
@@ -203,7 +201,7 @@ module.exports = function (should, M) {
       }], [{
         key: 'metadata',
         value: function metadata() {
-          return Object.freeze({ type: Animal, reviver: Modelico.buildReviver(Animal) });
+          return Modelico.metadata(Animal);
         }
       }]);
 
@@ -242,7 +240,7 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
 
-      var person = JSON.parse(personJson, Modelico.buildReviver(Person));
+      var person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
       person.fullName().should.be.exactly('Javier Cejudo');
 
@@ -304,7 +302,7 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var petJson = '{"name": "Robbie"}';
 
-      var pet = JSON.parse(petJson, Modelico.buildReviver(Animal));
+      var pet = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
 
       pet.speak().should.be.exactly('My name is Robbie!');
 
@@ -402,7 +400,7 @@ module.exports = function (should, M) {
 
     describe('reviver', function () {
       it('should revive the value as is, without the wrapper', function () {
-        var asIsObject = JSON.parse('{"two":2}', AsIs.buildReviver(Object));
+        var asIsObject = JSON.parse('{"two":2}', AsIs.metadata(Object).reviver);
 
         should(asIsObject.two).be.exactly(2);
       });
@@ -483,7 +481,7 @@ module.exports = function (should, M) {
 
     describe('parsing', function () {
       it('should parse the list correctly', function () {
-        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z",null]', List.buildReviver(ModelicoDate.metadata()));
+        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z",null]', List.metadata(ModelicoDate.metadata()).reviver);
 
         should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
 
@@ -498,7 +496,7 @@ module.exports = function (should, M) {
       });
 
       it('should support null lists', function () {
-        var modelicoList = JSON.parse('null', List.buildReviver(ModelicoDate.metadata()));
+        var modelicoList = JSON.parse('null', List.metadata(ModelicoDate.metadata()).reviver);
 
         should(modelicoList.list()).be.exactly(null);
       });
@@ -575,7 +573,7 @@ module.exports = function (should, M) {
 
     describe('parsing', function () {
       it('should parse the map correctly', function () {
-        var modelicoMap = JSON.parse('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]', ModelicoMap.buildReviver(ModelicoAsIs.metadata(String), ModelicoDate.metadata()));
+        var modelicoMap = JSON.parse('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]', ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver);
 
         should(modelicoMap.map().get('a').date().getFullYear()).be.exactly(1988);
 
@@ -590,7 +588,7 @@ module.exports = function (should, M) {
       });
 
       it('should support null maps', function () {
-        var modelicoMap = JSON.parse('null', ModelicoMap.buildReviver(ModelicoAsIs.metadata(String), ModelicoDate.metadata()));
+        var modelicoMap = JSON.parse('null', ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver);
 
         should(modelicoMap.map()).be.exactly(null);
       });
@@ -613,14 +611,6 @@ module.exports = function (should, M) {
 
 },{"./fixtures/Person":12}],9:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 module.exports = function (should, M) {
   return function () {
@@ -711,7 +701,7 @@ module.exports = function (should, M) {
     describe('parsing', function () {
       it('should parse types correctly', function () {
         var author = Modelico.fromJSON(Person, authorJson);
-        var authorAlt = JSON.parse(authorJson, Modelico.buildReviver(Person));
+        var authorAlt = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
         'Javier Cejudo'.should.be.exactly(author.fullName()).and.exactly(authorAlt.fullName());
 
@@ -729,7 +719,7 @@ module.exports = function (should, M) {
       });
 
       it('should work with plain classes extending Modelico', function () {
-        var animal = JSON.parse('{"name": "Sam"}', Modelico.buildReviver(Animal));
+        var animal = JSON.parse('{"name": "Sam"}', Modelico.metadata(Animal).reviver);
 
         animal.speak().should.be.exactly('hello');
         animal.name().should.be.exactly('Sam');
@@ -760,51 +750,6 @@ module.exports = function (should, M) {
         author1.equals(author3).should.be.exactly(false);
 
         author1.should.not.be.exactly(author2);
-      });
-    });
-
-    describe('building custom revivers', function () {
-      it('should use subclass revivers when available', function () {
-        var Thing = function (_M$Modelico) {
-          _inherits(Thing, _M$Modelico);
-
-          function Thing(fields) {
-            _classCallCheck(this, Thing);
-
-            return _possibleConstructorReturn(this, Object.getPrototypeOf(Thing).call(this, Thing, fields));
-          }
-
-          _createClass(Thing, null, [{
-            key: 'reviver',
-            value: function reviver(k, v) {
-              if (k === '') {
-                if (!v.hasOwnProperty('numTimesParsed')) {
-                  v.numTimesParsed = 1;
-                }
-
-                return new Thing(v);
-              }
-
-              if (k === 'numTimesParsed') {
-                return v + 1;
-              }
-
-              return v;
-            }
-          }]);
-
-          return Thing;
-        }(M.Modelico);
-
-        var thing1 = JSON.parse('{"age": 250}', Modelico.buildReviver(Thing));
-        should(thing1.age()).be.exactly(250);
-        should(thing1.numTimesParsed()).be.exactly(1);
-
-        thing1 = JSON.parse(JSON.stringify(thing1), Modelico.buildReviver(Thing));
-        should(thing1.numTimesParsed()).be.exactly(2);
-
-        thing1 = JSON.parse(JSON.stringify(thing1), Modelico.buildReviver(Thing));
-        should(thing1.numTimesParsed()).be.exactly(3);
       });
     });
   };
@@ -854,7 +799,7 @@ var range = function range(minTime, maxTime) {
 };
 
 module.exports = function (M) {
-  return M.enumFactory({
+  return new M.Enum({
     ANY: range(0, 1440),
     MORNING: range(0, 720),
     AFTERNOON: range(720, 1080),
@@ -929,7 +874,7 @@ module.exports = function (M) {
 'use strict';
 
 module.exports = function (M) {
-  return M.enumFactory(['FEMALE', 'MALE', 'OTHER']);
+  return new M.Enum(['FEMALE', 'MALE', 'OTHER']);
 };
 
 },{}]},{},[5])(5)

@@ -3,7 +3,7 @@
 
 module.exports = require('./src');
 
-},{"./src":10}],2:[function(require,module,exports){
+},{"./src":9}],2:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -53,19 +53,9 @@ var ModelicoAsIs = function (_Modelico) {
       return this.value();
     }
   }], [{
-    key: 'buildReviver',
-    value: function buildReviver(type) {
-      return U.bind(ModelicoAsIs.reviver, type);
-    }
-  }, {
-    key: 'reviver',
-    value: function reviver(type, k, v) {
-      return v;
-    }
-  }, {
     key: 'metadata',
     value: function metadata(type) {
-      return Object.freeze({ type: type, reviver: ModelicoAsIs.buildReviver(type) });
+      return Object.freeze({ type: type, reviver: U.identityReviver });
     }
   }]);
 
@@ -139,8 +129,6 @@ module.exports = Object.freeze(ModelicoDate);
 },{"./Modelico":7}],4:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -150,33 +138,40 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var U = require('./U');
 var Modelico = require('./Modelico');
 
+var enumeratorsReducer = function enumeratorsReducer(acc, code) {
+  return (acc[code] = { code: code }) && acc;
+};
+
+var reviver = function reviver(values, k, v) {
+  return v === null ? null : values[v];
+};
+
 var ModelicoEnum = function (_Modelico) {
   _inherits(ModelicoEnum, _Modelico);
 
-  function ModelicoEnum(fields) {
+  function ModelicoEnum(input) {
     _classCallCheck(this, ModelicoEnum);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnum).call(this, ModelicoEnum, fields));
+    var enumerators = Array.isArray(input) ? input.reduce(enumeratorsReducer, {}) : input;
 
-    Object.getOwnPropertyNames(fields).forEach(function (field) {
-      return _this[field]().toJSON = function () {
-        return field;
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnum).call(this, ModelicoEnum, enumerators));
+
+    Object.getOwnPropertyNames(enumerators).forEach(function (enumerator) {
+      return _this[enumerator]().toJSON = function () {
+        return enumerator;
       };
     });
+
+    _this.metadata = function () {
+      return Object.freeze({
+        type: ModelicoEnum,
+        reviver: U.bind(reviver, enumerators)
+      });
+    };
+
+    Object.freeze(_this);
     return _this;
   }
-
-  _createClass(ModelicoEnum, null, [{
-    key: 'buildReviver',
-    value: function buildReviver(values) {
-      return U.bind(ModelicoEnum.reviver, values);
-    }
-  }, {
-    key: 'reviver',
-    value: function reviver(values, k, v) {
-      return v === null ? null : values[v];
-    }
-  }]);
 
   return ModelicoEnum;
 }(Modelico);
@@ -197,6 +192,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var U = require('./U');
 var Modelico = require('./Modelico');
 var AsIs = require('./AsIs').metadata;
+
+var reviver = function reviver(itemMetadata, k, v) {
+  if (k === '') {
+    var list = v === null ? null : v.map(U.bind(itemMetadata.reviver, k));
+
+    return new ModelicoList(itemMetadata, list);
+  }
+
+  return v;
+};
 
 var ModelicoList = function (_Modelico) {
   _inherits(ModelicoList, _Modelico);
@@ -242,25 +247,9 @@ var ModelicoList = function (_Modelico) {
       return new ModelicoList(AsIs(), arr);
     }
   }, {
-    key: 'buildReviver',
-    value: function buildReviver(itemMetadata) {
-      return U.bind(ModelicoList.reviver, itemMetadata);
-    }
-  }, {
-    key: 'reviver',
-    value: function reviver(itemMetadata, k, v) {
-      if (k === '') {
-        var list = v === null ? null : v.map(U.bind(itemMetadata.reviver, k));
-
-        return new ModelicoList(itemMetadata, list);
-      }
-
-      return v;
-    }
-  }, {
     key: 'metadata',
-    value: function metadata(subtypeMetadata) {
-      return Object.freeze({ type: ModelicoList, reviver: ModelicoList.buildReviver(subtypeMetadata) });
+    value: function metadata(itemMetadata) {
+      return Object.freeze({ type: ModelicoList, reviver: U.bind(reviver, itemMetadata) });
     }
   }]);
 
@@ -289,17 +278,24 @@ var AsIs = require('./AsIs').metadata;
 var stringifyMapper = function stringifyMapper(pair) {
   return { key: pair[0], value: pair[1] };
 };
-var identityReviver = function identityReviver(k, v) {
-  return v;
-};
 var reviverOrDefault = function reviverOrDefault(metadata) {
-  return metadata.reviver || identityReviver;
+  return metadata.reviver || U.identityReviver;
 };
 
 var parseMapper = function parseMapper(subtypes) {
   return function (pairObject) {
     return [reviverOrDefault(subtypes.keyMetadata)('', pairObject.key), reviverOrDefault(subtypes.valueMetadata)('', pairObject.value)];
   };
+};
+
+var reviver = function reviver(innerTypes, k, v) {
+  if (k === '') {
+    var map = v === null ? null : new Map(v.map(parseMapper(innerTypes)));
+
+    return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
+  }
+
+  return v;
 };
 
 var ModelicoMap = function (_Modelico) {
@@ -353,25 +349,9 @@ var ModelicoMap = function (_Modelico) {
       return new ModelicoMap(AsIs(String), AsIs(), map);
     }
   }, {
-    key: 'buildReviver',
-    value: function buildReviver(keyMetadata, valueMetadata) {
-      return U.bind(ModelicoMap.reviver, { keyMetadata: keyMetadata, valueMetadata: valueMetadata });
-    }
-  }, {
-    key: 'reviver',
-    value: function reviver(innerTypes, k, v) {
-      if (k === '') {
-        var map = v === null ? null : new Map(v.map(parseMapper(innerTypes)));
-
-        return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
-      }
-
-      return v;
-    }
-  }, {
     key: 'metadata',
     value: function metadata(keyMetadata, valueMetadata) {
-      return Object.freeze({ type: ModelicoMap, reviver: ModelicoMap.buildReviver(keyMetadata, valueMetadata) });
+      return Object.freeze({ type: ModelicoMap, reviver: U.bind(reviver, { keyMetadata: keyMetadata, valueMetadata: valueMetadata }) });
     }
   }]);
 
@@ -393,6 +373,22 @@ var assignReducer = function assignReducer(acc, pair) {
   acc[pair.field] = pair.value;
 
   return acc;
+};
+
+var reviver = function reviver(Type, k, v) {
+  if (k === '') {
+    return new Type(v);
+  }
+
+  if (Type.innerTypes) {
+    var innerTypeMetadata = Type.innerTypes()[k];
+
+    if (innerTypeMetadata) {
+      return innerTypeMetadata.reviver('', v);
+    }
+  }
+
+  return v;
 };
 
 var Modelico = function () {
@@ -449,33 +445,12 @@ var Modelico = function () {
   }, {
     key: 'fromJSON',
     value: function fromJSON(Type, json) {
-      return JSON.parse(json, Modelico.buildReviver(Type));
+      return JSON.parse(json, U.bind(reviver, Type));
     }
   }, {
-    key: 'buildReviver',
-    value: function buildReviver(Type) {
-      if (Type.hasOwnProperty('reviver')) {
-        return Type.reviver;
-      }
-
-      return U.bind(Modelico.reviver, Type);
-    }
-  }, {
-    key: 'reviver',
-    value: function reviver(Type, k, v) {
-      if (k === '') {
-        return new Type(v);
-      }
-
-      if (Type.innerTypes) {
-        var innerTypeMetadata = Type.innerTypes()[k];
-
-        if (innerTypeMetadata) {
-          return innerTypeMetadata.reviver('', v);
-        }
-      }
-
-      return v;
+    key: 'metadata',
+    value: function metadata(Type) {
+      return Object.freeze({ type: Type, reviver: U.bind(reviver, Type) });
     }
   }]);
 
@@ -498,32 +473,13 @@ module.exports = Object.freeze({
     return Object.keys(obj).map(function (k) {
       return [k, obj[k]];
     });
+  },
+  identityReviver: function identityReviver(k, v) {
+    return v;
   }
 });
 
 },{}],9:[function(require,module,exports){
-'use strict';
-
-var ModelicoEnum = require('./Enum');
-
-var valuesReducer = function valuesReducer(acc, code) {
-  return (acc[code] = { code: code }) && acc;
-};
-
-module.exports = function (values) {
-  var valuesAsObject = Array.isArray(values) ? values.reduce(valuesReducer, {}) : values;
-
-  var myEnum = new ModelicoEnum(valuesAsObject);
-
-  myEnum.reviver = ModelicoEnum.buildReviver(valuesAsObject);
-  myEnum.metadata = function () {
-    return Object.freeze({ type: ModelicoEnum, reviver: myEnum.reviver });
-  };
-
-  return Object.freeze(myEnum);
-};
-
-},{"./Enum":4}],10:[function(require,module,exports){
 'use strict';
 
 var Modelico = require('./Modelico');
@@ -532,7 +488,6 @@ var ModelicoDate = require('./Date');
 var AsIs = require('./AsIs');
 var List = require('./List');
 var Enum = require('./Enum');
-var enumFactory = require('./enumFactory');
 
 module.exports = Object.freeze({
   Modelico: Modelico,
@@ -540,9 +495,8 @@ module.exports = Object.freeze({
   Date: ModelicoDate,
   AsIs: AsIs,
   List: List,
-  Enum: Enum,
-  enumFactory: enumFactory
+  Enum: Enum
 });
 
-},{"./AsIs":2,"./Date":3,"./Enum":4,"./List":5,"./Map":6,"./Modelico":7,"./enumFactory":9}]},{},[1])(1)
+},{"./AsIs":2,"./Date":3,"./Enum":4,"./List":5,"./Map":6,"./Modelico":7}]},{},[1])(1)
 });
