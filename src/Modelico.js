@@ -19,7 +19,7 @@ class Modelico {
   }
 
   set(field, value) {
-    const newFields = Object.assign({}, this.clone().fields(), assignReducer({}, {field, value}));
+    const newFields = Object.assign({}, this.fields(), assignReducer({}, {field, value}));
     const Type = this.type();
 
     return new Type(newFields);
@@ -33,10 +33,6 @@ class Modelico {
     return this.set(path[0], this[path[0]]().setPath(path.slice(1), value));
   }
 
-  clone() {
-    return Modelico.fromJSON(this.type(), JSON.stringify(this));
-  }
-
   equals(other) {
     return (JSON.stringify(this) === JSON.stringify(other));
   }
@@ -45,12 +41,12 @@ class Modelico {
     return this.fields();
   }
 
-  static fromJSON(Type, json) {
-    return JSON.parse(json, Modelico.buildReviver(Type));
-  }
-
   static factory(Type, fields, thisArg) {
     return new Modelico(Type, fields, thisArg);
+  }
+
+  static fromJSON(Type, json) {
+    return JSON.parse(json, Modelico.buildReviver(Type));
   }
 
   static buildReviver(Type) {
