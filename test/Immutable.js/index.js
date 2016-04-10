@@ -90,11 +90,7 @@ module.exports = (should, M) => () => {
   it('Batching Mutations', () => {
     var list1 = M.List.fromArray([1, 2, 3]);
     var list2Array = list1.list();
-
-    list2Array.push(4);
-    list2Array.push(5);
-    list2Array.push(6);
-
+    list2Array.push(4, 5, 6);
     var list2 = M.List.fromArray(list2Array);
 
     (list1.list().length === 3).should.be.exactly(true);

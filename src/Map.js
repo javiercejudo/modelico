@@ -18,13 +18,14 @@ class ModelicoMap extends Modelico {
     super(ModelicoMap, {map});
 
     this.innerTypes = () => Object.freeze({keyMetadata, valueMetadata});
+    this.map = () => (map === null) ? null : new Map([...map]);
 
     Object.freeze(this);
   }
 
   set(key, value) {
     const innerTypes = this.innerTypes();
-    const newMap = this.clone().map();
+    const newMap = this.map();
     newMap.set(key, value);
 
     return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
@@ -35,12 +36,9 @@ class ModelicoMap extends Modelico {
     return this.set(path[0], item.setPath(path.slice(1), value));
   }
 
-  clone() {
-    return JSON.parse(JSON.stringify(this), U.bind(ModelicoMap.reviver, this.innerTypes()));
-  }
-
   toJSON() {
-    return (this.map() === null) ? null : Array.from(this.map()).map(stringifyMapper);
+    const fields = this.fields();
+    return (fields.map === null) ? null : Array.from(fields.map).map(stringifyMapper);
   }
 
   static fromObject(obj) {

@@ -9,7 +9,7 @@ class ModelicoList extends Modelico {
     super(ModelicoList, {list});
 
     this.itemMetadata = () => itemMetadata;
-    this.list = () => list === null ? null : list.slice();
+    this.list = () => (list === null) ? null : list.slice();
 
     Object.freeze(this);
   }
@@ -26,12 +26,8 @@ class ModelicoList extends Modelico {
     return this.set(path[0], item.setPath(path.slice(1), value));
   }
 
-  clone() {
-    return JSON.parse(JSON.stringify(this), ModelicoList.buildReviver(this.itemMetadata()));
-  }
-
   toJSON() {
-    return this.list();
+    return this.fields().list;
   }
 
   static fromArray(arr) {

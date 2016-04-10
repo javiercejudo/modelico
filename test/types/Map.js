@@ -91,26 +91,6 @@ module.exports = (should, M) => () => {
     });
   });
 
-  describe('cloning', () => {
-    it('should clone the map correctly', () => {
-      const map = new Map([
-        ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))],
-        ['b', new ModelicoDate(null)]
-      ]);
-
-      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
-      const modelicoMapClone = modelicoMap.clone();
-
-      modelicoMap.should.not.be.exactly(modelicoMapClone);
-
-      should(modelicoMap.map().get('a').date().getFullYear())
-        .be.exactly(1988);
-
-      should(modelicoMapClone.map().get('a').date().getFullYear())
-        .be.exactly(1988);
-    });
-  });
-
   describe('comparing', () => {
     it('should identify equal instances', () => {
       const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), new Map([

@@ -42,7 +42,7 @@ module.exports = (should, M) => () => {
       authorAlt.givenName().should.be.exactly('Javi');
       authorAlt.equals(author).should.be.exactly(false, 'Oops, they are equal');
     });
-    
+
     it('should set fields recursively returning a new object', () => {
       const author = new Person({
         givenName: 'Javier',
@@ -128,34 +128,6 @@ module.exports = (should, M) => () => {
     });
   });
 
-  describe('cloning', () => {
-    it('should support cloning', () => {
-      const author = new Person({
-        givenName: 'Javier',
-        familyName: 'Cejudo',
-        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))
-        // equivalent but perhaps more convenient:
-        // birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
-      });
-
-      const authorClone = author.clone();
-      const birthdayClone = author.birthday().clone();
-
-      'Javier'
-        .should.be.exactly(author.givenName())
-        .and.exactly(authorClone.givenName());
-
-      author.should.not.be.exactly(authorClone);
-
-      should(1988)
-        .be.exactly(author.birthday().date().getFullYear())
-        .and.exactly(birthdayClone.date().getFullYear());
-
-      author.birthday()
-        .should.not.be.exactly(birthdayClone);
-    });
-  });
-
   describe('comparing', () => {
     it('should identify equal instances', () => {
       const author1 = new Person({
@@ -180,6 +152,42 @@ module.exports = (should, M) => () => {
       author1.equals(author3).should.be.exactly(false);
 
       author1.should.not.be.exactly(author2);
+    });
+  });
+
+  describe('building custom revivers', () => {
+    it('should use subclass revivers when available', () => {
+      class Thing extends M.Modelico {
+        constructor(fields) {
+          super(Thing, fields);
+        }
+
+        static reviver(k, v) {
+          if (k === '') {
+            if (!v.hasOwnProperty('numTimesParsed')) {
+              v.numTimesParsed = 1;
+            }
+
+            return new Thing(v);
+          }
+
+          if (k === 'numTimesParsed') {
+            return v + 1;
+          }
+
+          return v;
+        }
+      }
+
+      let thing1 = JSON.parse('{"age": 250}', Modelico.buildReviver(Thing));
+      should(thing1.age()).be.exactly(250);
+      should(thing1.numTimesParsed()).be.exactly(1);
+
+      thing1 = JSON.parse(JSON.stringify(thing1), Modelico.buildReviver(Thing));
+      should(thing1.numTimesParsed()).be.exactly(2);
+
+      thing1 = JSON.parse(JSON.stringify(thing1), Modelico.buildReviver(Thing));
+      should(thing1.numTimesParsed()).be.exactly(3);
     });
   });
 };
