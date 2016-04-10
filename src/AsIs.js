@@ -26,16 +26,8 @@ class ModelicoAsIs extends Modelico {
     return this.value();
   }
 
-  static buildReviver(type) {
-    return U.bind(ModelicoAsIs.reviver, type);
-  }
-
-  static reviver(type, k, v) {
-    return v;
-  }
-
   static metadata(type) {
-    return Object.freeze({type: type, reviver: ModelicoAsIs.buildReviver(type)});
+    return Object.freeze({type: type, reviver: U.identityReviver});
   }
 }
 

@@ -70,7 +70,7 @@ module.exports = (should, M) => () => {
     it('should parse the list correctly', () => {
       const modelicoList = JSON.parse(
         '["1988-04-16T00:00:00.000Z",null]',
-        List.buildReviver(ModelicoDate.metadata())
+        List.metadata(ModelicoDate.metadata()).reviver
       );
 
       should(modelicoList.list()[0].date().getFullYear())
@@ -88,7 +88,7 @@ module.exports = (should, M) => () => {
     });
 
     it('should support null lists', () => {
-      const modelicoList = JSON.parse('null', List.buildReviver(ModelicoDate.metadata()));
+      const modelicoList = JSON.parse('null', List.metadata(ModelicoDate.metadata()).reviver);
 
       should(modelicoList.list())
         .be.exactly(null);

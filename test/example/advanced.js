@@ -17,7 +17,7 @@ module.exports = (should, M) => () => {
     }
 
     static metadata() {
-      return Object.freeze({type: Animal, reviver: Modelico.buildReviver(Animal)});
+      return Modelico.metadata(Animal);
     }
   }
 
@@ -49,7 +49,7 @@ module.exports = (should, M) => () => {
       }]
     }`;
 
-    const person = JSON.parse(personJson, Modelico.buildReviver(Person));
+    const person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
     person.fullName().should.be.exactly('Javier Cejudo');
 

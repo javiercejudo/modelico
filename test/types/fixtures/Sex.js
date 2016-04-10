@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = M => {
-  return M.enumFactory(['FEMALE', 'MALE', 'OTHER']);
+  return new M.Enum(['FEMALE', 'MALE', 'OTHER']);
 };

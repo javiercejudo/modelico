@@ -66,7 +66,7 @@ module.exports = (should, M) => () => {
     it('should parse the map correctly', () => {
       const modelicoMap = JSON.parse(
         '[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]',
-        ModelicoMap.buildReviver(ModelicoAsIs.metadata(String), ModelicoDate.metadata())
+        ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver
       );
 
       should(modelicoMap.map().get('a').date().getFullYear())
@@ -84,7 +84,10 @@ module.exports = (should, M) => () => {
     });
 
     it('should support null maps', () => {
-      const modelicoMap = JSON.parse('null', ModelicoMap.buildReviver(ModelicoAsIs.metadata(String), ModelicoDate.metadata()));
+      const modelicoMap = JSON.parse(
+        'null',
+        ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver
+      );
 
       should(modelicoMap.map())
         .be.exactly(null);

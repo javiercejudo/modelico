@@ -17,9 +17,7 @@ module.exports = (should, M) => () => {
     return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
   };
 
-  Animal.metadata = function() {
-    return Object.freeze({type: Animal, reviver: Modelico.buildReviver(Animal)});
-  };
+  Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 
   function Person(fields) {
     Modelico.factory(Person, fields, this);
@@ -49,7 +47,7 @@ module.exports = (should, M) => () => {
       }]
     }`;
 
-    const person = JSON.parse(personJson, Modelico.buildReviver(Person));
+    const person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
     person.fullName().should.be.exactly('Javier Cejudo');
 
