@@ -5,13 +5,22 @@ const Modelico = require('./Modelico');
 const AsIs = require('./AsIs').metadata;
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
-const identityReviver = (k, v) => v;
-const reviverOrDefault = metadata => (metadata.reviver || identityReviver);
+const reviverOrDefault = metadata => (metadata.reviver || U.identityReviver);
 
 const parseMapper = subtypes => pairObject => [
   reviverOrDefault(subtypes.keyMetadata)('', pairObject.key),
   reviverOrDefault(subtypes.valueMetadata)('', pairObject.value)
 ];
+
+const reviver = (innerTypes, k, v) => {
+  if (k === '') {
+    const map = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
+
+    return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
+  }
+
+  return v;
+}
 
 class ModelicoMap extends Modelico {
   constructor(keyMetadata, valueMetadata, map) {
@@ -49,22 +58,8 @@ class ModelicoMap extends Modelico {
     return new ModelicoMap(AsIs(String), AsIs(), map);
   }
 
-  static buildReviver(keyMetadata, valueMetadata) {
-    return U.bind(ModelicoMap.reviver, {keyMetadata, valueMetadata});
-  }
-
-  static reviver(innerTypes, k, v) {
-    if (k === '') {
-      const map = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
-
-      return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
-    }
-
-    return v;
-  }
-
   static metadata(keyMetadata, valueMetadata) {
-    return Object.freeze({type: ModelicoMap, reviver: ModelicoMap.buildReviver(keyMetadata, valueMetadata)});
+    return Object.freeze({type: ModelicoMap, reviver: U.bind(reviver, {keyMetadata, valueMetadata})});
   }
 }
 

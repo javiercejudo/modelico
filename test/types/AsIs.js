@@ -34,7 +34,7 @@ module.exports = (should, M) => () => {
       // verify that asIsNumber was not mutated
       should(asIsNumber.value()).be.exactly(1);
     });
-    
+
     it('should set the entity correctly when part of a path', () => {
       const list = [
         new AsIs(String, 'a'),
@@ -65,7 +65,7 @@ module.exports = (should, M) => () => {
 
   describe('reviver', () => {
     it('should revive the value as is, without the wrapper', () => {
-      const asIsObject = JSON.parse('{"two":2}', AsIs.buildReviver(Object));
+      const asIsObject = JSON.parse('{"two":2}', AsIs.metadata(Object).reviver);
 
       should(asIsObject.two).be.exactly(2);
     });

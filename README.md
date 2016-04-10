@@ -32,7 +32,7 @@ The goal is to parse JSON strings like the following into JavaScript classes
 so that we can do things like this:
 
 ```js
-const pet = JSON.parse(petJson, Modelico.buildReviver(Animal));
+const pet = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
 
 pet.speak(); //=> 'my name is Robbie!'
 
@@ -83,7 +83,7 @@ Again, our goal is to parse JSON into JavaScript classes
 to be able to do things like
 
 ```js
-const person = JSON.parse(personJson, Modelico.buildReviver(Person));
+const person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
 person.fullName(); //=> 'Javier Cejudo'
 person.pets().list()[0].speak(); //=> 'my name is Robbie!'
@@ -128,7 +128,7 @@ class Animal extends Modelico {
   // ... constructor and speak methods shown above
 
   static metadata() {
-    return Object.freeze({type: Animal, reviver: Modelico.buildReviver(Animal)});
+    return Modelico.metadata(Animal);
   }
 }
 ```
@@ -181,9 +181,7 @@ Animal.prototype.speak = function() {
   return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
 };
 
-Animal.metadata = function() {
-  return Object.freeze({type: Animal, reviver: Modelico.buildReviver(Animal)});
-};
+Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 ```
 
 See [spec](test).

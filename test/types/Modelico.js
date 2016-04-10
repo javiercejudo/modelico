@@ -95,7 +95,7 @@ module.exports = (should, M) => () => {
   describe('parsing', () => {
     it('should parse types correctly', () => {
       const author = Modelico.fromJSON(Person, authorJson);
-      const authorAlt = JSON.parse(authorJson, Modelico.buildReviver(Person));
+      const authorAlt = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
       'Javier Cejudo'
         .should.be.exactly(author.fullName())
@@ -121,7 +121,7 @@ module.exports = (should, M) => () => {
     });
 
     it('should work with plain classes extending Modelico', () => {
-      const animal = JSON.parse('{"name": "Sam"}', Modelico.buildReviver(Animal));
+      const animal = JSON.parse('{"name": "Sam"}', Modelico.metadata(Animal).reviver);
 
       animal.speak().should.be.exactly('hello');
       animal.name().should.be.exactly('Sam');
@@ -152,42 +152,6 @@ module.exports = (should, M) => () => {
       author1.equals(author3).should.be.exactly(false);
 
       author1.should.not.be.exactly(author2);
-    });
-  });
-
-  describe('building custom revivers', () => {
-    it('should use subclass revivers when available', () => {
-      class Thing extends M.Modelico {
-        constructor(fields) {
-          super(Thing, fields);
-        }
-
-        static reviver(k, v) {
-          if (k === '') {
-            if (!v.hasOwnProperty('numTimesParsed')) {
-              v.numTimesParsed = 1;
-            }
-
-            return new Thing(v);
-          }
-
-          if (k === 'numTimesParsed') {
-            return v + 1;
-          }
-
-          return v;
-        }
-      }
-
-      let thing1 = JSON.parse('{"age": 250}', Modelico.buildReviver(Thing));
-      should(thing1.age()).be.exactly(250);
-      should(thing1.numTimesParsed()).be.exactly(1);
-
-      thing1 = JSON.parse(JSON.stringify(thing1), Modelico.buildReviver(Thing));
-      should(thing1.numTimesParsed()).be.exactly(2);
-
-      thing1 = JSON.parse(JSON.stringify(thing1), Modelico.buildReviver(Thing));
-      should(thing1.numTimesParsed()).be.exactly(3);
     });
   });
 };

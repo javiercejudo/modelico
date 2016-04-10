@@ -4,6 +4,16 @@ const U = require('./U');
 const Modelico = require('./Modelico');
 const AsIs = require('./AsIs').metadata;
 
+const reviver = (itemMetadata, k, v) => {
+  if (k === '') {
+    const list = (v === null) ? null : v.map(U.bind(itemMetadata.reviver, k));
+
+    return new ModelicoList(itemMetadata, list);
+  }
+
+  return v;
+}
+
 class ModelicoList extends Modelico {
   constructor(itemMetadata, list) {
     super(ModelicoList, {list});
@@ -34,22 +44,8 @@ class ModelicoList extends Modelico {
     return new ModelicoList(AsIs(), arr);
   }
 
-  static buildReviver(itemMetadata) {
-    return U.bind(ModelicoList.reviver, itemMetadata);
-  }
-
-  static reviver(itemMetadata, k, v) {
-    if (k === '') {
-      const list = (v === null) ? null : v.map(U.bind(itemMetadata.reviver, k));
-
-      return new ModelicoList(itemMetadata, list);
-    }
-
-    return v;
-  }
-
-  static metadata(subtypeMetadata) {
-    return Object.freeze({type: ModelicoList, reviver: ModelicoList.buildReviver(subtypeMetadata)});
+  static metadata(itemMetadata) {
+    return Object.freeze({type: ModelicoList, reviver: U.bind(reviver, itemMetadata)});
   }
 }
 

@@ -3,20 +3,29 @@
 const U = require('./U');
 const Modelico = require('./Modelico');
 
+const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
+
+const reviver = (values, k, v) => {
+  return (v === null) ? null : values[v];
+};
+
 class ModelicoEnum extends Modelico {
-  constructor(fields) {
-    super(ModelicoEnum, fields);
+  constructor(input) {
+    const enumerators = Array.isArray(input) ?
+      input.reduce(enumeratorsReducer, {}) :
+      input;
 
-    Object.getOwnPropertyNames(fields)
-      .forEach(field => this[field]().toJSON = () => field);
-  }
+    super(ModelicoEnum, enumerators);
 
-  static buildReviver(values) {
-    return U.bind(ModelicoEnum.reviver, values);
-  }
+    Object.getOwnPropertyNames(enumerators)
+      .forEach(enumerator => this[enumerator]().toJSON = () => enumerator);
 
-  static reviver(values, k, v) {
-    return (v === null) ? null : values[v];
+    this.metadata = () => Object.freeze({
+      type: ModelicoEnum,
+      reviver: U.bind(reviver, enumerators)
+    });
+
+    Object.freeze(this);
   }
 }
 

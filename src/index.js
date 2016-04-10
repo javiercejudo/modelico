@@ -6,7 +6,6 @@ const ModelicoDate = require('./Date');
 const AsIs = require('./AsIs');
 const List = require('./List');
 const Enum = require('./Enum');
-const enumFactory = require('./enumFactory');
 
 module.exports = Object.freeze({
   Modelico,
@@ -14,6 +13,5 @@ module.exports = Object.freeze({
   Date: ModelicoDate,
   AsIs,
   List,
-  Enum,
-  enumFactory
+  Enum
 });

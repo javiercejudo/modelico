@@ -8,6 +8,22 @@ const assignReducer = (acc, pair) => {
   return acc;
 };
 
+const reviver = (Type, k, v) => {
+  if (k === '') {
+    return new Type(v);
+  }
+
+  if (Type.innerTypes) {
+    const innerTypeMetadata = Type.innerTypes()[k];
+
+    if (innerTypeMetadata) {
+      return innerTypeMetadata.reviver('', v);
+    }
+  }
+
+  return v;
+};
+
 class Modelico {
   constructor(Type, fields, thisArg) {
     thisArg = U.default(thisArg, this);
@@ -46,31 +62,11 @@ class Modelico {
   }
 
   static fromJSON(Type, json) {
-    return JSON.parse(json, Modelico.buildReviver(Type));
+    return JSON.parse(json, U.bind(reviver, Type));
   }
 
-  static buildReviver(Type) {
-    if (Type.hasOwnProperty('reviver')) {
-      return Type.reviver;
-    }
-
-    return U.bind(Modelico.reviver, Type);
-  }
-
-  static reviver(Type, k, v) {
-    if (k === '') {
-      return new Type(v);
-    }
-
-    if (Type.innerTypes) {
-      const innerTypeMetadata = Type.innerTypes()[k];
-
-      if (innerTypeMetadata) {
-        return innerTypeMetadata.reviver('', v);
-      }
-    }
-
-    return v;
+  static metadata(Type) {
+    return Object.freeze({type: Type, reviver: U.bind(reviver, Type)});
   }
 }
 
