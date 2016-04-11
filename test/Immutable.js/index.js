@@ -41,7 +41,7 @@ module.exports = (should, M) => () => {
 
   it('JavaScript-first API (2)', () => {
     var alpha = M.Map.fromObject({a: 1, b: 2, c: 3, d: 4});
-    [...alpha.map()].map(kv =>  kv[0].toUpperCase()).join()
+    Array.from(alpha.map()).map(kv =>  kv[0].toUpperCase()).join()
       .should.be.exactly('A,B,C,D');
   });
 
@@ -52,7 +52,7 @@ module.exports = (should, M) => () => {
     var obj = {d: 100, o: 200, g: 300};
 
     var map3 = M.Map.fromMap(
-      new Map([...map1.map()].concat([...map2.map()], objToArr(obj)))
+      new Map(Array.from(map1.map()).concat(Array.from(map2.map()), objToArr(obj)))
     );
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))
