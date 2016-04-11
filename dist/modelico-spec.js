@@ -1,8 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.modelicoSpec = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var objToArr = function objToArr(obj) {
   return Object.keys(obj).map(function (k) {
     return [k, obj[k]];
@@ -49,7 +47,7 @@ module.exports = function (should, M) {
 
     it('JavaScript-first API (2)', function () {
       var alpha = M.Map.fromObject({ a: 1, b: 2, c: 3, d: 4 });
-      [].concat(_toConsumableArray(alpha.map())).map(function (kv) {
+      Array.from(alpha.map()).map(function (kv) {
         return kv[0].toUpperCase();
       }).join().should.be.exactly('A,B,C,D');
     });
@@ -60,7 +58,7 @@ module.exports = function (should, M) {
 
       var obj = { d: 100, o: 200, g: 300 };
 
-      var map3 = M.Map.fromMap(new Map([].concat(_toConsumableArray(map1.map())).concat([].concat(_toConsumableArray(map2.map())), objToArr(obj))));
+      var map3 = M.Map.fromMap(new Map(Array.from(map1.map()).concat(Array.from(map2.map()), objToArr(obj))));
 
       map3.equals(M.Map.fromObject({ a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300 })).should.be.exactly(true);
     });
