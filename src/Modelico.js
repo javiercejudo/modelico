@@ -1,6 +1,6 @@
 'use strict';
 
-const U = require('./U');
+import U from './U';
 
 const assignReducer = (acc, pair) => {
   acc[pair.field] = pair.value;
@@ -75,4 +75,4 @@ class Modelico {
   }
 }
 
-module.exports = Object.freeze(Modelico);
+export default Object.freeze(Modelico);

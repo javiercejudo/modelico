@@ -1,5 +1,5 @@
 'use strict';
 
-const U = require('./U');
+import U from './U';
 
-module.exports = type => Object.freeze({type: type, reviver: U.asIsReviver});
+export default type => Object.freeze({type: type, reviver: U.asIsReviver});

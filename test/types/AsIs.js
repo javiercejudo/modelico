@@ -1,7 +1,6 @@
 'use strict';
 
-module.exports = (U, should, M) => () => {
-
+export default (U, should, M) => () => {
   const AsIs = M.AsIs;
   const List = M.List;
 

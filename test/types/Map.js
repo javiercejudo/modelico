@@ -1,7 +1,9 @@
 'use strict';
 
-module.exports = (should, M) => () => {
-  const Person = require('./fixtures/Person')(M);
+import PersonFactory from './fixtures/Person';
+
+export default (should, M) => () => {
+  const Person = PersonFactory(M);
 
   const Modelico = M.Modelico;
   const ModelicoAsIs = M.AsIs;

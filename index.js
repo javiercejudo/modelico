@@ -1,3 +1,5 @@
 'use strict';
 
-module.exports = require('./src');
+import Modelico from './src/index';
+
+export default Modelico;

@@ -2,7 +2,7 @@
 
 const range = (minTime, maxTime) => ({minTime, maxTime});
 
-module.exports = M => {
+export default M => {
   return new M.Enum({
     ANY: range(0, 1440),
     MORNING: range(0, 720),

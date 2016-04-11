@@ -1,9 +1,9 @@
 'use strict';
 
-const U = require('./U');
-const Modelico = require('./Modelico');
-const AsIs = require('./AsIs');
-const Any = require('./Any');
+import U from './U';
+import Modelico from './Modelico';
+import AsIs from './AsIs';
+import Any from './Any';
 
 class ModelicoSet extends Modelico {
   constructor(itemMetadata, innerSet) {
@@ -52,4 +52,4 @@ class ModelicoSet extends Modelico {
   }
 }
 
-module.exports = Object.freeze(ModelicoSet);
+export default Object.freeze(ModelicoSet);

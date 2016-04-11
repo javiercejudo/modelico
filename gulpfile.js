@@ -19,8 +19,8 @@ gulp.task('instrument', ['clean'], () => {
   const excludeProxies = continuousIntegration && travisNodeVersion !== 'stable';
 
   return gulp.src([
-      'src/**/*.js'
-    ].concat(excludeProxies ? '!src/proxyFactory.js' : []))
+      'dist/modelico.js'
+    ])
     .pipe(plumber())
     .pipe(istanbul({ coverageVariable }))
     .pipe(istanbul.hookRequire());

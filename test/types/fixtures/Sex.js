@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = M => {
+export default M => {
   return new M.Enum(['FEMALE', 'MALE', 'OTHER']);
 };

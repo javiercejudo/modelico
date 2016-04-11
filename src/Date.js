@@ -1,6 +1,6 @@
 'use strict';
 
-const Modelico = require('./Modelico');
+import Modelico from './Modelico';
 
 class ModelicoDate extends Modelico {
   constructor(date) {
@@ -38,4 +38,4 @@ class ModelicoDate extends Modelico {
   }
 }
 
-module.exports = Object.freeze(ModelicoDate);
+export default Object.freeze(ModelicoDate);

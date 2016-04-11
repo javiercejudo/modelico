@@ -1,7 +1,7 @@
 'use strict';
 
-const U = require('./U');
-const AbstractMap = require('./AbstractMap');
+import U from './U';
+import AbstractMap from './AbstractMap';
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1];
@@ -46,4 +46,4 @@ class ModelicoEnumMap extends AbstractMap {
   }
 }
 
-module.exports = Object.freeze(ModelicoEnumMap);
+export default Object.freeze(ModelicoEnumMap);

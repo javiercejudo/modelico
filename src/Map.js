@@ -1,9 +1,9 @@
 'use strict';
 
-const U = require('./U');
-const AbstractMap = require('./AbstractMap');
-const AsIs = require('./AsIs');
-const Any = require('./Any');
+import U from './U';
+import AbstractMap from './AbstractMap';
+import AsIs from './AsIs';
+import Any from './Any';
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
@@ -52,4 +52,4 @@ class ModelicoMap extends AbstractMap {
   }
 }
 
-module.exports = Object.freeze(ModelicoMap);
+export default Object.freeze(ModelicoMap);

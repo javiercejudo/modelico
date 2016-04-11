@@ -1,7 +1,9 @@
 'use strict';
 
-module.exports = (should, M) => () => {
-  const PartOfDay = require('./fixtures/PartOfDay')(M);
+import PartOfDayFactory from './fixtures/PartOfDay';
+
+export default (should, M) => () => {
+  const PartOfDay = PartOfDayFactory(M);
 
   describe('setting', () => {
     it('should set fields returning a new enum map', () => {

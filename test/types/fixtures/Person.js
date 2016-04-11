@@ -1,8 +1,11 @@
 'use strict';
 
-module.exports = M => {
-  const PartOfDay = require('./PartOfDay')(M).metadata;
-  const Sex = require('./Sex')(M).metadata;
+import PartOfDayFactory from './PartOfDay';
+import SexFactory from './Sex';
+
+export default M => {
+  const PartOfDay = PartOfDayFactory(M).metadata;
+  const Sex = SexFactory(M).metadata;
 
   const Modelico = M.Modelico;
 

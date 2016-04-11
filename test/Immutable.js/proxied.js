@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (U, should, M) => () => {
+export default (U, should, M) => () => {
   var objToArr = U.objToArr;
   var _m = M.proxyMap;
   var _l = M.proxyList;
