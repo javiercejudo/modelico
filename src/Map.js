@@ -27,7 +27,7 @@ class ModelicoMap extends Modelico {
     super(ModelicoMap, {map});
 
     this.innerTypes = () => Object.freeze({keyMetadata, valueMetadata});
-    this.map = () => (map === null) ? null : new Map([...map]);
+    this.map = () => (map === null) ? null : new Map(map);
 
     Object.freeze(this);
   }

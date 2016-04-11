@@ -9,11 +9,9 @@ const plumber = require('gulp-plumber');
 
 let coverageVariable;
 
-gulp.task('clean', function (cb) {
-  rimraf('./coverage', cb);
-});
+gulp.task('clean', cb => rimraf('./coverage', cb));
 
-gulp.task('instrument', ['clean'], function () {
+gulp.task('instrument', ['clean'], () => {
   coverageVariable = '$$cov_' + new Date().getTime() + '$$';
 
   return gulp.src(['src/**/*.js'])
@@ -22,22 +20,18 @@ gulp.task('instrument', ['clean'], function () {
     .pipe(istanbul.hookRequire());
 });
 
-gulp.task('test', ['clean', 'instrument'], function () {
+gulp.task('test', ['clean', 'instrument'], () => {
   return gulp.src(['test/index.js'])
     .pipe(mocha())
-    .on('error', function handleMochaError(err) {
-      console.error(err.toString());
-      this.emit('end');
-    })
     .pipe(istanbul.writeReports({ coverageVariable }));
 });
 
-gulp.task('codecov', function () {
+gulp.task('codecov', () => {
   gulp.src('coverage/coverage-final.json')
     .pipe(codecov());
 });
 
-gulp.task('watch', function() {
+gulp.task('watch', () => {
   gulp.watch(['src/**/*.js', 'test/**/*.js'], ['test']);
 });
 
