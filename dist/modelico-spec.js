@@ -139,8 +139,8 @@ module.exports = function (should, M) {
 
     Person.innerTypes = function () {
       return Object.freeze({
-        'givenName': AsIs.metadata(String),
-        'familyName': AsIs.metadata(String),
+        'givenName': AsIs(String),
+        'familyName': AsIs(String),
         'pets': List.metadata(Animal.metadata())
       });
     };
@@ -225,8 +225,8 @@ module.exports = function (should, M) {
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            'givenName': AsIs.metadata(String),
-            'familyName': AsIs.metadata(String),
+            'givenName': AsIs(String),
+            'familyName': AsIs(String),
             'pets': List.metadata(Animal.metadata())
           });
         }
@@ -338,70 +338,17 @@ module.exports = function (should, M) {
     var AsIs = M.AsIs;
     var List = M.List;
 
-    describe('constructor', function () {
-      it('should create a simple wrapper for the value', function () {
-        var asIsNumber = new AsIs(Number, 1);
-        var asIsObject = new AsIs(Object, { two: 2 });
-
-        should(asIsNumber.value()).be.exactly(1);
-        asIsObject.value().should.eql({ two: 2 });
-      });
-
-      it('should be immutable', function () {
-        var asIsObject = new AsIs(Object, { two: 2 });
-
-        (function () {
-          return AsIs.newStaticFn = function () {};
-        }).should.throw();
-        (function () {
-          return asIsObject.value = 3;
-        }).should.throw();
-
-        asIsObject.value().two = 3;
-        should(asIsObject.value().two).be.exactly(2);
-      });
-    });
-
-    describe('setting', function () {
-      it('should set the entity correctly', function () {
-        var asIsNumber = new AsIs(Number, 1);
-        var asIsNumber2 = asIsNumber.set(2);
-
-        should(asIsNumber2.value()).be.exactly(2);
-
-        // verify that asIsNumber was not mutated
-        should(asIsNumber.value()).be.exactly(1);
-      });
-
-      it('should set the entity correctly when part of a path', function () {
-        var list = [new AsIs(String, 'a'), new AsIs(String, 'b')];
-
-        var modelicoList1 = new List(AsIs.metadata(String), list);
-        var modelicoList2 = modelicoList1.setPath([1], new AsIs(String, 'B'));
-        var modelicoList3 = modelicoList2.setPath([1, 'value'], 'bb');
-
-        modelicoList2.list()[1].value().should.be.exactly('B');
-
-        modelicoList3.list()[1].value().should.be.exactly('bb');
-
-        // verify that modelicoList1 was not mutated
-        modelicoList1.list()[1].value().should.be.exactly('b');
-      });
-    });
-
     describe('toJSON', function () {
       it('should stringify the value as is', function () {
-        var asIsNumber = new AsIs(Number, 1);
-        var asIsObject = new AsIs(Object, { two: 2 });
+        var mapOfNumbers = M.Map.fromObject({ a: 1, b: 2 });
 
-        JSON.stringify(asIsNumber).should.be.exactly('1');
-        JSON.stringify(asIsObject).should.be.exactly('{"two":2}');
+        JSON.stringify(mapOfNumbers).should.be.exactly('[{"key":"a","value":1},{"key":"b","value":2}]');
       });
     });
 
     describe('reviver', function () {
       it('should revive the value as is, without the wrapper', function () {
-        var asIsObject = JSON.parse('{"two":2}', AsIs.metadata(Object).reviver);
+        var asIsObject = JSON.parse('{"two":2}', AsIs(Object).reviver);
 
         should(asIsObject.two).be.exactly(2);
       });
@@ -409,16 +356,18 @@ module.exports = function (should, M) {
 
     describe('metadata', function () {
       it('should return metadata like type', function () {
-        AsIs.metadata(String).type.should.be.exactly(String);
+        AsIs(String).type.should.be.exactly(String);
 
-        var asIsObject = JSON.parse('{"two":2}', AsIs.metadata(Object).reviver);
+        var asIsObject = JSON.parse('{"two":2}', AsIs(Object).reviver);
 
         should(asIsObject.two).be.exactly(2);
       });
 
       it('should be immutable', function () {
         (function () {
-          return AsIs.metadata = {};
+          return AsIs().reviver = function (x) {
+            return x;
+          };
         }).should.throw();
       });
     });
@@ -575,7 +524,7 @@ module.exports = function (should, M) {
       it('should set fields returning a new map', function () {
         var map = new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))], ['b', new ModelicoDate(null)]]);
 
-        var modelicoMap1 = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+        var modelicoMap1 = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), map);
         var modelicoMap2 = modelicoMap1.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
 
         should(modelicoMap2.map().get('a').date().getFullYear()).be.exactly(1989);
@@ -605,7 +554,7 @@ module.exports = function (should, M) {
 
         var customMap = new Map([['wedding', new ModelicoDate(new Date('2013-03-28T00:00:00.000Z'))]]);
 
-        var customModelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), customMap);
+        var customModelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), customMap);
         var map2 = map.setPath([], customModelicoMap);
 
         should(map2.map().get('wedding').date().getFullYear()).be.exactly(2013);
@@ -616,14 +565,14 @@ module.exports = function (should, M) {
       it('should stringify the map correctly', function () {
         var map = new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))], ['b', new ModelicoDate(null)]]);
 
-        var modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+        var modelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), map);
 
         JSON.stringify(modelicoMap).should.be.exactly('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]');
       });
 
       it('should support null maps', function () {
         var map = null;
-        var modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+        var modelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), map);
 
         JSON.stringify(modelicoMap).should.be.exactly('null');
       });
@@ -631,7 +580,7 @@ module.exports = function (should, M) {
 
     describe('parsing', function () {
       it('should parse the map correctly', function () {
-        var modelicoMap = JSON.parse('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]', ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver);
+        var modelicoMap = JSON.parse('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]', ModelicoMap.metadata(ModelicoAsIs(String), ModelicoDate.metadata()).reviver);
 
         should(modelicoMap.map().get('a').date().getFullYear()).be.exactly(1988);
 
@@ -646,7 +595,7 @@ module.exports = function (should, M) {
       });
 
       it('should support null maps', function () {
-        var modelicoMap = JSON.parse('null', ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver);
+        var modelicoMap = JSON.parse('null', ModelicoMap.metadata(ModelicoAsIs(String), ModelicoDate.metadata()).reviver);
 
         should(modelicoMap.map()).be.exactly(null);
       });
@@ -654,9 +603,9 @@ module.exports = function (should, M) {
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]]));
+        var modelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]]));
 
-        var modelicoMap2 = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]]));
+        var modelicoMap2 = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]]));
 
         modelicoMap.should.not.be.exactly(modelicoMap2);
         modelicoMap.should.not.equal(modelicoMap2);

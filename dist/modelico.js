@@ -6,69 +6,13 @@ module.exports = require('./src');
 },{"./src":9}],2:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 var U = require('./U');
-var Modelico = require('./Modelico');
 
-var cloneViaJSON = function cloneViaJSON(x) {
-  return JSON.parse(JSON.stringify(x));
+module.exports = function (type) {
+  return Object.freeze({ type: type, reviver: U.identityReviver });
 };
 
-var ModelicoAsIs = function (_Modelico) {
-  _inherits(ModelicoAsIs, _Modelico);
-
-  function ModelicoAsIs(type, value) {
-    _classCallCheck(this, ModelicoAsIs);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoAsIs).call(this, type, { value: value }));
-
-    _this.value = function () {
-      return cloneViaJSON(value);
-    };
-
-    Object.freeze(_this);
-    return _this;
-  }
-
-  _createClass(ModelicoAsIs, [{
-    key: 'set',
-    value: function set(value) {
-      return new ModelicoAsIs(this.type(), value);
-    }
-  }, {
-    key: 'setPath',
-    value: function setPath(path, value) {
-      if (path.length === 0) {
-        return value;
-      }
-
-      return this.set(value);
-    }
-  }, {
-    key: 'toJSON',
-    value: function toJSON() {
-      return this.value();
-    }
-  }], [{
-    key: 'metadata',
-    value: function metadata(type) {
-      return Object.freeze({ type: type, reviver: U.identityReviver });
-    }
-  }]);
-
-  return ModelicoAsIs;
-}(Modelico);
-
-module.exports = Object.freeze(ModelicoAsIs);
-
-},{"./Modelico":7,"./U":8}],3:[function(require,module,exports){
+},{"./U":8}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -199,7 +143,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var U = require('./U');
 var Modelico = require('./Modelico');
-var AsIs = require('./AsIs').metadata;
+var AsIs = require('./AsIs');
 
 var reviver = function reviver(itemMetadata, k, v) {
   if (k === '') {
@@ -283,7 +227,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var U = require('./U');
 var Modelico = require('./Modelico');
-var AsIs = require('./AsIs').metadata;
+var AsIs = require('./AsIs');
 
 var stringifyMapper = function stringifyMapper(pair) {
   return { key: pair[0], value: pair[1] };
