@@ -148,17 +148,17 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
 
-      var person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
+      var person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
-      person.fullName().should.be.exactly('Javier Cejudo');
+      person1.fullName().should.be.exactly('Javier Cejudo');
 
-      var person2 = person.set('givenName', 'Javi');
+      var person2 = person1.set('givenName', 'Javi');
       person2.fullName().should.be.exactly('Javi Cejudo');
-      person.fullName().should.be.exactly('Javier Cejudo');
+      person1.fullName().should.be.exactly('Javier Cejudo');
 
-      person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
+      person1.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
 
-      person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
+      person1.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
     });
   };
 };
@@ -238,23 +238,23 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
 
-      var person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
+      var person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
-      person.fullName().should.be.exactly('Javier Cejudo');
+      person1.fullName().should.be.exactly('Javier Cejudo');
 
-      var person2 = person.set('givenName', 'Javi');
+      var person2 = person1.set('givenName', 'Javi');
       person2.fullName().should.be.exactly('Javi Cejudo');
-      person.fullName().should.be.exactly('Javier Cejudo');
+      person1.fullName().should.be.exactly('Javier Cejudo');
 
-      person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
+      person1.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
 
-      person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
+      person1.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
 
-      var person3 = person.setPath(['pets', 0, 'name'], 'Bane');
+      var person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
       person3.pets().list()[0].name().should.be.exactly('Bane');
 
-      person.pets().list()[0].name().should.be.exactly('Robbie');
+      person1.pets().list()[0].name().should.be.exactly('Robbie');
     });
   };
 };
@@ -300,14 +300,14 @@ module.exports = function (should, M) {
     it('should showcase the main features', function () {
       var petJson = '{"name": "Robbie"}';
 
-      var pet = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
+      var pet1 = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
 
-      pet.speak().should.be.exactly('My name is Robbie!');
+      pet1.speak().should.be.exactly('My name is Robbie!');
 
-      var pet2 = pet.set('name', 'Bane');
+      var pet2 = pet1.set('name', 'Bane');
 
       pet2.name().should.be.exactly('Bane');
-      pet.name().should.be.exactly('Robbie');
+      pet1.name().should.be.exactly('Robbie');
     });
   };
 };
@@ -350,10 +350,10 @@ module.exports = function (should, M) {
       it('should be immutable', function () {
         var asIsObject = new AsIs(Object, { two: 2 });
 
-        (function (_) {
+        (function () {
           return AsIs.newStaticFn = function () {};
         }).should.throw();
-        (function (_) {
+        (function () {
           return asIsObject.value = 3;
         }).should.throw();
 
@@ -376,13 +376,16 @@ module.exports = function (should, M) {
       it('should set the entity correctly when part of a path', function () {
         var list = [new AsIs(String, 'a'), new AsIs(String, 'b')];
 
-        var modelicoList = new List(AsIs.metadata(String), list);
-        var modelicoList2 = modelicoList.setPath([1], 'B');
+        var modelicoList1 = new List(AsIs.metadata(String), list);
+        var modelicoList2 = modelicoList1.setPath([1], new AsIs(String, 'B'));
+        var modelicoList3 = modelicoList2.setPath([1, 'value'], 'bb');
 
         modelicoList2.list()[1].value().should.be.exactly('B');
 
-        // verify that modelicoList was not mutated
-        modelicoList.list()[1].value().should.be.exactly('b');
+        modelicoList3.list()[1].value().should.be.exactly('bb');
+
+        // verify that modelicoList1 was not mutated
+        modelicoList1.list()[1].value().should.be.exactly('b');
       });
     });
 
@@ -414,7 +417,7 @@ module.exports = function (should, M) {
       });
 
       it('should be immutable', function () {
-        (function (_) {
+        (function () {
           return AsIs.metadata = {};
         }).should.throw();
       });
@@ -435,35 +438,69 @@ module.exports = function (should, M) {
       it('should set items in the list correctly', function () {
         var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
 
-        var modelicoList = new M.List(M.Date.metadata(), list);
-
-        var modelicoList2 = modelicoList.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
+        var modelicoList1 = new M.List(M.Date.metadata(), list);
+        var modelicoList2 = modelicoList1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
         should(modelicoList2.list()[0].date().getFullYear()).be.exactly(1989);
 
-        // verify that modelicoList was not mutated
-        should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
+        // verify that modelicoList1 was not mutated
+        should(modelicoList1.list()[0].date().getFullYear()).be.exactly(1988);
       });
 
       it('should set items in the list correctly when part of a path', function () {
         var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
 
-        var modelicoList = new M.List(M.Date.metadata(), list);
-        var modelicoList2 = modelicoList.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
+        var modelicoList1 = new M.List(M.Date.metadata(), list);
+        var modelicoList2 = modelicoList1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
         should(modelicoList2.list()[0].date().getFullYear()).be.exactly(1989);
 
-        // verify that modelicoList was not mutated
-        should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
+        // verify that modelicoList1 was not mutated
+        should(modelicoList1.list()[0].date().getFullYear()).be.exactly(1988);
+      });
+
+      it('should set items in the list correctly when part of a path with a single element', function () {
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+
+        var modelicoList1 = new M.List(M.Date.metadata(), list);
+        var modelicoList2 = modelicoList1.setPath([0], new M.Date(new Date('2000-04-16T00:00:00.000Z')));
+
+        should(modelicoList2.list()[0].date().getFullYear()).be.exactly(2000);
+
+        // verify that modelicoList1 was not mutated
+        should(modelicoList1.list()[0].date().getFullYear()).be.exactly(1988);
       });
 
       it('should be able to set a whole list', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
-        var author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+        var author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
-        var author2 = author.set('importantDatesList', new M.List(M.Date.metadata(), author.importantDatesList().list().concat(new M.Date(new Date()))));
+        var newListArray = author1.importantDatesList().list();
+        newListArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
 
-        console.log(JSON.stringify(author2));
+        var author2 = author1.set('importantDatesList', new M.List(M.Date.metadata(), newListArray));
+
+        should(author1.importantDatesList().list().length).be.exactly(2);
+        should(author1.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
+        should(author1.importantDatesList().list()[1].date().getFullYear()).be.exactly(2012);
+
+        should(author2.importantDatesList().list().length).be.exactly(3);
+        should(author2.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
+        should(author2.importantDatesList().list()[1].date().getFullYear()).be.exactly(2016);
+        should(author2.importantDatesList().list()[2].date().getFullYear()).be.exactly(2012);
+      });
+
+      it('edge case when List setPath is called with an empty path', function () {
+        var modelicoDatesList1 = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)]);
+
+        var modelicoDatesList2 = new M.List(M.Date.metadata(), [new M.Date(new Date('2016-04-16T00:00:00.000Z'))]);
+
+        var listOfListOfDates1 = new M.List(M.List.metadata(M.Date.metadata()), [modelicoDatesList1]);
+        var listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
+
+        should(listOfListOfDates1.list()[0].list()[0].date().getFullYear()).be.exactly(1988);
+
+        should(listOfListOfDates2.list()[0].list()[0].date().getFullYear()).be.exactly(2016);
       });
     });
 
@@ -509,14 +546,14 @@ module.exports = function (should, M) {
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoList = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoList1 = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
         var modelicoList2 = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
-        modelicoList.should.not.be.exactly(modelicoList2);
-        modelicoList.should.not.equal(modelicoList2);
+        modelicoList1.should.not.be.exactly(modelicoList2);
+        modelicoList1.should.not.equal(modelicoList2);
 
-        modelicoList.equals(modelicoList2).should.be.exactly(true);
+        modelicoList1.equals(modelicoList2).should.be.exactly(true);
       });
     });
   };
@@ -538,24 +575,40 @@ module.exports = function (should, M) {
       it('should set fields returning a new map', function () {
         var map = new Map([['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))], ['b', new ModelicoDate(null)]]);
 
-        var modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
-        var modelicoMap2 = modelicoMap.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
+        var modelicoMap1 = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+        var modelicoMap2 = modelicoMap1.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
 
         should(modelicoMap2.map().get('a').date().getFullYear()).be.exactly(1989);
 
-        // verify that modelicoMap was not mutated
-        should(modelicoMap.map().get('a').date().getFullYear()).be.exactly(1988);
+        // verify that modelicoMap1 was not mutated
+        should(modelicoMap1.map().get('a').date().getFullYear()).be.exactly(1988);
       });
 
       it('should set fields returning a new map when part of a path', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
-        var author = Modelico.fromJSON(Person, authorJson);
-        var author2 = author.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
+        var author1 = Modelico.fromJSON(Person, authorJson);
+        var author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
 
         should(author2.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
 
-        // verify that author was not mutated
-        should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2012);
+        // verify that author1 was not mutated
+        should(author1.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2012);
+      });
+
+      it('edge case when setPath is called with an empty path', function () {
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+        var author = Modelico.fromJSON(Person, authorJson);
+
+        var map = author.lifeEvents();
+
+        should(map.map().get('wedding').date().getFullYear()).be.exactly(2012);
+
+        var customMap = new Map([['wedding', new ModelicoDate(new Date('2013-03-28T00:00:00.000Z'))]]);
+
+        var customModelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), customMap);
+        var map2 = map.setPath([], customModelicoMap);
+
+        should(map2.map().get('wedding').date().getFullYear()).be.exactly(2013);
       });
     });
 
@@ -627,12 +680,12 @@ module.exports = function (should, M) {
     var Modelico = M.Modelico;
     var ModelicoDate = M.Date;
 
-    var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","sex":"MALE"}';
+    var author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","sex":"MALE"}';
     var author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
 
     describe('setting', function () {
       it('should set fields returning a new object', function () {
-        var author = new Person({
+        var author1 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
@@ -641,26 +694,26 @@ module.exports = function (should, M) {
         });
 
         // sanity check
-        JSON.stringify(author).should.be.exactly(authorJson);
+        JSON.stringify(author1).should.be.exactly(author1Json);
 
-        author.givenName().should.be.exactly('Javier');
+        author1.givenName().should.be.exactly('Javier');
 
         // field setting
-        var authorAlt = author.set('givenName', 'Javi');
+        var author2 = author1.set('givenName', 'Javi');
 
         // repeat sanity check
-        author.givenName().should.be.exactly('Javier');
+        author1.givenName().should.be.exactly('Javier');
 
-        JSON.stringify(author).should.be.exactly(authorJson);
+        JSON.stringify(author1).should.be.exactly(author1Json);
 
         // new object checks
-        (authorAlt === author).should.be.exactly(false);
-        authorAlt.givenName().should.be.exactly('Javi');
-        authorAlt.equals(author).should.be.exactly(false, 'Oops, they are equal');
+        (author2 === author1).should.be.exactly(false);
+        author2.givenName().should.be.exactly('Javi');
+        author2.equals(author1).should.be.exactly(false, 'Oops, they are equal');
       });
 
       it('should set fields recursively returning a new object', function () {
-        var author = new Person({
+        var author1 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
@@ -668,18 +721,31 @@ module.exports = function (should, M) {
           sex: Sex.MALE()
         });
 
-        var author2 = author.setPath(['givenName'], 'Javi').setPath(['birthday', 'date'], new Date('1989-04-16T00:00:00.000Z'));
+        var author2 = author1.setPath(['givenName'], 'Javi').setPath(['birthday', 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
         should(author2.birthday().date().getFullYear()).be.exactly(1989);
 
-        // verify that the original author was not mutated
-        should(author.birthday().date().getFullYear()).be.exactly(1988);
+        // verify that the original author1 was not mutated
+        should(author1.birthday().date().getFullYear()).be.exactly(1988);
+      });
+
+      it('edge case when Modelico setPath is called with an empty path', function () {
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+        var author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+        var listOfPeople1 = new M.List(Person.metadata(), [author]);
+
+        var listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
+        var listOfPeople3 = listOfPeople2.setPath([0], author);
+
+        listOfPeople1.list()[0].givenName().should.be.exactly('Javier');
+        listOfPeople2.list()[0].givenName().should.be.exactly('Javi');
+        listOfPeople3.list()[0].givenName().should.be.exactly('Javier');
       });
     });
 
     describe('stringifying', function () {
       it('should stringify types correctly', function () {
-        var author = new Person({
+        var author1 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
@@ -687,7 +753,7 @@ module.exports = function (should, M) {
           sex: Sex.MALE()
         });
 
-        JSON.stringify(author).should.be.exactly(authorJson);
+        JSON.stringify(author1).should.be.exactly(author1Json);
       });
 
       it('should support null in Enum', function () {
@@ -705,16 +771,16 @@ module.exports = function (should, M) {
 
     describe('parsing', function () {
       it('should parse types correctly', function () {
-        var author = Modelico.fromJSON(Person, authorJson);
-        var authorAlt = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+        var author1 = Modelico.fromJSON(Person, author1Json);
+        var author2 = JSON.parse(author1Json, Modelico.metadata(Person).reviver);
 
-        'Javier Cejudo'.should.be.exactly(author.fullName()).and.exactly(authorAlt.fullName());
+        'Javier Cejudo'.should.be.exactly(author1.fullName()).and.exactly(author2.fullName());
 
-        should(1988).be.exactly(author.birthday().date().getFullYear()).and.exactly(authorAlt.birthday().date().getFullYear());
+        should(1988).be.exactly(author1.birthday().date().getFullYear()).and.exactly(author2.birthday().date().getFullYear());
 
-        should(PartOfDay.EVENING().minTime).be.exactly(author.favouritePartOfDay().minTime).and.exactly(authorAlt.favouritePartOfDay().minTime);
+        should(PartOfDay.EVENING().minTime).be.exactly(author1.favouritePartOfDay().minTime).and.exactly(author2.favouritePartOfDay().minTime);
 
-        Sex.MALE().code.should.be.exactly(author.sex().code).and.exactly(authorAlt.sex().code);
+        Sex.MALE().code.should.be.exactly(author1.sex().code).and.exactly(author2.sex().code);
       });
 
       it('should support null in Enum', function () {
@@ -866,6 +932,11 @@ module.exports = function (M) {
           'importantDatesList': ModelicoList(ModelicoDate()),
           'sex': Sex()
         });
+      }
+    }, {
+      key: 'metadata',
+      value: function metadata() {
+        return Modelico.metadata(Person);
       }
     }]);
 

@@ -45,6 +45,10 @@ var ModelicoAsIs = function (_Modelico) {
   }, {
     key: 'setPath',
     value: function setPath(path, value) {
+      if (path.length === 0) {
+        return value;
+      }
+
       return this.set(value);
     }
   }, {
@@ -99,8 +103,12 @@ var ModelicoDate = function (_Modelico) {
     }
   }, {
     key: 'setPath',
-    value: function setPath(path, date) {
-      return this.set(date);
+    value: function setPath(path, value) {
+      if (path.length === 0) {
+        return value;
+      }
+
+      return this.set(value);
     }
   }, {
     key: 'toJSON',
@@ -233,6 +241,10 @@ var ModelicoList = function (_Modelico) {
   }, {
     key: 'setPath',
     value: function setPath(path, value) {
+      if (path.length === 0) {
+        return value;
+      }
+
       var item = this.list()[path[0]];
       return this.set(path[0], item.setPath(path.slice(1), value));
     }
@@ -327,6 +339,10 @@ var ModelicoMap = function (_Modelico) {
   }, {
     key: 'setPath',
     value: function setPath(path, value) {
+      if (path.length === 0) {
+        return value;
+      }
+
       var item = this.map().get(path[0]);
       return this.set(path[0], item.setPath(path.slice(1), value));
     }
@@ -419,6 +435,10 @@ var Modelico = function () {
   }, {
     key: 'setPath',
     value: function setPath(path, value) {
+      if (path.length === 0) {
+        return value;
+      }
+
       if (path.length === 1) {
         return this.set(path[0], value);
       }
