@@ -32,6 +32,10 @@ module.exports = M => {
         'sex': Sex()
       });
     }
+
+    static metadata() {
+      return Modelico.metadata(Person);
+    }
   }
 
   return Object.freeze(Person);

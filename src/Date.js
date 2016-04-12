@@ -14,8 +14,12 @@ class ModelicoDate extends Modelico {
     return new ModelicoDate(date);
   }
 
-  setPath(path, date) {
-    return this.set(date);
+  setPath(path, value) {
+    if (path.length === 0) {
+      return value;
+    }
+
+    return this.set(value);
   }
 
   toJSON() {

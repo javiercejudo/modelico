@@ -9,12 +9,12 @@ module.exports = (should, M) => () => {
   const Modelico = M.Modelico;
   const ModelicoDate = M.Date;
 
-  const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","sex":"MALE"}';
+  const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","sex":"MALE"}';
   const author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
 
   describe('setting', () => {
     it('should set fields returning a new object', () => {
-      const author = new Person({
+      const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
@@ -23,28 +23,28 @@ module.exports = (should, M) => () => {
       });
 
       // sanity check
-      JSON.stringify(author)
-        .should.be.exactly(authorJson);
+      JSON.stringify(author1)
+        .should.be.exactly(author1Json);
 
-      author.givenName().should.be.exactly('Javier');
+      author1.givenName().should.be.exactly('Javier');
 
       // field setting
-      const authorAlt = author.set('givenName', 'Javi');
+      const author2 = author1.set('givenName', 'Javi');
 
       // repeat sanity check
-      author.givenName().should.be.exactly('Javier');
+      author1.givenName().should.be.exactly('Javier');
 
-      JSON.stringify(author)
-        .should.be.exactly(authorJson);
+      JSON.stringify(author1)
+        .should.be.exactly(author1Json);
 
       // new object checks
-      (authorAlt === author).should.be.exactly(false);
-      authorAlt.givenName().should.be.exactly('Javi');
-      authorAlt.equals(author).should.be.exactly(false, 'Oops, they are equal');
+      (author2 === author1).should.be.exactly(false);
+      author2.givenName().should.be.exactly('Javi');
+      author2.equals(author1).should.be.exactly(false, 'Oops, they are equal');
     });
 
     it('should set fields recursively returning a new object', () => {
-      const author = new Person({
+      const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
@@ -52,21 +52,34 @@ module.exports = (should, M) => () => {
         sex: Sex.MALE()
       });
 
-      const author2 = author.setPath(['givenName'], 'Javi')
+      const author2 = author1.setPath(['givenName'], 'Javi')
         .setPath(['birthday', 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
       should(author2.birthday().date().getFullYear())
         .be.exactly(1989);
 
-      // verify that the original author was not mutated
-      should(author.birthday().date().getFullYear())
+      // verify that the original author1 was not mutated
+      should(author1.birthday().date().getFullYear())
         .be.exactly(1988);
+    });
+
+    it('edge case when Modelico setPath is called with an empty path', () => {
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+      const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+      const listOfPeople1 = new M.List(Person.metadata(), [author]);
+
+      const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
+      const listOfPeople3 = listOfPeople2.setPath([0], author);
+
+      listOfPeople1.list()[0].givenName().should.be.exactly('Javier');
+      listOfPeople2.list()[0].givenName().should.be.exactly('Javi');
+      listOfPeople3.list()[0].givenName().should.be.exactly('Javier');
     });
   });
 
   describe('stringifying', () => {
     it('should stringify types correctly', () => {
-      const author = new Person({
+      const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
@@ -74,8 +87,8 @@ module.exports = (should, M) => () => {
         sex: Sex.MALE()
       });
 
-      JSON.stringify(author)
-        .should.be.exactly(authorJson);
+      JSON.stringify(author1)
+        .should.be.exactly(author1Json);
     });
 
     it('should support null in Enum', () => {
@@ -94,24 +107,24 @@ module.exports = (should, M) => () => {
 
   describe('parsing', () => {
     it('should parse types correctly', () => {
-      const author = Modelico.fromJSON(Person, authorJson);
-      const authorAlt = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+      const author1 = Modelico.fromJSON(Person, author1Json);
+      const author2 = JSON.parse(author1Json, Modelico.metadata(Person).reviver);
 
       'Javier Cejudo'
-        .should.be.exactly(author.fullName())
-        .and.exactly(authorAlt.fullName());
+        .should.be.exactly(author1.fullName())
+        .and.exactly(author2.fullName());
 
       should(1988)
-        .be.exactly(author.birthday().date().getFullYear())
-        .and.exactly(authorAlt.birthday().date().getFullYear());
+        .be.exactly(author1.birthday().date().getFullYear())
+        .and.exactly(author2.birthday().date().getFullYear());
 
       should(PartOfDay.EVENING().minTime)
-        .be.exactly(author.favouritePartOfDay().minTime)
-        .and.exactly(authorAlt.favouritePartOfDay().minTime);
+        .be.exactly(author1.favouritePartOfDay().minTime)
+        .and.exactly(author2.favouritePartOfDay().minTime);
 
       (Sex.MALE().code)
-        .should.be.exactly(author.sex().code)
-        .and.exactly(authorAlt.sex().code);
+        .should.be.exactly(author1.sex().code)
+        .and.exactly(author2.sex().code);
     });
 
     it('should support null in Enum', () => {

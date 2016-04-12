@@ -36,9 +36,9 @@ const pet = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
 
 pet.speak(); //=> 'my name is Robbie!'
 
-const pet2 = pet.set('name', 'Baine');
+const pet2 = pet.set('name', 'Bane');
 
-pet2.name(); //=> 'Baine'
+pet2.name(); //=> 'Bane'
 pet.name(); //=> 'Robbie'
 ```
 
@@ -145,9 +145,9 @@ const person2 = person.set('givenName', 'Javi');
 person2.fullName(); //=> 'Javi Cejudo'
 person.fullName();  //=> 'Javier Cejudo'
 
-const person3 = person.setPath(['pets', 0, 'name'], 'Baine');
+const person3 = person.setPath(['pets', 0, 'name'], 'Bane');
 
-person3.pets().list()[0].name(); //=> 'Baine'
+person3.pets().list()[0].name(); //=> 'Bane'
 person.pets().list()[0].name();  //=> 'Robbie'
 ```
 

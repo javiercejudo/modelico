@@ -32,6 +32,10 @@ class ModelicoList extends Modelico {
   }
 
   setPath(path, value) {
+    if (path.length === 0) {
+      return value;
+    }
+
     const item = this.list()[path[0]];
     return this.set(path[0], item.setPath(path.slice(1), value));
   }
