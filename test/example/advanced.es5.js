@@ -32,8 +32,8 @@ module.exports = (should, M) => () => {
 
   Person.innerTypes = function() {
     return Object.freeze({
-      'givenName': AsIs.metadata(String),
-      'familyName': AsIs.metadata(String),
+      'givenName': AsIs(String),
+      'familyName': AsIs(String),
       'pets': List.metadata(Animal.metadata())
     });
   };

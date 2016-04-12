@@ -32,14 +32,14 @@ The goal is to parse JSON strings like the following into JavaScript classes
 so that we can do things like this:
 
 ```js
-const pet = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
+const pet1 = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
 
-pet.speak(); //=> 'my name is Robbie!'
+pet1.speak(); //=> 'my name is Robbie!'
 
-const pet2 = pet.set('name', 'Bane');
+const pet2 = pet1.set('name', 'Bane');
 
 pet2.name(); //=> 'Bane'
-pet.name(); //=> 'Robbie'
+pet1.name(); //=> 'Robbie'
 ```
 
 Here is how `Animal` would look like:
@@ -83,10 +83,10 @@ Again, our goal is to parse JSON into JavaScript classes
 to be able to do things like
 
 ```js
-const person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
+const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
-person.fullName(); //=> 'Javier Cejudo'
-person.pets().list()[0].speak(); //=> 'my name is Robbie!'
+person1.fullName(); //=> 'Javier Cejudo'
+person1.pets().list()[0].speak(); //=> 'my name is Robbie!'
 ```
 
 We are going to need a `Person` class much like the `Animal`
@@ -112,8 +112,8 @@ class Person extends Modelico {
 
   static innerTypes() {
     return Object.freeze({
-      'givenName': AsIs.metadata(String),  // can be omitted since it is a string
-      'familyName': AsIs.metadata(String), // can be omitted since it is a string
+      'givenName': AsIs(String),  // can be omitted since it is a string
+      'familyName': AsIs(String), // can be omitted since it is a string
       'pets': List.metadata(Animal.metadata())
     });
   }
@@ -138,17 +138,17 @@ class Animal extends Modelico {
 Following the examples above:
 
 ```js
-const person2 = person.set('givenName', 'Javi');
+const person2 = person1.set('givenName', 'Javi');
 
 // person2 is a clone of person with the givenName
 // set to 'Javi', but person is not mutated
 person2.fullName(); //=> 'Javi Cejudo'
-person.fullName();  //=> 'Javier Cejudo'
+person1.fullName(); //=> 'Javier Cejudo'
 
-const person3 = person.setPath(['pets', 0, 'name'], 'Bane');
+const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
 person3.pets().list()[0].name(); //=> 'Bane'
-person.pets().list()[0].name();  //=> 'Robbie'
+person1.pets().list()[0].name(); //=> 'Robbie'
 ```
 
 The same principle applies across all Modelico classes:
@@ -158,10 +158,10 @@ The same principle applies across all Modelico classes:
 // we can shift to grab the first item without
 // modifying the internal list, as we are really
 // getting a clone of it
-person.pets().list().shift().speak(); //=> 'My name is Robbie!'
+person1.pets().list().shift().speak(); //=> 'My name is Robbie!'
 
 // When called again, the list is still intact
-person.pets().list().shift().speak(); //=> 'My name is Robbie!'
+person1.pets().list().shift().speak(); //=> 'My name is Robbie!'
 ```
 
 ## ES5 classes

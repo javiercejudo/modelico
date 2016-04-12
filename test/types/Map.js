@@ -15,7 +15,7 @@ module.exports = (should, M) => () => {
         ['b', new ModelicoDate(null)]
       ]);
 
-      const modelicoMap1 = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap1 = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), map);
       const modelicoMap2 = modelicoMap1.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
 
       should(modelicoMap2.map().get('a').date().getFullYear())
@@ -52,7 +52,7 @@ module.exports = (should, M) => () => {
         ['wedding', new ModelicoDate(new Date('2013-03-28T00:00:00.000Z'))]
       ]);
 
-      const customModelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), customMap);
+      const customModelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), customMap);
       const map2 = map.setPath([], customModelicoMap);
 
       should(map2.map().get('wedding').date().getFullYear())
@@ -67,7 +67,7 @@ module.exports = (should, M) => () => {
         ['b', new ModelicoDate(null)]
       ]);
 
-      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), map);
 
       JSON.stringify(modelicoMap)
         .should.be.exactly('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]');
@@ -75,7 +75,7 @@ module.exports = (should, M) => () => {
 
     it('should support null maps', () => {
       const map = null;
-      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), map);
 
       JSON.stringify(modelicoMap)
         .should.be.exactly('null');
@@ -86,7 +86,7 @@ module.exports = (should, M) => () => {
     it('should parse the map correctly', () => {
       const modelicoMap = JSON.parse(
         '[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]',
-        ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver
+        ModelicoMap.metadata(ModelicoAsIs(String), ModelicoDate.metadata()).reviver
       );
 
       should(modelicoMap.map().get('a').date().getFullYear())
@@ -106,7 +106,7 @@ module.exports = (should, M) => () => {
     it('should support null maps', () => {
       const modelicoMap = JSON.parse(
         'null',
-        ModelicoMap.metadata(ModelicoAsIs.metadata(String), ModelicoDate.metadata()).reviver
+        ModelicoMap.metadata(ModelicoAsIs(String), ModelicoDate.metadata()).reviver
       );
 
       should(modelicoMap.map())
@@ -116,11 +116,11 @@ module.exports = (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), new Map([
+      const modelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), new Map([
         ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 
-      const modelicoMap2 = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), new Map([
+      const modelicoMap2 = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), new Map([
         ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 
