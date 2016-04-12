@@ -47,18 +47,18 @@ module.exports = (should, M) => () => {
       }]
     }`;
 
-    const person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
+    const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
-    person.fullName().should.be.exactly('Javier Cejudo');
+    person1.fullName().should.be.exactly('Javier Cejudo');
 
-    const person2 = person.set('givenName', 'Javi');
+    const person2 = person1.set('givenName', 'Javi');
     person2.fullName().should.be.exactly('Javi Cejudo');
-    person.fullName().should.be.exactly('Javier Cejudo');
+    person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person.pets().list().shift().speak()
+    person1.pets().list().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
-    person.pets().list().shift().speak()
+    person1.pets().list().shift().speak()
       .should.be.exactly('My name is Robbie!');
   });
 };

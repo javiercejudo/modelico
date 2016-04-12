@@ -15,28 +15,48 @@ module.exports = (should, M) => () => {
         ['b', new ModelicoDate(null)]
       ]);
 
-      const modelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
-      const modelicoMap2 = modelicoMap.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
+      const modelicoMap1 = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), map);
+      const modelicoMap2 = modelicoMap1.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
 
       should(modelicoMap2.map().get('a').date().getFullYear())
         .be.exactly(1989);
 
-      // verify that modelicoMap was not mutated
-      should(modelicoMap.map().get('a').date().getFullYear())
+      // verify that modelicoMap1 was not mutated
+      should(modelicoMap1.map().get('a').date().getFullYear())
         .be.exactly(1988);
     });
 
     it('should set fields returning a new map when part of a path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
-      const author = Modelico.fromJSON(Person, authorJson);
-      const author2 = author.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
+      const author1 = Modelico.fromJSON(Person, authorJson);
+      const author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
 
       should(author2.lifeEvents().map().get('wedding').date().getFullYear())
         .be.exactly(2013);
 
-      // verify that author was not mutated
-      should(author.lifeEvents().map().get('wedding').date().getFullYear())
+      // verify that author1 was not mutated
+      should(author1.lifeEvents().map().get('wedding').date().getFullYear())
         .be.exactly(2012);
+    });
+
+    it('edge case when setPath is called with an empty path', () => {
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+      const author = Modelico.fromJSON(Person, authorJson);
+
+      const map = author.lifeEvents();
+
+      should(map.map().get('wedding').date().getFullYear())
+        .be.exactly(2012);
+
+      const customMap = new Map([
+        ['wedding', new ModelicoDate(new Date('2013-03-28T00:00:00.000Z'))]
+      ]);
+
+      const customModelicoMap = new ModelicoMap(ModelicoAsIs.metadata(String), ModelicoDate.metadata(), customMap);
+      const map2 = map.setPath([], customModelicoMap);
+
+      should(map2.map().get('wedding').date().getFullYear())
+        .be.exactly(2013);
     });
   });
 

@@ -49,26 +49,26 @@ module.exports = (should, M) => () => {
       }]
     }`;
 
-    const person = JSON.parse(personJson, Modelico.metadata(Person).reviver);
+    const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
-    person.fullName().should.be.exactly('Javier Cejudo');
+    person1.fullName().should.be.exactly('Javier Cejudo');
 
-    const person2 = person.set('givenName', 'Javi');
+    const person2 = person1.set('givenName', 'Javi');
     person2.fullName().should.be.exactly('Javi Cejudo');
-    person.fullName().should.be.exactly('Javier Cejudo');
+    person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person.pets().list().shift().speak()
+    person1.pets().list().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
-    person.pets().list().shift().speak()
+    person1.pets().list().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
-    const person3 = person.setPath(['pets', 0, 'name'], 'Baine');
+    const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
     person3.pets().list()[0].name()
-      .should.be.exactly('Baine');
+      .should.be.exactly('Bane');
 
-    person.pets().list()[0].name()
+    person1.pets().list()[0].name()
       .should.be.exactly('Robbie');
   });
 };

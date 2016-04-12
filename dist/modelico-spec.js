@@ -250,9 +250,9 @@ module.exports = function (should, M) {
 
       person.pets().list().shift().speak().should.be.exactly('My name is Robbie!');
 
-      var person3 = person.setPath(['pets', 0, 'name'], 'Baine');
+      var person3 = person.setPath(['pets', 0, 'name'], 'Bane');
 
-      person3.pets().list()[0].name().should.be.exactly('Baine');
+      person3.pets().list()[0].name().should.be.exactly('Bane');
 
       person.pets().list()[0].name().should.be.exactly('Robbie');
     });
@@ -304,9 +304,9 @@ module.exports = function (should, M) {
 
       pet.speak().should.be.exactly('My name is Robbie!');
 
-      var pet2 = pet.set('name', 'Baine');
+      var pet2 = pet.set('name', 'Bane');
 
-      pet2.name().should.be.exactly('Baine');
+      pet2.name().should.be.exactly('Bane');
       pet.name().should.be.exactly('Robbie');
     });
   };
@@ -430,16 +430,14 @@ module.exports = function (should, M) {
     var Person = require('./fixtures/Person')(M);
 
     var Modelico = M.Modelico;
-    var List = M.List;
-    var ModelicoDate = M.Date;
 
     describe('setting', function () {
       it('should set items in the list correctly', function () {
-        var list = [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')), new ModelicoDate(null)];
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
 
-        var modelicoList = new List(ModelicoDate.metadata(), list);
+        var modelicoList = new M.List(M.Date.metadata(), list);
 
-        var modelicoList2 = modelicoList.set(0, new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
+        var modelicoList2 = modelicoList.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
         should(modelicoList2.list()[0].date().getFullYear()).be.exactly(1989);
 
@@ -448,9 +446,9 @@ module.exports = function (should, M) {
       });
 
       it('should set items in the list correctly when part of a path', function () {
-        var list = [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')), new ModelicoDate(null)];
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
 
-        var modelicoList = new List(ModelicoDate.metadata(), list);
+        var modelicoList = new M.List(M.Date.metadata(), list);
         var modelicoList2 = modelicoList.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
         should(modelicoList2.list()[0].date().getFullYear()).be.exactly(1989);
@@ -458,20 +456,29 @@ module.exports = function (should, M) {
         // verify that modelicoList was not mutated
         should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
       });
+
+      it('should be able to set a whole list', function () {
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+        var author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+
+        var author2 = author.set('importantDatesList', new M.List(M.Date.metadata(), author.importantDatesList().list().concat(new M.Date(new Date()))));
+
+        console.log(JSON.stringify(author2));
+      });
     });
 
     describe('stringifying', function () {
       it('should stringify the list correctly', function () {
-        var list = [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')), new ModelicoDate(null)];
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
 
-        var modelicoList = new List(ModelicoDate.metadata(), list);
+        var modelicoList = new M.List(M.Date.metadata(), list);
 
         JSON.stringify(modelicoList).should.be.exactly('["1988-04-16T00:00:00.000Z",null]');
       });
 
       it('should support null lists', function () {
         var list = null;
-        var modelicoList = new List(ModelicoDate.metadata(), list);
+        var modelicoList = new M.List(M.Date.metadata(), list);
 
         JSON.stringify(modelicoList).should.be.exactly('null');
       });
@@ -479,7 +486,7 @@ module.exports = function (should, M) {
 
     describe('parsing', function () {
       it('should parse the list correctly', function () {
-        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z",null]', List.metadata(ModelicoDate.metadata()).reviver);
+        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z",null]', M.List.metadata(M.Date.metadata()).reviver);
 
         should(modelicoList.list()[0].date().getFullYear()).be.exactly(1988);
 
@@ -488,13 +495,13 @@ module.exports = function (should, M) {
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
-        var author = Modelico.fromJSON(Person, authorJson);
+        var author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
         should(author.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
       });
 
       it('should support null lists', function () {
-        var modelicoList = JSON.parse('null', List.metadata(ModelicoDate.metadata()).reviver);
+        var modelicoList = JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver);
 
         should(modelicoList.list()).be.exactly(null);
       });
@@ -502,9 +509,9 @@ module.exports = function (should, M) {
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoList = new List(ModelicoDate.metadata(), [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoList = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
-        var modelicoList2 = new List(ModelicoDate.metadata(), [new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoList2 = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
         modelicoList.should.not.be.exactly(modelicoList2);
         modelicoList.should.not.equal(modelicoList2);

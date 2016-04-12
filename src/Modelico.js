@@ -42,6 +42,10 @@ class Modelico {
   }
 
   setPath(path, value) {
+    if (path.length === 0) {
+      return value;
+    }
+
     if (path.length === 1) {
       return this.set(path[0], value);
     }

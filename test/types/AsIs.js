@@ -16,8 +16,8 @@ module.exports = (should, M) => () => {
     it('should be immutable', () => {
       const asIsObject = new AsIs(Object, {two: 2});
 
-      (_ => AsIs.newStaticFn = () => {}).should.throw();
-      (_ => asIsObject.value = 3).should.throw();
+      (() => AsIs.newStaticFn = () => {}).should.throw();
+      (() => asIsObject.value = 3).should.throw();
 
       asIsObject.value().two = 3;
       should(asIsObject.value().two).be.exactly(2);
@@ -36,19 +36,20 @@ module.exports = (should, M) => () => {
     });
 
     it('should set the entity correctly when part of a path', () => {
-      const list = [
-        new AsIs(String, 'a'),
-        new AsIs(String, 'b')
-      ];
+      const list = [new AsIs(String, 'a'), new AsIs(String, 'b')];
 
-      const modelicoList = new List(AsIs.metadata(String), list);
-      const modelicoList2 = modelicoList.setPath([1], 'B');
+      const modelicoList1 = new List(AsIs.metadata(String), list);
+      const modelicoList2 = modelicoList1.setPath([1], new AsIs(String, 'B'));
+      const modelicoList3 = modelicoList2.setPath([1, 'value'], 'bb');
 
       modelicoList2.list()[1].value()
         .should.be.exactly('B');
 
-      // verify that modelicoList was not mutated
-      modelicoList.list()[1].value()
+      modelicoList3.list()[1].value()
+        .should.be.exactly('bb');
+
+      // verify that modelicoList1 was not mutated
+      modelicoList1.list()[1].value()
         .should.be.exactly('b');
     });
   });
@@ -81,7 +82,7 @@ module.exports = (should, M) => () => {
     });
 
     it('should be immutable', () => {
-      (_ => AsIs.metadata = {}).should.throw();
+      (() => AsIs.metadata = {}).should.throw();
     });
   });
 };
