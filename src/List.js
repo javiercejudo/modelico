@@ -2,7 +2,7 @@
 
 const U = require('./U');
 const Modelico = require('./Modelico');
-const AsIs = require('./AsIs').metadata;
+const AsIs = require('./AsIs');
 
 const reviver = (itemMetadata, k, v) => {
   if (k === '') {

@@ -2,7 +2,7 @@
 
 const U = require('./U');
 const Modelico = require('./Modelico');
-const AsIs = require('./AsIs').metadata;
+const AsIs = require('./AsIs');
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 const reviverOrDefault = metadata => (metadata.reviver || U.identityReviver);
