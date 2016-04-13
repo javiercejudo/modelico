@@ -225,7 +225,7 @@ module.exports = function (should, M) {
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            'givenName': AsIs(String),
+            'givenName': AsIs(M.Any),
             'familyName': AsIs(String),
             'pets': List.metadata(Animal.metadata())
           });
@@ -322,6 +322,7 @@ module.exports = function (should, M) {
     describe('ModelicoBase', require('./types/Modelico').apply(_, deps));
     describe('ModelicoAsIs', require('./types/AsIs').apply(_, deps));
     describe('ModelicoMap', require('./types/Map').apply(_, deps));
+    describe('ModelicoEnumMap', require('./types/EnumMap').apply(_, deps));
     describe('ModelicoList', require('./types/List').apply(_, deps));
     describe('Readme Simple Example', require('./example/simple').apply(_, deps));
     describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
@@ -330,7 +331,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./Immutable.js/":1,"./example/advanced":3,"./example/advanced.es5":2,"./example/simple":4,"./types/AsIs":6,"./types/List":7,"./types/Map":8,"./types/Modelico":9}],6:[function(require,module,exports){
+},{"./Immutable.js/":1,"./example/advanced":3,"./example/advanced.es5":2,"./example/simple":4,"./types/AsIs":6,"./types/EnumMap":7,"./types/List":8,"./types/Map":9,"./types/Modelico":10}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -375,6 +376,84 @@ module.exports = function (should, M) {
 };
 
 },{}],7:[function(require,module,exports){
+'use strict';
+
+module.exports = function (should, M) {
+  return function () {
+    var PartOfDay = require('./fixtures/PartOfDay')(M);
+
+    describe('setting', function () {
+      it('should set fields returning a new enum map', function () {
+        var map = new Map([[PartOfDay.MORNING(), 'Good morning!'], [PartOfDay.AFTERNOON(), 'Good afternoon!'], [PartOfDay.EVENING(), 'Good evening!']]);
+
+        var greetings1 = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
+        var greetings2 = greetings1.set(PartOfDay.AFTERNOON(), 'GOOD AFTERNOON!');
+
+        greetings2.map().get(PartOfDay.AFTERNOON()).should.be.exactly('GOOD AFTERNOON!');
+
+        greetings1.map().get(PartOfDay.AFTERNOON()).should.be.exactly('Good afternoon!');
+      });
+
+      it('should set fields returning a new enum map when part of a path', function () {
+        var map = new Map([[PartOfDay.MORNING(), new M.Date(new Date('1988-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), new M.Date(new Date('2000-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), new M.Date(new Date('2012-04-16T00:00:00.000Z'))]]);
+
+        var greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map);
+        var greetings2 = greetings1.setPath([PartOfDay.EVENING(), 'date'], new Date('2013-04-16T00:00:00.000Z'));
+
+        should(greetings2.map().get(PartOfDay.EVENING()).date().getFullYear()).be.exactly(2013);
+
+        should(greetings1.map().get(PartOfDay.EVENING()).date().getFullYear()).be.exactly(2012);
+      });
+
+      it('edge case when setPath is called with an empty path', function () {
+        var map1 = new Map([[PartOfDay.MORNING(), new M.Date(new Date('1988-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), new M.Date(new Date('2000-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), new M.Date(new Date('2012-04-16T00:00:00.000Z'))]]);
+
+        var map2 = new Map([[PartOfDay.MORNING(), new M.Date(new Date('1989-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), new M.Date(new Date('2001-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), new M.Date(new Date('2013-04-16T00:00:00.000Z'))]]);
+
+        var greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map1);
+        var greetings2 = greetings1.setPath([], new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map2));
+
+        should(greetings2.map().get(PartOfDay.EVENING()).date().getFullYear()).be.exactly(2013);
+
+        should(greetings1.map().get(PartOfDay.EVENING()).date().getFullYear()).be.exactly(2012);
+      });
+    });
+
+    describe('stringifying', function () {
+      it('should stringify the enum map correctly', function () {
+        var map = new Map([[PartOfDay.MORNING(), 'Good morning!'], [PartOfDay.AFTERNOON(), 'Good afternoon!'], [PartOfDay.EVENING(), 'Good evening!']]);
+
+        var greetings = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
+
+        JSON.stringify(greetings).should.be.exactly('{"MORNING":"Good morning!","AFTERNOON":"Good afternoon!","EVENING":"Good evening!"}');
+      });
+
+      it('should support null enum maps', function () {
+        var map = null;
+
+        var greetings = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
+
+        JSON.stringify(greetings).should.be.exactly('null');
+      });
+    });
+
+    describe('parsing', function () {
+      it('should parse the enum map correctly', function () {
+        var greetings = JSON.parse('{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":[]}', M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(M.Any)).reviver);
+
+        greetings.map().get(PartOfDay.MORNING()).should.be.exactly('Good morning!');
+      });
+
+      it('should support null enum maps', function () {
+        var greetings = JSON.parse('null', M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(String)).reviver);
+
+        should(greetings.map()).be.exactly(null);
+      });
+    });
+  };
+};
+
+},{"./fixtures/PartOfDay":12}],8:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -508,7 +587,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":12}],8:[function(require,module,exports){
+},{"./fixtures/Person":13}],9:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -616,7 +695,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":12}],9:[function(require,module,exports){
+},{"./fixtures/Person":13}],10:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -775,7 +854,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Animal":10,"./fixtures/PartOfDay":11,"./fixtures/Person":12,"./fixtures/Sex":13}],10:[function(require,module,exports){
+},{"./fixtures/Animal":11,"./fixtures/PartOfDay":12,"./fixtures/Person":13,"./fixtures/Sex":14}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -811,7 +890,7 @@ module.exports = function (M) {
   return Object.freeze(Animal);
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var range = function range(minTime, maxTime) {
@@ -827,7 +906,7 @@ module.exports = function (M) {
   });
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -895,7 +974,7 @@ module.exports = function (M) {
   return Object.freeze(Person);
 };
 
-},{"./PartOfDay":11,"./Sex":13}],13:[function(require,module,exports){
+},{"./PartOfDay":12,"./Sex":14}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function (M) {
