@@ -7,8 +7,7 @@ const ModelicoDate = require('./Date');
 const AsIs = require('./AsIs');
 const List = require('./List');
 const Enum = require('./Enum');
-
-const Any = {};
+const Any = require('./Any');
 
 module.exports = Object.freeze({
   Modelico,

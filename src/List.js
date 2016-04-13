@@ -3,6 +3,7 @@
 const U = require('./U');
 const Modelico = require('./Modelico');
 const AsIs = require('./AsIs');
+const Any = require('./Any');
 
 const reviver = (itemMetadata, k, v) => {
   if (k !== '') {
@@ -45,7 +46,7 @@ class ModelicoList extends Modelico {
   }
 
   static fromArray(arr) {
-    return new ModelicoList(AsIs(), arr);
+    return new ModelicoList(AsIs(Any), arr);
   }
 
   static metadata(itemMetadata) {

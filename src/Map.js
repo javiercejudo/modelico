@@ -3,6 +3,7 @@
 const U = require('./U');
 const AbstractMap = require('./AbstractMap');
 const AsIs = require('./AsIs');
+const Any = require('./Any');
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
@@ -41,7 +42,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   static fromMap(map) {
-    return new ModelicoMap(AsIs(String), AsIs(), map);
+    return new ModelicoMap(AsIs(String), AsIs(Any), map);
   }
 
   static metadata(keyMetadata, valueMetadata) {
