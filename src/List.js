@@ -5,13 +5,13 @@ const Modelico = require('./Modelico');
 const AsIs = require('./AsIs');
 
 const reviver = (itemMetadata, k, v) => {
-  if (k === '') {
-    const list = (v === null) ? null : v.map(U.bind(itemMetadata.reviver, k));
-
-    return new ModelicoList(itemMetadata, list);
+  if (k !== '') {
+    return v;
   }
 
-  return v;
+  const list = (v === null) ? null : v.map(U.bind(itemMetadata.reviver, k));
+
+  return new ModelicoList(itemMetadata, list);
 }
 
 class ModelicoList extends Modelico {
