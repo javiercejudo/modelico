@@ -17,7 +17,7 @@ const reviver = (Type, k, v) => {
     const innerTypeMetadata = Type.innerTypes()[k];
 
     if (innerTypeMetadata) {
-      return innerTypeMetadata.reviver('', v);
+      return U.reviverOrAsIs(innerTypeMetadata)('', v);
     }
   }
 

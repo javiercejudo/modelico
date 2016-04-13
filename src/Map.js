@@ -5,21 +5,20 @@ const Modelico = require('./Modelico');
 const AsIs = require('./AsIs');
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
-const reviverOrDefault = metadata => (metadata.reviver || U.identityReviver);
 
-const parseMapper = subtypes => pairObject => [
-  reviverOrDefault(subtypes.keyMetadata)('', pairObject.key),
-  reviverOrDefault(subtypes.valueMetadata)('', pairObject.value)
+const parseMapper = innerTypes => pairObject => [
+  U.reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key),
+  U.reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
 ];
 
 const reviver = (innerTypes, k, v) => {
-  if (k === '') {
-    const map = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
-
-    return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
+  if (k !== '') {
+    return v;
   }
 
-  return v;
+  const map = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
+
+  return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
 }
 
 class ModelicoMap extends Modelico {

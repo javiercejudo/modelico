@@ -33,7 +33,7 @@ module.exports = (should, M) => () => {
 
     static innerTypes() {
       return Object.freeze({
-        'givenName': AsIs(String),
+        'givenName': AsIs(M.Any),
         'familyName': AsIs(String),
         'pets': List.metadata(Animal.metadata())
       });
