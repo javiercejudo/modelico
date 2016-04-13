@@ -2,4 +2,4 @@
 
 const U = require('./U');
 
-module.exports = type => Object.freeze({type: type, reviver: U.identityReviver});
+module.exports = type => Object.freeze({type: type, reviver: U.asIsReviver});
