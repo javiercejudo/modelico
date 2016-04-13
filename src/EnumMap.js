@@ -1,7 +1,7 @@
 'use strict';
 
 const U = require('./U');
-const Modelico = require('./Modelico');
+const AbstractMap = require('./AbstractMap');
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1];
@@ -10,7 +10,7 @@ const stringifyReducer = (acc, pair) => {
 }
 
 const parseMapper = (innerTypes, object) => (enumerator) => [
-  U.reviverOrAsIs(innerTypes.enumMetadata)('', enumerator),
+  U.reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
   U.reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
 ];
 
@@ -21,34 +21,17 @@ const reviver = (innerTypes, k, v) => {
 
   const map = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
 
-  return new ModelicoEnumMap(innerTypes.enumMetadata, innerTypes.valueMetadata, map);
+  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
 }
 
-class ModelicoEnumMap extends Modelico {
-  constructor(enumMetadata, valueMetadata, map) {
-    super(ModelicoEnumMap, {map});
-
-    this.innerTypes = () => Object.freeze({enumMetadata, valueMetadata});
-    this.map = () => (map === null) ? null : new Map(map);
-
+class ModelicoEnumMap extends AbstractMap {
+  constructor(keyMetadata, valueMetadata, map) {
+    super(ModelicoEnumMap, keyMetadata, valueMetadata, map);
     Object.freeze(this);
   }
 
   set(enumerator, value) {
-    const innerTypes = this.innerTypes();
-    const newMap = this.map();
-    newMap.set(enumerator, value);
-
-    return new ModelicoEnumMap(innerTypes.enumMetadata, innerTypes.valueMetadata, newMap);
-  }
-
-  setPath(path, value) {
-    if (path.length === 0) {
-      return value;
-    }
-
-    const item = this.map().get(path[0]);
-    return this.set(path[0], item.setPath(path.slice(1), value));
+    return super.set(ModelicoEnumMap, enumerator, value);
   }
 
   toJSON() {
@@ -56,8 +39,8 @@ class ModelicoEnumMap extends Modelico {
     return (fields.map === null) ? null : Array.from(fields.map).reduce(stringifyReducer, {});
   }
 
-  static metadata(enumMetadata, valueMetadata) {
-    return Object.freeze({type: ModelicoEnumMap, reviver: U.bind(reviver, {enumMetadata, valueMetadata})});
+  static metadata(keyMetadata, valueMetadata) {
+    return AbstractMap.metadata(ModelicoEnumMap, reviver, keyMetadata, valueMetadata);
   }
 }
 

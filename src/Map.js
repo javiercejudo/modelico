@@ -1,7 +1,7 @@
 'use strict';
 
 const U = require('./U');
-const Modelico = require('./Modelico');
+const AbstractMap = require('./AbstractMap');
 const AsIs = require('./AsIs');
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
@@ -21,31 +21,14 @@ const reviver = (innerTypes, k, v) => {
   return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
 }
 
-class ModelicoMap extends Modelico {
+class ModelicoMap extends AbstractMap {
   constructor(keyMetadata, valueMetadata, map) {
-    super(ModelicoMap, {map});
-
-    this.innerTypes = () => Object.freeze({keyMetadata, valueMetadata});
-    this.map = () => (map === null) ? null : new Map(map);
-
+    super(ModelicoMap, keyMetadata, valueMetadata, map);
     Object.freeze(this);
   }
 
-  set(key, value) {
-    const innerTypes = this.innerTypes();
-    const newMap = this.map();
-    newMap.set(key, value);
-
-    return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
-  }
-
-  setPath(path, value) {
-    if (path.length === 0) {
-      return value;
-    }
-
-    const item = this.map().get(path[0]);
-    return this.set(path[0], item.setPath(path.slice(1), value));
+  set(enumerator, value) {
+    return super.set(ModelicoMap, enumerator, value);
   }
 
   toJSON() {
@@ -62,7 +45,7 @@ class ModelicoMap extends Modelico {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return Object.freeze({type: ModelicoMap, reviver: U.bind(reviver, {keyMetadata, valueMetadata})});
+    return AbstractMap.metadata(ModelicoMap, reviver, keyMetadata, valueMetadata);
   }
 }
 
