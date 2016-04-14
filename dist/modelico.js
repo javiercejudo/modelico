@@ -3,7 +3,7 @@
 
 module.exports = require('./src');
 
-},{"./src":11}],2:[function(require,module,exports){
+},{"./src":12}],2:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35,15 +35,6 @@ var AbstractMap = function (_Modelico) {
   }
 
   _createClass(AbstractMap, [{
-    key: 'set',
-    value: function set(Type, key, value) {
-      var innerTypes = this.innerTypes();
-      var newMap = this.map();
-      newMap.set(key, value);
-
-      return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
-    }
-  }, {
     key: 'setPath',
     value: function setPath(path, value) {
       if (path.length === 0) {
@@ -53,7 +44,19 @@ var AbstractMap = function (_Modelico) {
       var item = this.map().get(path[0]);
       return this.set(path[0], item.setPath(path.slice(1), value));
     }
+
+    // as static to support IE < 11
+
   }], [{
+    key: 'set',
+    value: function set(Type, key, value) {
+      var innerTypes = this.innerTypes();
+      var newMap = this.map();
+      newMap.set(key, value);
+
+      return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
+    }
+  }, {
     key: 'metadata',
     value: function metadata(Type, reviver, keyMetadata, valueMetadata) {
       return Object.freeze({ type: Type, reviver: U.bind(reviver, { keyMetadata: keyMetadata, valueMetadata: valueMetadata }) });
@@ -65,16 +68,21 @@ var AbstractMap = function (_Modelico) {
 
 module.exports = Object.freeze(AbstractMap);
 
-},{"./Modelico":9,"./U":10}],3:[function(require,module,exports){
+},{"./Modelico":10,"./U":11}],3:[function(require,module,exports){
+'use strict';
+
+module.exports = {};
+
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var U = require('./U');
 
 module.exports = function (type) {
-  return Object.freeze({ type: type, reviver: U.identityReviver });
+  return Object.freeze({ type: type, reviver: U.asIsReviver });
 };
 
-},{"./U":10}],4:[function(require,module,exports){
+},{"./U":11}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -140,7 +148,7 @@ var ModelicoDate = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoDate);
 
-},{"./Modelico":9}],5:[function(require,module,exports){
+},{"./Modelico":10}],6:[function(require,module,exports){
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -192,12 +200,10 @@ var ModelicoEnum = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoEnum);
 
-},{"./Modelico":9,"./U":10}],6:[function(require,module,exports){
+},{"./Modelico":10,"./U":11}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -245,7 +251,7 @@ var ModelicoEnumMap = function (_AbstractMap) {
   _createClass(ModelicoEnumMap, [{
     key: 'set',
     value: function set(enumerator, value) {
-      return _get(Object.getPrototypeOf(ModelicoEnumMap.prototype), 'set', this).call(this, ModelicoEnumMap, enumerator, value);
+      return AbstractMap.set.call(this, ModelicoEnumMap, enumerator, value);
     }
   }, {
     key: 'toJSON',
@@ -265,7 +271,7 @@ var ModelicoEnumMap = function (_AbstractMap) {
 
 module.exports = Object.freeze(ModelicoEnumMap);
 
-},{"./AbstractMap":2,"./U":10}],7:[function(require,module,exports){
+},{"./AbstractMap":2,"./U":11}],8:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -279,6 +285,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var U = require('./U');
 var Modelico = require('./Modelico');
 var AsIs = require('./AsIs');
+var Any = require('./Any');
 
 var reviver = function reviver(itemMetadata, k, v) {
   if (k !== '') {
@@ -335,7 +342,7 @@ var ModelicoList = function (_Modelico) {
   }], [{
     key: 'fromArray',
     value: function fromArray(arr) {
-      return new ModelicoList(AsIs(), arr);
+      return new ModelicoList(AsIs(Any), arr);
     }
   }, {
     key: 'metadata',
@@ -349,12 +356,10 @@ var ModelicoList = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoList);
 
-},{"./AsIs":3,"./Modelico":9,"./U":10}],8:[function(require,module,exports){
+},{"./Any":3,"./AsIs":4,"./Modelico":10,"./U":11}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -365,6 +370,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var U = require('./U');
 var AbstractMap = require('./AbstractMap');
 var AsIs = require('./AsIs');
+var Any = require('./Any');
 
 var stringifyMapper = function stringifyMapper(pair) {
   return { key: pair[0], value: pair[1] };
@@ -401,12 +407,13 @@ var ModelicoMap = function (_AbstractMap) {
   _createClass(ModelicoMap, [{
     key: 'set',
     value: function set(enumerator, value) {
-      return _get(Object.getPrototypeOf(ModelicoMap.prototype), 'set', this).call(this, ModelicoMap, enumerator, value);
+      return AbstractMap.set.call(this, ModelicoMap, enumerator, value);
     }
   }, {
     key: 'toJSON',
     value: function toJSON() {
       var fields = this.fields();
+
       return fields.map === null ? null : Array.from(fields.map).map(stringifyMapper);
     }
   }], [{
@@ -417,7 +424,7 @@ var ModelicoMap = function (_AbstractMap) {
   }, {
     key: 'fromMap',
     value: function fromMap(map) {
-      return new ModelicoMap(AsIs(String), AsIs(), map);
+      return new ModelicoMap(AsIs(String), AsIs(Any), map);
     }
   }, {
     key: 'metadata',
@@ -431,7 +438,7 @@ var ModelicoMap = function (_AbstractMap) {
 
 module.exports = Object.freeze(ModelicoMap);
 
-},{"./AbstractMap":2,"./AsIs":3,"./U":10}],9:[function(require,module,exports){
+},{"./AbstractMap":2,"./Any":3,"./AsIs":4,"./U":11}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -534,7 +541,7 @@ var Modelico = function () {
 
 module.exports = Object.freeze(Modelico);
 
-},{"./U":10}],10:[function(require,module,exports){
+},{"./U":11}],11:[function(require,module,exports){
 'use strict';
 
 var asIsReviver = function asIsReviver(k, v) {
@@ -555,10 +562,11 @@ module.exports = Object.freeze({
   },
   reviverOrAsIs: function reviverOrAsIs(metadata) {
     return metadata.reviver || asIsReviver;
-  }
+  },
+  asIsReviver: asIsReviver
 });
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var Modelico = require('./Modelico');
@@ -568,8 +576,7 @@ var ModelicoDate = require('./Date');
 var AsIs = require('./AsIs');
 var List = require('./List');
 var Enum = require('./Enum');
-
-var Any = {};
+var Any = require('./Any');
 
 module.exports = Object.freeze({
   Modelico: Modelico,
@@ -582,5 +589,5 @@ module.exports = Object.freeze({
   Enum: Enum
 });
 
-},{"./AsIs":3,"./Date":4,"./Enum":5,"./EnumMap":6,"./List":7,"./Map":8,"./Modelico":9}]},{},[1])(1)
+},{"./Any":3,"./AsIs":4,"./Date":5,"./Enum":6,"./EnumMap":7,"./List":8,"./Map":9,"./Modelico":10}]},{},[1])(1)
 });

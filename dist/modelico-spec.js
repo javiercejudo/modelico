@@ -1,14 +1,10 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.modelicoSpec = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var objToArr = function objToArr(obj) {
-  return Object.keys(obj).map(function (k) {
-    return [k, obj[k]];
-  });
-};
-
-module.exports = function (should, M) {
+module.exports = function (U, should, M) {
   return function () {
+    var objToArr = U.objToArr;
+
     it('Getting started', function () {
       var map1 = M.Map.fromObject({ a: 1, b: 2, c: 3 });
       var map2 = map1.set('b', 50);
@@ -315,27 +311,41 @@ module.exports = function (should, M) {
 },{}],5:[function(require,module,exports){
 'use strict';
 
-module.exports = function (should, M) {
+var buildUtils = function buildUtils(options) {
+  return Object.freeze({
+    skipIfLegacyIE: options.legacyIE ? it.skip : it,
+    objToArr: function objToArr(obj) {
+      return Object.keys(obj).map(function (k) {
+        return [k, obj[k]];
+      });
+    }
+  });
+};
+
+module.exports = function (options, should, M) {
   return function (_) {
+    var U = buildUtils(options);
     var deps = [should, M];
+    var utilsAndDeps = [U].concat(deps);
 
     describe('ModelicoBase', require('./types/Modelico').apply(_, deps));
-    describe('ModelicoAsIs', require('./types/AsIs').apply(_, deps));
+    describe('ModelicoAsIs', require('./types/AsIs').apply(_, utilsAndDeps));
     describe('ModelicoMap', require('./types/Map').apply(_, deps));
     describe('ModelicoEnumMap', require('./types/EnumMap').apply(_, deps));
     describe('ModelicoList', require('./types/List').apply(_, deps));
     describe('Readme Simple Example', require('./example/simple').apply(_, deps));
     describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
     describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
-    describe('Immutable.js examples', require('./Immutable.js/').apply(_, deps));
+    describe('Immutable.js examples', require('./Immutable.js/').apply(_, utilsAndDeps));
   };
 };
 
 },{"./Immutable.js/":1,"./example/advanced":3,"./example/advanced.es5":2,"./example/simple":4,"./types/AsIs":6,"./types/EnumMap":7,"./types/List":8,"./types/Map":9,"./types/Modelico":10}],6:[function(require,module,exports){
 'use strict';
 
-module.exports = function (should, M) {
+module.exports = function (U, should, M) {
   return function () {
+
     var AsIs = M.AsIs;
     var List = M.List;
 
@@ -364,7 +374,7 @@ module.exports = function (should, M) {
         should(asIsObject.two).be.exactly(2);
       });
 
-      it('should be immutable', function () {
+      U.skipIfLegacyIE('should be immutable', function () {
         (function () {
           return AsIs().reviver = function (x) {
             return x;
