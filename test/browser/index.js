@@ -2,4 +2,4 @@
 
 'use strict';
 
-describe('Modelico', modelicoSpec(Should, Modelico));
+describe('Modelico', modelicoSpec({}, Should, Modelico));

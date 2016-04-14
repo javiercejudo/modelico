@@ -18,7 +18,7 @@ module.exports = function(config) {
       'node_modules/babel-polyfill/dist/polyfill.min.js',
       'dist/modelico.min.js',
       'dist/modelico-spec.js',
-      'test/browser/index.js'
+      'test/browser/' + (process.env.ENTRY || 'index.js')
     ],
 
 
@@ -113,6 +113,18 @@ function customLaunchers() {
       browserName: 'internet explorer',
       platform: 'Windows 8.1',
       version: '11'
+    },
+    'SL_IE_10': {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 7',
+      version: '10'
+    },
+    'SL_IE_9': {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 7',
+      version: '9'
     },
     'SL_Opera': {
       base: 'SauceLabs',

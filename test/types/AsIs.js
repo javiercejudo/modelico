@@ -1,6 +1,7 @@
 'use strict';
 
-module.exports = (should, M) => () => {
+module.exports = (U, should, M) => () => {
+
   const AsIs = M.AsIs;
   const List = M.List;
 
@@ -30,7 +31,7 @@ module.exports = (should, M) => () => {
       should(asIsObject.two).be.exactly(2);
     });
 
-    it('should be immutable', () => {
+    U.skipIfLegacyIE('should be immutable', () => {
       (() => AsIs().reviver = x => x).should.throw();
     });
   });

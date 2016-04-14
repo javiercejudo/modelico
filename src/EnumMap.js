@@ -31,7 +31,7 @@ class ModelicoEnumMap extends AbstractMap {
   }
 
   set(enumerator, value) {
-    return super.set(ModelicoEnumMap, enumerator, value);
+    return AbstractMap.set.call(this, ModelicoEnumMap, enumerator, value);
   }
 
   toJSON() {

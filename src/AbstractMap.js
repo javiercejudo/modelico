@@ -11,14 +11,6 @@ class AbstractMap extends Modelico {
     this.map = () => (map === null) ? null : new Map(map);
   }
 
-  set(Type, key, value) {
-    const innerTypes = this.innerTypes();
-    const newMap = this.map();
-    newMap.set(key, value);
-
-    return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
-  }
-
   setPath(path, value) {
     if (path.length === 0) {
       return value;
@@ -26,6 +18,15 @@ class AbstractMap extends Modelico {
 
     const item = this.map().get(path[0]);
     return this.set(path[0], item.setPath(path.slice(1), value));
+  }
+
+  // as static to support IE < 11
+  static set(Type, key, value) {
+    const innerTypes = this.innerTypes();
+    const newMap = this.map();
+    newMap.set(key, value);
+
+    return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
   }
 
   static metadata(Type, reviver, keyMetadata, valueMetadata) {

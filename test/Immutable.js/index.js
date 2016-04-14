@@ -1,8 +1,8 @@
 'use strict';
 
-var objToArr = obj => Object.keys(obj).map(k => [k, obj[k]]);
+module.exports = (U, should, M) => () => {
+  var objToArr = U.objToArr;
 
-module.exports = (should, M) => () => {
   it('Getting started', () => {
     var map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
     var map2 = map1.set('b', 50);

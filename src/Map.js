@@ -29,11 +29,12 @@ class ModelicoMap extends AbstractMap {
   }
 
   set(enumerator, value) {
-    return super.set(ModelicoMap, enumerator, value);
+    return AbstractMap.set.call(this, ModelicoMap, enumerator, value);
   }
 
   toJSON() {
     const fields = this.fields();
+
     return (fields.map === null) ? null : Array.from(fields.map).map(stringifyMapper);
   }
 
