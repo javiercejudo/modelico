@@ -17,9 +17,8 @@
     (function() {
       'use strict';
 
-      var call = Function.call;
       var prototypeOfObject = Object.prototype;
-      var toStr = call.bind(prototypeOfObject.toString);
+      var toStr = Function.call.bind(prototypeOfObject.toString);
 
       // https://github.com/es-shims/es5-shim/issues#issue/2
       // http://ejohn.org/blog/objectgetprototypeof/
@@ -60,7 +59,11 @@
   <script>
     mocha.setup('bdd');
 
-    describe('Modelico', modelicoSpec(Should, Modelico));
+    var options = {
+      legacyIE: true
+    };
+
+    describe('Modelico', modelicoSpec(options, Should, Modelico));
 
     mocha.checkLeaks();
     mocha.run();
