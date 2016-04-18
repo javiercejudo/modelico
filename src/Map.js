@@ -25,7 +25,8 @@ const reviver = (innerTypes, k, v) => {
 class ModelicoMap extends AbstractMap {
   constructor(keyMetadata, valueMetadata, map) {
     super(ModelicoMap, keyMetadata, valueMetadata, map);
-    Object.freeze(this);
+
+    return Object.freeze(this);
   }
 
   set(enumerator, value) {
@@ -33,9 +34,9 @@ class ModelicoMap extends AbstractMap {
   }
 
   toJSON() {
-    const fields = this.fields();
+    const map = this.fields().map;
 
-    return (fields.map === null) ? null : Array.from(fields.map).map(stringifyMapper);
+    return (map === null) ? null : Array.from(map).map(stringifyMapper);
   }
 
   static fromObject(obj) {

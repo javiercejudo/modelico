@@ -25,7 +25,7 @@ class ModelicoEnum extends Modelico {
       reviver: U.bind(reviver, enumerators)
     });
 
-    Object.freeze(this);
+    return Object.freeze(this);
   }
 }
 

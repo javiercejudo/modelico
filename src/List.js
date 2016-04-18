@@ -22,7 +22,7 @@ class ModelicoList extends Modelico {
     this.itemMetadata = () => itemMetadata;
     this.list = () => (list === null) ? null : list.slice();
 
-    Object.freeze(this);
+    return Object.freeze(this);
   }
 
   set(index, value) {
@@ -38,6 +38,7 @@ class ModelicoList extends Modelico {
     }
 
     const item = this.list()[path[0]];
+
     return this.set(path[0], item.setPath(path.slice(1), value));
   }
 

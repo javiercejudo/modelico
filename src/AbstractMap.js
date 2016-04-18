@@ -9,6 +9,8 @@ class AbstractMap extends Modelico {
 
     this.innerTypes = () => Object.freeze({keyMetadata, valueMetadata});
     this.map = () => (map === null) ? null : new Map(map);
+
+    return this;
   }
 
   setPath(path, value) {

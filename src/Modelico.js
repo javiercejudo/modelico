@@ -32,6 +32,8 @@ class Modelico {
 
     Object.getOwnPropertyNames(fields)
       .forEach(field => thisArg[field] = () => fields[field]);
+
+    return thisArg;
   }
 
   set(field, value) {
