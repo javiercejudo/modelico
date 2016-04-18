@@ -8,6 +8,7 @@ module.exports = M => {
 
   const ModelicoMap = M.Map.metadata;
   const ModelicoList = M.List.metadata;
+  const ModelicoSet = M.Set.metadata;
   const ModelicoDate = M.Date.metadata;
 
   const joinWithSpace = arr => arr.filter(x => x !== null && x !== undefined).join(' ');
@@ -29,6 +30,7 @@ module.exports = M => {
         'favouritePartOfDay': PartOfDay(),
         'lifeEvents': ModelicoMap(String, ModelicoDate()),
         'importantDatesList': ModelicoList(ModelicoDate()),
+        'importantDatesSet': ModelicoSet(ModelicoDate()),
         'sex': Sex()
       });
     }

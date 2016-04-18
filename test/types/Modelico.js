@@ -71,9 +71,9 @@ module.exports = (should, M) => () => {
       const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
       const listOfPeople3 = listOfPeople2.setPath([0], author);
 
-      listOfPeople1.list()[0].givenName().should.be.exactly('Javier');
-      listOfPeople2.list()[0].givenName().should.be.exactly('Javi');
-      listOfPeople3.list()[0].givenName().should.be.exactly('Javier');
+      listOfPeople1.innerList()[0].givenName().should.be.exactly('Javier');
+      listOfPeople2.innerList()[0].givenName().should.be.exactly('Javi');
+      listOfPeople3.innerList()[0].givenName().should.be.exactly('Javier');
     });
   });
 

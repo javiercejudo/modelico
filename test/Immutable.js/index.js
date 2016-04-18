@@ -6,8 +6,8 @@ module.exports = (U, should, M) => () => {
   it('Getting started', () => {
     var map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
     var map2 = map1.set('b', 50);
-    should(map1.map().get('b')).be.exactly(2);
-    should(map2.map().get('b')).be.exactly(50);
+    should(map1.innerMap().get('b')).be.exactly(2);
+    should(map2.innerMap().get('b')).be.exactly(50);
   });
 
   it('The case for Immutability', () => {
@@ -21,27 +21,27 @@ module.exports = (U, should, M) => () => {
   it('JavaScript-first API', () => {
     var list1 = M.List.fromArray([1, 2]);
 
-    var list2Array = list1.list();
+    var list2Array = list1.innerList();
     list2Array.push(3, 4, 5);
     var list2 = M.List.fromArray(list2Array);
 
-    var list3Array = list2.list();
+    var list3Array = list2.innerList();
     list3Array.unshift(0);
     var list3 = M.List.fromArray(list3Array);
 
-    var list4Array = list1.list();
-    var list4 = M.List.fromArray(list1.list().concat(list2.list(), list3.list()));
+    var list4Array = list1.innerList();
+    var list4 = M.List.fromArray(list1.innerList().concat(list2.innerList(), list3.innerList()));
 
-    (list1.list().length === 2).should.be.exactly(true);
-    (list2.list().length === 5).should.be.exactly(true);
-    (list3.list().length === 6).should.be.exactly(true);
-    (list4.list().length === 13).should.be.exactly(true);
-    (list4.list()[0] === 1).should.be.exactly(true);
+    (list1.innerList().length === 2).should.be.exactly(true);
+    (list2.innerList().length === 5).should.be.exactly(true);
+    (list3.innerList().length === 6).should.be.exactly(true);
+    (list4.innerList().length === 13).should.be.exactly(true);
+    (list4.innerList()[0] === 1).should.be.exactly(true);
   });
 
   it('JavaScript-first API (2)', () => {
     var alpha = M.Map.fromObject({a: 1, b: 2, c: 3, d: 4});
-    Array.from(alpha.map()).map(kv =>  kv[0].toUpperCase()).join()
+    Array.from(alpha.innerMap()).map(kv =>  kv[0].toUpperCase()).join()
       .should.be.exactly('A,B,C,D');
   });
 
@@ -52,7 +52,7 @@ module.exports = (U, should, M) => () => {
     var obj = {d: 100, o: 200, g: 300};
 
     var map3 = M.Map.fromMap(
-      new Map(Array.from(map1.map()).concat(Array.from(map2.map()), objToArr(obj)))
+      new Map(Array.from(map1.innerMap()).concat(Array.from(map2.innerMap()), objToArr(obj)))
     );
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))
@@ -75,8 +75,8 @@ module.exports = (U, should, M) => () => {
     obj[1].should.be.exactly('one');
 
     var map = M.Map.fromObject(obj);
-    map.map().get('1').should.be.exactly('one');
-    should(map.map().get(1)).be.exactly(undefined);
+    map.innerMap().get('1').should.be.exactly('one');
+    should(map.innerMap().get(1)).be.exactly(undefined);
   });
 
   it('Equality treats Collections as Data', () => {
@@ -89,11 +89,11 @@ module.exports = (U, should, M) => () => {
 
   it('Batching Mutations', () => {
     var list1 = M.List.fromArray([1, 2, 3]);
-    var list2Array = list1.list();
+    var list2Array = list1.innerList();
     list2Array.push(4, 5, 6);
     var list2 = M.List.fromArray(list2Array);
 
-    (list1.list().length === 3).should.be.exactly(true);
-    (list2.list().length === 6).should.be.exactly(true);
+    (list1.innerList().length === 3).should.be.exactly(true);
+    (list2.innerList().length === 6).should.be.exactly(true);
   });
 };

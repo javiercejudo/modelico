@@ -14,10 +14,10 @@ module.exports = (should, M) => () => {
       const greetings1 = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
       const greetings2 = greetings1.set(PartOfDay.AFTERNOON(), 'GOOD AFTERNOON!');
 
-      greetings2.map().get(PartOfDay.AFTERNOON())
+      greetings2.innerMap().get(PartOfDay.AFTERNOON())
         .should.be.exactly('GOOD AFTERNOON!');
 
-      greetings1.map().get(PartOfDay.AFTERNOON())
+      greetings1.innerMap().get(PartOfDay.AFTERNOON())
         .should.be.exactly('Good afternoon!');
     });
 
@@ -31,10 +31,10 @@ module.exports = (should, M) => () => {
       const greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map);
       const greetings2 = greetings1.setPath([PartOfDay.EVENING(), 'date'], new Date('2013-04-16T00:00:00.000Z'));
 
-      should(greetings2.map().get(PartOfDay.EVENING()).date().getFullYear())
+      should(greetings2.innerMap().get(PartOfDay.EVENING()).date().getFullYear())
         .be.exactly(2013);
 
-      should(greetings1.map().get(PartOfDay.EVENING()).date().getFullYear())
+      should(greetings1.innerMap().get(PartOfDay.EVENING()).date().getFullYear())
         .be.exactly(2012);
     });
 
@@ -54,10 +54,10 @@ module.exports = (should, M) => () => {
       const greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map1);
       const greetings2 = greetings1.setPath([], new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map2));
 
-      should(greetings2.map().get(PartOfDay.EVENING()).date().getFullYear())
+      should(greetings2.innerMap().get(PartOfDay.EVENING()).date().getFullYear())
         .be.exactly(2013);
 
-      should(greetings1.map().get(PartOfDay.EVENING()).date().getFullYear())
+      should(greetings1.innerMap().get(PartOfDay.EVENING()).date().getFullYear())
         .be.exactly(2012);
     });
   });
@@ -93,7 +93,7 @@ module.exports = (should, M) => () => {
         M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(M.Any)).reviver
       );
 
-      greetings.map().get(PartOfDay.MORNING())
+      greetings.innerMap().get(PartOfDay.MORNING())
         .should.be.exactly('Good morning!');
     });
 
@@ -103,7 +103,7 @@ module.exports = (should, M) => () => {
         M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(String)).reviver
       );
 
-      should(greetings.map()).be.exactly(null);
+      should(greetings.innerMap()).be.exactly(null);
     });
   });
 };

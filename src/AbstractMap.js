@@ -4,11 +4,11 @@ const U = require('./U');
 const Modelico = require('./Modelico');
 
 class AbstractMap extends Modelico {
-  constructor(Type, keyMetadata, valueMetadata, map) {
-    super(Type, {map});
+  constructor(Type, keyMetadata, valueMetadata, innerMap) {
+    super(Type, {innerMap});
 
     this.innerTypes = () => Object.freeze({keyMetadata, valueMetadata});
-    this.map = () => (map === null) ? null : new Map(map);
+    this.innerMap = () => (innerMap === null) ? null : new Map(innerMap);
 
     return this;
   }
@@ -18,14 +18,14 @@ class AbstractMap extends Modelico {
       return value;
     }
 
-    const item = this.map().get(path[0]);
+    const item = this.innerMap().get(path[0]);
     return this.set(path[0], item.setPath(path.slice(1), value));
   }
 
   // as static to support IE < 11
   static set(Type, key, value) {
     const innerTypes = this.innerTypes();
-    const newMap = this.map();
+    const newMap = this.innerMap();
     newMap.set(key, value);
 
     return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);

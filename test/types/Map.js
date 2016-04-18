@@ -18,11 +18,11 @@ module.exports = (should, M) => () => {
       const modelicoMap1 = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), map);
       const modelicoMap2 = modelicoMap1.set('a', new ModelicoDate(new Date('1989-04-16T00:00:00.000Z')));
 
-      should(modelicoMap2.map().get('a').date().getFullYear())
+      should(modelicoMap2.innerMap().get('a').date().getFullYear())
         .be.exactly(1989);
 
       // verify that modelicoMap1 was not mutated
-      should(modelicoMap1.map().get('a').date().getFullYear())
+      should(modelicoMap1.innerMap().get('a').date().getFullYear())
         .be.exactly(1988);
     });
 
@@ -31,11 +31,11 @@ module.exports = (should, M) => () => {
       const author1 = Modelico.fromJSON(Person, authorJson);
       const author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
 
-      should(author2.lifeEvents().map().get('wedding').date().getFullYear())
+      should(author2.lifeEvents().innerMap().get('wedding').date().getFullYear())
         .be.exactly(2013);
 
       // verify that author1 was not mutated
-      should(author1.lifeEvents().map().get('wedding').date().getFullYear())
+      should(author1.lifeEvents().innerMap().get('wedding').date().getFullYear())
         .be.exactly(2012);
     });
 
@@ -45,7 +45,7 @@ module.exports = (should, M) => () => {
 
       const map = author.lifeEvents();
 
-      should(map.map().get('wedding').date().getFullYear())
+      should(map.innerMap().get('wedding').date().getFullYear())
         .be.exactly(2012);
 
       const customMap = new Map([
@@ -55,7 +55,7 @@ module.exports = (should, M) => () => {
       const customModelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), customMap);
       const map2 = map.setPath([], customModelicoMap);
 
-      should(map2.map().get('wedding').date().getFullYear())
+      should(map2.innerMap().get('wedding').date().getFullYear())
         .be.exactly(2013);
     });
   });
@@ -89,10 +89,10 @@ module.exports = (should, M) => () => {
         ModelicoMap.metadata(ModelicoAsIs(String), ModelicoDate.metadata()).reviver
       );
 
-      should(modelicoMap.map().get('a').date().getFullYear())
+      should(modelicoMap.innerMap().get('a').date().getFullYear())
         .be.exactly(1988);
 
-      should(modelicoMap.map().get('b').date())
+      should(modelicoMap.innerMap().get('b').date())
         .be.exactly(null);
     });
 
@@ -100,7 +100,7 @@ module.exports = (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
       const author = Modelico.fromJSON(Person, authorJson);
 
-      should(author.lifeEvents().map().get('wedding').date().getFullYear()).be.exactly(2013);
+      should(author.lifeEvents().innerMap().get('wedding').date().getFullYear()).be.exactly(2013);
     });
 
     it('should support null maps', () => {
@@ -109,7 +109,7 @@ module.exports = (should, M) => () => {
         ModelicoMap.metadata(ModelicoAsIs(String), ModelicoDate.metadata()).reviver
       );
 
-      should(modelicoMap.map())
+      should(modelicoMap.innerMap())
         .be.exactly(null);
     });
   });
@@ -128,6 +128,22 @@ module.exports = (should, M) => () => {
       modelicoMap.should.not.equal(modelicoMap2);
 
       modelicoMap.equals(modelicoMap2).should.be.exactly(true);
+    });
+  });
+
+  describe('from object', () => {
+    it('should be able to create a set from an array', () => {
+      var map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
+
+      should(map1.innerMap().get('b')).be.exactly(2);
+    });
+  });
+
+  describe('from map', () => {
+    it('should be able to create a set from a native set', () => {
+      var map1 = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+
+      should(map1.innerMap().get('b')).be.exactly(2);
     });
   });
 };

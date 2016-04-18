@@ -5,28 +5,18 @@ const Modelico = require('./Modelico');
 const AsIs = require('./AsIs');
 const Any = require('./Any');
 
-const reviver = (itemMetadata, k, v) => {
-  if (k !== '') {
-    return v;
-  }
-
-  const list = (v === null) ? null : v.map(U.bind(itemMetadata.reviver, k));
-
-  return new ModelicoList(itemMetadata, list);
-}
-
 class ModelicoList extends Modelico {
-  constructor(itemMetadata, list) {
-    super(ModelicoList, {list});
+  constructor(itemMetadata, innerList) {
+    super(ModelicoList, {innerList});
 
     this.itemMetadata = () => itemMetadata;
-    this.list = () => (list === null) ? null : list.slice();
+    this.innerList = () => (innerList === null) ? null : innerList.slice();
 
     return Object.freeze(this);
   }
 
   set(index, value) {
-    const newList = this.list();
+    const newList = this.innerList();
     newList[index] = value;
 
     return new ModelicoList(this.itemMetadata(), newList);
@@ -37,13 +27,13 @@ class ModelicoList extends Modelico {
       return value;
     }
 
-    const item = this.list()[path[0]];
+    const item = this.innerList()[path[0]];
 
     return this.set(path[0], item.setPath(path.slice(1), value));
   }
 
   toJSON() {
-    return this.fields().list;
+    return this.fields().innerList;
   }
 
   static fromArray(arr) {
@@ -51,7 +41,7 @@ class ModelicoList extends Modelico {
   }
 
   static metadata(itemMetadata) {
-    return Object.freeze({type: ModelicoList, reviver: U.bind(reviver, itemMetadata)});
+    return U.iterableMetadata(ModelicoList, itemMetadata);
   }
 }
 
