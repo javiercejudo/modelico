@@ -15,6 +15,7 @@ module.exports = (options, should, M) => _ => {
   describe('ModelicoMap', require('./types/Map').apply(_, deps));
   describe('ModelicoEnumMap', require('./types/EnumMap').apply(_, deps));
   describe('ModelicoList', require('./types/List').apply(_, deps));
+  describe('ModelicoSet', require('./types/Set').apply(_, deps));
   describe('Readme Simple Example', require('./example/simple').apply(_, deps));
   describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
   describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));

@@ -15,11 +15,11 @@ module.exports = (should, M) => () => {
       const modelicoList1 = new M.List(M.Date.metadata(), list);
       const modelicoList2 = modelicoList1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
-      should(modelicoList2.list()[0].date().getFullYear())
+      should(modelicoList2.innerList()[0].date().getFullYear())
         .be.exactly(1989);
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.list()[0].date().getFullYear())
+      should(modelicoList1.innerList()[0].date().getFullYear())
         .be.exactly(1988);
     });
 
@@ -32,11 +32,11 @@ module.exports = (should, M) => () => {
       const modelicoList1 = new M.List(M.Date.metadata(), list);
       const modelicoList2 = modelicoList1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
-      should(modelicoList2.list()[0].date().getFullYear())
+      should(modelicoList2.innerList()[0].date().getFullYear())
         .be.exactly(1989);
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.list()[0].date().getFullYear())
+      should(modelicoList1.innerList()[0].date().getFullYear())
         .be.exactly(1988);
     });
 
@@ -49,11 +49,11 @@ module.exports = (should, M) => () => {
       const modelicoList1 = new M.List(M.Date.metadata(), list);
       const modelicoList2 = modelicoList1.setPath([0], new M.Date(new Date('2000-04-16T00:00:00.000Z')));
 
-      should(modelicoList2.list()[0].date().getFullYear())
+      should(modelicoList2.innerList()[0].date().getFullYear())
         .be.exactly(2000);
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.list()[0].date().getFullYear())
+      should(modelicoList1.innerList()[0].date().getFullYear())
         .be.exactly(1988);
     });
 
@@ -61,7 +61,7 @@ module.exports = (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
       const author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
-      const newListArray = author1.importantDatesList().list();
+      const newListArray = author1.importantDatesList().innerList();
       newListArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
 
       const author2 = author1.set(
@@ -69,14 +69,14 @@ module.exports = (should, M) => () => {
         new M.List(M.Date.metadata(), newListArray)
       );
 
-      should(author1.importantDatesList().list().length).be.exactly(2);
-      should(author1.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
-      should(author1.importantDatesList().list()[1].date().getFullYear()).be.exactly(2012);
+      should(author1.importantDatesList().innerList().length).be.exactly(2);
+      should(author1.importantDatesList().innerList()[0].date().getFullYear()).be.exactly(2013);
+      should(author1.importantDatesList().innerList()[1].date().getFullYear()).be.exactly(2012);
 
-      should(author2.importantDatesList().list().length).be.exactly(3);
-      should(author2.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
-      should(author2.importantDatesList().list()[1].date().getFullYear()).be.exactly(2016);
-      should(author2.importantDatesList().list()[2].date().getFullYear()).be.exactly(2012);
+      should(author2.importantDatesList().innerList().length).be.exactly(3);
+      should(author2.importantDatesList().innerList()[0].date().getFullYear()).be.exactly(2013);
+      should(author2.importantDatesList().innerList()[1].date().getFullYear()).be.exactly(2016);
+      should(author2.importantDatesList().innerList()[2].date().getFullYear()).be.exactly(2012);
     });
 
     it('edge case when List setPath is called with an empty path', () => {
@@ -92,10 +92,10 @@ module.exports = (should, M) => () => {
       const listOfListOfDates1 = new M.List(M.List.metadata(M.Date.metadata()), [modelicoDatesList1]);
       const listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
 
-      should(listOfListOfDates1.list()[0].list()[0].date().getFullYear())
+      should(listOfListOfDates1.innerList()[0].innerList()[0].date().getFullYear())
         .be.exactly(1988);
 
-      should(listOfListOfDates2.list()[0].list()[0].date().getFullYear())
+      should(listOfListOfDates2.innerList()[0].innerList()[0].date().getFullYear())
         .be.exactly(2016);
     });
   });
@@ -129,10 +129,10 @@ module.exports = (should, M) => () => {
         M.List.metadata(M.Date.metadata()).reviver
       );
 
-      should(modelicoList.list()[0].date().getFullYear())
+      should(modelicoList.innerList()[0].date().getFullYear())
         .be.exactly(1988);
 
-      should(modelicoList.list()[1].date())
+      should(modelicoList.innerList()[1].date())
         .be.exactly(null);
     });
 
@@ -140,13 +140,13 @@ module.exports = (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
       const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
-      should(author.importantDatesList().list()[0].date().getFullYear()).be.exactly(2013);
+      should(author.importantDatesList().innerList()[0].date().getFullYear()).be.exactly(2013);
     });
 
     it('should support null lists', () => {
       const modelicoList = JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver);
 
-      should(modelicoList.list())
+      should(modelicoList.innerList())
         .be.exactly(null);
     });
   });
@@ -165,6 +165,17 @@ module.exports = (should, M) => () => {
       modelicoList1.should.not.equal(modelicoList2);
 
       modelicoList1.equals(modelicoList2).should.be.exactly(true);
+    });
+  });
+
+  describe('from array', () => {
+    it('should be able to create a list from an array', () => {
+      const fibArray = [0, 1, 1, 2, 3, 5, 8];
+
+      const modelicoSet = M.List.fromArray(fibArray);
+
+      modelicoSet.innerList()
+        .should.eql([0, 1, 1, 2, 3, 5, 8]);
     });
   });
 };

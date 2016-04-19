@@ -19,14 +19,14 @@ const reviver = (innerTypes, k, v) => {
     return v;
   }
 
-  const map = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
+  const innerMap = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
 
-  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
+  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
 }
 
 class ModelicoEnumMap extends AbstractMap {
-  constructor(keyMetadata, valueMetadata, map) {
-    super(ModelicoEnumMap, keyMetadata, valueMetadata, map);
+  constructor(keyMetadata, valueMetadata, innerMap) {
+    super(ModelicoEnumMap, keyMetadata, valueMetadata, innerMap);
 
     return Object.freeze(this);
   }
@@ -36,9 +36,9 @@ class ModelicoEnumMap extends AbstractMap {
   }
 
   toJSON() {
-    const fields = this.fields();
+    const innerMap = this.fields().innerMap;
 
-    return (fields.map === null) ? null : Array.from(fields.map).reduce(stringifyReducer, {});
+    return (innerMap === null) ? null : Array.from(innerMap).reduce(stringifyReducer, {});
   }
 
   static metadata(keyMetadata, valueMetadata) {

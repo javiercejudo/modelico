@@ -6,6 +6,7 @@ const EnumMap = require('./EnumMap');
 const ModelicoDate = require('./Date');
 const AsIs = require('./AsIs');
 const List = require('./List');
+const ModelicoSet = require('./Set');
 const Enum = require('./Enum');
 const Any = require('./Any');
 
@@ -17,5 +18,6 @@ module.exports = Object.freeze({
   AsIs,
   Any,
   List,
+  Set: ModelicoSet,
   Enum
 });

@@ -57,18 +57,18 @@ module.exports = (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo');
     person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person1.pets().list().shift().speak()
+    person1.pets().innerList().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
-    person1.pets().list().shift().speak()
+    person1.pets().innerList().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
     const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-    person3.pets().list()[0].name()
+    person3.pets().innerList()[0].name()
       .should.be.exactly('Bane');
 
-    person1.pets().list()[0].name()
+    person1.pets().innerList()[0].name()
       .should.be.exactly('Robbie');
   });
 };

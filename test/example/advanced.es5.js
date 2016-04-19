@@ -55,10 +55,10 @@ module.exports = (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo');
     person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person1.pets().list().shift().speak()
+    person1.pets().innerList().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
-    person1.pets().list().shift().speak()
+    person1.pets().innerList().shift().speak()
       .should.be.exactly('My name is Robbie!');
   });
 };
