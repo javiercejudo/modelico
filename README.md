@@ -86,7 +86,7 @@ to be able to do things like
 const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
 person1.fullName(); //=> 'Javier Cejudo'
-person1.pets().list()[0].speak(); //=> 'my name is Robbie!'
+person1.pets().innerList()[0].speak(); //=> 'my name is Robbie!'
 ```
 
 We are going to need a `Person` class much like the `Animal`
@@ -147,21 +147,21 @@ person1.fullName(); //=> 'Javier Cejudo'
 
 const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-person3.pets().list()[0].name(); //=> 'Bane'
-person1.pets().list()[0].name(); //=> 'Robbie'
+person3.pets().innerList()[0].name(); //=> 'Bane'
+person1.pets().innerList()[0].name(); //=> 'Robbie'
 ```
 
 The same principle applies across all Modelico classes:
 
 ```js
-// While person.pets().list() is a plain array,
+// While person.pets().innerList() is a plain array,
 // we can shift to grab the first item without
 // modifying the internal list, as we are really
 // getting a clone of it
-person1.pets().list().shift().speak(); //=> 'My name is Robbie!'
+person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
 
 // When called again, the list is still intact
-person1.pets().list().shift().speak(); //=> 'My name is Robbie!'
+person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
 ```
 
 ## ES5 classes
