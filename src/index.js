@@ -9,6 +9,7 @@ const List = require('./List');
 const ModelicoSet = require('./Set');
 const Enum = require('./Enum');
 const Any = require('./Any');
+const U = require('./U');
 
 module.exports = Object.freeze({
   Modelico,
@@ -19,5 +20,9 @@ module.exports = Object.freeze({
   Any,
   List,
   Set: ModelicoSet,
-  Enum
+  Enum,
+  proxyMap: U.bind(U.proxyToInner, 'innerMap'),
+  proxyList: U.bind(U.proxyToInner, 'innerList'),
+  proxySet: U.bind(U.proxyToInner, 'innerSet'),
+  proxyDate: U.bind(U.proxyToInner, 'date')
 });

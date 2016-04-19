@@ -1,6 +1,18 @@
 'use strict';
 
+const hasProxies = (() => {
+  try {
+    new Proxy({}, {});
+
+    return true;
+  } catch (ignore) {}
+
+  return false;
+})();
+
 const buildUtils = (options) => Object.freeze({
+  skipIfNoProxies: hasProxies ? it : it.skip,
+  skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
   skipIfLegacyIE: options.legacyIE ? it.skip : it,
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
 });
@@ -20,4 +32,11 @@ module.exports = (options, should, M) => _ => {
   describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
   describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
   describe('Immutable.js examples', require('./Immutable.js/').apply(_, utilsAndDeps));
+
+  U.skipDescribeIfNoProxies('Proxies', () => {
+    describe('Map', require('./proxies/proxyMap').apply(_, deps));
+    describe('List', require('./proxies/proxyList').apply(_, deps));
+    describe('Set', require('./proxies/proxySet').apply(_, deps));
+    describe('Date', require('./proxies/proxyDate').apply(_, deps));
+  });
 };

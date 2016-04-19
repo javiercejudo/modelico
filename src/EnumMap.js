@@ -7,7 +7,7 @@ const stringifyReducer = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1];
 
   return acc;
-}
+};
 
 const parseMapper = (innerTypes, object) => (enumerator) => [
   U.reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
@@ -22,7 +22,7 @@ const reviver = (innerTypes, k, v) => {
   const innerMap = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
 
   return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
-}
+};
 
 class ModelicoEnumMap extends AbstractMap {
   constructor(keyMetadata, valueMetadata, innerMap) {

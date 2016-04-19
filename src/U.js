@@ -1,5 +1,7 @@
 'use strict';
 
+const proxyToInner = require('./proxyToInner');
+
 const asIsReviver = (k, v) => v;
 const bind = (fn, _1) => fn.bind(undefined, _1);
 
@@ -11,14 +13,14 @@ const iterableReviver = (IterableType, itemMetadata, k, v) => {
   const iterable = (v === null) ? null : v.map(bind(itemMetadata.reviver, k));
 
   return new IterableType(itemMetadata, iterable);
-}
+};
 
 const iterableMetadata = (IterableType, itemMetadata, k, v) => {
   return Object.freeze({
     type: IterableType,
     reviver: iterableReviver.bind(undefined, IterableType, itemMetadata)
   });
-}
+};
 
 module.exports = Object.freeze({
   bind,
@@ -27,5 +29,6 @@ module.exports = Object.freeze({
   reviverOrAsIs: metadata => (metadata.reviver || asIsReviver),
   asIsReviver,
   iterableReviver,
-  iterableMetadata
+  iterableMetadata,
+  proxyToInner
 });

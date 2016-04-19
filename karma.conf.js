@@ -92,7 +92,8 @@ function customLaunchers() {
   return {
     'SL_Chrome': {
       base: 'SauceLabs',
-      browserName: 'chrome'
+      browserName: 'chrome',
+      platform: 'Windows 10'
     },
     'SL_Firefox': {
       base: 'SauceLabs',

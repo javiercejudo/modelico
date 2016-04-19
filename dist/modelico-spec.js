@@ -12,6 +12,17 @@ module.exports = function (U, should, M) {
       should(map2.innerMap().get('b')).be.exactly(50);
     });
 
+    U.skipIfNoProxies('Getting started (proxied)', function () {
+      var _ = M.proxyMap;
+
+      var map1 = _(M.Map.fromObject({ a: 1, b: 2, c: 3 }));
+      var map2 = _(map1.set('b', 50));
+
+      should(map1.size).be.exactly(3);
+      should(map1.get('b')).be.exactly(2);
+      should(map2.get('b')).be.exactly(50);
+    });
+
     it('The case for Immutability', function () {
       var map1 = M.Map.fromObject({ a: 1, b: 2, c: 3 });
       var map2 = map1.set('b', 2);
@@ -311,8 +322,20 @@ module.exports = function (should, M) {
 },{}],5:[function(require,module,exports){
 'use strict';
 
+var hasProxies = function () {
+  try {
+    new Proxy({}, {});
+
+    return true;
+  } catch (ignore) {}
+
+  return false;
+}();
+
 var buildUtils = function buildUtils(options) {
   return Object.freeze({
+    skipIfNoProxies: hasProxies ? it : it.skip,
+    skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
     skipIfLegacyIE: options.legacyIE ? it.skip : it,
     objToArr: function objToArr(obj) {
       return Object.keys(obj).map(function (k) {
@@ -338,10 +361,119 @@ module.exports = function (options, should, M) {
     describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
     describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
     describe('Immutable.js examples', require('./Immutable.js/').apply(_, utilsAndDeps));
+
+    U.skipDescribeIfNoProxies('Proxies', function () {
+      describe('Map', require('./proxies/proxyMap').apply(_, deps));
+      describe('List', require('./proxies/proxyList').apply(_, deps));
+      describe('Set', require('./proxies/proxySet').apply(_, deps));
+      describe('Date', require('./proxies/proxyDate').apply(_, deps));
+    });
   };
 };
 
-},{"./Immutable.js/":1,"./example/advanced":3,"./example/advanced.es5":2,"./example/simple":4,"./types/AsIs":6,"./types/EnumMap":7,"./types/List":8,"./types/Map":9,"./types/Modelico":10,"./types/Set":11}],6:[function(require,module,exports){
+},{"./Immutable.js/":1,"./example/advanced":3,"./example/advanced.es5":2,"./example/simple":4,"./proxies/proxyDate":6,"./proxies/proxyList":7,"./proxies/proxyMap":8,"./proxies/proxySet":9,"./types/AsIs":10,"./types/EnumMap":11,"./types/List":12,"./types/Map":13,"./types/Modelico":14,"./types/Set":15}],6:[function(require,module,exports){
+'use strict';
+
+module.exports = function (should, M) {
+  return function () {
+    var p = M.proxyDate;
+
+    it('should make Date methods available to Modelico Date', function () {
+      var date = p(new M.Date(new Date('1988-04-16T00:00:00.000Z')));
+
+      date.getFullYear().should.be.exactly(1988);
+
+      date.getMonth().should.be.exactly(3);
+    });
+  };
+};
+
+},{}],7:[function(require,module,exports){
+'use strict';
+
+module.exports = function (should, M) {
+  return function () {
+    var p = M.proxyList;
+
+    it('should make Array methods available to Modelico List', function () {
+      var list = p(M.List.fromArray([1, 2, 2, 3]));
+      var add = function add(a, b) {
+        return a + b;
+      };
+
+      list.reduce(add, 0).should.be.exactly(8);
+
+      list.join('-').should.be.exactly('1-2-2-3');
+    });
+
+    it('should make Array properties available to Modelico List', function () {
+      var list1 = p(M.List.fromArray([1, 2, 2, 3]));
+      var list2 = p(list1.set(1, 50));
+
+      list1[1].should.be.exactly(2);
+      list2[1].should.be.exactly(50);
+
+      list1.length.should.be.exactly(4);
+    });
+  };
+};
+
+},{}],8:[function(require,module,exports){
+'use strict';
+
+module.exports = function (should, M) {
+  return function () {
+    var p = M.proxyMap;
+
+    it('should make Map methods available to Modelico Map', function () {
+      var map1 = p(M.Map.fromObject({ a: 1, b: 2, c: 3 }));
+      var map2 = p(map1.set('b', 50));
+
+      should(map1.get('b')).be.exactly(2);
+      should(map2.get('b')).be.exactly(50);
+    });
+
+    it('should make Map properties available to Modelico Map', function () {
+      var map = p(M.Map.fromObject({ a: 1, b: 2, c: 3 }));
+
+      should(map.size).be.exactly(3);
+    });
+  };
+};
+
+},{}],9:[function(require,module,exports){
+'use strict';
+
+module.exports = function (should, M) {
+  return function () {
+    var p = M.proxySet;
+
+    it('should make Set methods available to Modelico Set', function () {
+      var set = p(M.Set.fromArray([1, 2, 2, 3]));
+
+      Array.from(set.values()).reduce(function (a, b) {
+        return a + b;
+      }, 0).should.be.exactly(6);
+
+      set.size.should.be.exactly(3);
+
+      p(M.Set.fromSet(set.add(5))).size.should.be.exactly(4);
+    });
+
+    it('should make Set properties available to Modelico Set', function () {
+      var set1 = p(M.Set.fromArray([1, 2, 2, 3]));
+      var set2 = p(set1.set(1, 50));
+
+      set1.size.should.be.exactly(3);
+      set2.size.should.be.exactly(3);
+
+      set1.has(2).should.be.exactly(true);
+      set2.has(2).should.be.exactly(false);
+    });
+  };
+};
+
+},{}],10:[function(require,module,exports){
 'use strict';
 
 module.exports = function (U, should, M) {
@@ -386,7 +518,7 @@ module.exports = function (U, should, M) {
   };
 };
 
-},{}],7:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -464,7 +596,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/PartOfDay":13}],8:[function(require,module,exports){
+},{"./fixtures/PartOfDay":17}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -608,7 +740,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":14}],9:[function(require,module,exports){
+},{"./fixtures/Person":18}],13:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -732,7 +864,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":14}],10:[function(require,module,exports){
+},{"./fixtures/Person":18}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -891,7 +1023,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Animal":12,"./fixtures/PartOfDay":13,"./fixtures/Person":14,"./fixtures/Sex":15}],11:[function(require,module,exports){
+},{"./fixtures/Animal":16,"./fixtures/PartOfDay":17,"./fixtures/Person":18,"./fixtures/Sex":19}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = function (should, M) {
@@ -1049,7 +1181,7 @@ module.exports = function (should, M) {
   };
 };
 
-},{"./fixtures/Person":14}],12:[function(require,module,exports){
+},{"./fixtures/Person":18}],16:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1085,7 +1217,7 @@ module.exports = function (M) {
   return Object.freeze(Animal);
 };
 
-},{}],13:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var range = function range(minTime, maxTime) {
@@ -1101,7 +1233,7 @@ module.exports = function (M) {
   });
 };
 
-},{}],14:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1171,7 +1303,7 @@ module.exports = function (M) {
   return Object.freeze(Person);
 };
 
-},{"./PartOfDay":13,"./Sex":15}],15:[function(require,module,exports){
+},{"./PartOfDay":17,"./Sex":19}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function (M) {
