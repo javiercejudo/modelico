@@ -3,7 +3,7 @@
 
 module.exports = require('./src');
 
-},{"./src":12}],2:[function(require,module,exports){
+},{"./src":13}],2:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -20,18 +20,21 @@ var Modelico = require('./Modelico');
 var AbstractMap = function (_Modelico) {
   _inherits(AbstractMap, _Modelico);
 
-  function AbstractMap(Type, keyMetadata, valueMetadata, map) {
+  function AbstractMap(Type, keyMetadata, valueMetadata, innerMap) {
+    var _ret;
+
     _classCallCheck(this, AbstractMap);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AbstractMap).call(this, Type, { map: map }));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AbstractMap).call(this, Type, { innerMap: innerMap }));
 
     _this.innerTypes = function () {
       return Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata });
     };
-    _this.map = function () {
-      return map === null ? null : new Map(map);
+    _this.innerMap = function () {
+      return innerMap === null ? null : new Map(innerMap);
     };
-    return _this;
+
+    return _ret = _this, _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(AbstractMap, [{
@@ -41,7 +44,7 @@ var AbstractMap = function (_Modelico) {
         return value;
       }
 
-      var item = this.map().get(path[0]);
+      var item = this.innerMap().get(path[0]);
       return this.set(path[0], item.setPath(path.slice(1), value));
     }
 
@@ -51,7 +54,7 @@ var AbstractMap = function (_Modelico) {
     key: 'set',
     value: function set(Type, key, value) {
       var innerTypes = this.innerTypes();
-      var newMap = this.map();
+      var newMap = this.innerMap();
       newMap.set(key, value);
 
       return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
@@ -68,10 +71,10 @@ var AbstractMap = function (_Modelico) {
 
 module.exports = Object.freeze(AbstractMap);
 
-},{"./Modelico":10,"./U":11}],3:[function(require,module,exports){
+},{"./Modelico":10,"./U":12}],3:[function(require,module,exports){
 'use strict';
 
-module.exports = {};
+module.exports = Object.freeze({});
 
 },{}],4:[function(require,module,exports){
 'use strict';
@@ -82,7 +85,7 @@ module.exports = function (type) {
   return Object.freeze({ type: type, reviver: U.asIsReviver });
 };
 
-},{"./U":11}],5:[function(require,module,exports){
+},{"./U":12}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -99,6 +102,8 @@ var ModelicoDate = function (_Modelico) {
   _inherits(ModelicoDate, _Modelico);
 
   function ModelicoDate(date) {
+    var _ret;
+
     _classCallCheck(this, ModelicoDate);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoDate).call(this, ModelicoDate, { date: date }));
@@ -106,8 +111,8 @@ var ModelicoDate = function (_Modelico) {
     _this.date = function () {
       return date === null ? null : new Date(date.toISOString());
     };
-    Object.freeze(_this);
-    return _this;
+
+    return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(ModelicoDate, [{
@@ -172,6 +177,8 @@ var ModelicoEnum = function (_Modelico) {
   _inherits(ModelicoEnum, _Modelico);
 
   function ModelicoEnum(input) {
+    var _ret;
+
     _classCallCheck(this, ModelicoEnum);
 
     var enumerators = Array.isArray(input) ? input.reduce(enumeratorsReducer, {}) : input;
@@ -191,8 +198,7 @@ var ModelicoEnum = function (_Modelico) {
       });
     };
 
-    Object.freeze(_this);
-    return _this;
+    return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
 
   return ModelicoEnum;
@@ -200,7 +206,7 @@ var ModelicoEnum = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoEnum);
 
-},{"./Modelico":10,"./U":11}],7:[function(require,module,exports){
+},{"./Modelico":10,"./U":12}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -231,21 +237,22 @@ var reviver = function reviver(innerTypes, k, v) {
     return v;
   }
 
-  var map = v === null ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
+  var innerMap = v === null ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
 
-  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
+  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
 };
 
 var ModelicoEnumMap = function (_AbstractMap) {
   _inherits(ModelicoEnumMap, _AbstractMap);
 
-  function ModelicoEnumMap(keyMetadata, valueMetadata, map) {
+  function ModelicoEnumMap(keyMetadata, valueMetadata, innerMap) {
+    var _ret;
+
     _classCallCheck(this, ModelicoEnumMap);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnumMap).call(this, ModelicoEnumMap, keyMetadata, valueMetadata, map));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnumMap).call(this, ModelicoEnumMap, keyMetadata, valueMetadata, innerMap));
 
-    Object.freeze(_this);
-    return _this;
+    return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(ModelicoEnumMap, [{
@@ -256,8 +263,9 @@ var ModelicoEnumMap = function (_AbstractMap) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      var fields = this.fields();
-      return fields.map === null ? null : Array.from(fields.map).reduce(stringifyReducer, {});
+      var innerMap = this.fields().innerMap;
+
+      return innerMap === null ? null : Array.from(innerMap).reduce(stringifyReducer, {});
     }
   }], [{
     key: 'metadata',
@@ -271,7 +279,7 @@ var ModelicoEnumMap = function (_AbstractMap) {
 
 module.exports = Object.freeze(ModelicoEnumMap);
 
-},{"./AbstractMap":2,"./U":11}],8:[function(require,module,exports){
+},{"./AbstractMap":2,"./U":12}],8:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -287,39 +295,30 @@ var Modelico = require('./Modelico');
 var AsIs = require('./AsIs');
 var Any = require('./Any');
 
-var reviver = function reviver(itemMetadata, k, v) {
-  if (k !== '') {
-    return v;
-  }
-
-  var list = v === null ? null : v.map(U.bind(itemMetadata.reviver, k));
-
-  return new ModelicoList(itemMetadata, list);
-};
-
 var ModelicoList = function (_Modelico) {
   _inherits(ModelicoList, _Modelico);
 
-  function ModelicoList(itemMetadata, list) {
+  function ModelicoList(itemMetadata, innerList) {
+    var _ret;
+
     _classCallCheck(this, ModelicoList);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoList).call(this, ModelicoList, { list: list }));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoList).call(this, ModelicoList, { innerList: innerList }));
 
     _this.itemMetadata = function () {
       return itemMetadata;
     };
-    _this.list = function () {
-      return list === null ? null : list.slice();
+    _this.innerList = function () {
+      return innerList === null ? null : innerList.slice();
     };
 
-    Object.freeze(_this);
-    return _this;
+    return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(ModelicoList, [{
     key: 'set',
     value: function set(index, value) {
-      var newList = this.list();
+      var newList = this.innerList();
       newList[index] = value;
 
       return new ModelicoList(this.itemMetadata(), newList);
@@ -331,13 +330,14 @@ var ModelicoList = function (_Modelico) {
         return value;
       }
 
-      var item = this.list()[path[0]];
+      var item = this.innerList()[path[0]];
+
       return this.set(path[0], item.setPath(path.slice(1), value));
     }
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      return this.fields().list;
+      return this.fields().innerList;
     }
   }], [{
     key: 'fromArray',
@@ -347,7 +347,7 @@ var ModelicoList = function (_Modelico) {
   }, {
     key: 'metadata',
     value: function metadata(itemMetadata) {
-      return Object.freeze({ type: ModelicoList, reviver: U.bind(reviver, itemMetadata) });
+      return U.iterableMetadata(ModelicoList, itemMetadata);
     }
   }]);
 
@@ -356,7 +356,7 @@ var ModelicoList = function (_Modelico) {
 
 module.exports = Object.freeze(ModelicoList);
 
-},{"./Any":3,"./AsIs":4,"./Modelico":10,"./U":11}],9:[function(require,module,exports){
+},{"./Any":3,"./AsIs":4,"./Modelico":10,"./U":12}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -387,21 +387,22 @@ var reviver = function reviver(innerTypes, k, v) {
     return v;
   }
 
-  var map = v === null ? null : new Map(v.map(parseMapper(innerTypes)));
+  var innerMap = v === null ? null : new Map(v.map(parseMapper(innerTypes)));
 
-  return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, map);
+  return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
 };
 
 var ModelicoMap = function (_AbstractMap) {
   _inherits(ModelicoMap, _AbstractMap);
 
-  function ModelicoMap(keyMetadata, valueMetadata, map) {
+  function ModelicoMap(keyMetadata, valueMetadata, innerMap) {
+    var _ret;
+
     _classCallCheck(this, ModelicoMap);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoMap).call(this, ModelicoMap, keyMetadata, valueMetadata, map));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoMap).call(this, ModelicoMap, keyMetadata, valueMetadata, innerMap));
 
-    Object.freeze(_this);
-    return _this;
+    return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(ModelicoMap, [{
@@ -412,9 +413,9 @@ var ModelicoMap = function (_AbstractMap) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      var fields = this.fields();
+      var innerMap = this.fields().innerMap;
 
-      return fields.map === null ? null : Array.from(fields.map).map(stringifyMapper);
+      return innerMap === null ? null : Array.from(innerMap).map(stringifyMapper);
     }
   }], [{
     key: 'fromObject',
@@ -438,7 +439,7 @@ var ModelicoMap = function (_AbstractMap) {
 
 module.exports = Object.freeze(ModelicoMap);
 
-},{"./AbstractMap":2,"./Any":3,"./AsIs":4,"./U":11}],10:[function(require,module,exports){
+},{"./AbstractMap":2,"./Any":3,"./AsIs":4,"./U":12}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -486,6 +487,8 @@ var Modelico = function () {
         return fields[field];
       };
     });
+
+    return thisArg;
   }
 
   _createClass(Modelico, [{
@@ -541,17 +544,119 @@ var Modelico = function () {
 
 module.exports = Object.freeze(Modelico);
 
-},{"./U":11}],11:[function(require,module,exports){
+},{"./U":12}],11:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var U = require('./U');
+var Modelico = require('./Modelico');
+var AsIs = require('./AsIs');
+var Any = require('./Any');
+
+var ModelicoSet = function (_Modelico) {
+  _inherits(ModelicoSet, _Modelico);
+
+  function ModelicoSet(itemMetadata, innerSet) {
+    var _ret;
+
+    _classCallCheck(this, ModelicoSet);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoSet).call(this, ModelicoSet, { innerSet: innerSet }));
+
+    _this.itemMetadata = function () {
+      return itemMetadata;
+    };
+    _this.innerSet = function () {
+      return innerSet === null ? null : new Set(innerSet);
+    };
+
+    return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(ModelicoSet, [{
+    key: 'set',
+    value: function set(index, value) {
+      var newSet = Array.from(this.innerSet());
+      newSet[index] = value;
+
+      return new ModelicoSet(this.itemMetadata(), newSet);
+    }
+  }, {
+    key: 'setPath',
+    value: function setPath(path, value) {
+      if (path.length === 0) {
+        return value;
+      }
+
+      var item = Array.from(this.innerSet())[path[0]];
+
+      return this.set(path[0], item.setPath(path.slice(1), value));
+    }
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      var innerSet = this.fields().innerSet;
+
+      return innerSet === null ? null : Array.from(innerSet);
+    }
+  }], [{
+    key: 'fromArray',
+    value: function fromArray(arr) {
+      return new ModelicoSet(AsIs(Any), arr);
+    }
+  }, {
+    key: 'fromSet',
+    value: function fromSet(arr) {
+      return new ModelicoSet(AsIs(Any), arr);
+    }
+  }, {
+    key: 'metadata',
+    value: function metadata(itemMetadata) {
+      return U.iterableMetadata(ModelicoSet, itemMetadata);
+    }
+  }]);
+
+  return ModelicoSet;
+}(Modelico);
+
+module.exports = Object.freeze(ModelicoSet);
+
+},{"./Any":3,"./AsIs":4,"./Modelico":10,"./U":12}],12:[function(require,module,exports){
 'use strict';
 
 var asIsReviver = function asIsReviver(k, v) {
   return v;
 };
+var bind = function bind(fn, _1) {
+  return fn.bind(undefined, _1);
+};
+
+var iterableReviver = function iterableReviver(IterableType, itemMetadata, k, v) {
+  if (k !== '') {
+    return v;
+  }
+
+  var iterable = v === null ? null : v.map(bind(itemMetadata.reviver, k));
+
+  return new IterableType(itemMetadata, iterable);
+};
+
+var iterableMetadata = function iterableMetadata(IterableType, itemMetadata, k, v) {
+  return Object.freeze({
+    type: IterableType,
+    reviver: iterableReviver.bind(undefined, IterableType, itemMetadata)
+  });
+};
 
 module.exports = Object.freeze({
-  bind: function bind(fn, _1) {
-    return fn.bind(undefined, _1);
-  },
+  bind: bind,
   default: function _default(optional, fallback) {
     return optional === undefined ? fallback : optional;
   },
@@ -563,10 +668,12 @@ module.exports = Object.freeze({
   reviverOrAsIs: function reviverOrAsIs(metadata) {
     return metadata.reviver || asIsReviver;
   },
-  asIsReviver: asIsReviver
+  asIsReviver: asIsReviver,
+  iterableReviver: iterableReviver,
+  iterableMetadata: iterableMetadata
 });
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var Modelico = require('./Modelico');
@@ -575,6 +682,7 @@ var EnumMap = require('./EnumMap');
 var ModelicoDate = require('./Date');
 var AsIs = require('./AsIs');
 var List = require('./List');
+var ModelicoSet = require('./Set');
 var Enum = require('./Enum');
 var Any = require('./Any');
 
@@ -586,8 +694,9 @@ module.exports = Object.freeze({
   AsIs: AsIs,
   Any: Any,
   List: List,
+  Set: ModelicoSet,
   Enum: Enum
 });
 
-},{"./Any":3,"./AsIs":4,"./Date":5,"./Enum":6,"./EnumMap":7,"./List":8,"./Map":9,"./Modelico":10}]},{},[1])(1)
+},{"./Any":3,"./AsIs":4,"./Date":5,"./Enum":6,"./EnumMap":7,"./List":8,"./Map":9,"./Modelico":10,"./Set":11}]},{},[1])(1)
 });
