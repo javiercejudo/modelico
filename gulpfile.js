@@ -14,7 +14,11 @@ gulp.task('clean', cb => rimraf('./coverage', cb));
 gulp.task('instrument', ['clean'], () => {
   coverageVariable = '$$cov_' + new Date().getTime() + '$$';
 
-  return gulp.src(['src/**/*.js'])
+  return gulp.src([
+      'src/**/*.js',
+      // Node 5 does not have Proxy
+      '!src/proxyToInner.js'
+    ])
     .pipe(plumber())
     .pipe(istanbul({ coverageVariable }))
     .pipe(istanbul.hookRequire());
@@ -26,13 +30,8 @@ gulp.task('test', ['clean', 'instrument'], () => {
     .pipe(istanbul.writeReports({ coverageVariable }));
 });
 
-gulp.task('codecov', () => {
-  gulp.src('coverage/coverage-final.json')
-    .pipe(codecov());
-});
+gulp.task('codecov', () => gulp.src('coverage/coverage-final.json').pipe(codecov()));
 
-gulp.task('watch', () => {
-  gulp.watch(['src/**/*.js', 'test/**/*.js'], ['test']);
-});
+gulp.task('watch', () => gulp.watch(['src/**/*.js', 'test/**/*.js'], ['test']));
 
 gulp.task('default', ['test']);

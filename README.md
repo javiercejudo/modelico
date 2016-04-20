@@ -89,6 +89,10 @@ person1.fullName(); //=> 'Javier Cejudo'
 person1.pets().innerList()[0].speak(); //=> 'my name is Robbie!'
 ```
 
+*Note: pets() returns a `Modelico.List`, hence the need to call `innerList`
+to grab the underlying array. See the [proxies section](#es2015-proxies)
+for a way to use methods and properties of the inner structure directly.*
+
 We are going to need a `Person` class much like the `Animal`
 class we have already defined. Since `Person` contains a list
 of `Animal`, we use the static method `innerTypes` to specify
@@ -164,6 +168,41 @@ person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
 person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
 ```
 
+## ES2015 proxies
+
+Built-in types in Modelico (List, Set, Map, EnumMap and Date)
+are wrappers around native structures. By default, it is necessary to
+retrieve those structures to access their properties and methods
+(eg. list.innerList().length).
+
+However, if your environment
+[supports ES2015 proxies](https://kangax.github.io/compat-table/es6/#test-Proxy),
+Modelico provides a utility to get around this.
+
+```js
+const M = Modelico;
+const p = M.proxyMap;
+
+const defaultMap = M.Map.fromObject({a: 1, b: 2, c: 3});
+const proxiedMap = p(defaultMap);
+
+// without proxies
+defaultMap.innerMap().get('b'); //=> 2
+defaultMap.innerMap().size; //=> 3
+
+// with proxies
+proxiedMap.get('b'); //=> 2
+proxiedMap.size; //=> 3
+```
+
+Please note that native methods that modify the structure in place will
+still return what they are meant to, but will not modify the inner
+structure. For example, at the moment `proxiedMap.delete('b')` will return
+`true` but has no effect otherwise. More convenient support for mutator
+methods can be tracked at [#22](https://github.com/javiercejudo/modelico/issues/22).
+
+See [proxy tests](test/proxies) for more details.
+
 ## ES5 classes
 
 To support legacy browsers without transpiling, Modelico can be used
@@ -183,5 +222,3 @@ Animal.prototype.speak = function() {
 
 Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 ```
-
-See [spec](test).

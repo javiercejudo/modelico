@@ -20,7 +20,7 @@ const reviver = (innerTypes, k, v) => {
   const innerMap = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
 
   return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
-}
+};
 
 class ModelicoMap extends AbstractMap {
   constructor(keyMetadata, valueMetadata, innerMap) {

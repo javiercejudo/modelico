@@ -631,6 +631,8 @@ module.exports = Object.freeze(ModelicoSet);
 },{"./Any":3,"./AsIs":4,"./Modelico":10,"./U":12}],12:[function(require,module,exports){
 'use strict';
 
+var proxyToInner = require('./proxyToInner');
+
 var asIsReviver = function asIsReviver(k, v) {
   return v;
 };
@@ -670,10 +672,11 @@ module.exports = Object.freeze({
   },
   asIsReviver: asIsReviver,
   iterableReviver: iterableReviver,
-  iterableMetadata: iterableMetadata
+  iterableMetadata: iterableMetadata,
+  proxyToInner: proxyToInner
 });
 
-},{}],13:[function(require,module,exports){
+},{"./proxyToInner":14}],13:[function(require,module,exports){
 'use strict';
 
 var Modelico = require('./Modelico');
@@ -685,6 +688,7 @@ var List = require('./List');
 var ModelicoSet = require('./Set');
 var Enum = require('./Enum');
 var Any = require('./Any');
+var U = require('./U');
 
 module.exports = Object.freeze({
   Modelico: Modelico,
@@ -695,8 +699,37 @@ module.exports = Object.freeze({
   Any: Any,
   List: List,
   Set: ModelicoSet,
-  Enum: Enum
+  Enum: Enum,
+  proxyMap: U.bind(U.proxyToInner, 'innerMap'),
+  proxyList: U.bind(U.proxyToInner, 'innerList'),
+  proxySet: U.bind(U.proxyToInner, 'innerSet'),
+  proxyDate: U.bind(U.proxyToInner, 'date')
 });
 
-},{"./Any":3,"./AsIs":4,"./Date":5,"./Enum":6,"./EnumMap":7,"./List":8,"./Map":9,"./Modelico":10,"./Set":11}]},{},[1])(1)
+},{"./Any":3,"./AsIs":4,"./Date":5,"./Enum":6,"./EnumMap":7,"./List":8,"./Map":9,"./Modelico":10,"./Set":11,"./U":12}],14:[function(require,module,exports){
+'use strict';
+
+var proxyToInner = function proxyToInner(innerAccessor, obj) {
+  var get = function get(target, prop) {
+    if (prop in target) {
+      return target[prop];
+    }
+
+    var inner = target[innerAccessor]();
+    var candidate = inner[prop];
+
+    if (typeof candidate === 'function') {
+      return candidate.bind(inner);
+    }
+
+    return candidate;
+  };
+
+  // not using shortcut get due to https://github.com/nodejs/node/issues/4237
+  return new Proxy(obj, { get: get });
+};
+
+module.exports = proxyToInner;
+
+},{}]},{},[1])(1)
 });
