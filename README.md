@@ -173,11 +173,11 @@ person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
 Built-in types in Modelico (List, Set, Map, EnumMap and Date)
 are wrappers around native structures. By default, it is necessary to
 retrieve those structures to access their properties and methods
-(eg. list.innerList().length).
+(eg. `list.innerList().length`).
 
 However, if your environment
 [supports ES2015 proxies](https://kangax.github.io/compat-table/es6/#test-Proxy),
-Modelico provides a utility to get around this.
+Modelico provides utilities to get around this.
 
 ```js
 const M = Modelico;
@@ -214,6 +214,7 @@ function Animal(fields) {
 }
 
 Animal.prototype = Object.create(Modelico.prototype);
+Animal.prototype.constructor = Animal;
 
 Animal.prototype.speak = function() {
   var name = this.fields().name;
