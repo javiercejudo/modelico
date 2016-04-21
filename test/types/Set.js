@@ -47,7 +47,7 @@ module.exports = (should, M) => () => {
       ];
 
       const modelicoSet1 = new M.Set(M.Date.metadata(), set);
-      const modelicoSet2 = modelicoSet1.setPath([0], new M.Date(new Date('2000-04-16T00:00:00.000Z')));
+      const modelicoSet2 = modelicoSet1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
       should(Array.from(modelicoSet2.innerSet())[0].date().getFullYear())
         .be.exactly(2000);
@@ -89,7 +89,7 @@ module.exports = (should, M) => () => {
         new M.Date(null)
       ]);
 
-      const modelicoDateSet2 = new M.Set(M.Date.metadata(), [
+      const modelicoDateSet2 = new Set([
         new M.Date(new Date('2016-04-16T00:00:00.000Z'))
       ]);
 

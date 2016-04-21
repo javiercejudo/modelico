@@ -177,7 +177,7 @@ retrieve those structures to access their properties and methods
 
 However, if your environment
 [supports ES2015 proxies](https://kangax.github.io/compat-table/es6/#test-Proxy),
-Modelico provides utilities to get around this.
+Modelico provides utilities to get around this:
 
 ```js
 const M = Modelico;
@@ -196,10 +196,14 @@ proxiedMap.size; //=> 3
 ```
 
 Please note that native methods that modify the structure in place will
-still return what they are meant to, but will not modify the inner
-structure. For example, at the moment `proxiedMap.delete('b')` will return
-`true` but has no effect otherwise. More convenient support for mutator
-methods can be tracked at [#22](https://github.com/javiercejudo/modelico/issues/22).
+instead return a new modelico object:
+
+```js
+const proxiedMap2 = proxiedMap.delete('b');
+
+proxiedMap.size;  //=> 3 (still)
+proxiedMap2.size; //=> 2
+```
 
 See [proxy tests](test/proxies) for more details.
 

@@ -52,7 +52,7 @@ module.exports = (should, M) => () => {
       ]);
 
       const greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map1);
-      const greetings2 = greetings1.setPath([], new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map2));
+      const greetings2 = greetings1.setPath([], map2);
 
       should(greetings2.innerMap().get(PartOfDay.EVENING()).date().getFullYear())
         .be.exactly(2013);

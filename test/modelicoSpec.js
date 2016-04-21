@@ -33,6 +33,11 @@ module.exports = (options, should, M) => _ => {
   describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
   describe('Immutable.js examples', require('./Immutable.js/').apply(_, utilsAndDeps));
 
+  U.skipDescribeIfNoProxies(
+    'Immutable.js examples (proxied)',
+    require('./Immutable.js/proxied').apply(_, utilsAndDeps)
+  );
+
   U.skipDescribeIfNoProxies('Proxies', () => {
     describe('Map', require('./proxies/proxyMap').apply(_, deps));
     describe('List', require('./proxies/proxyList').apply(_, deps));

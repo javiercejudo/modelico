@@ -52,8 +52,7 @@ module.exports = (should, M) => () => {
         ['wedding', new ModelicoDate(new Date('2013-03-28T00:00:00.000Z'))]
       ]);
 
-      const customModelicoMap = new ModelicoMap(ModelicoAsIs(String), ModelicoDate.metadata(), customMap);
-      const map2 = map.setPath([], customModelicoMap);
+      const map2 = map.setPath([], customMap);
 
       should(map2.innerMap().get('wedding').date().getFullYear())
         .be.exactly(2013);

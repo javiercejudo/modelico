@@ -15,7 +15,9 @@ class AbstractMap extends Modelico {
 
   setPath(path, value) {
     if (path.length === 0) {
-      return value;
+      const innerTypes = this.innerTypes();
+
+      return new (this.type())(innerTypes.keyMetadata, innerTypes.keyMetadata, value);
     }
 
     const item = this.innerMap().get(path[0]);

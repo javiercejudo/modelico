@@ -24,7 +24,7 @@ class ModelicoList extends Modelico {
 
   setPath(path, value) {
     if (path.length === 0) {
-      return value;
+      return new ModelicoList(this.itemMetadata(), value);
     }
 
     const item = this.innerList()[path[0]];
