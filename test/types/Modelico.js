@@ -69,7 +69,7 @@ module.exports = (should, M) => () => {
       const listOfPeople1 = new M.List(Person.metadata(), [author]);
 
       const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
-      const listOfPeople3 = listOfPeople2.setPath([0], author);
+      const listOfPeople3 = listOfPeople2.setPath([0], author.fields());
 
       listOfPeople1.innerList()[0].givenName().should.be.exactly('Javier');
       listOfPeople2.innerList()[0].givenName().should.be.exactly('Javi');

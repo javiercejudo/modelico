@@ -38,14 +38,13 @@ class Modelico {
 
   set(field, value) {
     const newFields = Object.assign({}, this.fields(), assignReducer({}, {field, value}));
-    const Type = this.type();
 
-    return new Type(newFields);
+    return new (this.type())(newFields);
   }
 
   setPath(path, value) {
     if (path.length === 0) {
-      return value;
+      return new (this.type())(value);
     }
 
     if (path.length === 1) {

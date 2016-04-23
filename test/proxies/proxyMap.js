@@ -3,17 +3,28 @@
 module.exports = (should, M) => () => {
   var p = M.proxyMap;
 
-  it('should make Map methods available to Modelico Map', () => {
-    var map1 = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
-    var map2 = p(map1.set('b', 50));
-
-    should(map1.get('b')).be.exactly(2);
-    should(map2.get('b')).be.exactly(50);
-  });
-
-  it('should make Map properties available to Modelico Map', () => {
+  it('size', () => {
     var map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
 
-    should(map.size).be.exactly(3);
+    (map.size).should.be.exactly(3);
+  });
+
+  it('get() / set() / delete() / clear()', () => {
+    const map1 = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
+
+    const map2 = map1.set('b', 50);
+
+    (map1.get('b')).should.be.exactly(2);
+    (map2.get('b')).should.be.exactly(50);
+
+    const map3 = map2.delete('c');
+
+    (map2.get('c')).should.be.exactly(3);
+    (map3.has('c')).should.be.exactly(false);
+
+    const map4 = map3.clear();
+
+    (map3.size).should.be.exactly(2);
+    (map4.size).should.be.exactly(0);
   });
 };

@@ -24,7 +24,7 @@ class ModelicoSet extends Modelico {
 
   setPath(path, value) {
     if (path.length === 0) {
-      return value;
+      return new ModelicoSet(this.itemMetadata(), value);
     }
 
     const item = Array.from(this.innerSet())[path[0]];
@@ -39,11 +39,11 @@ class ModelicoSet extends Modelico {
   }
 
   static fromArray(arr) {
-    return new ModelicoSet(AsIs(Any), arr);
+    return ModelicoSet.fromSet(new Set(arr));
   }
 
-  static fromSet(arr) {
-    return new ModelicoSet(AsIs(Any), arr);
+  static fromSet(set) {
+    return new ModelicoSet(AsIs(Any), set);
   }
 
   static metadata(itemMetadata) {

@@ -10,17 +10,6 @@ module.exports = (U, should, M) => () => {
     should(map2.innerMap().get('b')).be.exactly(50);
   });
 
-  U.skipIfNoProxies('Getting started (proxied)', () => {
-    var _ = M.proxyMap;
-
-    var map1 = _(M.Map.fromObject({a: 1, b: 2, c: 3}));
-    var map2 = _(map1.set('b', 50));
-
-    should(map1.size).be.exactly(3);
-    should(map1.get('b')).be.exactly(2);
-    should(map2.get('b')).be.exactly(50);
-  });
-
   it('The case for Immutability', () => {
     var map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
     var map2 = map1.set('b', 2);
@@ -63,7 +52,7 @@ module.exports = (U, should, M) => () => {
     var obj = {d: 100, o: 200, g: 300};
 
     var map3 = M.Map.fromMap(
-      new Map(Array.from(map1.innerMap()).concat(Array.from(map2.innerMap()), objToArr(obj)))
+      new Map([].concat(Array.from(map1.innerMap()), Array.from(map2.innerMap()), objToArr(obj)))
     );
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))

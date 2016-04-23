@@ -17,7 +17,7 @@ gulp.task('instrument', ['clean'], () => {
   return gulp.src([
       'src/**/*.js',
       // Node 5 does not have Proxy
-      '!src/proxyToInner.js'
+      '!src/proxyFactory.js'
     ])
     .pipe(plumber())
     .pipe(istanbul({ coverageVariable }))

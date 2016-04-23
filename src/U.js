@@ -1,7 +1,5 @@
 'use strict';
 
-const proxyToInner = require('./proxyToInner');
-
 const asIsReviver = (k, v) => v;
 const bind = (fn, _1) => fn.bind(undefined, _1);
 
@@ -29,6 +27,5 @@ module.exports = Object.freeze({
   reviverOrAsIs: metadata => (metadata.reviver || asIsReviver),
   asIsReviver,
   iterableReviver,
-  iterableMetadata,
-  proxyToInner
+  iterableMetadata
 });

@@ -9,20 +9,35 @@ const List = require('./List');
 const ModelicoSet = require('./Set');
 const Enum = require('./Enum');
 const Any = require('./Any');
-const U = require('./U');
+
+const bind3 = (fn, _1, _2, _3) => fn.bind(undefined, _1, _2, _3);
+const proxyFactory = require('./proxyFactory');
+const internalNonMutators = ['set', 'setPath'];
+
+const mapNonMutatorMethods = internalNonMutators;
+const mapMutatorMethods = require('../data/mapMutators.json');
+
+const setNonMutatorMethods = internalNonMutators;
+const setMutatorMethods = require('../data/setMutators.json');
+
+const listNonMutatorMethods = internalNonMutators.concat(require('../data/listNonMutators.json'));
+const listMutatorMethods = require('../data/listMutators.json');
+
+const dateNonMutatorMethods = internalNonMutators;
+const dateMutatorMethods = require('../data/dateMutators.json');
 
 module.exports = Object.freeze({
-  Modelico,
-  Map: ModelicoMap,
-  EnumMap,
-  Date: ModelicoDate,
-  AsIs,
   Any,
-  List,
-  Set: ModelicoSet,
+  AsIs,
+  Date: ModelicoDate,
   Enum,
-  proxyMap: U.bind(U.proxyToInner, 'innerMap'),
-  proxyList: U.bind(U.proxyToInner, 'innerList'),
-  proxySet: U.bind(U.proxyToInner, 'innerSet'),
-  proxyDate: U.bind(U.proxyToInner, 'date')
+  EnumMap,
+  List,
+  Map: ModelicoMap,
+  Modelico,
+  Set: ModelicoSet,
+  proxyMap: bind3(proxyFactory, mapNonMutatorMethods, mapMutatorMethods, 'innerMap'),
+  proxyList: bind3(proxyFactory, listNonMutatorMethods, listMutatorMethods, 'innerList'),
+  proxySet: bind3(proxyFactory, setNonMutatorMethods, setMutatorMethods, 'innerSet'),
+  proxyDate: bind3(proxyFactory, dateNonMutatorMethods, dateMutatorMethods, 'date')
 });

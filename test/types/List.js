@@ -47,7 +47,7 @@ module.exports = (should, M) => () => {
       ];
 
       const modelicoList1 = new M.List(M.Date.metadata(), list);
-      const modelicoList2 = modelicoList1.setPath([0], new M.Date(new Date('2000-04-16T00:00:00.000Z')));
+      const modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
       should(modelicoList2.innerList()[0].date().getFullYear())
         .be.exactly(2000);
@@ -85,9 +85,9 @@ module.exports = (should, M) => () => {
         new M.Date(null)
       ]);
 
-      const modelicoDatesList2 = new M.List(M.Date.metadata(), [
+      const modelicoDatesList2 = [
         new M.Date(new Date('2016-04-16T00:00:00.000Z'))
-      ]);
+      ];
 
       const listOfListOfDates1 = new M.List(M.List.metadata(M.Date.metadata()), [modelicoDatesList1]);
       const listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
