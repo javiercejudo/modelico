@@ -9,7 +9,7 @@ class ModelicoSet extends Modelico {
   constructor(itemMetadata, innerSet) {
     super(ModelicoSet, {innerSet});
 
-    this.itemMetadata = () => itemMetadata;
+    this.itemMetadata = U.always(itemMetadata);
     this.innerSet = () => (innerSet === null) ? null : new Set(innerSet);
 
     return Object.freeze(this);

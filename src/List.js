@@ -9,7 +9,7 @@ class ModelicoList extends Modelico {
   constructor(itemMetadata, innerList) {
     super(ModelicoList, {innerList});
 
-    this.itemMetadata = () => itemMetadata;
+    this.itemMetadata = U.always(itemMetadata);
     this.innerList = () => (innerList === null) ? null : innerList.slice();
 
     return Object.freeze(this);
