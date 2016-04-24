@@ -80,9 +80,7 @@ var AbstractMap = function (_Modelico) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AbstractMap).call(this, Type, { innerMap: innerMap }));
 
-    _this.innerTypes = function () {
-      return Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata });
-    };
+    _this.innerTypes = U.always(Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata }));
     _this.innerMap = function () {
       return innerMap === null ? null : new Map(innerMap);
     };
@@ -241,17 +239,13 @@ var ModelicoEnum = function (_Modelico) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnum).call(this, ModelicoEnum, enumerators));
 
     Object.getOwnPropertyNames(enumerators).forEach(function (enumerator) {
-      return _this[enumerator]().toJSON = function () {
-        return enumerator;
-      };
+      return _this[enumerator]().toJSON = U.always(enumerator);
     });
 
-    _this.metadata = function () {
-      return Object.freeze({
-        type: ModelicoEnum,
-        reviver: U.bind(reviver, enumerators)
-      });
-    };
+    _this.metadata = U.always(Object.freeze({
+      type: ModelicoEnum,
+      reviver: U.bind(reviver, enumerators)
+    }));
 
     return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
@@ -360,9 +354,7 @@ var ModelicoList = function (_Modelico) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoList).call(this, ModelicoList, { innerList: innerList }));
 
-    _this.itemMetadata = function () {
-      return itemMetadata;
-    };
+    _this.itemMetadata = U.always(itemMetadata);
     _this.innerList = function () {
       return innerList === null ? null : innerList.slice();
     };
@@ -530,17 +522,11 @@ var Modelico = function () {
     _classCallCheck(this, Modelico);
 
     thisArg = U.default(thisArg, this);
-    thisArg.type = function () {
-      return Type;
-    };
-    thisArg.fields = function () {
-      return Object.freeze(fields);
-    };
+    thisArg.type = U.always(Type);
+    thisArg.fields = U.always(Object.freeze(fields));
 
     Object.getOwnPropertyNames(fields).forEach(function (field) {
-      return thisArg[field] = function () {
-        return fields[field];
-      };
+      return thisArg[field] = U.always(fields[field]);
     });
 
     return thisArg;
@@ -624,9 +610,7 @@ var ModelicoSet = function (_Modelico) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoSet).call(this, ModelicoSet, { innerSet: innerSet }));
 
-    _this.itemMetadata = function () {
-      return itemMetadata;
-    };
+    _this.itemMetadata = U.always(itemMetadata);
     _this.innerSet = function () {
       return innerSet === null ? null : new Set(innerSet);
     };
@@ -710,6 +694,11 @@ var iterableMetadata = function iterableMetadata(IterableType, itemMetadata, k, 
 };
 
 module.exports = Object.freeze({
+  always: function always(x) {
+    return function () {
+      return x;
+    };
+  },
   bind: bind,
   default: function _default(optional, fallback) {
     return optional === undefined ? fallback : optional;
