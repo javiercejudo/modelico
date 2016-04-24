@@ -4,7 +4,7 @@ module.exports = (should, M) => () => {
   var p = M.proxyMap;
 
   it('size', () => {
-    var map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
+    const map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
 
     (map.size).should.be.exactly(3);
   });
