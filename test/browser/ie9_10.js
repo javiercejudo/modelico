@@ -36,8 +36,4 @@ Object.getPrototypeOf = function getPrototypeOf(object) {
   return null;
 };
 
-var options = {
-  legacyIE: true
-};
-
-describe('Modelico', modelicoSpec(options, Should, Modelico));
+describe('Modelico', modelicoSpec({}, Should, Modelico));

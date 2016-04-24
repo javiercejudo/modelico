@@ -31,7 +31,7 @@ module.exports = (U, should, M) => () => {
       should(asIsObject.two).be.exactly(2);
     });
 
-    U.skipIfLegacyIE('should be immutable', () => {
+    U.skipIfNoObjectFreeze('should be immutable', () => {
       (() => AsIs().reviver = x => x).should.throw();
     });
   });
