@@ -9,7 +9,7 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper = (innerTypes, object) => (enumerator) => [
+const parseMapper = (innerTypes, object) => enumerator => [
   U.reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
   U.reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
 ];

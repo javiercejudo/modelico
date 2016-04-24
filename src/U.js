@@ -21,6 +21,7 @@ const iterableMetadata = (IterableType, itemMetadata, k, v) => {
 };
 
 module.exports = Object.freeze({
+  always: x => () => x,
   bind,
   default: (optional, fallback) => (optional === undefined) ? fallback : optional,
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]]),

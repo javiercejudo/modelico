@@ -18,12 +18,12 @@ class ModelicoEnum extends Modelico {
     super(ModelicoEnum, enumerators);
 
     Object.getOwnPropertyNames(enumerators)
-      .forEach(enumerator => this[enumerator]().toJSON = () => enumerator);
+      .forEach(enumerator => this[enumerator]().toJSON = U.always(enumerator));
 
-    this.metadata = () => Object.freeze({
+    this.metadata = U.always(Object.freeze({
       type: ModelicoEnum,
       reviver: U.bind(reviver, enumerators)
-    });
+    }));
 
     return Object.freeze(this);
   }

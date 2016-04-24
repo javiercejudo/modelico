@@ -7,7 +7,7 @@ class AbstractMap extends Modelico {
   constructor(Type, keyMetadata, valueMetadata, innerMap) {
     super(Type, {innerMap});
 
-    this.innerTypes = () => Object.freeze({keyMetadata, valueMetadata});
+    this.innerTypes = U.always(Object.freeze({keyMetadata, valueMetadata}));
     this.innerMap = () => (innerMap === null) ? null : new Map(innerMap);
 
     return this;

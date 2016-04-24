@@ -27,11 +27,11 @@ const reviver = (Type, k, v) => {
 class Modelico {
   constructor(Type, fields, thisArg) {
     thisArg = U.default(thisArg, this);
-    thisArg.type = () => Type;
-    thisArg.fields = () => Object.freeze(fields);
+    thisArg.type = U.always(Type);
+    thisArg.fields = U.always(Object.freeze(fields));
 
     Object.getOwnPropertyNames(fields)
-      .forEach(field => thisArg[field] = () => fields[field]);
+      .forEach(field => thisArg[field] = U.always(fields[field]));
 
     return thisArg;
   }
