@@ -27,4 +27,39 @@ module.exports = (should, M) => () => {
     (map3.size).should.be.exactly(2);
     (map4.size).should.be.exactly(0);
   });
+
+  it('entries()', () => {
+    const map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
+
+    Array.from(map.entries())
+      .should.eql([['a', 1], ['b', 2], ['c', 3]]);
+  });
+
+  it('values() / keys() / [@@iterator]()', () => {
+    const map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
+
+    Array.from(map.values())
+      .should.eql([1, 2, 3]);
+
+    Array.from(map.keys())
+      .should.eql(['a', 'b', 'c']);
+
+    Array.from(map[Symbol.iterator]())
+      .should.eql([['a', 1], ['b', 2], ['c', 3]]);
+  });
+
+  it('forEach()', () => {
+    const map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
+
+    let sum = 0;
+    let keys = '';
+
+    map.forEach((v, k) => {
+      sum += v;
+      keys += k.toUpperCase();
+    });
+
+    (sum).should.be.exactly(6);
+    (keys).should.be.exactly('ABC');
+  });
 };

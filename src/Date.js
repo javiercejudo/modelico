@@ -6,7 +6,7 @@ class ModelicoDate extends Modelico {
   constructor(date) {
     super(ModelicoDate, {date});
 
-    this.date = () => date === null ? null : new Date(date.toISOString());
+    this.date = () => date === null ? null : new Date(date.getTime());
 
     return Object.freeze(this);
   }

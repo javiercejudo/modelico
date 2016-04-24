@@ -2,6 +2,7 @@
   "setDate",
   "setFullYear",
   "setHours",
+  "setMinutes",
   "setMilliseconds",
   "setMonth",
   "setSeconds",

@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Modelico Browser Tests</title>
+  <title>Modelico Browser Tests (ES3 setup)</title>
   <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.4.5/mocha.min.css">
 </head>
@@ -59,7 +59,7 @@
   <script>
     mocha.setup('bdd');
 
-    describe('Modelico', modelicoSpec({}, Should, Modelico));
+    describe('Modelico (ES3 setup)', modelicoSpec({}, Should, Modelico));
 
     mocha.checkLeaks();
     mocha.run();
