@@ -414,6 +414,23 @@ module.exports = function (should, M) {
 },{}],6:[function(require,module,exports){
 'use strict';
 
+var hasObjectFreeze = function () {
+  var a = {};
+
+  try {
+    Object.freeze(a);
+  } catch (e) {
+    return false;
+  }
+
+  try {
+    a.test = 1;
+    return false;
+  } catch (ignore) {}
+
+  return true;
+}();
+
 var hasProxies = function () {
   try {
     new Proxy({}, {});
@@ -428,7 +445,7 @@ var buildUtils = function buildUtils(options) {
   return Object.freeze({
     skipIfNoProxies: hasProxies ? it : it.skip,
     skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-    skipIfLegacyIE: options.legacyIE ? it.skip : it,
+    skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
     objToArr: function objToArr(obj) {
       return Object.keys(obj).map(function (k) {
         return [k, obj[k]];
@@ -748,7 +765,7 @@ module.exports = function (U, should, M) {
         should(asIsObject.two).be.exactly(2);
       });
 
-      U.skipIfLegacyIE('should be immutable', function () {
+      U.skipIfNoObjectFreeze('should be immutable', function () {
         (function () {
           return AsIs().reviver = function (x) {
             return x;

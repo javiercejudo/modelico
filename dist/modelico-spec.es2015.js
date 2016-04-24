@@ -379,6 +379,23 @@ module.exports = (should, M) => () => {
 },{}],6:[function(require,module,exports){
 'use strict';
 
+const hasObjectFreeze = (function(){
+  const a = {};
+
+  try{
+    Object.freeze(a);
+  } catch(e) {
+    return false;
+  }
+
+  try {
+    a.test = 1;
+    return false;
+  } catch(ignore) {}
+
+  return true;
+})();
+
 const hasProxies = (() => {
   try {
     new Proxy({}, {});
@@ -392,7 +409,7 @@ const hasProxies = (() => {
 const buildUtils = (options) => Object.freeze({
   skipIfNoProxies: hasProxies ? it : it.skip,
   skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-  skipIfLegacyIE: options.legacyIE ? it.skip : it,
+  skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
 });
 
@@ -713,7 +730,7 @@ module.exports = (U, should, M) => () => {
       should(asIsObject.two).be.exactly(2);
     });
 
-    U.skipIfLegacyIE('should be immutable', () => {
+    U.skipIfNoObjectFreeze('should be immutable', () => {
       (() => AsIs().reviver = x => x).should.throw();
     });
   });
