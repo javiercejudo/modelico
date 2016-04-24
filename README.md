@@ -9,8 +9,9 @@ Universal library for serialisable immutable models.
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/modelico.svg)](https://saucelabs.com/u/modelico)
 
 *Note: [babel-polyfill](https://babeljs.io/docs/usage/polyfill/) might be required
-for browsers other than Chrome, Firefox and Edge. See [browser tests](test/browser)
-for more details (including IE 9 & 10) or [run the current tests directly on your browser](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html).*
+for browsers other than Chrome, Firefox and Edge. Additionally, IE 9 & 10 also require
+a `getPrototypeOf` polyfill as the one in [es5-sham](https://github.com/es-shims/es5-shim#shams).
+See [browser tests](test/browser) for more details.*
 
 ## Installation
 
@@ -19,9 +20,16 @@ for more details (including IE 9 & 10) or [run the current tests directly on you
 To use it in the browser, grab the [minified](dist/modelico.min.js) or the
 [development](dist/modelico.js) files.
 
+A modern (smaller) build is also available for browsers with broad ES2015 browsers.
+Run the current tests directly on your target browsers to see what setup is right for you:
+
+- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/es2015.html) with modern ES2015 setup
+- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html) with standard ES5 setup
+- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/ie9_10.html) with legacy ES3 setup
+
 ## Quick intro
 
-The goal is to parse JSON strings like the following into JavaScript classes
+The goal is to parse JSON strings like the following into JavaScript custom objects
 
 ```JSON
 {
@@ -36,6 +44,7 @@ const pet1 = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
 
 pet1.speak(); //=> 'my name is Robbie!'
 
+// pet1 will not be mutated
 const pet2 = pet1.set('name', 'Bane');
 
 pet2.name(); //=> 'Bane'
