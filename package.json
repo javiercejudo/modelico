@@ -8,9 +8,15 @@
     "test-browsers": "./scripts/browser_tester.sh",
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "npm run build-dev && npm run build-min && npm run build-browser-spec",
-    "build-dev": "browserify ./index.js -s Modelico -t babelify -o dist/modelico.js",
-    "build-min": "browserify ./index.js -s Modelico -t babelify -o -g uglifyify | uglifyjs -c -m > dist/modelico.min.js",
-    "build-browser-spec": "browserify ./test/modelicoSpec.js -t babelify -s modelicoSpec -o dist/modelico-spec.js",
+    "build-dev": "npm run build-dev-es5 && npm run build-dev-es2015",
+    "build-dev-es5": "browserify ./index.js -s Modelico -t babelify -o dist/modelico.js",
+    "build-dev-es2015": "browserify ./index.js -s Modelico -o dist/modelico.es2015.js",
+    "build-min": "npm run build-min-es5 && npm run build-min-es2015",
+    "build-min-es5": "browserify ./index.js -s Modelico -t babelify -g uglifyify | uglifyjs -c -m > dist/modelico.min.js",
+    "build-min-es2015": "browserify ./index.js -s Modelico -g uglifyify | uglifyjs -c -m > dist/modelico.es2015.min.js",
+    "build-browser-spec": "npm run build-browser-spec-es5 && npm run build-browser-spec-es2015",
+    "build-browser-spec-es5": "browserify ./test/modelicoSpec.js -t babelify -s modelicoSpec -o dist/modelico-spec.js",
+    "build-browser-spec-es2015": "browserify ./test/modelicoSpec.js -s modelicoSpec -o dist/modelico-spec.es2015.js",
     "version": "npm run build && git add -A dist"
   },
   "repository": {
@@ -53,7 +59,7 @@
     "phantomjs-prebuilt": "^2.1.7",
     "rimraf": "^2.4.3",
     "should": "^8.3.0",
-    "uglify-js": "^2.6.2",
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#8571a08a930474b68cb0e2daf3c7e666dcdcb15e",
     "uglifyify": "^3.0.1"
   }
 }

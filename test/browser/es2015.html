@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Modelico Browser Tests</title>
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.4.5/mocha.min.css">
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.4.5/mocha.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/should.js/8.3.0/should.min.js"></script>
+
+  <script src="../../dist/modelico.es2015.min.js"></script>
+  <script src="../../dist/modelico-spec.es2015.js"></script>
+
+  <script>
+    mocha.setup('bdd');
+
+    describe('Modelico', modelicoSpec({}, Should, Modelico));
+
+    mocha.checkLeaks();
+    mocha.run();
+  </script>
+</body>
+</html>
