@@ -3,6 +3,7 @@ module.exports=[
   "setDate",
   "setFullYear",
   "setHours",
+  "setMinutes",
   "setMilliseconds",
   "setMonth",
   "setSeconds",
@@ -32,9 +33,9 @@ module.exports=[
 
 },{}],3:[function(require,module,exports){
 module.exports=[
+  "concat",
   "slice",
-  "filter",
-  "concat"
+  "filter"
 ]
 
 },{}],4:[function(require,module,exports){
@@ -162,7 +163,7 @@ var ModelicoDate = function (_Modelico) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoDate).call(this, ModelicoDate, { date: date }));
 
     _this.date = function () {
-      return date === null ? null : new Date(date.toISOString());
+      return date === null ? null : new Date(date.getTime());
     };
 
     return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);

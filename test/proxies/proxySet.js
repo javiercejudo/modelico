@@ -33,24 +33,21 @@ module.exports = (should, M) => () => {
   it('entries()', () => {
     const set = p(M.Set.fromArray([1, 2, 2, 3]));
 
-    Array.from(set.entries()).reduce((acc, curr) => acc + curr[0], 0)
-      .should.be.exactly(6);
-
-    Array.from(set.entries()).reduce((acc, curr) => acc + curr[1], 0)
-      .should.be.exactly(6);
+    Array.from(set.entries())
+      .should.eql([[1, 1], [2, 2], [3, 3]]);
   });
 
   it('values() / keys() / [@@iterator]()', () => {
     const set = p(M.Set.fromArray([1, 2, 2, 3]));
 
-    Array.from(set.values()).reduce((a, b) => a + b, 0)
-      .should.be.exactly(6);
+    Array.from(set.values())
+      .should.eql([1, 2, 3]);
 
-    Array.from(set.keys()).reduce((a, b) => a + b, 0)
-      .should.be.exactly(6);
+    Array.from(set.keys())
+      .should.eql([1, 2, 3]);
 
-    Array.from(set[Symbol.iterator]()).reduce((a, b) => a + b, 0)
-      .should.be.exactly(6);
+    Array.from(set[Symbol.iterator]())
+      .should.eql([1, 2, 3]);
   });
 
   it('forEach()', () => {
