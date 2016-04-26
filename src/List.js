@@ -15,6 +15,10 @@ class ModelicoList extends Modelico {
     return Object.freeze(this);
   }
 
+  [Symbol.iterator]() {
+    return this.innerList()[Symbol.iterator]();
+  }
+
   set(index, value) {
     const newList = this.innerList();
     newList[index] = value;

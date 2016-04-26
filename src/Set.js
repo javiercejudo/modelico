@@ -15,6 +15,10 @@ class ModelicoSet extends Modelico {
     return Object.freeze(this);
   }
 
+  [Symbol.iterator]() {
+    return this.innerSet()[Symbol.iterator]();
+  }
+
   set(index, value) {
     const newSet = Array.from(this.innerSet());
     newSet[index] = value;

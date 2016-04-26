@@ -13,6 +13,10 @@ class AbstractMap extends Modelico {
     return this;
   }
 
+  [Symbol.iterator]() {
+    return this.innerMap()[Symbol.iterator]();
+  }
+
   setPath(path, value) {
     if (path.length === 0) {
       const innerTypes = this.innerTypes();
