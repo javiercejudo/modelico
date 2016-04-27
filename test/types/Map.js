@@ -9,6 +9,13 @@ module.exports = (should, M) => () => {
   const ModelicoDate = M.Date;
 
   describe('setting', () => {
+    it('should implement Symbol.iterator', () => {
+      const map = M.Map.fromObject({a: 1, b: 2, c: 3});
+
+      Array.from(map)
+        .should.eql([['a', 1], ['b', 2], ['c', 3]]);
+    });
+
     it('should set fields returning a new map', () => {
       const map = new Map([
         ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))],

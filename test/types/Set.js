@@ -6,6 +6,13 @@ module.exports = (should, M) => () => {
   const Modelico = M.Modelico;
 
   describe('setting', () => {
+    it('should implement Symbol.iterator', () => {
+      const set = M.Set.fromArray([1, 2, 2, 4]);
+
+      Array.from(set)
+        .should.eql([1, 2, 4]);
+    });
+
     it('should set items in the set correctly', () => {
       const set = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
