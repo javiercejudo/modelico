@@ -73,6 +73,10 @@ class AbstractMap extends Modelico {
     return this;
   }
 
+  [Symbol.iterator]() {
+    return this.innerMap()[Symbol.iterator]();
+  }
+
   setPath(path, value) {
     if (path.length === 0) {
       const innerTypes = this.innerTypes();
@@ -256,6 +260,10 @@ class ModelicoList extends Modelico {
     this.innerList = () => (innerList === null) ? null : innerList.slice();
 
     return Object.freeze(this);
+  }
+
+  [Symbol.iterator]() {
+    return this.innerList()[Symbol.iterator]();
   }
 
   set(index, value) {
@@ -443,6 +451,10 @@ class ModelicoSet extends Modelico {
     this.innerSet = () => (innerSet === null) ? null : new Set(innerSet);
 
     return Object.freeze(this);
+  }
+
+  [Symbol.iterator]() {
+    return this.innerSet()[Symbol.iterator]();
   }
 
   set(index, value) {

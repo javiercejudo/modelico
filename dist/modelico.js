@@ -90,6 +90,11 @@ var AbstractMap = function (_Modelico) {
   }
 
   _createClass(AbstractMap, [{
+    key: Symbol.iterator,
+    value: function value() {
+      return this.innerMap()[Symbol.iterator]();
+    }
+  }, {
     key: 'setPath',
     value: function setPath(path, value) {
       if (path.length === 0) {
@@ -364,6 +369,11 @@ var ModelicoList = function (_Modelico) {
   }
 
   _createClass(ModelicoList, [{
+    key: Symbol.iterator,
+    value: function value() {
+      return this.innerList()[Symbol.iterator]();
+    }
+  }, {
     key: 'set',
     value: function set(index, value) {
       var newList = this.innerList();
@@ -620,6 +630,11 @@ var ModelicoSet = function (_Modelico) {
   }
 
   _createClass(ModelicoSet, [{
+    key: Symbol.iterator,
+    value: function value() {
+      return this.innerSet()[Symbol.iterator]();
+    }
+  }, {
     key: 'set',
     value: function set(index, value) {
       var newSet = Array.from(this.innerSet());

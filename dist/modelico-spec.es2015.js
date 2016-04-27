@@ -1040,6 +1040,13 @@ module.exports = (should, M) => () => {
   const Modelico = M.Modelico;
 
   describe('setting', () => {
+    it('should implement Symbol.iterator', () => {
+      const list = M.List.fromArray([1, 2, 3, 4]);
+
+      Array.from(list)
+        .should.eql([1, 2, 3, 4]);
+    });
+
     it('should set items in the list correctly', () => {
       const list = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
@@ -1226,6 +1233,13 @@ module.exports = (should, M) => () => {
   const ModelicoDate = M.Date;
 
   describe('setting', () => {
+    it('should implement Symbol.iterator', () => {
+      const map = M.Map.fromObject({a: 1, b: 2, c: 3});
+
+      Array.from(map)
+        .should.eql([['a', 1], ['b', 2], ['c', 3]]);
+    });
+
     it('should set fields returning a new map', () => {
       const map = new Map([
         ['a', new ModelicoDate(new Date('1988-04-16T00:00:00.000Z'))],
@@ -1545,6 +1559,13 @@ module.exports = (should, M) => () => {
   const Modelico = M.Modelico;
 
   describe('setting', () => {
+    it('should implement Symbol.iterator', () => {
+      const set = M.Set.fromArray([1, 2, 2, 4]);
+
+      Array.from(set)
+        .should.eql([1, 2, 4]);
+    });
+
     it('should set items in the set correctly', () => {
       const set = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
