@@ -14,11 +14,13 @@ gulp.task('clean', cb => rimraf('./coverage', cb));
 gulp.task('instrument', ['clean'], () => {
   coverageVariable = '$$cov_' + new Date().getTime() + '$$';
 
+  const continuousIntegration = process.env.CONTINUOUS_INTEGRATION;
+  const travisNodeVersion = process.env.TRAVIS_NODE_VERSION;
+  const excludeProxies = continuousIntegration && travisNodeVersion !== 'stable';
+
   return gulp.src([
       'src/**/*.js',
-      // Node 5 does not have Proxy
-      '!src/proxyFactory.js'
-    ])
+    ].concat(excludeProxies ? '!src/proxyFactory.js' : []))
     .pipe(plumber())
     .pipe(istanbul({ coverageVariable }))
     .pipe(istanbul.hookRequire());
