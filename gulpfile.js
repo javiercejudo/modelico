@@ -19,7 +19,7 @@ gulp.task('instrument', ['clean'], () => {
   const excludeProxies = continuousIntegration && travisNodeVersion !== 'stable';
 
   return gulp.src([
-      'src/**/*.js',
+      'src/**/*.js'
     ].concat(excludeProxies ? '!src/proxyFactory.js' : []))
     .pipe(plumber())
     .pipe(istanbul({ coverageVariable }))
