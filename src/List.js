@@ -11,12 +11,9 @@ class ModelicoList extends Modelico {
 
     this.itemMetadata = U.always(itemMetadata);
     this.innerList = () => (innerList === null) ? null : innerList.slice();
+    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     return Object.freeze(this);
-  }
-
-  [Symbol.iterator]() {
-    return this.innerList()[Symbol.iterator]();
   }
 
   set(index, value) {

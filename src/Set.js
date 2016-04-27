@@ -11,12 +11,9 @@ class ModelicoSet extends Modelico {
 
     this.itemMetadata = U.always(itemMetadata);
     this.innerSet = () => (innerSet === null) ? null : new Set(innerSet);
+    this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
     return Object.freeze(this);
-  }
-
-  [Symbol.iterator]() {
-    return this.innerSet()[Symbol.iterator]();
   }
 
   set(index, value) {

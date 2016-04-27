@@ -9,12 +9,9 @@ class AbstractMap extends Modelico {
 
     this.innerTypes = U.always(Object.freeze({keyMetadata, valueMetadata}));
     this.innerMap = () => (innerMap === null) ? null : new Map(innerMap);
+    this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
 
     return this;
-  }
-
-  [Symbol.iterator]() {
-    return this.innerMap()[Symbol.iterator]();
   }
 
   setPath(path, value) {

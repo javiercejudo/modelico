@@ -69,12 +69,9 @@ class AbstractMap extends Modelico {
 
     this.innerTypes = U.always(Object.freeze({keyMetadata, valueMetadata}));
     this.innerMap = () => (innerMap === null) ? null : new Map(innerMap);
+    this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
 
     return this;
-  }
-
-  [Symbol.iterator]() {
-    return this.innerMap()[Symbol.iterator]();
   }
 
   setPath(path, value) {
@@ -258,12 +255,9 @@ class ModelicoList extends Modelico {
 
     this.itemMetadata = U.always(itemMetadata);
     this.innerList = () => (innerList === null) ? null : innerList.slice();
+    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     return Object.freeze(this);
-  }
-
-  [Symbol.iterator]() {
-    return this.innerList()[Symbol.iterator]();
   }
 
   set(index, value) {
@@ -449,12 +443,9 @@ class ModelicoSet extends Modelico {
 
     this.itemMetadata = U.always(itemMetadata);
     this.innerSet = () => (innerSet === null) ? null : new Set(innerSet);
+    this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
     return Object.freeze(this);
-  }
-
-  [Symbol.iterator]() {
-    return this.innerSet()[Symbol.iterator]();
   }
 
   set(index, value) {

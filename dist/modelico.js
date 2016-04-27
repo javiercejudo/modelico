@@ -85,16 +85,14 @@ var AbstractMap = function (_Modelico) {
     _this.innerMap = function () {
       return innerMap === null ? null : new Map(innerMap);
     };
+    _this[Symbol.iterator] = function () {
+      return innerMap[Symbol.iterator]();
+    };
 
     return _ret = _this, _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(AbstractMap, [{
-    key: Symbol.iterator,
-    value: function value() {
-      return this.innerMap()[Symbol.iterator]();
-    }
-  }, {
     key: 'setPath',
     value: function setPath(path, value) {
       if (path.length === 0) {
@@ -364,16 +362,14 @@ var ModelicoList = function (_Modelico) {
     _this.innerList = function () {
       return innerList === null ? null : innerList.slice();
     };
+    _this[Symbol.iterator] = function () {
+      return innerList[Symbol.iterator]();
+    };
 
     return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(ModelicoList, [{
-    key: Symbol.iterator,
-    value: function value() {
-      return this.innerList()[Symbol.iterator]();
-    }
-  }, {
     key: 'set',
     value: function set(index, value) {
       var newList = this.innerList();
@@ -625,16 +621,14 @@ var ModelicoSet = function (_Modelico) {
     _this.innerSet = function () {
       return innerSet === null ? null : new Set(innerSet);
     };
+    _this[Symbol.iterator] = function () {
+      return innerSet[Symbol.iterator]();
+    };
 
     return _ret = Object.freeze(_this), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(ModelicoSet, [{
-    key: Symbol.iterator,
-    value: function value() {
-      return this.innerSet()[Symbol.iterator]();
-    }
-  }, {
     key: 'set',
     value: function set(index, value) {
       var newSet = Array.from(this.innerSet());

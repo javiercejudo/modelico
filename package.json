@@ -13,7 +13,7 @@
     "build-dev-es2015": "browserify ./index.js -s Modelico -o dist/modelico.es2015.js",
     "build-min": "npm run build-min-es5 && npm run build-min-es2015",
     "build-min-es5": "browserify ./index.js -s Modelico -t babelify -g uglifyify | uglifyjs -c -m > dist/modelico.min.js",
-    "build-min-es2015": "browserify ./index.js -s Modelico | uglifyjs -c -m > dist/modelico.es2015.min.js",
+    "build-min-es2015": "browserify ./index.js -s Modelico -g uglifyify | uglifyjs -c -m > dist/modelico.es2015.min.js",
     "build-browser-spec": "npm run build-browser-spec-es5 && npm run build-browser-spec-es2015",
     "build-browser-spec-es5": "browserify ./test/modelicoSpec.js -t babelify -s modelicoSpec -o dist/modelico-spec.js",
     "build-browser-spec-es2015": "browserify ./test/modelicoSpec.js -s modelicoSpec -o dist/modelico-spec.es2015.js",
