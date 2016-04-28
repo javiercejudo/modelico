@@ -1,10 +1,15 @@
 'use strict';
 
-module.exports = (should, M) => () => {
-  const Person = require('./fixtures/Person')(M);
-  const PartOfDay = require('./fixtures/PartOfDay')(M);
-  const Sex = require('./fixtures/Sex')(M);
-  const Animal = require('./fixtures/Animal')(M);
+import PersonFactory from './fixtures/Person';
+import PartOfDayFactory from './fixtures/PartOfDay';
+import SexFactory from './fixtures/Sex';
+import AnimalFactory from './fixtures/Animal';
+
+export default (should, M) => () => {
+  const Person = PersonFactory(M);
+  const PartOfDay = PartOfDayFactory(M);
+  const Sex = SexFactory(M);
+  const Animal = AnimalFactory(M);
 
   const Modelico = M.Modelico;
   const ModelicoDate = M.Date;

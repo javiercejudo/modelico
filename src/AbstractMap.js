@@ -1,7 +1,7 @@
 'use strict';
 
-const U = require('./U');
-const Modelico = require('./Modelico');
+import U from './U';
+import Modelico from './Modelico';
 
 class AbstractMap extends Modelico {
   constructor(Type, keyMetadata, valueMetadata, innerMap) {
@@ -39,4 +39,4 @@ class AbstractMap extends Modelico {
   }
 }
 
-module.exports = Object.freeze(AbstractMap);
+export default Object.freeze(AbstractMap);

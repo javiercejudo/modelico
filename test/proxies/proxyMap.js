@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (should, M) => () => {
+export default (should, M) => () => {
   var p = M.proxyMap;
 
   it('size', () => {

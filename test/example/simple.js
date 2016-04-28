@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (should, M) => () => {
+export default (should, M) => () => {
 
   const Modelico = M.Modelico;
   const AsIs = M.AsIs;

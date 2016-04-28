@@ -34,31 +34,49 @@ const buildUtils = (options) => Object.freeze({
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
 });
 
-module.exports = (options, should, M) => _ => {
+import Modelico from './types/Modelico';
+import ModelicoAsIs from './types/AsIs';
+import ModelicoMap from './types/Map';
+import ModelicoEnumMap from './types/EnumMap';
+import ModelicoList from './types/List';
+import ModelicoSet from './types/Set';
+
+import exampleSimple from './example/simple';
+import exampleAdvanced from './example/advanced';
+import exampleAdvancedES5 from './example/advanced.es5';
+import Immutable from './Immutable.js/index';
+import ImmutableProxied from './Immutable.js/proxied';
+
+import proxyMap from './proxies/proxyMap';
+import proxyList from './proxies/proxyList';
+import proxySet from './proxies/proxySet';
+import proxyDate from './proxies/proxyDate';
+
+export default (options, should, M) => _ => {
   const U = buildUtils(options);
   const deps = [should, M];
   const utilsAndDeps = [U].concat(deps);
 
-  describe('ModelicoBase', require('./types/Modelico').apply(_, deps));
-  describe('ModelicoAsIs', require('./types/AsIs').apply(_, utilsAndDeps));
-  describe('ModelicoMap', require('./types/Map').apply(_, deps));
-  describe('ModelicoEnumMap', require('./types/EnumMap').apply(_, deps));
-  describe('ModelicoList', require('./types/List').apply(_, deps));
-  describe('ModelicoSet', require('./types/Set').apply(_, deps));
-  describe('Readme Simple Example', require('./example/simple').apply(_, deps));
-  describe('Readme Advanced Example', require('./example/advanced').apply(_, deps));
-  describe('Readme Advanced Example ES5', require('./example/advanced.es5').apply(_, deps));
-  describe('Immutable.js examples', require('./Immutable.js/').apply(_, utilsAndDeps));
+  describe('Base', Modelico.apply(_, deps));
+  describe('AsIs', ModelicoAsIs.apply(_, utilsAndDeps));
+  describe('Map', ModelicoMap.apply(_, deps));
+  describe('EnumMap', ModelicoEnumMap.apply(_, deps));
+  describe('ModelicoList', ModelicoList.apply(_, deps));
+  describe('ModelicoSet', ModelicoSet.apply(_, deps));
+  describe('Readme Simple Example', exampleSimple.apply(_, deps));
+  describe('Readme Advanced Example', exampleAdvanced.apply(_, deps));
+  describe('Readme Advanced Example ES5', exampleAdvancedES5.apply(_, deps));
+  describe('Immutable.js examples', Immutable.apply(_, utilsAndDeps));
 
   U.skipDescribeIfNoProxies(
     'Immutable.js examples (proxied)',
-    require('./Immutable.js/proxied').apply(_, utilsAndDeps)
+    ImmutableProxied.apply(_, utilsAndDeps)
   );
 
   U.skipDescribeIfNoProxies('Proxies', () => {
-    describe('Map', require('./proxies/proxyMap').apply(_, deps));
-    describe('List', require('./proxies/proxyList').apply(_, deps));
-    describe('Set', require('./proxies/proxySet').apply(_, deps));
-    describe('Date', require('./proxies/proxyDate').apply(_, deps));
+    describe('Map', proxyMap.apply(_, deps));
+    describe('List', proxyList.apply(_, deps));
+    describe('Set', proxySet.apply(_, deps));
+    describe('Date', proxyDate.apply(_, deps));
   });
 };

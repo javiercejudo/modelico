@@ -59,4 +59,4 @@ proxyFactory = (nonMutators, mutators, innerAccessor, obj) => {
   return new Proxy(obj, {get: get});
 };
 
-module.exports = proxyFactory;
+export default proxyFactory;

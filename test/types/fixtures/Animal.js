@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = M => {
+export default M => {
   const Modelico = M.Modelico;
 
   class Animal extends Modelico {

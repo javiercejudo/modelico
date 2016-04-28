@@ -1,7 +1,7 @@
 'use strict';
 
-const U = require('./U');
-const Modelico = require('./Modelico');
+import U from './U';
+import Modelico from './Modelico';
 
 const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
 
@@ -29,4 +29,4 @@ class ModelicoEnum extends Modelico {
   }
 }
 
-module.exports = Object.freeze(ModelicoEnum);
+export default Object.freeze(ModelicoEnum);

@@ -20,7 +20,7 @@ const iterableMetadata = (IterableType, itemMetadata, k, v) => {
   });
 };
 
-module.exports = Object.freeze({
+export default Object.freeze({
   always: x => () => x,
   bind,
   default: (optional, fallback) => (optional === undefined) ? fallback : optional,
