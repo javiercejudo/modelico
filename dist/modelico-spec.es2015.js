@@ -936,7 +936,6 @@
   };
 
   var exampleSimple = (should, M) => () => {
-
     const Modelico = M.Modelico;
     const AsIs = M.AsIs;
     const List = M.List;
@@ -968,7 +967,6 @@
   };
 
   var exampleAdvanced = (should, M) => () => {
-
     const Modelico = M.Modelico;
     const AsIs = M.AsIs;
     const List = M.List;
@@ -1041,7 +1039,6 @@
   };
 
   var exampleAdvancedES5 = (should, M) => () => {
-
     const Modelico = M.Modelico;
     const AsIs = M.AsIs;
     const List = M.List;
@@ -1100,6 +1097,101 @@
 
       person1.pets().innerList().shift().speak()
         .should.be.exactly('My name is Robbie!');
+    });
+  };
+
+  var RegionFactory = M => {
+    const Modelico = M.Modelico;
+
+    class Region extends Modelico {
+      constructor(fields) {
+        super(Region, fields);
+
+        return Object.freeze(this);
+      }
+
+      customMethod() {
+        return `${this.name()} (${this.code()})`;
+      }
+
+      static innerTypes() {
+        return Object.freeze({
+          'name': M.AsIs(String)
+        });
+      }
+
+      static metadata() {
+        return Modelico.metadata(Region);
+      }
+    }
+
+    return Object.freeze(Region);
+  };
+
+  var CountryFactory = M => {
+    const Modelico = M.Modelico;
+    const Region = RegionFactory(M);
+
+    class Country extends Modelico {
+      constructor(fields) {
+        super(Country, fields);
+
+        return Object.freeze(this);
+      }
+
+      static innerTypes() {
+        return Object.freeze({
+          'name': M.AsIs(String),
+          'region': Region.metadata()
+        });
+      }
+
+      static metadata() {
+        return Modelico.metadata(Country);
+      }
+    }
+
+    return Object.freeze(Country);
+  };
+
+  var CityFactory = M => {
+    const Modelico = M.Modelico;
+    const Country = CountryFactory(M);
+
+    class City extends Modelico {
+      constructor(fields) {
+        super(City, fields);
+
+        return Object.freeze(this);
+      }
+
+      static innerTypes() {
+        return Object.freeze({
+          'name': M.AsIs(String),
+          'country': Country.metadata()
+        });
+      }
+
+      static metadata() {
+        return Modelico.metadata(City);
+      }
+    }
+
+    return Object.freeze(City);
+  };
+
+  var exampleDeepNesting = (should, M) => () => {
+    const Modelico = M.Modelico;
+    const City = CityFactory(M);
+
+    it('should showcase the main features', () => {
+      const cityJson = `{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}`;
+
+      const city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
+
+      city.name().should.be.exactly('Pamplona');
+      city.country().name().should.be.exactly('Spain');
+      city.country().region().customMethod().should.be.exactly('Europe (EU)');
     });
   };
 
@@ -1769,9 +1861,10 @@
     describe('EnumMap', ModelicoEnumMap.apply(_, deps));
     describe('ModelicoList', ModelicoList.apply(_, deps));
     describe('ModelicoSet', ModelicoSet.apply(_, deps));
-    describe('Readme Simple Example', exampleSimple.apply(_, deps));
-    describe('Readme Advanced Example', exampleAdvanced.apply(_, deps));
-    describe('Readme Advanced Example ES5', exampleAdvancedES5.apply(_, deps));
+    describe('Readme simple example', exampleSimple.apply(_, deps));
+    describe('Readme advanced example', exampleAdvanced.apply(_, deps));
+    describe('Readme advanced example ES5', exampleAdvancedES5.apply(_, deps));
+    describe('Deep nesting example', exampleDeepNesting.apply(_, deps));
     describe('Immutable.js examples', Immutable.apply(_, utilsAndDeps));
 
     U.skipDescribeIfNoProxies(

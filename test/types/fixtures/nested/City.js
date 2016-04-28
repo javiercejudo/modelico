@@ -1,0 +1,29 @@
+'use strict';
+
+import CountryFactory from './Country';
+
+export default M => {
+  const Modelico = M.Modelico;
+  const Country = CountryFactory(M);
+
+  class City extends Modelico {
+    constructor(fields) {
+      super(City, fields);
+
+      return Object.freeze(this);
+    }
+
+    static innerTypes() {
+      return Object.freeze({
+        'name': M.AsIs(String),
+        'country': Country.metadata()
+      });
+    }
+
+    static metadata() {
+      return Modelico.metadata(City);
+    }
+  }
+
+  return Object.freeze(City);
+};

@@ -862,7 +862,6 @@
 
   var exampleSimple = (function (should, M) {
     return function () {
-
       var Modelico = M.Modelico;
       var AsIs = M.AsIs;
       var List = M.List;
@@ -902,7 +901,6 @@
 
   var exampleAdvanced = (function (should, M) {
     return function () {
-
       var Modelico = M.Modelico;
       var AsIs = M.AsIs;
       var List = M.List;
@@ -983,7 +981,6 @@
 
   var exampleAdvancedES5 = (function (should, M) {
     return function () {
-
       var Modelico = M.Modelico;
       var AsIs = M.AsIs;
       var List = M.List;
@@ -1034,6 +1031,137 @@
         person1.pets().innerList().shift().speak().should.be.exactly('My name is Robbie!');
 
         person1.pets().innerList().shift().speak().should.be.exactly('My name is Robbie!');
+      });
+    };
+  })
+
+  var RegionFactory = (function (M) {
+    var Modelico = M.Modelico;
+
+    var Region = function (_Modelico) {
+      babelHelpers.inherits(Region, _Modelico);
+
+      function Region(fields) {
+        var _ret;
+
+        babelHelpers.classCallCheck(this, Region);
+
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Region).call(this, Region, fields));
+
+        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+      }
+
+      babelHelpers.createClass(Region, [{
+        key: 'customMethod',
+        value: function customMethod() {
+          return this.name() + ' (' + this.code() + ')';
+        }
+      }], [{
+        key: 'innerTypes',
+        value: function innerTypes() {
+          return Object.freeze({
+            'name': M.AsIs(String)
+          });
+        }
+      }, {
+        key: 'metadata',
+        value: function metadata() {
+          return Modelico.metadata(Region);
+        }
+      }]);
+      return Region;
+    }(Modelico);
+
+    return Object.freeze(Region);
+  })
+
+  var CountryFactory = (function (M) {
+    var Modelico = M.Modelico;
+    var Region = RegionFactory(M);
+
+    var Country = function (_Modelico) {
+      babelHelpers.inherits(Country, _Modelico);
+
+      function Country(fields) {
+        var _ret;
+
+        babelHelpers.classCallCheck(this, Country);
+
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Country).call(this, Country, fields));
+
+        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+      }
+
+      babelHelpers.createClass(Country, null, [{
+        key: 'innerTypes',
+        value: function innerTypes() {
+          return Object.freeze({
+            'name': M.AsIs(String),
+            'region': Region.metadata()
+          });
+        }
+      }, {
+        key: 'metadata',
+        value: function metadata() {
+          return Modelico.metadata(Country);
+        }
+      }]);
+      return Country;
+    }(Modelico);
+
+    return Object.freeze(Country);
+  })
+
+  var CityFactory = (function (M) {
+    var Modelico = M.Modelico;
+    var Country = CountryFactory(M);
+
+    var City = function (_Modelico) {
+      babelHelpers.inherits(City, _Modelico);
+
+      function City(fields) {
+        var _ret;
+
+        babelHelpers.classCallCheck(this, City);
+
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(City).call(this, City, fields));
+
+        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+      }
+
+      babelHelpers.createClass(City, null, [{
+        key: 'innerTypes',
+        value: function innerTypes() {
+          return Object.freeze({
+            'name': M.AsIs(String),
+            'country': Country.metadata()
+          });
+        }
+      }, {
+        key: 'metadata',
+        value: function metadata() {
+          return Modelico.metadata(City);
+        }
+      }]);
+      return City;
+    }(Modelico);
+
+    return Object.freeze(City);
+  })
+
+  var exampleDeepNesting = (function (should, M) {
+    return function () {
+      var Modelico = M.Modelico;
+      var City = CityFactory(M);
+
+      it('should showcase the main features', function () {
+        var cityJson = '{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}';
+
+        var city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
+
+        city.name().should.be.exactly('Pamplona');
+        city.country().name().should.be.exactly('Spain');
+        city.country().region().customMethod().should.be.exactly('Europe (EU)');
       });
     };
   })
@@ -1684,9 +1812,10 @@
       describe('EnumMap', ModelicoEnumMap.apply(_, deps));
       describe('ModelicoList', ModelicoList.apply(_, deps));
       describe('ModelicoSet', ModelicoSet.apply(_, deps));
-      describe('Readme Simple Example', exampleSimple.apply(_, deps));
-      describe('Readme Advanced Example', exampleAdvanced.apply(_, deps));
-      describe('Readme Advanced Example ES5', exampleAdvancedES5.apply(_, deps));
+      describe('Readme simple example', exampleSimple.apply(_, deps));
+      describe('Readme advanced example', exampleAdvanced.apply(_, deps));
+      describe('Readme advanced example ES5', exampleAdvancedES5.apply(_, deps));
+      describe('Deep nesting example', exampleDeepNesting.apply(_, deps));
       describe('Immutable.js examples', Immutable.apply(_, utilsAndDeps));
 
       U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(_, utilsAndDeps));

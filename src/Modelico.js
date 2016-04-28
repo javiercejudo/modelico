@@ -8,20 +8,36 @@ const assignReducer = (acc, pair) => {
   return acc;
 };
 
-const reviver = (Type, k, v) => {
-  if (k === '') {
-    return new Type(v);
+const mergeDeepInnerTypes = (Type) => {
+  if (!Type.innerTypes) {
+    return Object.freeze({});
   }
 
-  if (Type.innerTypes) {
-    const innerTypeMetadata = Type.innerTypes()[k];
+  const innerTypes = Type.innerTypes();
+
+  return Object.keys(innerTypes).reduce((acc, key) => {
+    acc[key] = innerTypes[key];
+
+    return Object.assign(acc, mergeDeepInnerTypes(innerTypes[key].type));
+  }, {});
+};
+
+const reviverFactory = Type => {
+  const innerTypes = mergeDeepInnerTypes(Type);
+
+  return (k, v) => {
+    if (k === '') {
+      return new Type(v);
+    }
+
+    const innerTypeMetadata = innerTypes[k];
 
     if (innerTypeMetadata) {
       return U.reviverOrAsIs(innerTypeMetadata)('', v);
     }
-  }
 
-  return v;
+    return v;
+  };
 };
 
 class Modelico {
@@ -67,11 +83,11 @@ class Modelico {
   }
 
   static fromJSON(Type, json) {
-    return JSON.parse(json, U.bind(reviver, Type));
+    return JSON.parse(json, reviverFactory(Type));
   }
 
   static metadata(Type) {
-    return Object.freeze({type: Type, reviver: U.bind(reviver, Type)});
+    return Object.freeze({type: Type, reviver: reviverFactory(Type)});
   }
 }
 

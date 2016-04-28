@@ -5,6 +5,7 @@
   "main": "dist/modelico.js",
   "scripts": {
     "test": "npm run build && gulp test",
+    "test-dev": "npm run build-dev-es5 && npm run build-browser-spec-es5 && gulp test",
     "test-browsers": "./scripts/browser_tester.sh",
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "npm run build-dev && npm run build-min && npm run build-browser-spec",

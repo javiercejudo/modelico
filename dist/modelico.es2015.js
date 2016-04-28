@@ -38,20 +38,36 @@ var Modelico = (function () {
     return acc;
   };
 
-  const reviver = (Type, k, v) => {
-    if (k === '') {
-      return new Type(v);
+  const mergeDeepInnerTypes = (Type) => {
+    if (!Type.innerTypes) {
+      return Object.freeze({});
     }
 
-    if (Type.innerTypes) {
-      const innerTypeMetadata = Type.innerTypes()[k];
+    const innerTypes = Type.innerTypes();
+
+    return Object.keys(innerTypes).reduce((acc, key) => {
+      acc[key] = innerTypes[key];
+
+      return Object.assign(acc, mergeDeepInnerTypes(innerTypes[key].type));
+    }, {});
+  };
+
+  const reviverFactory = Type => {
+    const innerTypes = mergeDeepInnerTypes(Type);
+
+    return (k, v) => {
+      if (k === '') {
+        return new Type(v);
+      }
+
+      const innerTypeMetadata = innerTypes[k];
 
       if (innerTypeMetadata) {
         return U.reviverOrAsIs(innerTypeMetadata)('', v);
       }
-    }
 
-    return v;
+      return v;
+    };
   };
 
   class Modelico$1 {
@@ -97,11 +113,11 @@ var Modelico = (function () {
     }
 
     static fromJSON(Type, json) {
-      return JSON.parse(json, U.bind(reviver, Type));
+      return JSON.parse(json, reviverFactory(Type));
     }
 
     static metadata(Type) {
-      return Object.freeze({type: Type, reviver: U.bind(reviver, Type)});
+      return Object.freeze({type: Type, reviver: reviverFactory(Type)});
     }
   }
 
@@ -156,7 +172,7 @@ var Modelico = (function () {
     U.reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
   ];
 
-  const reviver$1 = (innerTypes, k, v) => {
+  const reviver = (innerTypes, k, v) => {
     if (k !== '') {
       return v;
     }
@@ -192,7 +208,7 @@ var Modelico = (function () {
     }
 
     static metadata(keyMetadata, valueMetadata) {
-      return AbstractMap$1.metadata(ModelicoMap, reviver$1, keyMetadata, valueMetadata);
+      return AbstractMap$1.metadata(ModelicoMap, reviver, keyMetadata, valueMetadata);
     }
   }
 
@@ -209,7 +225,7 @@ var Modelico = (function () {
     U.reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
   ];
 
-  const reviver$2 = (innerTypes, k, v) => {
+  const reviver$1 = (innerTypes, k, v) => {
     if (k !== '') {
       return v;
     }
@@ -237,7 +253,7 @@ var Modelico = (function () {
     }
 
     static metadata(keyMetadata, valueMetadata) {
-      return AbstractMap$1.metadata(ModelicoEnumMap, reviver$2, keyMetadata, valueMetadata);
+      return AbstractMap$1.metadata(ModelicoEnumMap, reviver$1, keyMetadata, valueMetadata);
     }
   }
 
@@ -375,7 +391,7 @@ var Modelico = (function () {
 
   const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
 
-  const reviver$3 = (values, k, v) => {
+  const reviver$2 = (values, k, v) => {
     return (v === null) ? null : values[v];
   };
 
@@ -392,7 +408,7 @@ var Modelico = (function () {
 
       this.metadata = U.always(Object.freeze({
         type: ModelicoEnum,
-        reviver: U.bind(reviver$3, enumerators)
+        reviver: U.bind(reviver$2, enumerators)
       }));
 
       return Object.freeze(this);
