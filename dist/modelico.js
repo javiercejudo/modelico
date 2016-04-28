@@ -109,20 +109,36 @@
     return acc;
   };
 
-  var reviver = function reviver(Type, k, v) {
-    if (k === '') {
-      return new Type(v);
+  var mergeDeepInnerTypes = function mergeDeepInnerTypes(Type) {
+    if (!Type.innerTypes) {
+      return Object.freeze({});
     }
 
-    if (Type.innerTypes) {
-      var innerTypeMetadata = Type.innerTypes()[k];
+    var innerTypes = Type.innerTypes();
+
+    return Object.keys(innerTypes).reduce(function (acc, key) {
+      acc[key] = innerTypes[key];
+
+      return Object.assign(acc, mergeDeepInnerTypes(innerTypes[key].type));
+    }, {});
+  };
+
+  var reviverFactory = function reviverFactory(Type) {
+    var innerTypes = mergeDeepInnerTypes(Type);
+
+    return function (k, v) {
+      if (k === '') {
+        return new Type(v);
+      }
+
+      var innerTypeMetadata = innerTypes[k];
 
       if (innerTypeMetadata) {
         return U.reviverOrAsIs(innerTypeMetadata)('', v);
       }
-    }
 
-    return v;
+      return v;
+    };
   };
 
   var Modelico$1 = function () {
@@ -178,12 +194,12 @@
     }, {
       key: 'fromJSON',
       value: function fromJSON(Type, json) {
-        return JSON.parse(json, U.bind(reviver, Type));
+        return JSON.parse(json, reviverFactory(Type));
       }
     }, {
       key: 'metadata',
       value: function metadata(Type) {
-        return Object.freeze({ type: Type, reviver: U.bind(reviver, Type) });
+        return Object.freeze({ type: Type, reviver: reviverFactory(Type) });
       }
     }]);
     return Modelico;
@@ -263,7 +279,7 @@
     };
   };
 
-  var reviver$1 = function reviver(innerTypes, k, v) {
+  var reviver = function reviver(innerTypes, k, v) {
     if (k !== '') {
       return v;
     }
@@ -311,7 +327,7 @@
     }, {
       key: 'metadata',
       value: function metadata(keyMetadata, valueMetadata) {
-        return AbstractMap$1.metadata(ModelicoMap, reviver$1, keyMetadata, valueMetadata);
+        return AbstractMap$1.metadata(ModelicoMap, reviver, keyMetadata, valueMetadata);
       }
     }]);
     return ModelicoMap;
@@ -331,7 +347,7 @@
     };
   };
 
-  var reviver$2 = function reviver(innerTypes, k, v) {
+  var reviver$1 = function reviver(innerTypes, k, v) {
     if (k !== '') {
       return v;
     }
@@ -369,7 +385,7 @@
     }], [{
       key: 'metadata',
       value: function metadata(keyMetadata, valueMetadata) {
-        return AbstractMap$1.metadata(ModelicoEnumMap, reviver$2, keyMetadata, valueMetadata);
+        return AbstractMap$1.metadata(ModelicoEnumMap, reviver$1, keyMetadata, valueMetadata);
       }
     }]);
     return ModelicoEnumMap;
@@ -564,7 +580,7 @@
     return (acc[code] = { code: code }) && acc;
   };
 
-  var reviver$3 = function reviver(values, k, v) {
+  var reviver$2 = function reviver(values, k, v) {
     return v === null ? null : values[v];
   };
 
@@ -586,7 +602,7 @@
 
       _this.metadata = U.always(Object.freeze({
         type: ModelicoEnum,
-        reviver: U.bind(reviver$3, enumerators)
+        reviver: U.bind(reviver$2, enumerators)
       }));
 
       return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);

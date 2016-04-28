@@ -44,6 +44,7 @@ import ModelicoSet from './types/Set';
 import exampleSimple from './example/simple';
 import exampleAdvanced from './example/advanced';
 import exampleAdvancedES5 from './example/advanced.es5';
+import exampleDeepNesting from './example/deepNesting';
 import Immutable from './Immutable.js/index';
 import ImmutableProxied from './Immutable.js/proxied';
 
@@ -63,9 +64,10 @@ export default (options, should, M) => _ => {
   describe('EnumMap', ModelicoEnumMap.apply(_, deps));
   describe('ModelicoList', ModelicoList.apply(_, deps));
   describe('ModelicoSet', ModelicoSet.apply(_, deps));
-  describe('Readme Simple Example', exampleSimple.apply(_, deps));
-  describe('Readme Advanced Example', exampleAdvanced.apply(_, deps));
-  describe('Readme Advanced Example ES5', exampleAdvancedES5.apply(_, deps));
+  describe('Readme simple example', exampleSimple.apply(_, deps));
+  describe('Readme advanced example', exampleAdvanced.apply(_, deps));
+  describe('Readme advanced example ES5', exampleAdvancedES5.apply(_, deps));
+  describe('Deep nesting example', exampleDeepNesting.apply(_, deps));
   describe('Immutable.js examples', Immutable.apply(_, utilsAndDeps));
 
   U.skipDescribeIfNoProxies(
