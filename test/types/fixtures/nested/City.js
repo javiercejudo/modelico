@@ -2,9 +2,9 @@
 
 import CountryFactory from './Country';
 
-export default M => {
+export default (M, Region) => {
   const Modelico = M.Modelico;
-  const Country = CountryFactory(M);
+  const Country = CountryFactory(M, Region);
 
   class City extends Modelico {
     constructor(fields) {

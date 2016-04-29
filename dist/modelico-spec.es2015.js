@@ -1100,6 +1100,57 @@
     });
   };
 
+  var CountryFactory = (M, Region) => {
+    const Modelico = M.Modelico;
+
+    class Country extends Modelico {
+      constructor(fields) {
+        super(Country, fields);
+
+        return Object.freeze(this);
+      }
+
+      static innerTypes() {
+        return Object.freeze({
+          'name': M.AsIs(String),
+          'region': Region.metadata()
+        });
+      }
+
+      static metadata() {
+        return Modelico.metadata(Country);
+      }
+    }
+
+    return Object.freeze(Country);
+  };
+
+  var CityFactory = (M, Region) => {
+    const Modelico = M.Modelico;
+    const Country = CountryFactory(M, Region);
+
+    class City extends Modelico {
+      constructor(fields) {
+        super(City, fields);
+
+        return Object.freeze(this);
+      }
+
+      static innerTypes() {
+        return Object.freeze({
+          'name': M.AsIs(String),
+          'country': Country.metadata()
+        });
+      }
+
+      static metadata() {
+        return Modelico.metadata(City);
+      }
+    }
+
+    return Object.freeze(City);
+  };
+
   var RegionFactory = M => {
     const Modelico = M.Modelico;
 
@@ -1128,63 +1179,39 @@
     return Object.freeze(Region);
   };
 
-  var CountryFactory = M => {
+  var RegionIncompatibleNameKeyFactory = M => {
     const Modelico = M.Modelico;
-    const Region = RegionFactory(M);
 
-    class Country extends Modelico {
+    class Region extends Modelico {
       constructor(fields) {
-        super(Country, fields);
+        super(Region, fields);
 
         return Object.freeze(this);
       }
 
-      static innerTypes() {
-        return Object.freeze({
-          'name': M.AsIs(String),
-          'region': Region.metadata()
-        });
-      }
-
-      static metadata() {
-        return Modelico.metadata(Country);
-      }
-    }
-
-    return Object.freeze(Country);
-  };
-
-  var CityFactory = M => {
-    const Modelico = M.Modelico;
-    const Country = CountryFactory(M);
-
-    class City extends Modelico {
-      constructor(fields) {
-        super(City, fields);
-
-        return Object.freeze(this);
+      customMethod() {
+        return `${this.name()} (${this.code()})`;
       }
 
       static innerTypes() {
         return Object.freeze({
-          'name': M.AsIs(String),
-          'country': Country.metadata()
+          'name': M.AsIs(M.Any)
         });
       }
 
       static metadata() {
-        return Modelico.metadata(City);
+        return Modelico.metadata(Region);
       }
     }
 
-    return Object.freeze(City);
+    return Object.freeze(Region);
   };
 
   var exampleDeepNesting = (should, M) => () => {
     const Modelico = M.Modelico;
-    const City = CityFactory(M);
 
-    it('should showcase the main features', () => {
+    it('should revive deeply nested JSON', () => {
+      const City = CityFactory(M, RegionFactory(M));
       const cityJson = `{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}`;
 
       const city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
@@ -1192,6 +1219,14 @@
       city.name().should.be.exactly('Pamplona');
       city.country().name().should.be.exactly('Spain');
       city.country().region().customMethod().should.be.exactly('Europe (EU)');
+    });
+
+    it('should throw when an object has incompatible nested keys', () => {
+      const City = CityFactory(M, RegionIncompatibleNameKeyFactory(M));
+      const cityJson = `{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}`;
+
+      (() => JSON.parse(cityJson, Modelico.metadata(City).reviver))
+        .should.throw(`Duplicated typed key 'name' with types String and Any`);
     });
   };
 
