@@ -1,5 +1,8 @@
-var Modelico = (function () {
-  'use strict';
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global.Modelico = factory());
+}(this, function () { 'use strict';
 
   const asIsReviver = (k, v) => v;
   const bind = (fn, _1) => fn.bind(undefined, _1);
@@ -560,4 +563,4 @@ var Modelico = (function () {
 
   return Modelico;
 
-}());
+}));
