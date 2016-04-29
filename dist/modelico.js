@@ -109,22 +109,32 @@
     return acc;
   };
 
-  var mergeDeepInnerTypes = function mergeDeepInnerTypes(Type) {
+  var mergeDeepInnerTypes = function mergeDeepInnerTypes(acc, Type) {
     if (!Type.innerTypes) {
-      return Object.freeze({});
+      return acc;
     }
 
     var innerTypes = Type.innerTypes();
 
-    return Object.keys(innerTypes).reduce(function (acc, key) {
-      acc[key] = innerTypes[key];
+    var result = Object.keys(innerTypes).reduce(function (localAcc, key) {
+      localAcc = mergeDeepInnerTypes(acc, innerTypes[key].type);
 
-      return Object.assign(acc, mergeDeepInnerTypes(innerTypes[key].type));
+      if (localAcc.hasOwnProperty(key) && acc[key].type.name !== innerTypes[key].type.name) {
+        throw new TypeError('Duplicated typed key \'' + key + '\' with types ' + acc[key].type.name + ' and ' + innerTypes[key].type.name);
+      }
+
+      localAcc[key] = innerTypes[key];
+
+      return localAcc;
     }, {});
+
+    // console.log(result);
+
+    return result;
   };
 
   var reviverFactory = function reviverFactory(Type) {
-    var innerTypes = mergeDeepInnerTypes(Type);
+    var innerTypes = mergeDeepInnerTypes({}, Type);
 
     return function (k, v) {
       if (k === '') {
@@ -263,11 +273,11 @@
 
   var AbstractMap$1 = Object.freeze(AbstractMap);
 
-  var AsIs = (function (type) {
-    return Object.freeze({ type: type, reviver: U.asIsReviver });
+  var AsIs = (function (Type) {
+    return Object.freeze({ type: Type, reviver: U.asIsReviver });
   })
 
-  var Any = Object.freeze({});
+  var Any = Object.freeze({ name: 'Any' });
 
   var stringifyMapper = function stringifyMapper(pair) {
     return { key: pair[0], value: pair[1] };

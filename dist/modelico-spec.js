@@ -1035,6 +1035,79 @@
     };
   })
 
+  var CountryFactory = (function (M, Region) {
+    var Modelico = M.Modelico;
+
+    var Country = function (_Modelico) {
+      babelHelpers.inherits(Country, _Modelico);
+
+      function Country(fields) {
+        var _ret;
+
+        babelHelpers.classCallCheck(this, Country);
+
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Country).call(this, Country, fields));
+
+        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+      }
+
+      babelHelpers.createClass(Country, null, [{
+        key: 'innerTypes',
+        value: function innerTypes() {
+          return Object.freeze({
+            'name': M.AsIs(String),
+            'region': Region.metadata()
+          });
+        }
+      }, {
+        key: 'metadata',
+        value: function metadata() {
+          return Modelico.metadata(Country);
+        }
+      }]);
+      return Country;
+    }(Modelico);
+
+    return Object.freeze(Country);
+  })
+
+  var CityFactory = (function (M, Region) {
+    var Modelico = M.Modelico;
+    var Country = CountryFactory(M, Region);
+
+    var City = function (_Modelico) {
+      babelHelpers.inherits(City, _Modelico);
+
+      function City(fields) {
+        var _ret;
+
+        babelHelpers.classCallCheck(this, City);
+
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(City).call(this, City, fields));
+
+        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+      }
+
+      babelHelpers.createClass(City, null, [{
+        key: 'innerTypes',
+        value: function innerTypes() {
+          return Object.freeze({
+            'name': M.AsIs(String),
+            'country': Country.metadata()
+          });
+        }
+      }, {
+        key: 'metadata',
+        value: function metadata() {
+          return Modelico.metadata(City);
+        }
+      }]);
+      return City;
+    }(Modelico);
+
+    return Object.freeze(City);
+  })
+
   var RegionFactory = (function (M) {
     var Modelico = M.Modelico;
 
@@ -1075,86 +1148,52 @@
     return Object.freeze(Region);
   })
 
-  var CountryFactory = (function (M) {
+  var RegionIncompatibleNameKeyFactory = (function (M) {
     var Modelico = M.Modelico;
-    var Region = RegionFactory(M);
 
-    var Country = function (_Modelico) {
-      babelHelpers.inherits(Country, _Modelico);
+    var Region = function (_Modelico) {
+      babelHelpers.inherits(Region, _Modelico);
 
-      function Country(fields) {
+      function Region(fields) {
         var _ret;
 
-        babelHelpers.classCallCheck(this, Country);
+        babelHelpers.classCallCheck(this, Region);
 
-        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Country).call(this, Country, fields));
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Region).call(this, Region, fields));
 
         return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
       }
 
-      babelHelpers.createClass(Country, null, [{
+      babelHelpers.createClass(Region, [{
+        key: 'customMethod',
+        value: function customMethod() {
+          return this.name() + ' (' + this.code() + ')';
+        }
+      }], [{
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            'name': M.AsIs(String),
-            'region': Region.metadata()
+            'name': M.AsIs(M.Any)
           });
         }
       }, {
         key: 'metadata',
         value: function metadata() {
-          return Modelico.metadata(Country);
+          return Modelico.metadata(Region);
         }
       }]);
-      return Country;
+      return Region;
     }(Modelico);
 
-    return Object.freeze(Country);
-  })
-
-  var CityFactory = (function (M) {
-    var Modelico = M.Modelico;
-    var Country = CountryFactory(M);
-
-    var City = function (_Modelico) {
-      babelHelpers.inherits(City, _Modelico);
-
-      function City(fields) {
-        var _ret;
-
-        babelHelpers.classCallCheck(this, City);
-
-        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(City).call(this, City, fields));
-
-        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
-      }
-
-      babelHelpers.createClass(City, null, [{
-        key: 'innerTypes',
-        value: function innerTypes() {
-          return Object.freeze({
-            'name': M.AsIs(String),
-            'country': Country.metadata()
-          });
-        }
-      }, {
-        key: 'metadata',
-        value: function metadata() {
-          return Modelico.metadata(City);
-        }
-      }]);
-      return City;
-    }(Modelico);
-
-    return Object.freeze(City);
+    return Object.freeze(Region);
   })
 
   var exampleDeepNesting = (function (should, M) {
     return function () {
       var Modelico = M.Modelico;
-      var City = CityFactory(M);
 
-      it('should showcase the main features', function () {
+      it('should revive deeply nested JSON', function () {
+        var City = CityFactory(M, RegionFactory(M));
         var cityJson = '{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}';
 
         var city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
@@ -1162,6 +1201,15 @@
         city.name().should.be.exactly('Pamplona');
         city.country().name().should.be.exactly('Spain');
         city.country().region().customMethod().should.be.exactly('Europe (EU)');
+      });
+
+      it('should throw when an object has incompatible nested keys', function () {
+        var City = CityFactory(M, RegionIncompatibleNameKeyFactory(M));
+        var cityJson = '{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}';
+
+        (function () {
+          return JSON.parse(cityJson, Modelico.metadata(City).reviver);
+        }).should.throw('Duplicated typed key \'name\' with types String and Any');
       });
     };
   })

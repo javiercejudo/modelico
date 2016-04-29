@@ -8,22 +8,32 @@ const assignReducer = (acc, pair) => {
   return acc;
 };
 
-const mergeDeepInnerTypes = (Type) => {
+const mergeDeepInnerTypes = (acc, Type) => {
   if (!Type.innerTypes) {
-    return Object.freeze({});
+    return acc;
   }
 
   const innerTypes = Type.innerTypes();
 
-  return Object.keys(innerTypes).reduce((acc, key) => {
-    acc[key] = innerTypes[key];
+  const result = Object.keys(innerTypes).reduce((localAcc, key) => {
+    localAcc = mergeDeepInnerTypes(acc, innerTypes[key].type);
 
-    return Object.assign(acc, mergeDeepInnerTypes(innerTypes[key].type));
+    if (localAcc.hasOwnProperty(key) && acc[key].type.name !== innerTypes[key].type.name) {
+      throw new TypeError(`Duplicated typed key '${key}' with types ${acc[key].type.name} and ${innerTypes[key].type.name}`);
+    }
+
+    localAcc[key] = innerTypes[key];
+
+    return localAcc;
   }, {});
+
+  // console.log(result);
+
+  return result;
 };
 
 const reviverFactory = Type => {
-  const innerTypes = mergeDeepInnerTypes(Type);
+  const innerTypes = mergeDeepInnerTypes({}, Type);
 
   return (k, v) => {
     if (k === '') {
