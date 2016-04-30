@@ -16,10 +16,6 @@ class ModelicoDate extends Modelico {
   }
 
   setPath(path, value) {
-    if (path.length === 0) {
-      return this.set(value);
-    }
-
     return this.set(value);
   }
 
