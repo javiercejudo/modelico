@@ -14,12 +14,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.7.4/polyfill.min.js"></script>
 
   <script src="../../dist/modelico.min.js"></script>
+  <script>ModelicoMin = Modelico</script>
+  <script src="../../dist/modelico.js"></script>
   <script src="../../dist/modelico-spec.js"></script>
 
   <script>
     mocha.setup('bdd');
 
-    describe('Modelico (standard setup)', modelicoSpec({}, Should, Modelico));
+    describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
+    describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
 
     mocha.checkLeaks();
     mocha.run();

@@ -54,12 +54,15 @@
   </script>
 
   <script src="../../dist/modelico.min.js"></script>
+  <script>ModelicoMin = Modelico</script>
+  <script src="../../dist/modelico.js"></script>
   <script src="../../dist/modelico-spec.js"></script>
 
   <script>
     mocha.setup('bdd');
 
-    describe('Modelico (ES3 setup)', modelicoSpec({}, Should, Modelico));
+    describe('Modelico Dev (ES3 setup)', modelicoSpec({}, Should, Modelico));
+    describe('Modelico Min (ES3 setup)', modelicoSpec({}, Should, ModelicoMin));
 
     mocha.checkLeaks();
     mocha.run();

@@ -13,12 +13,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/should.js/8.3.0/should.min.js"></script>
 
   <script src="../../dist/modelico.es2015.min.js"></script>
+  <script>ModelicoMin = Modelico</script>
+  <script src="../../dist/modelico.es2015.js"></script>
   <script src="../../dist/modelico-spec.es2015.js"></script>
 
   <script>
     mocha.setup('bdd');
 
-    describe('Modelico (ES2015 setup)', modelicoSpec({}, Should, Modelico));
+    describe('Modelico Dev (ES2015 setup)', modelicoSpec({}, Should, Modelico));
+    describe('Modelico Min (ES2015 setup)', modelicoSpec({}, Should, ModelicoMin));
 
     mocha.checkLeaks();
     mocha.run();
