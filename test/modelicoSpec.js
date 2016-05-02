@@ -1,6 +1,6 @@
 'use strict';
 
-const hasObjectFreeze = (function(){
+const hasObjectFreeze = (() => {
   const a = {};
 
   try{

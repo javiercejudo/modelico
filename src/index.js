@@ -68,7 +68,7 @@ const dateMutatorMethods = [
 ];
 
 export default Object.freeze({
-  about: { version, author, homepage, license },
+  about: Object.freeze({ version, author, homepage, license }),
   Any,
   AsIs,
   Date: ModelicoDate,
