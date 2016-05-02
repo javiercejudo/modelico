@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, function () { 'use strict';
 
-	var version = "12.3.0";
+	var version = "12.4.0";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
