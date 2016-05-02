@@ -11,7 +11,7 @@
     "build": "npm run build-dev && npm run build-min && npm run build-browser-spec",
     "build-dev": "npm run build-dev-es5 && npm run build-dev-es2015",
     "build-dev-es5": "rollup -c",
-    "build-dev-es2015": "rollup ./index.js -f umd -n Modelico -o dist/modelico.es2015.js",
+    "build-dev-es2015": "rollup -c rollup.es2015.config.js",
     "build-min": "npm run build-min-es5 && npm run build-min-es2015",
     "build-min-es5": "uglifyjs dist/modelico.js -c -m > dist/modelico.min.js",
     "build-min-es2015": "uglifyjs dist/modelico.es2015.js -c -m > dist/modelico.es2015.min.js",

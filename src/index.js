@@ -1,5 +1,7 @@
 'use strict';
 
+import { version, author, homepage, license } from '../package.json';
+
 import Modelico from './Modelico';
 import ModelicoMap from './Map';
 import EnumMap from './EnumMap';
@@ -66,6 +68,7 @@ const dateMutatorMethods = [
 ];
 
 export default Object.freeze({
+  about: { version, author, homepage, license },
   Any,
   AsIs,
   Date: ModelicoDate,
