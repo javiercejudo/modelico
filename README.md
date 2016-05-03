@@ -237,6 +237,6 @@ Animal.prototype.speak = function() {
 Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 ```
 
-## Acknowledgment
+## Acknowledgments
 
 Inspired by an internal Skiddoo tool by [Jaie Wilson](https://github.com/jaiew) :bow:
