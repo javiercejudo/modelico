@@ -1,4 +1,6 @@
-# modelico
+# modélico
+
+**\[moˈðe.li.ko\]** ([IPA](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet))
 
 Universal-JS library for serialisable immutable models.
 
@@ -164,7 +166,7 @@ person3.pets().innerList()[0].name(); //=> 'Bane'
 person1.pets().innerList()[0].name(); //=> 'Robbie'
 ```
 
-The same principle applies across all Modelico classes:
+The same principle applies across all Modélico classes:
 
 ```js
 // While person.pets().innerList() is a plain array,
@@ -179,14 +181,14 @@ person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
 
 ## ES2015 proxies
 
-Built-in types in Modelico (List, Set, Map, EnumMap and Date)
+Built-in types in Modélico (List, Set, Map, EnumMap and Date)
 are wrappers around native structures. By default, it is necessary to
 retrieve those structures to access their properties and methods
 (eg. `list.innerList().length`).
 
 However, if your environment
 [supports ES2015 proxies](https://kangax.github.io/compat-table/es6/#test-Proxy),
-Modelico provides utilities to get around this:
+Modélico provides utilities to get around this:
 
 ```js
 const M = Modelico;
@@ -218,7 +220,7 @@ See [proxy tests](test/proxies) for more details.
 
 ## ES5 classes
 
-To support legacy browsers without transpiling, Modelico can be used
+To support legacy browsers without transpiling, Modélico can be used
 with ES5-style classes. In the case of our `Animal` class:
 
 ```js
