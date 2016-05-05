@@ -561,7 +561,7 @@
       describe('instantiation', function () {
         it('must be instantiated with new', function () {
           (function () {
-            return M.List([]);
+            return M.List(M.AsIs(M.Any), []);
           }).should.throw();
         });
       });

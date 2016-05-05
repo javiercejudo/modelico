@@ -9,7 +9,7 @@ export default (should, M) => () => {
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
-      (() => M.List([])).should.throw();
+      (() => M.List(M.AsIs(M.Any), [])).should.throw();
     });
   });
 
