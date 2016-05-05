@@ -1,6 +1,6 @@
 'use strict';
 
-import U from './U';
+import { always, bind } from './U';
 import Modelico from './Modelico';
 
 const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
@@ -18,11 +18,11 @@ class ModelicoEnum extends Modelico {
     super(ModelicoEnum, enumerators);
 
     Object.getOwnPropertyNames(enumerators)
-      .forEach(enumerator => this[enumerator]().toJSON = U.always(enumerator));
+      .forEach(enumerator => this[enumerator]().toJSON = always(enumerator));
 
-    this.metadata = U.always(Object.freeze({
+    this.metadata = always(Object.freeze({
       type: ModelicoEnum,
-      reviver: U.bind(reviver, enumerators)
+      reviver: bind(reviver, enumerators)
     }));
 
     return Object.freeze(this);

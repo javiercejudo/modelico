@@ -29,16 +29,10 @@
 	  });
 	};
 
-	var U = Object.freeze({
-	  always: x => () => x,
-	  bind,
-	  default: (optional, fallback) => (optional === undefined) ? fallback : optional,
-	  objToArr: obj => Object.keys(obj).map(k => [k, obj[k]]),
-	  reviverOrAsIs: metadata => (metadata.reviver || asIsReviver),
-	  asIsReviver,
-	  iterableReviver,
-	  iterableMetadata
-	});
+	const always = x => () => x;
+	const defaultTo = (fallback, optional) => (optional === undefined) ? fallback : optional;
+	const objToArr = obj => Object.keys(obj).map(k => [k, obj[k]]);
+	const reviverOrAsIs = metadata => (metadata.reviver || asIsReviver);
 
 	const assignReducer = (acc, pair) => {
 	  acc[pair.field] = pair.value;
@@ -81,7 +75,7 @@
 	    const innerTypeMetadata = innerTypes[k];
 
 	    if (innerTypeMetadata) {
-	      return U.reviverOrAsIs(innerTypeMetadata)('', v);
+	      return reviverOrAsIs(innerTypeMetadata)('', v);
 	    }
 
 	    return v;
@@ -90,12 +84,12 @@
 
 	class Modelico$1 {
 	  constructor(Type, fields, thisArg) {
-	    thisArg = U.default(thisArg, this);
-	    thisArg.type = U.always(Type);
-	    thisArg.fields = U.always(Object.freeze(fields));
+	    thisArg = defaultTo(this, thisArg);
+	    thisArg.type = always(Type);
+	    thisArg.fields = always(Object.freeze(fields));
 
 	    Object.getOwnPropertyNames(fields)
-	      .forEach(field => thisArg[field] = U.always(fields[field]));
+	      .forEach(field => thisArg[field] = always(fields[field]));
 
 	    return thisArg;
 	  }
@@ -145,7 +139,7 @@
 	  constructor(Type, keyMetadata, valueMetadata, innerMap) {
 	    super(Type, {innerMap});
 
-	    this.innerTypes = U.always(Object.freeze({keyMetadata, valueMetadata}));
+	    this.innerTypes = always(Object.freeze({keyMetadata, valueMetadata}));
 	    this.innerMap = () => (innerMap === null) ? null : new Map(innerMap);
 	    this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
 
@@ -172,25 +166,25 @@
 	    return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
 	  }
 
-	  static metadata(Type, reviver, keyMetadata, valueMetadata) {
-	    return Object.freeze({type: Type, reviver: U.bind(reviver, {keyMetadata, valueMetadata})});
+	  static metadata(Type, reviverFactory, keyMetadata, valueMetadata) {
+	    return Object.freeze({type: Type, reviver: reviverFactory({keyMetadata, valueMetadata})});
 	  }
 	}
 
 	var AbstractMap$1 = Object.freeze(AbstractMap);
 
-	var AsIs = Type => Object.freeze({type: Type, reviver: U.asIsReviver});
+	var AsIs = Type => Object.freeze({type: Type, reviver: asIsReviver});
 
 	var Any = Object.freeze({name: 'Any'});
 
 	const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
 	const parseMapper = innerTypes => pairObject => [
-	  U.reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key),
-	  U.reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
+	  reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key),
+	  reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
 	];
 
-	const reviver = (innerTypes, k, v) => {
+	const reviverFactory$1 = innerTypes => (k, v) => {
 	  if (k !== '') {
 	    return v;
 	  }
@@ -218,7 +212,7 @@
 	  }
 
 	  static fromObject(obj) {
-	    return ModelicoMap.fromMap(new Map(U.objToArr(obj)));
+	    return ModelicoMap.fromMap(new Map(objToArr(obj)));
 	  }
 
 	  static fromMap(map) {
@@ -226,7 +220,7 @@
 	  }
 
 	  static metadata(keyMetadata, valueMetadata) {
-	    return AbstractMap$1.metadata(ModelicoMap, reviver, keyMetadata, valueMetadata);
+	    return AbstractMap$1.metadata(ModelicoMap, reviverFactory$1, keyMetadata, valueMetadata);
 	  }
 	}
 
@@ -239,11 +233,11 @@
 	};
 
 	const parseMapper$1 = (innerTypes, object) => enumerator => [
-	  U.reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
-	  U.reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
+	  reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
+	  reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
 	];
 
-	const reviver$1 = (innerTypes, k, v) => {
+	const reviverFactory$2 = innerTypes => (k, v) => {
 	  if (k !== '') {
 	    return v;
 	  }
@@ -271,7 +265,7 @@
 	  }
 
 	  static metadata(keyMetadata, valueMetadata) {
-	    return AbstractMap$1.metadata(ModelicoEnumMap, reviver$1, keyMetadata, valueMetadata);
+	    return AbstractMap$1.metadata(ModelicoEnumMap, reviverFactory$2, keyMetadata, valueMetadata);
 	  }
 	}
 
@@ -315,7 +309,7 @@
 	  constructor(itemMetadata, innerList) {
 	    super(ModelicoList, {innerList});
 
-	    this.itemMetadata = U.always(itemMetadata);
+	    this.itemMetadata = always(itemMetadata);
 	    this.innerList = () => (innerList === null) ? null : innerList.slice();
 	    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
@@ -348,7 +342,7 @@
 	  }
 
 	  static metadata(itemMetadata) {
-	    return U.iterableMetadata(ModelicoList, itemMetadata);
+	    return iterableMetadata(ModelicoList, itemMetadata);
 	  }
 	}
 
@@ -358,7 +352,7 @@
 	  constructor(itemMetadata, innerSet) {
 	    super(ModelicoSet, {innerSet});
 
-	    this.itemMetadata = U.always(itemMetadata);
+	    this.itemMetadata = always(itemMetadata);
 	    this.innerSet = () => (innerSet === null) ? null : new Set(innerSet);
 	    this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
@@ -397,7 +391,7 @@
 	  }
 
 	  static metadata(itemMetadata) {
-	    return U.iterableMetadata(ModelicoSet, itemMetadata);
+	    return iterableMetadata(ModelicoSet, itemMetadata);
 	  }
 	}
 
@@ -405,7 +399,7 @@
 
 	const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
 
-	const reviver$2 = (values, k, v) => {
+	const reviver = (values, k, v) => {
 	  return (v === null) ? null : values[v];
 	};
 
@@ -418,11 +412,11 @@
 	    super(ModelicoEnum, enumerators);
 
 	    Object.getOwnPropertyNames(enumerators)
-	      .forEach(enumerator => this[enumerator]().toJSON = U.always(enumerator));
+	      .forEach(enumerator => this[enumerator]().toJSON = always(enumerator));
 
-	    this.metadata = U.always(Object.freeze({
+	    this.metadata = always(Object.freeze({
 	      type: ModelicoEnum,
-	      reviver: U.bind(reviver$2, enumerators)
+	      reviver: bind(reviver, enumerators)
 	    }));
 
 	    return Object.freeze(this);
@@ -547,7 +541,7 @@
 	];
 
 	var Modelico = Object.freeze({
-	  about: { version, author, homepage, license },
+	  about: Object.freeze({ version, author, homepage, license }),
 	  Any,
 	  AsIs,
 	  Date: ModelicoDate$1,

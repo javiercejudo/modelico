@@ -1,6 +1,6 @@
 'use strict';
 
-import U from './U';
+import { objToArr, reviverOrAsIs } from './U';
 import AbstractMap from './AbstractMap';
 import AsIs from './AsIs';
 import Any from './Any';
@@ -8,11 +8,11 @@ import Any from './Any';
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
 const parseMapper = innerTypes => pairObject => [
-  U.reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key),
-  U.reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
+  reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key),
+  reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
 ];
 
-const reviver = (innerTypes, k, v) => {
+const reviverFactory = innerTypes => (k, v) => {
   if (k !== '') {
     return v;
   }
@@ -40,7 +40,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   static fromObject(obj) {
-    return ModelicoMap.fromMap(new Map(U.objToArr(obj)));
+    return ModelicoMap.fromMap(new Map(objToArr(obj)));
   }
 
   static fromMap(map) {
@@ -48,7 +48,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoMap, reviver, keyMetadata, valueMetadata);
+    return AbstractMap.metadata(ModelicoMap, reviverFactory, keyMetadata, valueMetadata);
   }
 }
 

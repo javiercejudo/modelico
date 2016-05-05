@@ -85,28 +85,22 @@
 	  });
 	};
 
-	var U = Object.freeze({
-	  always: function always(x) {
-	    return function () {
-	      return x;
-	    };
-	  },
-	  bind: bind,
-	  default: function _default(optional, fallback) {
-	    return optional === undefined ? fallback : optional;
-	  },
-	  objToArr: function objToArr(obj) {
-	    return Object.keys(obj).map(function (k) {
-	      return [k, obj[k]];
-	    });
-	  },
-	  reviverOrAsIs: function reviverOrAsIs(metadata) {
-	    return metadata.reviver || asIsReviver;
-	  },
-	  asIsReviver: asIsReviver,
-	  iterableReviver: iterableReviver,
-	  iterableMetadata: iterableMetadata
-	});
+	var always = function always(x) {
+	  return function () {
+	    return x;
+	  };
+	};
+	var defaultTo = function defaultTo(fallback, optional) {
+	  return optional === undefined ? fallback : optional;
+	};
+	var objToArr = function objToArr(obj) {
+	  return Object.keys(obj).map(function (k) {
+	    return [k, obj[k]];
+	  });
+	};
+	var reviverOrAsIs = function reviverOrAsIs(metadata) {
+	  return metadata.reviver || asIsReviver;
+	};
 
 	var assignReducer = function assignReducer(acc, pair) {
 	  acc[pair.field] = pair.value;
@@ -149,7 +143,7 @@
 	    var innerTypeMetadata = innerTypes[k];
 
 	    if (innerTypeMetadata) {
-	      return U.reviverOrAsIs(innerTypeMetadata)('', v);
+	      return reviverOrAsIs(innerTypeMetadata)('', v);
 	    }
 
 	    return v;
@@ -160,12 +154,12 @@
 	  function Modelico(Type, fields, thisArg) {
 	    babelHelpers.classCallCheck(this, Modelico);
 
-	    thisArg = U.default(thisArg, this);
-	    thisArg.type = U.always(Type);
-	    thisArg.fields = U.always(Object.freeze(fields));
+	    thisArg = defaultTo(this, thisArg);
+	    thisArg.type = always(Type);
+	    thisArg.fields = always(Object.freeze(fields));
 
 	    Object.getOwnPropertyNames(fields).forEach(function (field) {
-	      return thisArg[field] = U.always(fields[field]);
+	      return thisArg[field] = always(fields[field]);
 	    });
 
 	    return thisArg;
@@ -232,7 +226,7 @@
 
 	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(AbstractMap).call(this, Type, { innerMap: innerMap }));
 
-	    _this.innerTypes = U.always(Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata }));
+	    _this.innerTypes = always(Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata }));
 	    _this.innerMap = function () {
 	      return innerMap === null ? null : new Map(innerMap);
 	    };
@@ -269,8 +263,8 @@
 	    }
 	  }, {
 	    key: 'metadata',
-	    value: function metadata(Type, reviver, keyMetadata, valueMetadata) {
-	      return Object.freeze({ type: Type, reviver: U.bind(reviver, { keyMetadata: keyMetadata, valueMetadata: valueMetadata }) });
+	    value: function metadata(Type, reviverFactory, keyMetadata, valueMetadata) {
+	      return Object.freeze({ type: Type, reviver: reviverFactory({ keyMetadata: keyMetadata, valueMetadata: valueMetadata }) });
 	    }
 	  }]);
 	  return AbstractMap;
@@ -279,7 +273,7 @@
 	var AbstractMap$1 = Object.freeze(AbstractMap);
 
 	var AsIs = (function (Type) {
-	  return Object.freeze({ type: Type, reviver: U.asIsReviver });
+	  return Object.freeze({ type: Type, reviver: asIsReviver });
 	})
 
 	var Any = Object.freeze({ name: 'Any' });
@@ -290,18 +284,20 @@
 
 	var parseMapper = function parseMapper(innerTypes) {
 	  return function (pairObject) {
-	    return [U.reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key), U.reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)];
+	    return [reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key), reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)];
 	  };
 	};
 
-	var reviver = function reviver(innerTypes, k, v) {
-	  if (k !== '') {
-	    return v;
-	  }
+	var reviverFactory$1 = function reviverFactory(innerTypes) {
+	  return function (k, v) {
+	    if (k !== '') {
+	      return v;
+	    }
 
-	  var innerMap = v === null ? null : new Map(v.map(parseMapper(innerTypes)));
+	    var innerMap = v === null ? null : new Map(v.map(parseMapper(innerTypes)));
 
-	  return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+	    return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+	  };
 	};
 
 	var ModelicoMap = function (_AbstractMap) {
@@ -332,7 +328,7 @@
 	  }], [{
 	    key: 'fromObject',
 	    value: function fromObject(obj) {
-	      return ModelicoMap.fromMap(new Map(U.objToArr(obj)));
+	      return ModelicoMap.fromMap(new Map(objToArr(obj)));
 	    }
 	  }, {
 	    key: 'fromMap',
@@ -342,7 +338,7 @@
 	  }, {
 	    key: 'metadata',
 	    value: function metadata(keyMetadata, valueMetadata) {
-	      return AbstractMap$1.metadata(ModelicoMap, reviver, keyMetadata, valueMetadata);
+	      return AbstractMap$1.metadata(ModelicoMap, reviverFactory$1, keyMetadata, valueMetadata);
 	    }
 	  }]);
 	  return ModelicoMap;
@@ -358,18 +354,20 @@
 
 	var parseMapper$1 = function parseMapper(innerTypes, object) {
 	  return function (enumerator) {
-	    return [U.reviverOrAsIs(innerTypes.keyMetadata)('', enumerator), U.reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])];
+	    return [reviverOrAsIs(innerTypes.keyMetadata)('', enumerator), reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])];
 	  };
 	};
 
-	var reviver$1 = function reviver(innerTypes, k, v) {
-	  if (k !== '') {
-	    return v;
-	  }
+	var reviverFactory$2 = function reviverFactory(innerTypes) {
+	  return function (k, v) {
+	    if (k !== '') {
+	      return v;
+	    }
 
-	  var innerMap = v === null ? null : new Map(Object.keys(v).map(parseMapper$1(innerTypes, v)));
+	    var innerMap = v === null ? null : new Map(Object.keys(v).map(parseMapper$1(innerTypes, v)));
 
-	  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+	    return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+	  };
 	};
 
 	var ModelicoEnumMap = function (_AbstractMap) {
@@ -400,7 +398,7 @@
 	  }], [{
 	    key: 'metadata',
 	    value: function metadata(keyMetadata, valueMetadata) {
-	      return AbstractMap$1.metadata(ModelicoEnumMap, reviver$1, keyMetadata, valueMetadata);
+	      return AbstractMap$1.metadata(ModelicoEnumMap, reviverFactory$2, keyMetadata, valueMetadata);
 	    }
 	  }]);
 	  return ModelicoEnumMap;
@@ -468,7 +466,7 @@
 
 	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoList).call(this, ModelicoList, { innerList: innerList }));
 
-	    _this.itemMetadata = U.always(itemMetadata);
+	    _this.itemMetadata = always(itemMetadata);
 	    _this.innerList = function () {
 	      return innerList === null ? null : innerList.slice();
 	    };
@@ -511,7 +509,7 @@
 	  }, {
 	    key: 'metadata',
 	    value: function metadata(itemMetadata) {
-	      return U.iterableMetadata(ModelicoList, itemMetadata);
+	      return iterableMetadata(ModelicoList, itemMetadata);
 	    }
 	  }]);
 	  return ModelicoList;
@@ -529,7 +527,7 @@
 
 	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoSet).call(this, ModelicoSet, { innerSet: innerSet }));
 
-	    _this.itemMetadata = U.always(itemMetadata);
+	    _this.itemMetadata = always(itemMetadata);
 	    _this.innerSet = function () {
 	      return innerSet === null ? null : new Set(innerSet);
 	    };
@@ -579,7 +577,7 @@
 	  }, {
 	    key: 'metadata',
 	    value: function metadata(itemMetadata) {
-	      return U.iterableMetadata(ModelicoSet, itemMetadata);
+	      return iterableMetadata(ModelicoSet, itemMetadata);
 	    }
 	  }]);
 	  return ModelicoSet;
@@ -591,7 +589,7 @@
 	  return (acc[code] = { code: code }) && acc;
 	};
 
-	var reviver$2 = function reviver(values, k, v) {
+	var reviver = function reviver(values, k, v) {
 	  return v === null ? null : values[v];
 	};
 
@@ -608,12 +606,12 @@
 	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnum).call(this, ModelicoEnum, enumerators));
 
 	    Object.getOwnPropertyNames(enumerators).forEach(function (enumerator) {
-	      return _this[enumerator]().toJSON = U.always(enumerator);
+	      return _this[enumerator]().toJSON = always(enumerator);
 	    });
 
-	    _this.metadata = U.always(Object.freeze({
+	    _this.metadata = always(Object.freeze({
 	      type: ModelicoEnum,
-	      reviver: U.bind(reviver$2, enumerators)
+	      reviver: bind(reviver, enumerators)
 	    }));
 
 	    return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
@@ -704,7 +702,7 @@
 	var dateMutatorMethods = ["setDate", "setFullYear", "setHours", "setMinutes", "setMilliseconds", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 
 	var Modelico = Object.freeze({
-	  about: { version: version, author: author, homepage: homepage, license: license },
+	  about: Object.freeze({ version: version, author: author, homepage: homepage, license: license }),
 	  Any: Any,
 	  AsIs: AsIs,
 	  Date: ModelicoDate$1,

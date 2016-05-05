@@ -1,5 +1,5 @@
 'use strict';
 
-import U from './U';
+import { asIsReviver } from './U';
 
-export default Type => Object.freeze({type: Type, reviver: U.asIsReviver});
+export default Type => Object.freeze({type: Type, reviver: asIsReviver});
