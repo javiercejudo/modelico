@@ -558,6 +558,14 @@
 
       var Modelico = M.Modelico;
 
+      describe('instantiation', function () {
+        it('must be instantiated with new', function () {
+          (function () {
+            return M.List([]);
+          }).should.throw();
+        });
+      });
+
       describe('setting', function () {
         it('should implement Symbol.iterator', function () {
           var list = M.List.fromArray([1, 2, 3, 4]);

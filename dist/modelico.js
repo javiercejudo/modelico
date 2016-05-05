@@ -56,7 +56,7 @@
 
 	babelHelpers;
 
-	var version = "12.4.0";
+	var version = "12.5.0";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -126,8 +126,6 @@
 
 	    return localAcc;
 	  }, {});
-
-	  // console.log(result);
 
 	  return result;
 	};
