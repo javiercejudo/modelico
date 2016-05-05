@@ -27,8 +27,6 @@ const mergeDeepInnerTypes = (acc, Type) => {
     return localAcc;
   }, {});
 
-  // console.log(result);
-
   return result;
 };
 

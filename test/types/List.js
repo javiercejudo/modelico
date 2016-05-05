@@ -7,6 +7,12 @@ export default (should, M) => () => {
 
   const Modelico = M.Modelico;
 
+  describe('instantiation', () => {
+    it('must be instantiated with new', () => {
+      (() => M.List([])).should.throw();
+    });
+  });
+
   describe('setting', () => {
     it('should implement Symbol.iterator', () => {
       const list = M.List.fromArray([1, 2, 3, 4]);
