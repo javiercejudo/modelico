@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, function () { 'use strict';
 
-	var version = "12.5.0";
+	var version = "12.6.0";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -33,12 +33,6 @@
 	const defaultTo = (fallback, optional) => (optional === undefined) ? fallback : optional;
 	const objToArr = obj => Object.keys(obj).map(k => [k, obj[k]]);
 	const reviverOrAsIs = metadata => (metadata.reviver || asIsReviver);
-
-	const assignReducer = (acc, pair) => {
-	  acc[pair.field] = pair.value;
-
-	  return acc;
-	};
 
 	const mergeDeepInnerTypes = (acc, Type) => {
 	  if (!Type.innerTypes) {
@@ -93,7 +87,7 @@
 	  }
 
 	  set(field, value) {
-	    const newFields = Object.assign({}, this.fields(), assignReducer({}, {field, value}));
+	    const newFields = Object.assign({}, this.fields(), {[field]: value});
 
 	    return new (this.type())(newFields);
 	  }

@@ -30,6 +30,21 @@
 	  };
 	}();
 
+	babelHelpers.defineProperty = function (obj, key, value) {
+	  if (key in obj) {
+	    Object.defineProperty(obj, key, {
+	      value: value,
+	      enumerable: true,
+	      configurable: true,
+	      writable: true
+	    });
+	  } else {
+	    obj[key] = value;
+	  }
+
+	  return obj;
+	};
+
 	babelHelpers.inherits = function (subClass, superClass) {
 	  if (typeof superClass !== "function" && superClass !== null) {
 	    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
@@ -56,7 +71,7 @@
 
 	babelHelpers;
 
-	var version = "12.5.0";
+	var version = "12.6.0";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -100,12 +115,6 @@
 	};
 	var reviverOrAsIs = function reviverOrAsIs(metadata) {
 	  return metadata.reviver || asIsReviver;
-	};
-
-	var assignReducer = function assignReducer(acc, pair) {
-	  acc[pair.field] = pair.value;
-
-	  return acc;
 	};
 
 	var mergeDeepInnerTypes = function mergeDeepInnerTypes(acc, Type) {
@@ -166,7 +175,7 @@
 	  babelHelpers.createClass(Modelico, [{
 	    key: 'set',
 	    value: function set(field, value) {
-	      var newFields = Object.assign({}, this.fields(), assignReducer({}, { field: field, value: value }));
+	      var newFields = Object.assign({}, this.fields(), babelHelpers.defineProperty({}, field, value));
 
 	      return new (this.type())(newFields);
 	    }
