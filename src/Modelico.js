@@ -2,12 +2,6 @@
 
 import { always, defaultTo, reviverOrAsIs } from './U';
 
-const assignReducer = (acc, pair) => {
-  acc[pair.field] = pair.value;
-
-  return acc;
-};
-
 const mergeDeepInnerTypes = (acc, Type) => {
   if (!Type.innerTypes) {
     return acc;
@@ -61,7 +55,7 @@ class Modelico {
   }
 
   set(field, value) {
-    const newFields = Object.assign({}, this.fields(), assignReducer({}, {field, value}));
+    const newFields = Object.assign({}, this.fields(), {[field]: value});
 
     return new (this.type())(newFields);
   }
