@@ -1,13 +1,13 @@
 'use strict';
 
-import U from './U';
+import { always } from './U';
 import Modelico from './Modelico';
 
 class AbstractMap extends Modelico {
   constructor(Type, keyMetadata, valueMetadata, innerMap) {
     super(Type, {innerMap});
 
-    this.innerTypes = U.always(Object.freeze({keyMetadata, valueMetadata}));
+    this.innerTypes = always(Object.freeze({keyMetadata, valueMetadata}));
     this.innerMap = () => (innerMap === null) ? null : new Map(innerMap);
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
 
@@ -34,8 +34,8 @@ class AbstractMap extends Modelico {
     return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
   }
 
-  static metadata(Type, reviver, keyMetadata, valueMetadata) {
-    return Object.freeze({type: Type, reviver: U.bind(reviver, {keyMetadata, valueMetadata})});
+  static metadata(Type, reviverFactory, keyMetadata, valueMetadata) {
+    return Object.freeze({type: Type, reviver: reviverFactory({keyMetadata, valueMetadata})});
   }
 }
 

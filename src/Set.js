@@ -1,6 +1,6 @@
 'use strict';
 
-import U from './U';
+import { always, iterableMetadata } from './U';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
 import Any from './Any';
@@ -9,7 +9,7 @@ class ModelicoSet extends Modelico {
   constructor(itemMetadata, innerSet) {
     super(ModelicoSet, {innerSet});
 
-    this.itemMetadata = U.always(itemMetadata);
+    this.itemMetadata = always(itemMetadata);
     this.innerSet = () => (innerSet === null) ? null : new Set(innerSet);
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
@@ -48,7 +48,7 @@ class ModelicoSet extends Modelico {
   }
 
   static metadata(itemMetadata) {
-    return U.iterableMetadata(ModelicoSet, itemMetadata);
+    return iterableMetadata(ModelicoSet, itemMetadata);
   }
 }
 

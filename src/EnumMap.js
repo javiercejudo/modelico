@@ -1,6 +1,6 @@
 'use strict';
 
-import U from './U';
+import { reviverOrAsIs } from './U';
 import AbstractMap from './AbstractMap';
 
 const stringifyReducer = (acc, pair) => {
@@ -10,11 +10,11 @@ const stringifyReducer = (acc, pair) => {
 };
 
 const parseMapper = (innerTypes, object) => enumerator => [
-  U.reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
-  U.reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
+  reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
+  reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
 ];
 
-const reviver = (innerTypes, k, v) => {
+const reviverFactory = innerTypes => (k, v) => {
   if (k !== '') {
     return v;
   }
@@ -42,7 +42,7 @@ class ModelicoEnumMap extends AbstractMap {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoEnumMap, reviver, keyMetadata, valueMetadata);
+    return AbstractMap.metadata(ModelicoEnumMap, reviverFactory, keyMetadata, valueMetadata);
   }
 }
 

@@ -1,6 +1,6 @@
 'use strict';
 
-import U from './U';
+import { always, iterableMetadata } from './U';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
 import Any from './Any';
@@ -9,7 +9,7 @@ class ModelicoList extends Modelico {
   constructor(itemMetadata, innerList) {
     super(ModelicoList, {innerList});
 
-    this.itemMetadata = U.always(itemMetadata);
+    this.itemMetadata = always(itemMetadata);
     this.innerList = () => (innerList === null) ? null : innerList.slice();
     this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
@@ -42,7 +42,7 @@ class ModelicoList extends Modelico {
   }
 
   static metadata(itemMetadata) {
-    return U.iterableMetadata(ModelicoList, itemMetadata);
+    return iterableMetadata(ModelicoList, itemMetadata);
   }
 }
 

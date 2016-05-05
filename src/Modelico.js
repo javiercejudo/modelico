@@ -1,6 +1,6 @@
 'use strict';
 
-import U from './U';
+import { always, defaultTo, reviverOrAsIs } from './U';
 
 const assignReducer = (acc, pair) => {
   acc[pair.field] = pair.value;
@@ -43,7 +43,7 @@ const reviverFactory = Type => {
     const innerTypeMetadata = innerTypes[k];
 
     if (innerTypeMetadata) {
-      return U.reviverOrAsIs(innerTypeMetadata)('', v);
+      return reviverOrAsIs(innerTypeMetadata)('', v);
     }
 
     return v;
@@ -52,12 +52,12 @@ const reviverFactory = Type => {
 
 class Modelico {
   constructor(Type, fields, thisArg) {
-    thisArg = U.default(thisArg, this);
-    thisArg.type = U.always(Type);
-    thisArg.fields = U.always(Object.freeze(fields));
+    thisArg = defaultTo(this, thisArg);
+    thisArg.type = always(Type);
+    thisArg.fields = always(Object.freeze(fields));
 
     Object.getOwnPropertyNames(fields)
-      .forEach(field => thisArg[field] = U.always(fields[field]));
+      .forEach(field => thisArg[field] = always(fields[field]));
 
     return thisArg;
   }
