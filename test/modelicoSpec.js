@@ -41,6 +41,8 @@ import ModelicoEnumMap from './types/EnumMap';
 import ModelicoList from './types/List';
 import ModelicoSet from './types/Set';
 
+import setPath from './types/setPath';
+
 import exampleSimple from './example/simple';
 import exampleAdvanced from './example/advanced';
 import exampleAdvancedES5 from './example/advanced.es5';
@@ -64,6 +66,9 @@ export default (options, should, M) => _ => {
   describe('EnumMap', ModelicoEnumMap.apply(_, deps));
   describe('ModelicoList', ModelicoList.apply(_, deps));
   describe('ModelicoSet', ModelicoSet.apply(_, deps));
+
+  describe('setPath', setPath.apply(_, deps));
+
   describe('Readme simple example', exampleSimple.apply(_, deps));
   describe('Readme advanced example', exampleAdvanced.apply(_, deps));
   describe('Readme advanced example ES5', exampleAdvancedES5.apply(_, deps));
