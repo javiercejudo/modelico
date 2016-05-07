@@ -71,7 +71,7 @@
 
 	babelHelpers;
 
-	var version = "12.6.0";
+	var version = "12.6.1";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -254,6 +254,11 @@
 	      }
 
 	      var item = this.innerMap().get(path[0]);
+
+	      if (!item.setPath) {
+	        return this.set(path[0], value);
+	      }
+
 	      return this.set(path[0], item.setPath(path.slice(1), value));
 	    }
 
@@ -501,6 +506,10 @@
 
 	      var item = this.innerList()[path[0]];
 
+	      if (!item.setPath) {
+	        return this.set(path[0], value);
+	      }
+
 	      return this.set(path[0], item.setPath(path.slice(1), value));
 	    }
 	  }, {
@@ -561,6 +570,10 @@
 	      }
 
 	      var item = Array.from(this.innerSet())[path[0]];
+
+	      if (!item.setPath) {
+	        return this.set(path[0], value);
+	      }
 
 	      return this.set(path[0], item.setPath(path.slice(1), value));
 	    }
