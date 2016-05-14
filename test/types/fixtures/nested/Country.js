@@ -12,7 +12,7 @@ export default (M, Region) => {
 
     static innerTypes() {
       return Object.freeze({
-        'name': M.AsIs(String),
+        'code': M.AsIs(String),
         'region': Region.metadata()
       });
     }
