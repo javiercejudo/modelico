@@ -239,6 +239,9 @@ Animal.prototype.speak = function() {
 Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 ```
 
-## Acknowledgments
+## Acknowledgments :bow:
 
-Inspired by an internal Skiddoo tool by [Jaie Wilson](https://github.com/jaiew) :bow:
+Inspired by [Immutable.js](https://github.com/facebook/immutable-js),
+[Gson](https://github.com/google/gson) and initially designed to cover
+the same use cases as an internal Skiddoo tool by
+[Jaie Wilson](https://github.com/jaiew).

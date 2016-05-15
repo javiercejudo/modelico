@@ -1,12 +1,12 @@
 'use strict';
 
-import { always, bind } from './U';
+import { always } from './U';
 import Modelico from './Modelico';
 
 const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
 
-const reviver = (values, k, v) => {
-  return (v === null) ? null : values[v];
+const reviverFactory = enumerators => (k, v) => {
+  return (v === null) ? null : enumerators[v];
 };
 
 class ModelicoEnum extends Modelico {
@@ -22,7 +22,7 @@ class ModelicoEnum extends Modelico {
 
     this.metadata = always(Object.freeze({
       type: ModelicoEnum,
-      reviver: bind(reviver, enumerators)
+      reviver: reviverFactory(enumerators)
     }));
 
     return Object.freeze(this);
