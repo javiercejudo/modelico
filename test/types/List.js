@@ -17,7 +17,7 @@ export default (should, M) => () => {
     it('should implement Symbol.iterator', () => {
       const list = M.List.fromArray([1, 2, 3, 4]);
 
-      Array.from(list)
+      [...list]
         .should.eql([1, 2, 3, 4]);
     });
 

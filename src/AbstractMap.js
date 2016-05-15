@@ -39,8 +39,8 @@ class AbstractMap extends Modelico {
     return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
   }
 
-  static metadata(Type, reviverFactory, keyMetadata, valueMetadata) {
-    return Object.freeze({type: Type, reviver: reviverFactory({keyMetadata, valueMetadata})});
+  static metadata(Type, reviver) {
+    return Object.freeze({type: Type, reviver});
   }
 }
 

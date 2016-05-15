@@ -31,20 +31,20 @@ export default (should, M) => () => {
   it('entries()', () => {
     const map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
 
-    Array.from(map.entries())
+    [...map.entries()]
       .should.eql([['a', 1], ['b', 2], ['c', 3]]);
   });
 
   it('values() / keys() / [@@iterator]()', () => {
     const map = p(M.Map.fromObject({a: 1, b: 2, c: 3}));
 
-    Array.from(map.values())
+    [...map.values()]
       .should.eql([1, 2, 3]);
 
-    Array.from(map.keys())
+    [...map.keys()]
       .should.eql(['a', 'b', 'c']);
 
-    Array.from(map[Symbol.iterator]())
+    [...map[Symbol.iterator]()]
       .should.eql([['a', 1], ['b', 2], ['c', 3]]);
   });
 

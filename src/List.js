@@ -1,6 +1,7 @@
 'use strict';
 
-import { always, iterableMetadata } from './U';
+import { always } from './U';
+import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
 import Any from './Any';

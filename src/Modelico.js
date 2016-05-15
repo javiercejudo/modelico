@@ -11,11 +11,13 @@ const reviverFactory = Type => {
     }
 
     const fields = Object.keys(v).reduce((acc, field) => {
-      const innerTypeMetadata = innerTypes[field];
+      const metadata = innerTypes[field];
 
-      acc[field] = innerTypeMetadata ?
-        reviverOrAsIs(innerTypeMetadata)('', v[field]) :
+      if (metadata) {
+        acc[field] = reviverOrAsIs(metadata)(k, v[field]);
+      } else {
         acc[field] = v[field];
+      }
 
       return acc;
     }, {});
@@ -26,7 +28,7 @@ const reviverFactory = Type => {
 
 class Modelico {
   constructor(Type, fields, thisArg) {
-    thisArg = defaultTo(this, thisArg);
+    thisArg = defaultTo(this)(thisArg);
     thisArg.type = always(Type);
     thisArg.fields = always(Object.freeze(fields));
 

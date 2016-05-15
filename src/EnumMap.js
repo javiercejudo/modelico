@@ -9,19 +9,24 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper = (innerTypes, object) => enumerator => [
-  reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
-  reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
-];
+const parseMapper = (keyMetadata, valueMetadata, object) => (enumerator, index) => {
+  const reviveKey = reviverOrAsIs(keyMetadata);
+  const key = reviveKey('', enumerator);
 
-const reviverFactory = innerTypes => (k, v) => {
+  const reviveVal = reviverOrAsIs(valueMetadata);
+  const val = reviveVal('', object[enumerator]);
+
+  return [key, val];
+};
+
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v;
   }
 
-  const innerMap = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
+  const innerMap = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(keyMetadata, valueMetadata, v)));
 
-  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+  return new ModelicoEnumMap(keyMetadata, valueMetadata, innerMap);
 };
 
 class ModelicoEnumMap extends AbstractMap {
@@ -38,11 +43,11 @@ class ModelicoEnumMap extends AbstractMap {
   toJSON() {
     const innerMap = this.fields().innerMap;
 
-    return (innerMap === null) ? null : Array.from(innerMap).reduce(stringifyReducer, {});
+    return (innerMap === null) ? null : [...innerMap].reduce(stringifyReducer, {});
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoEnumMap, reviverFactory, keyMetadata, valueMetadata);
+    return AbstractMap.metadata(ModelicoEnumMap, reviverFactory(keyMetadata, valueMetadata));
   }
 }
 

@@ -145,13 +145,13 @@ export default (should, M) => () => {
   it('keys() / entries() / [@@iterator]()', () => {
     const list = p(M.List.fromArray([1, 2, 2, 3]));
 
-    Array.from(list.entries())
+    [...list.entries()]
       .should.eql([[0, 1], [1, 2], [2, 2], [3, 3]]);
 
-    Array.from(list.keys())
+    [...list.keys()]
       .should.eql([0, 1, 2, 3 ]);
 
-    Array.from(list[Symbol.iterator]())
+    [...list[Symbol.iterator]()]
       .should.eql([1, 2, 2, 3]);
   });
 

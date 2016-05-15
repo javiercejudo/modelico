@@ -4,17 +4,11 @@ import PartOfDayFactory from './PartOfDay';
 import SexFactory from './Sex';
 
 export default M => {
-  const PartOfDay = PartOfDayFactory(M).metadata;
-  const Sex = SexFactory(M).metadata;
+  const PartOfDay = PartOfDayFactory(M);
+  const Sex = SexFactory(M);
 
   const Modelico = M.Modelico;
-
-  const ModelicoMap = M.Map.metadata;
-  const ModelicoList = M.List.metadata;
-  const ModelicoSet = M.Set.metadata;
-  const ModelicoDate = M.Date.metadata;
-
-  const joinWithSpace = arr => arr.filter(x => x !== null && x !== undefined).join(' ');
+  const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ');
 
   class Person extends Modelico {
     constructor(fields) {
@@ -24,17 +18,17 @@ export default M => {
     }
 
     fullName() {
-      return joinWithSpace([this.givenName(), this.familyName()]);
+      return joinWithSpace(this.givenName(), this.familyName());
     }
 
     static innerTypes() {
       return Object.freeze({
-        'birthday': ModelicoDate(),
-        'favouritePartOfDay': PartOfDay(),
-        'lifeEvents': ModelicoMap(String, ModelicoDate()),
-        'importantDatesList': ModelicoList(ModelicoDate()),
-        'importantDatesSet': ModelicoSet(ModelicoDate()),
-        'sex': Sex()
+        birthday: M.Date.metadata(),
+        favouritePartOfDay: PartOfDay.metadata(),
+        lifeEvents: M.Map.metadata(String, M.Date.metadata()),
+        importantDatesList: M.List.metadata(M.Date.metadata()),
+        importantDatesSet: M.Set.metadata(M.Date.metadata()),
+        sex: Sex.metadata()
       });
     }
 

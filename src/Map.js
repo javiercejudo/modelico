@@ -7,19 +7,24 @@ import Any from './Any';
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
-const parseMapper = innerTypes => pairObject => [
-  reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key),
-  reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
-];
+const parseMapper = (keyMetadata, valueMetadata) => pairObject => {
+  const reviveKey = reviverOrAsIs(keyMetadata);
+  const key = reviveKey('', pairObject.key);
 
-const reviverFactory = innerTypes => (k, v) => {
+  const reviveVal = reviverOrAsIs(valueMetadata);
+  const val = reviveVal('', pairObject.value);
+
+  return [key, val];
+};
+
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v;
   }
 
-  const innerMap = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
+  const innerMap = (v === null) ? null : new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
 
-  return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+  return new ModelicoMap(keyMetadata, valueMetadata, innerMap);
 };
 
 class ModelicoMap extends AbstractMap {
@@ -36,7 +41,7 @@ class ModelicoMap extends AbstractMap {
   toJSON() {
     const innerMap = this.fields().innerMap;
 
-    return (innerMap === null) ? null : Array.from(innerMap).map(stringifyMapper);
+    return (innerMap === null) ? null : [...innerMap].map(stringifyMapper);
   }
 
   static fromObject(obj) {
@@ -48,7 +53,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoMap, reviverFactory, keyMetadata, valueMetadata);
+    return AbstractMap.metadata(ModelicoMap, reviverFactory(keyMetadata, valueMetadata));
   }
 }
 

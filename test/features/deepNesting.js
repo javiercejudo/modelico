@@ -21,7 +21,7 @@ export default (should, M) => () => {
 
   it('should support nested keys with different types', () => {
     const City = CityFactory(M, RegionIncompatibleNameKeyFactory(M));
-    const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"type": 1,"value":"EU"}}}}`;
+    const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"id": 1,"value":"EU"}}}}`;
 
     const city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
 

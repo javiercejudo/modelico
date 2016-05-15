@@ -9,8 +9,8 @@ const proxyToSelf = (nonMutators, mutators, innerAccessor, target, prop) => {
     return target[prop];
   }
 
-  return function() {
-    const newObj = target[prop].apply(target, arguments);
+  return (...args) => {
+    const newObj = target[prop](...args);
 
     return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
   };
@@ -18,24 +18,24 @@ const proxyToSelf = (nonMutators, mutators, innerAccessor, target, prop) => {
 
 const proxyToInner = (inner, candidate, nonMutators, mutators, innerAccessor, target, prop) => {
   if (nonMutators.includes(prop)) {
-    return function() {
-      const newObj = target.setPath([], candidate.apply(inner, arguments));
+    return (...args) => {
+      const newObj = target.setPath([], candidate.apply(inner, args));
 
       return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
     };
   }
 
   if (mutators.includes(prop)) {
-    return function() {
-      candidate.apply(inner, arguments);
+    return (...args) => {
+      candidate.apply(inner, args);
       const newObj = target.setPath([], inner);
 
       return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
     };
   }
 
-  return function() {
-    return candidate.apply(inner, arguments);
+  return (...args) => {
+    return candidate.apply(inner, args);
   };
 };
 

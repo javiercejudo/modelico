@@ -1,6 +1,7 @@
 'use strict';
 
-import { always, iterableMetadata } from './U';
+import { always } from './U';
+import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
 import Any from './Any';
@@ -17,7 +18,7 @@ class ModelicoSet extends Modelico {
   }
 
   set(index, value) {
-    const newSet = Array.from(this.innerSet());
+    const newSet = [...this.innerSet()];
     newSet[index] = value;
 
     return new ModelicoSet(this.itemMetadata(), newSet);
@@ -28,7 +29,7 @@ class ModelicoSet extends Modelico {
       return new ModelicoSet(this.itemMetadata(), value);
     }
 
-    const item = Array.from(this.innerSet())[path[0]];
+    const item = [...this.innerSet()][path[0]];
 
     if (!item.setPath) {
       return this.set(path[0], value);
@@ -40,7 +41,7 @@ class ModelicoSet extends Modelico {
   toJSON() {
     const innerSet = this.fields().innerSet;
 
-    return (innerSet === null) ? null : Array.from(innerSet);
+    return (innerSet === null) ? null : [...innerSet];
   }
 
   static fromArray(arr) {
