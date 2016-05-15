@@ -17,4 +17,4 @@ script:
   - npm test
   - npm run test-browsers
 after_success:
-  - gulp codecov
+  - npm run send-coverage

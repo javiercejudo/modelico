@@ -5,7 +5,7 @@ export default M => {
 
   class Code extends Modelico {
     constructor(fields) {
-      super(Region, fields);
+      super(Code, fields);
 
       return Object.freeze(this);
     }
