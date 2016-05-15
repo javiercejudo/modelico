@@ -10,11 +10,6 @@ if [[ "$TRAVIS_NODE_VERSION" = "stable" && "$SAUCE_ACCESS_KEY" ]]; then
   LEGACY_IE_BROWSERS=$SL_LEGACY_IE_BROWSERS
 fi
 
-echo -e '\nO_o Browser tests'
-echo -e '\nO_o Preparing...'
-
-npm run build
-
 echo -e '\nO_o Running browser tests...'
 ENTRY="index.js" karma start --single-run --browsers $BROWSERS
 ENTRY="ie9_10.js" karma start --single-run --browsers $LEGACY_IE_BROWSERS
