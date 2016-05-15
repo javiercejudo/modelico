@@ -71,7 +71,7 @@
 
 	babelHelpers;
 
-	var version = "12.6.1";
+	var version = "13.0.0";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -117,43 +117,23 @@
 	  return metadata.reviver || asIsReviver;
 	};
 
-	var mergeDeepInnerTypes = function mergeDeepInnerTypes(acc, Type) {
-	  if (!Type.innerTypes) {
-	    return acc;
-	  }
-
-	  var innerTypes = Type.innerTypes();
-
-	  var result = Object.keys(innerTypes).reduce(function (localAcc, key) {
-	    localAcc = mergeDeepInnerTypes(acc, innerTypes[key].type);
-
-	    if (localAcc.hasOwnProperty(key) && acc[key].type.name !== innerTypes[key].type.name) {
-	      throw new TypeError('Duplicated typed key \'' + key + '\' with types ' + acc[key].type.name + ' and ' + innerTypes[key].type.name);
-	    }
-
-	    localAcc[key] = innerTypes[key];
-
-	    return localAcc;
-	  }, {});
-
-	  return result;
-	};
-
 	var reviverFactory = function reviverFactory(Type) {
-	  var innerTypes = mergeDeepInnerTypes({}, Type);
+	  var innerTypes = Type.innerTypes && Type.innerTypes() || {};
 
 	  return function (k, v) {
-	    if (k === '') {
-	      return new Type(v);
+	    if (k !== '') {
+	      return v;
 	    }
 
-	    var innerTypeMetadata = innerTypes[k];
+	    var fields = Object.keys(v).reduce(function (acc, field) {
+	      var innerTypeMetadata = innerTypes[field];
 
-	    if (innerTypeMetadata) {
-	      return reviverOrAsIs(innerTypeMetadata)('', v);
-	    }
+	      acc[field] = innerTypeMetadata ? reviverOrAsIs(innerTypeMetadata)('', v[field]) : acc[field] = v[field];
 
-	    return v;
+	      return acc;
+	    }, {});
+
+	    return new Type(fields);
 	  };
 	};
 

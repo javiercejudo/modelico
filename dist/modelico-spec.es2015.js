@@ -1159,7 +1159,7 @@
 
       static innerTypes() {
         return Object.freeze({
-          'name': M.AsIs(String),
+          'code': M.AsIs(String),
           'region': Region.metadata()
         });
       }
@@ -1185,7 +1185,6 @@
 
       static innerTypes() {
         return Object.freeze({
-          'name': M.AsIs(String),
           'country': Country.metadata()
         });
       }
@@ -1214,7 +1213,7 @@
 
       static innerTypes() {
         return Object.freeze({
-          'name': M.AsIs(String)
+          'code': M.AsIs(String)
         });
       }
 
@@ -1229,6 +1228,14 @@
   var RegionIncompatibleNameKeyFactory = M => {
     const Modelico = M.Modelico;
 
+    class Code extends Modelico {
+      constructor(fields) {
+        super(Code, fields);
+
+        return Object.freeze(this);
+      }
+    }
+
     class Region extends Modelico {
       constructor(fields) {
         super(Region, fields);
@@ -1237,12 +1244,12 @@
       }
 
       customMethod() {
-        return `${this.name()} (${this.code()})`;
+        return `${this.name()} (${this.code().value()})`;
       }
 
       static innerTypes() {
         return Object.freeze({
-          'name': M.AsIs(M.Any)
+          'code': Modelico.metadata(Code)
         });
       }
 
@@ -1259,21 +1266,26 @@
 
     it('should revive deeply nested JSON', () => {
       const City = CityFactory(M, RegionFactory(M));
-      const cityJson = `{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}`;
+      const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":"EU"}}}`;
 
       const city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
 
       city.name().should.be.exactly('Pamplona');
       city.country().name().should.be.exactly('Spain');
+      city.country().code().should.be.exactly('ESP');
       city.country().region().customMethod().should.be.exactly('Europe (EU)');
     });
 
-    it('should throw when an object has incompatible nested keys', () => {
+    it('should support nested keys with different types', () => {
       const City = CityFactory(M, RegionIncompatibleNameKeyFactory(M));
-      const cityJson = `{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}`;
+      const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"type": 1,"value":"EU"}}}}`;
 
-      (() => JSON.parse(cityJson, Modelico.metadata(City).reviver))
-        .should.throw(`Duplicated typed key 'name' with types String and Any`);
+      const city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
+
+      city.name().should.be.exactly('Pamplona');
+      city.country().name().should.be.exactly('Spain');
+      city.country().code().should.be.exactly('ESP');
+      city.country().region().customMethod().should.be.exactly('Europe (EU)');
     });
   };
 

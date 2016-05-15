@@ -1103,7 +1103,7 @@
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            'name': M.AsIs(String),
+            'code': M.AsIs(String),
             'region': Region.metadata()
           });
         }
@@ -1140,7 +1140,6 @@
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            'name': M.AsIs(String),
             'country': Country.metadata()
           });
         }
@@ -1181,7 +1180,7 @@
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            'name': M.AsIs(String)
+            'code': M.AsIs(String)
           });
         }
       }, {
@@ -1199,29 +1198,45 @@
   var RegionIncompatibleNameKeyFactory = (function (M) {
     var Modelico = M.Modelico;
 
-    var Region = function (_Modelico) {
-      babelHelpers.inherits(Region, _Modelico);
+    var Code = function (_Modelico) {
+      babelHelpers.inherits(Code, _Modelico);
+
+      function Code(fields) {
+        var _ret;
+
+        babelHelpers.classCallCheck(this, Code);
+
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Code).call(this, Code, fields));
+
+        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+      }
+
+      return Code;
+    }(Modelico);
+
+    var Region = function (_Modelico2) {
+      babelHelpers.inherits(Region, _Modelico2);
 
       function Region(fields) {
-        var _ret;
+        var _ret2;
 
         babelHelpers.classCallCheck(this, Region);
 
-        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Region).call(this, Region, fields));
+        var _this2 = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Region).call(this, Region, fields));
 
-        return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+        return _ret2 = Object.freeze(_this2), babelHelpers.possibleConstructorReturn(_this2, _ret2);
       }
 
       babelHelpers.createClass(Region, [{
         key: 'customMethod',
         value: function customMethod() {
-          return this.name() + ' (' + this.code() + ')';
+          return this.name() + ' (' + this.code().value() + ')';
         }
       }], [{
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            'name': M.AsIs(M.Any)
+            'code': Modelico.metadata(Code)
           });
         }
       }, {
@@ -1242,22 +1257,26 @@
 
       it('should revive deeply nested JSON', function () {
         var City = CityFactory(M, RegionFactory(M));
-        var cityJson = '{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}';
+        var cityJson = '{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":"EU"}}}';
 
         var city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
 
         city.name().should.be.exactly('Pamplona');
         city.country().name().should.be.exactly('Spain');
+        city.country().code().should.be.exactly('ESP');
         city.country().region().customMethod().should.be.exactly('Europe (EU)');
       });
 
-      it('should throw when an object has incompatible nested keys', function () {
+      it('should support nested keys with different types', function () {
         var City = CityFactory(M, RegionIncompatibleNameKeyFactory(M));
-        var cityJson = '{"name":"Pamplona","country":{"name":"Spain","region":{"name":"Europe","code":"EU"}}}';
+        var cityJson = '{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"type": 1,"value":"EU"}}}}';
 
-        (function () {
-          return JSON.parse(cityJson, Modelico.metadata(City).reviver);
-        }).should.throw('Duplicated typed key \'name\' with types String and Any');
+        var city = JSON.parse(cityJson, Modelico.metadata(City).reviver);
+
+        city.name().should.be.exactly('Pamplona');
+        city.country().name().should.be.exactly('Spain');
+        city.country().code().should.be.exactly('ESP');
+        city.country().region().customMethod().should.be.exactly('Europe (EU)');
       });
     };
   })

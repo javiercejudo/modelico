@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, function () { 'use strict';
 
-	var version = "12.6.1";
+	var version = "13.0.0";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -34,43 +34,25 @@
 	const objToArr = obj => Object.keys(obj).map(k => [k, obj[k]]);
 	const reviverOrAsIs = metadata => (metadata.reviver || asIsReviver);
 
-	const mergeDeepInnerTypes = (acc, Type) => {
-	  if (!Type.innerTypes) {
-	    return acc;
-	  }
-
-	  const innerTypes = Type.innerTypes();
-
-	  const result = Object.keys(innerTypes).reduce((localAcc, key) => {
-	    localAcc = mergeDeepInnerTypes(acc, innerTypes[key].type);
-
-	    if (localAcc.hasOwnProperty(key) && acc[key].type.name !== innerTypes[key].type.name) {
-	      throw new TypeError(`Duplicated typed key '${key}' with types ${acc[key].type.name} and ${innerTypes[key].type.name}`);
-	    }
-
-	    localAcc[key] = innerTypes[key];
-
-	    return localAcc;
-	  }, {});
-
-	  return result;
-	};
-
 	const reviverFactory = Type => {
-	  const innerTypes = mergeDeepInnerTypes({}, Type);
+	  const innerTypes = Type.innerTypes && Type.innerTypes() || {};
 
 	  return (k, v) => {
-	    if (k === '') {
-	      return new Type(v);
+	    if (k !== '') {
+	      return v;
 	    }
 
-	    const innerTypeMetadata = innerTypes[k];
+	    const fields = Object.keys(v).reduce((acc, field) => {
+	      const innerTypeMetadata = innerTypes[field];
 
-	    if (innerTypeMetadata) {
-	      return reviverOrAsIs(innerTypeMetadata)('', v);
-	    }
+	      acc[field] = innerTypeMetadata ?
+	        reviverOrAsIs(innerTypeMetadata)('', v[field]) :
+	        acc[field] = v[field];
 
-	    return v;
+	      return acc;
+	    }, {});
+
+	    return new Type(fields);
 	  };
 	};
 
