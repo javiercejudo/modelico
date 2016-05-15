@@ -2,4 +2,10 @@
 
 import { asIsReviver } from './U';
 
-export default Type => Object.freeze({type: Type, reviver: asIsReviver});
+export const AsIsWithOptions = (options, Type) => Object.freeze({
+  type: Type,
+  reviver: asIsReviver,
+  options
+});
+
+export default Type => AsIsWithOptions({}, Type);

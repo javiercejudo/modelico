@@ -29,12 +29,12 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        'birthday': ModelicoDate(),
-        'favouritePartOfDay': PartOfDay(),
-        'lifeEvents': ModelicoMap(String, ModelicoDate()),
-        'importantDatesList': ModelicoList(ModelicoDate()),
-        'importantDatesSet': ModelicoSet(ModelicoDate()),
-        'sex': Sex()
+        birthday: M.Date.metadata(),
+        favouritePartOfDay: PartOfDay(),
+        lifeEvents: ModelicoMap(String, ModelicoDate()),
+        importantDatesList: M.List.metadataWithOptions({nullable: false}, ModelicoDate()),
+        importantDatesSet: ModelicoSet(ModelicoDate()),
+        sex: Sex()
       });
     }
 

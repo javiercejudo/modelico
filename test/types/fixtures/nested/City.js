@@ -15,12 +15,9 @@ export default (M, Region) => {
 
     static innerTypes() {
       return Object.freeze({
-        'country': Country.metadata()
+        name: M.AsIsWithOptions({required: true}, String),
+        country: Modelico.metadataWithOptions({required: true}, Country)
       });
-    }
-
-    static metadata() {
-      return Modelico.metadata(City);
     }
   }
 

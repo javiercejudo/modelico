@@ -12,13 +12,10 @@ export default (M, Region) => {
 
     static innerTypes() {
       return Object.freeze({
-        'code': M.AsIs(String),
-        'region': Region.metadata()
+        name: M.AsIsWithOptions({required: true, nullable: false}, String),
+        code: M.AsIsWithOptions({required: true, nullable: true}, String),
+        region: Modelico.metadataWithOptions({required: true}, Region)
       });
-    }
-
-    static metadata() {
-      return Modelico.metadata(Country);
     }
   }
 

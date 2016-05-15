@@ -2,8 +2,6 @@
 
 export default (should, M) => () => {
   const Modelico = M.Modelico;
-  const AsIs = M.AsIs;
-  const List = M.List;
 
   class Animal extends Modelico {
     constructor(fields) {
@@ -13,10 +11,6 @@ export default (should, M) => () => {
     speak() {
       const name = this.fields().name;
       return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
-    }
-
-    static metadata() {
-      return Modelico.metadata(Animal);
     }
   }
 
@@ -32,9 +26,9 @@ export default (should, M) => () => {
 
     static innerTypes() {
       return Object.freeze({
-        'givenName': AsIs(M.Any),
-        'familyName': AsIs(String),
-        'pets': List.metadata(Animal.metadata())
+        givenName: M.AsIs(M.Any),
+        familyName: M.AsIs(String),
+        pets: M.List.metadata(Modelico.metadata(Animal))
       });
     }
   }

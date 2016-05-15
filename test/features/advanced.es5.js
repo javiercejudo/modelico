@@ -2,8 +2,6 @@
 
 export default (should, M) => () => {
   const Modelico = M.Modelico;
-  const AsIs = M.AsIs;
-  const List = M.List;
 
   function Animal(fields) {
     Modelico.factory(Animal, fields, this);
@@ -15,8 +13,6 @@ export default (should, M) => () => {
     var name = this.fields().name;
     return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
   };
-
-  Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 
   function Person(fields) {
     Modelico.factory(Person, fields, this);
@@ -31,9 +27,9 @@ export default (should, M) => () => {
 
   Person.innerTypes = function() {
     return Object.freeze({
-      'givenName': AsIs(String),
-      'familyName': AsIs(String),
-      'pets': List.metadata(Animal.metadata())
+      givenName: M.AsIs(String),
+      familyName: M.AsIs(String),
+      pets: M.List.metadata(Modelico.metadata(Animal))
     });
   };
 
