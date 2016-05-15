@@ -16,7 +16,7 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        'name': M.AsIs(String)
+        'code': M.AsIs(String)
       });
     }
 

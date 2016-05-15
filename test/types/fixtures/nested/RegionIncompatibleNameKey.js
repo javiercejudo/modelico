@@ -3,6 +3,14 @@
 export default M => {
   const Modelico = M.Modelico;
 
+  class Code extends Modelico {
+    constructor(fields) {
+      super(Region, fields);
+
+      return Object.freeze(this);
+    }
+  }
+
   class Region extends Modelico {
     constructor(fields) {
       super(Region, fields);
@@ -11,12 +19,12 @@ export default M => {
     }
 
     customMethod() {
-      return `${this.name()} (${this.code()})`;
+      return `${this.name()} (${this.code().value()})`;
     }
 
     static innerTypes() {
       return Object.freeze({
-        'name': M.AsIs(M.Any)
+        'code': Modelico.metadata(Code)
       });
     }
 

@@ -15,7 +15,6 @@ export default (M, Region) => {
 
     static innerTypes() {
       return Object.freeze({
-        'name': M.AsIs(String),
         'country': Country.metadata()
       });
     }
