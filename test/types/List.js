@@ -17,7 +17,7 @@ export default (should, M) => () => {
     it('should implement Symbol.iterator', () => {
       const list = M.List.fromArray([1, 2, 3, 4]);
 
-      Array.from(list)
+      [...list]
         .should.eql([1, 2, 3, 4]);
     });
 
@@ -163,6 +163,16 @@ export default (should, M) => () => {
 
       should(modelicoList.innerList())
         .be.exactly(null);
+    });
+
+    it('should check item metadata options: nullable', () => {
+      const reviver = M.List.metadata(M.Date.metadataWithOptions({nullable: false})).reviver;
+
+      (() => JSON.parse('["2013-03-28T00:00:00.000Z", "2014-03-28T00:00:00.000Z"]', reviver))
+        .should.not.throw();
+
+      (() => JSON.parse('["2013-03-28T00:00:00.000Z", null]', reviver))
+        .should.throw('"items[1]" in Iterable cannot be null');
     });
   });
 

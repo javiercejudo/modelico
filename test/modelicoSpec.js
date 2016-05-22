@@ -43,10 +43,11 @@ import ModelicoSet from './types/Set';
 
 import setPath from './types/setPath';
 
-import exampleSimple from './example/simple';
-import exampleAdvanced from './example/advanced';
-import exampleAdvancedES5 from './example/advanced.es5';
-import exampleDeepNesting from './example/deepNesting';
+import featuresSimple from './features/simple';
+import featuresAdvanced from './features/advanced';
+import featuresAdvancedES5 from './features/advanced.es5';
+import featuresDeepNesting from './features/deepNesting';
+import featuresMetadataOptions from './features/metadataOptions';
 import Immutable from './Immutable.js/index';
 import ImmutableProxied from './Immutable.js/proxied';
 
@@ -69,10 +70,11 @@ export default (options, should, M) => _ => {
 
   describe('setPath', setPath.apply(_, deps));
 
-  describe('Readme simple example', exampleSimple.apply(_, deps));
-  describe('Readme advanced example', exampleAdvanced.apply(_, deps));
-  describe('Readme advanced example ES5', exampleAdvancedES5.apply(_, deps));
-  describe('Deep nesting example', exampleDeepNesting.apply(_, deps));
+  describe('Readme simple features', featuresSimple.apply(_, deps));
+  describe('Readme advanced features', featuresAdvanced.apply(_, deps));
+  describe('Readme advanced features ES5', featuresAdvancedES5.apply(_, deps));
+  describe('Deep nesting features', featuresDeepNesting.apply(_, deps));
+  describe('Metadata options', featuresMetadataOptions.apply(_, deps));
   describe('Immutable.js examples', Immutable.apply(_, utilsAndDeps));
 
   U.skipDescribeIfNoProxies(

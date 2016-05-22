@@ -2,8 +2,6 @@
 
 export default (should, M) => () => {
   const Modelico = M.Modelico;
-  const AsIs = M.AsIs;
-  const List = M.List;
 
   class Animal extends Modelico {
     constructor(fields) {

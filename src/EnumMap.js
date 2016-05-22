@@ -1,6 +1,7 @@
 'use strict';
 
-import { reviverOrAsIs } from './U';
+import { reviverOrAsIs, pipe, partial } from './U';
+import { checkNull } from './checks';
 import AbstractMap from './AbstractMap';
 
 const stringifyReducer = (acc, pair) => {
@@ -9,19 +10,26 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper = (innerTypes, object) => enumerator => [
-  reviverOrAsIs(innerTypes.keyMetadata)('', enumerator),
-  reviverOrAsIs(innerTypes.valueMetadata)('', object[enumerator])
-];
+const parseMapper = (keyMetadata, valueMetadata, object) => (enumerator, index) => {
+  const keyCheckNull = checkNull('EnumMap', keyMetadata, `keys[${index}]`);
+  const reviveKey = partial(reviverOrAsIs(keyMetadata), '');
+  const key = pipe(keyCheckNull, reviveKey)(enumerator);
 
-const reviverFactory = innerTypes => (k, v) => {
+  const valCheckNull = checkNull('EnumMap', valueMetadata, `values[${index}]`);
+  const reviveVal = partial(reviverOrAsIs(valueMetadata), '');
+  const val = pipe(valCheckNull, reviveVal)(object[enumerator]);
+
+  return [key, val];
+};
+
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v;
   }
 
-  const innerMap = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(innerTypes, v)));
+  const innerMap = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(keyMetadata, valueMetadata, v)));
 
-  return new ModelicoEnumMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+  return new ModelicoEnumMap(keyMetadata, valueMetadata, innerMap);
 };
 
 class ModelicoEnumMap extends AbstractMap {
@@ -38,11 +46,15 @@ class ModelicoEnumMap extends AbstractMap {
   toJSON() {
     const innerMap = this.fields().innerMap;
 
-    return (innerMap === null) ? null : Array.from(innerMap).reduce(stringifyReducer, {});
+    return (innerMap === null) ? null : [...innerMap].reduce(stringifyReducer, {});
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoEnumMap, reviverFactory, keyMetadata, valueMetadata);
+    return ModelicoEnumMap.metadataWithOptions({}, keyMetadata, valueMetadata);
+  }
+
+  static metadataWithOptions(options, keyMetadata, valueMetadata) {
+    return AbstractMap.metadataWithOptions(options, ModelicoEnumMap, reviverFactory, keyMetadata, valueMetadata);
   }
 }
 

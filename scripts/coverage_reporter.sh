@@ -2,6 +2,6 @@
 
 set -e
 
-if [[ "$TRAVIS_NODE_VERSION" = "stable" && "$SAUCE_ACCESS_KEY" ]]; then
+if [[ "$TRAVIS_NODE_VERSION" = "6" && "$SAUCE_ACCESS_KEY" ]]; then
   gulp codecov
 fi

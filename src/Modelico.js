@@ -1,6 +1,7 @@
 'use strict';
 
-import { always, defaultTo, reviverOrAsIs } from './U';
+import { always, defaultTo, reviverOrAsIs, pipe, partial } from './U';
+import { checkRequired, checkStrict, checkNull } from './checks';
 
 const reviverFactory = Type => {
   const innerTypes = Type.innerTypes && Type.innerTypes() || {};
@@ -10,12 +11,21 @@ const reviverFactory = Type => {
       return v;
     }
 
-    const fields = Object.keys(v).reduce((acc, field) => {
-      const innerTypeMetadata = innerTypes[field];
+    Object.keys(innerTypes)
+      .forEach(field => checkRequired(Type.name, innerTypes[field], field)(v[field]));
 
-      acc[field] = innerTypeMetadata ?
-        reviverOrAsIs(innerTypeMetadata)('', v[field]) :
+    const fields = Object.keys(v).reduce((acc, field) => {
+      const metadata = innerTypes[field];
+
+      if (metadata) {
+        acc[field] = pipe(
+          checkStrict(Type.name, metadata, field),
+          checkNull(Type.name, metadata, field),
+          partial(reviverOrAsIs(metadata), k)
+        )(v[field]);
+      } else {
         acc[field] = v[field];
+      }
 
       return acc;
     }, {});
@@ -26,7 +36,7 @@ const reviverFactory = Type => {
 
 class Modelico {
   constructor(Type, fields, thisArg) {
-    thisArg = defaultTo(this, thisArg);
+    thisArg = defaultTo(this)(thisArg);
     thisArg.type = always(Type);
     thisArg.fields = always(Object.freeze(fields));
 
@@ -71,7 +81,11 @@ class Modelico {
   }
 
   static metadata(Type) {
-    return Object.freeze({type: Type, reviver: reviverFactory(Type)});
+    return Modelico.metadataWithOptions({}, Type);
+  }
+
+  static metadataWithOptions(options, Type) {
+    return Object.freeze({type: Type, reviver: reviverFactory(Type), options: options});
   }
 }
 

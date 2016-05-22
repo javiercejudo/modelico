@@ -1,25 +1,33 @@
 'use strict';
 
-import { objToArr, reviverOrAsIs } from './U';
+import { objToArr, reviverOrAsIs, pipe, partial } from './U';
+import { checkNull } from './checks';
 import AbstractMap from './AbstractMap';
 import AsIs from './AsIs';
 import Any from './Any';
 
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
-const parseMapper = innerTypes => pairObject => [
-  reviverOrAsIs(innerTypes.keyMetadata)('', pairObject.key),
-  reviverOrAsIs(innerTypes.valueMetadata)('', pairObject.value)
-];
+const parseMapper = (keyMetadata, valueMetadata) => (pairObject, index) => {
+  const keyCheckNull = checkNull('Map', keyMetadata, `keys[${index}]`);
+  const reviveKey = partial(reviverOrAsIs(keyMetadata), '');
+  const key = pipe(keyCheckNull, reviveKey)(pairObject.key);
 
-const reviverFactory = innerTypes => (k, v) => {
+  const valCheckNull = checkNull('Map', valueMetadata, `values[${index}]`);
+  const reviveVal = partial(reviverOrAsIs(valueMetadata), '');
+  const val = pipe(valCheckNull, reviveVal)(pairObject.value);
+
+  return [key, val];
+};
+
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v;
   }
 
-  const innerMap = (v === null) ? null : new Map(v.map(parseMapper(innerTypes)));
+  const innerMap = (v === null) ? null : new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
 
-  return new ModelicoMap(innerTypes.keyMetadata, innerTypes.valueMetadata, innerMap);
+  return new ModelicoMap(keyMetadata, valueMetadata, innerMap);
 };
 
 class ModelicoMap extends AbstractMap {
@@ -36,7 +44,7 @@ class ModelicoMap extends AbstractMap {
   toJSON() {
     const innerMap = this.fields().innerMap;
 
-    return (innerMap === null) ? null : Array.from(innerMap).map(stringifyMapper);
+    return (innerMap === null) ? null : [...innerMap].map(stringifyMapper);
   }
 
   static fromObject(obj) {
@@ -48,7 +56,11 @@ class ModelicoMap extends AbstractMap {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoMap, reviverFactory, keyMetadata, valueMetadata);
+    return ModelicoMap.metadataWithOptions({}, keyMetadata, valueMetadata);
+  }
+
+  static metadataWithOptions(options, keyMetadata, valueMetadata) {
+    return AbstractMap.metadataWithOptions(options, ModelicoMap, reviverFactory, keyMetadata, valueMetadata);
   }
 }
 

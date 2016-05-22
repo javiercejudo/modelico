@@ -1,19 +1,19 @@
 'use strict';
 
 import { version, author, homepage, license } from '../package.json';
+import { partial } from './U';
 
 import Modelico from './Modelico';
 import ModelicoMap from './Map';
 import EnumMap from './EnumMap';
 import ModelicoDate from './Date';
-import AsIs from './AsIs';
+import AsIs, { AsIsWithOptions } from './AsIs';
 import List from './List';
 import ModelicoSet from './Set';
 import Enum from './Enum';
 import Any from './Any';
 import proxyFactory from './proxyFactory';
 
-const bind3 = (fn, _1, _2, _3) => fn.bind(undefined, _1, _2, _3);
 const internalNonMutators = ['set', 'setPath'];
 
 const mapNonMutatorMethods = internalNonMutators;
@@ -71,6 +71,7 @@ export default Object.freeze({
   about: Object.freeze({ version, author, homepage, license }),
   Any,
   AsIs,
+  AsIsWithOptions,
   Date: ModelicoDate,
   Enum,
   EnumMap,
@@ -78,8 +79,8 @@ export default Object.freeze({
   Map: ModelicoMap,
   Modelico,
   Set: ModelicoSet,
-  proxyMap: bind3(proxyFactory, mapNonMutatorMethods, mapMutatorMethods, 'innerMap'),
-  proxyList: bind3(proxyFactory, listNonMutatorMethods, listMutatorMethods, 'innerList'),
-  proxySet: bind3(proxyFactory, setNonMutatorMethods, setMutatorMethods, 'innerSet'),
-  proxyDate: bind3(proxyFactory, dateNonMutatorMethods, dateMutatorMethods, 'date')
+  proxyMap: partial(proxyFactory, mapNonMutatorMethods, mapMutatorMethods, 'innerMap'),
+  proxyList: partial(proxyFactory, listNonMutatorMethods, listMutatorMethods, 'innerList'),
+  proxySet: partial(proxyFactory, setNonMutatorMethods, setMutatorMethods, 'innerSet'),
+  proxyDate: partial(proxyFactory, dateNonMutatorMethods, dateMutatorMethods, 'date')
 });

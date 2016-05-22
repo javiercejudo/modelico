@@ -16,12 +16,9 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        'code': M.AsIs(String)
+        name: M.AsIsWithOptions({required: true}, String),
+        code: M.AsIsWithOptions({required: true, strict: true}, String)
       });
-    }
-
-    static metadata() {
-      return Modelico.metadata(Region);
     }
   }
 

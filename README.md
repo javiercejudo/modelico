@@ -22,10 +22,8 @@ See [browser tests](test/browser) for more details.*
 To use it in the browser, grab the [minified](dist/modelico.min.js) or the
 [development](dist/modelico.js) files.
 
-A modern (smaller) build is also available for browsers with broad ES2015 browsers.
 Run the current tests directly on your target browsers to see what setup is right for you:
 
-- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/es2015.html) with modern ES2015 setup
 - [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html) with standard ES5 setup
 - [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/ie9_10.html) with legacy ES3 setup
 
@@ -112,8 +110,6 @@ that.
 ```js
 const M = require('modelico');
 const Modelico = M.Modelico;
-const AsIs = M.AsIs;
-const List = M.List;
 
 class Person extends Modelico {
   constructor(fields) {
@@ -127,26 +123,49 @@ class Person extends Modelico {
 
   static innerTypes() {
     return Object.freeze({
-      'givenName': AsIs(String),  // can be omitted since it is a string
-      'familyName': AsIs(String), // can be omitted since it is a string
-      'pets': List.metadata(Animal.metadata())
+      givenName: M.AsIs(String),  // can be omitted since it is a string
+      familyName: M.AsIs(String), // can be omitted since it is a string
+      pets: M.List.metadata(Modelico.metadata(Animal))
     });
   }
 }
 ```
 
-Finally `Animal` needs to be updated to add a `metadata` static
-method to help its parsing when used within other classes:
+## Metadata options
+
+To enforce checks regarding existence, type, etc., all Modélico types provide
+a way to create metadata with options. For each a `metadata` method, there is
+a `metadataWithOptions` method that takes an options parameter:
 
 ```js
-class Animal extends Modelico {
-  // ... constructor and speak methods shown above
-
-  static metadata() {
-    return Modelico.metadata(Animal);
-  }
+static innerTypes() {
+  return Object.freeze({
+    givenName: M.AsIsWithOptions({required: true, strict: true}, String),
+    familyName: M.AsIsWithOptions({required: true, nullable: true}, String),
+    pets: M.List.metadata(Modelico.metadataWithOptions({required: true}, Animal))
+  });
 }
 ```
+
+#### required
+
+type: *boolean*, default: *false*
+
+Verify a value exists (accepts `null`).
+
+#### strict
+
+type: *boolean*, default: *false*
+
+Check value type against declared type (it does not accept `null`,
+but can be missing if not explicitely `required`).
+
+#### nullable
+
+type: *boolean*, default: *true*
+
+Check `null` values (if `strict` option is true, a `null` value will
+still be rejected).
 
 ## A note on immutability
 
@@ -235,8 +254,6 @@ Animal.prototype.speak = function() {
   var name = this.fields().name;
   return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
 };
-
-Animal.metadata = Modelico.metadata.bind(undefined, Animal);
 ```
 
 ## Acknowledgments :bow:

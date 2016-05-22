@@ -1,6 +1,7 @@
 'use strict';
 
-import { always, iterableMetadata } from './U';
+import { always } from './U';
+import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
 import Any from './Any';
@@ -46,7 +47,11 @@ class ModelicoList extends Modelico {
   }
 
   static metadata(itemMetadata) {
-    return iterableMetadata(ModelicoList, itemMetadata);
+    return ModelicoList.metadataWithOptions({}, itemMetadata);
+  }
+
+  static metadataWithOptions(options, itemMetadata) {
+    return iterableMetadata(options, ModelicoList, itemMetadata);
   }
 }
 
