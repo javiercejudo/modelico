@@ -9,6 +9,13 @@ export default M => {
 
       return Object.freeze(this);
     }
+
+    static innerTypes() {
+      return Object.freeze({
+        id: M.AsIs(Number),
+        value: M.AsIs(String)
+      });
+    }
   }
 
   class Region extends Modelico {
@@ -24,12 +31,9 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        'code': Modelico.metadata(Code)
+        name: M.AsIs(String),
+        code: Modelico.metadata(Code)
       });
-    }
-
-    static metadata() {
-      return Modelico.metadata(Region);
     }
   }
 

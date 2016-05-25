@@ -25,7 +25,7 @@ export default (U, should, M) => () => {
 
     var list2 = list1.push(3, 4, 5);
     var list3 = list2.unshift(0);
-    var list4 = list1.concat(Array.from(list2), Array.from(list3));
+    var list4 = list1.concat([...list2], [...list3]);
 
     (list1.length === 2).should.be.exactly(true);
     (list2.length === 5).should.be.exactly(true);
@@ -49,7 +49,7 @@ export default (U, should, M) => () => {
     var obj = {d: 100, o: 200, g: 300};
 
     var map3 = M.Map.fromMap(
-      new Map([].concat(Array.from(map1.entries()), Array.from(map2.entries()), objToArr(obj)))
+      new Map([].concat([...map1.entries()], [...map2.entries()], objToArr(obj)))
     );
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))

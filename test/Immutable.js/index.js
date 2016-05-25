@@ -41,7 +41,7 @@ export default (U, should, M) => () => {
 
   it('JavaScript-first API (2)', () => {
     var alpha = M.Map.fromObject({a: 1, b: 2, c: 3, d: 4});
-    Array.from(alpha.innerMap()).map(kv =>  kv[0].toUpperCase()).join()
+    [...alpha.innerMap()].map(kv =>  kv[0].toUpperCase()).join()
       .should.be.exactly('A,B,C,D');
   });
 
@@ -52,7 +52,7 @@ export default (U, should, M) => () => {
     var obj = {d: 100, o: 200, g: 300};
 
     var map3 = M.Map.fromMap(
-      new Map([].concat(Array.from(map1.innerMap()), Array.from(map2.innerMap()), objToArr(obj)))
+      new Map([].concat([...map1.innerMap()], [...map2.innerMap()], objToArr(obj)))
     );
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))

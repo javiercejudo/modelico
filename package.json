@@ -5,20 +5,14 @@
   "main": "dist/modelico.js",
   "scripts": {
     "test": "npm run build && gulp test",
-    "test-dev": "npm run build-dev-es5 && npm run build-browser-spec-es5 && gulp test",
+    "test-dev": "npm run build-dev && npm run build-browser-spec && gulp test",
     "test-browsers": "./scripts/browser_tester.sh",
     "send-coverage": "./scripts/coverage_reporter.sh",
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "npm run build-dev && npm run build-min && npm run build-browser-spec",
-    "build-dev": "npm run build-dev-es5 && npm run build-dev-es2015",
-    "build-dev-es5": "rollup -c",
-    "build-dev-es2015": "rollup -c rollup.es2015.config.js",
-    "build-min": "npm run build-min-es5 && npm run build-min-es2015",
-    "build-min-es5": "uglifyjs dist/modelico.js -c -m > dist/modelico.min.js",
-    "build-min-es2015": "uglifyjs dist/modelico.es2015.js -c -m > dist/modelico.es2015.min.js",
-    "build-browser-spec": "npm run build-browser-spec-es5 && npm run build-browser-spec-es2015",
-    "build-browser-spec-es5": "rollup -c ./test/rollup.config.js",
-    "build-browser-spec-es2015": "rollup ./test/modelicoSpec.js -f umd -n modelicoSpec -o dist/modelico-spec.es2015.js",
+    "build-dev": "rollup -c",
+    "build-min": "uglifyjs dist/modelico.js -c -m > dist/modelico.min.js",
+    "build-browser-spec": "rollup -c ./test/rollup.config.js",
     "version": "npm run build && git add -A dist"
   },
   "repository": {
@@ -62,6 +56,6 @@
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-json": "^2.0.0",
     "should": "^8.3.0",
-    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#8571a08a930474b68cb0e2daf3c7e666dcdcb15e"
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#f63803e3e3753253721a4d7abbbe2ff46f11eecc"
   }
 }

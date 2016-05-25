@@ -33,20 +33,20 @@ export default (should, M) => () => {
   it('entries()', () => {
     const set = p(M.Set.fromArray([1, 2, 2, 3]));
 
-    Array.from(set.entries())
+    [...set.entries()]
       .should.eql([[1, 1], [2, 2], [3, 3]]);
   });
 
   it('values() / keys() / [@@iterator]()', () => {
     const set = p(M.Set.fromArray([1, 2, 2, 3]));
 
-    Array.from(set.values())
+    [...set.values()]
       .should.eql([1, 2, 3]);
 
-    Array.from(set.keys())
+    [...set.keys()]
       .should.eql([1, 2, 3]);
 
-    Array.from(set[Symbol.iterator]())
+    [...set[Symbol.iterator]()]
       .should.eql([1, 2, 3]);
   });
 
