@@ -389,8 +389,6 @@
           var author1 = Modelico.fromJSON(Person, authorJson);
           var author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
 
-          console.log(author2.lifeEvents().innerMap().get('wedding'));
-
           should(author2.lifeEvents().innerMap().get('wedding').date().getFullYear()).be.exactly(2013);
 
           // verify that author1 was not mutated
