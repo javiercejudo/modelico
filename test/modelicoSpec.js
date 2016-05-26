@@ -27,7 +27,7 @@ const hasProxies = (() => {
   return false;
 })();
 
-const buildUtils = (options) => Object.freeze({
+const buildUtils = options => Object.freeze({
   skipIfNoProxies: hasProxies ? it : it.skip,
   skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
   skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
@@ -47,6 +47,7 @@ import featuresSimple from './features/simple';
 import featuresAdvanced from './features/advanced';
 import featuresAdvancedES5 from './features/advanced.es5';
 import featuresDeepNesting from './features/deepNesting';
+import featuresSchema from './features/schema';
 import Immutable from './Immutable.js/index';
 import ImmutableProxied from './Immutable.js/proxied';
 
@@ -75,6 +76,7 @@ export default (options, should, M) => () => {
   describe('Readme advanced features', featuresAdvanced(...deps));
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps));
   describe('Deep nesting features', featuresDeepNesting(...deps));
+  describe('Schema', featuresSchema(...[options].concat(deps)));
   describe('Immutable.js examples', Immutable(...utilsAndDeps));
 
   U.skipDescribeIfNoProxies(

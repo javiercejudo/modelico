@@ -5,16 +5,18 @@ import AbstractMap from './AbstractMap';
 import AsIs from './AsIs';
 import Any from './Any';
 
+// Not using this because it generates a verbose babel helper
+// const stringifyMapper = ([key, value]) => ({key, value});
 const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
 
-const parseMapper = (keyMetadata, valueMetadata) => pairObject => {
+const parseMapper = (keyMetadata, valueMetadata) => ({key, value}) => {
   const reviveKey = reviverOrAsIs(keyMetadata);
-  const key = reviveKey('', pairObject.key);
+  const revivedKey = reviveKey('', key);
 
-  const reviveVal = reviverOrAsIs(valueMetadata);
-  const val = reviveVal('', pairObject.value);
+  const reviveValue = reviverOrAsIs(valueMetadata);
+  const revivedValue = reviveValue('', value);
 
-  return [key, val];
+  return [revivedKey, revivedValue];
 };
 
 const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {

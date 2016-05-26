@@ -1,11 +1,14 @@
 'use strict';
 
 var Should = require('should');
+var jsonSchema = require('jsonschema');
 
 var modelicoSpec = require('../dist/modelico-spec.js');
 
 var Modelico = require('../dist/modelico.js');
 var ModelicoMin = require('../dist/modelico.min.js');
 
-describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
-describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
+var options = {jsonSchema};
+
+describe('Modelico Dev (standard setup)', modelicoSpec(options, Should, Modelico));
+describe('Modelico Min (standard setup)', modelicoSpec(options, Should, ModelicoMin));
