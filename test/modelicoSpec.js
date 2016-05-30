@@ -55,6 +55,8 @@ import proxyList from './proxies/proxyList';
 import proxySet from './proxies/proxySet';
 import proxyDate from './proxies/proxyDate';
 
+import cases from './cases/index';
+
 export default (options, should, M) => _ => {
   const U = buildUtils(options);
   const deps = [should, M];
@@ -86,4 +88,6 @@ export default (options, should, M) => _ => {
     describe('Set', proxySet.apply(_, deps));
     describe('Date', proxyDate.apply(_, deps));
   });
+
+  describe('Cases', cases.apply(_, deps));
 };

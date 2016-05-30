@@ -1,5 +1,6 @@
 'use strict';
 
+import isPlainObject from 'lodash-es/isPlainObject';
 import { always, defaultTo, reviverOrAsIs } from './U';
 
 const reviverFactory = Type => {
@@ -10,7 +11,7 @@ const reviverFactory = Type => {
       return v;
     }
 
-    const fields = Object.keys(v).reduce((acc, field) => {
+    const fields = !isPlainObject(v) ? v : Object.keys(v).reduce((acc, field) => {
       const metadata = innerTypes[field];
 
       if (metadata) {
