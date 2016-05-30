@@ -5,6 +5,11 @@
 }(this, function () { 'use strict';
 
 	var babelHelpers = {};
+	babelHelpers.typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	  return typeof obj;
+	} : function (obj) {
+	  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	};
 
 	babelHelpers.classCallCheck = function (instance, Constructor) {
 	  if (!(instance instanceof Constructor)) {
@@ -81,7 +86,7 @@
 
 	babelHelpers;
 
-	var version = "14.0.0";
+	var version = "14.0.1";
 	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 	var license = "MIT";
 	var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -124,6 +129,130 @@
 	};
 	var reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver));
 
+	/* Built-in method references for those with the same name as other `lodash` methods. */
+	var nativeGetPrototype = Object.getPrototypeOf;
+
+	/**
+	 * Gets the `[[Prototype]]` of `value`.
+	 *
+	 * @private
+	 * @param {*} value The value to query.
+	 * @returns {null|Object} Returns the `[[Prototype]]`.
+	 */
+	function getPrototype(value) {
+	  return nativeGetPrototype(Object(value));
+	}
+
+	/**
+	 * Checks if `value` is a host object in IE < 9.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
+	 */
+	function isHostObject(value) {
+	  // Many host objects are `Object` objects that can coerce to strings
+	  // despite having improperly defined `toString` methods.
+	  var result = false;
+	  if (value != null && typeof value.toString != 'function') {
+	    try {
+	      result = !!(value + '');
+	    } catch (e) {}
+	  }
+	  return result;
+	}
+
+	/**
+	 * Checks if `value` is object-like. A value is object-like if it's not `null`
+	 * and has a `typeof` result of "object".
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 4.0.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	 * @example
+	 *
+	 * _.isObjectLike({});
+	 * // => true
+	 *
+	 * _.isObjectLike([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObjectLike(_.noop);
+	 * // => false
+	 *
+	 * _.isObjectLike(null);
+	 * // => false
+	 */
+	function isObjectLike(value) {
+	  return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) == 'object';
+	}
+
+	/** `Object#toString` result references. */
+	var objectTag = '[object Object]';
+
+	/** Used for built-in method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to resolve the decompiled source of functions. */
+	var funcToString = Function.prototype.toString;
+
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/** Used to infer the `Object` constructor. */
+	var objectCtorString = funcToString.call(Object);
+
+	/**
+	 * Used to resolve the
+	 * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objectToString = objectProto.toString;
+
+	/**
+	 * Checks if `value` is a plain object, that is, an object created by the
+	 * `Object` constructor or one with a `[[Prototype]]` of `null`.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 0.8.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a plain object,
+	 *  else `false`.
+	 * @example
+	 *
+	 * function Foo() {
+	 *   this.a = 1;
+	 * }
+	 *
+	 * _.isPlainObject(new Foo);
+	 * // => false
+	 *
+	 * _.isPlainObject([1, 2, 3]);
+	 * // => false
+	 *
+	 * _.isPlainObject({ 'x': 0, 'y': 0 });
+	 * // => true
+	 *
+	 * _.isPlainObject(Object.create(null));
+	 * // => true
+	 */
+	function isPlainObject(value) {
+	  if (!isObjectLike(value) || objectToString.call(value) != objectTag || isHostObject(value)) {
+	    return false;
+	  }
+	  var proto = getPrototype(value);
+	  if (proto === null) {
+	    return true;
+	  }
+	  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+	  return typeof Ctor == 'function' && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
+	}
+
 	var reviverFactory = function reviverFactory(Type) {
 	  var innerTypes = Type.innerTypes && Type.innerTypes() || {};
 
@@ -132,7 +261,7 @@
 	      return v;
 	    }
 
-	    var fields = Object.keys(v).reduce(function (acc, field) {
+	    var fields = !isPlainObject(v) ? v : Object.keys(v).reduce(function (acc, field) {
 	      var metadata = innerTypes[field];
 
 	      if (metadata) {
@@ -148,7 +277,7 @@
 	  };
 	};
 
-	var Modelico$1 = function () {
+	var Modelico = function () {
 	  function Modelico(Type, fields, thisArg) {
 	    babelHelpers.classCallCheck(this, Modelico);
 
@@ -212,7 +341,7 @@
 	  return Modelico;
 	}();
 
-	var Modelico$2 = Object.freeze(Modelico$1);
+	var Modelico$1 = Object.freeze(Modelico);
 
 	var AbstractMap = function (_Modelico) {
 	  babelHelpers.inherits(AbstractMap, _Modelico);
@@ -271,7 +400,7 @@
 	    }
 	  }]);
 	  return AbstractMap;
-	}(Modelico$2);
+	}(Modelico$1);
 
 	var AbstractMap$1 = Object.freeze(AbstractMap);
 
@@ -467,7 +596,7 @@
 	    }
 	  }]);
 	  return ModelicoDate;
-	}(Modelico$2);
+	}(Modelico$1);
 
 	var ModelicoDate$1 = Object.freeze(ModelicoDate);
 
@@ -552,7 +681,7 @@
 	    }
 	  }]);
 	  return ModelicoList;
-	}(Modelico$2);
+	}(Modelico$1);
 
 	var List = Object.freeze(ModelicoList);
 
@@ -624,7 +753,7 @@
 	    }
 	  }]);
 	  return ModelicoSet;
-	}(Modelico$2);
+	}(Modelico$1);
 
 	var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
@@ -663,7 +792,7 @@
 	  }
 
 	  return ModelicoEnum;
-	}(Modelico$2);
+	}(Modelico$1);
 
 	var Enum = Object.freeze(ModelicoEnum);
 
@@ -755,7 +884,7 @@
 	var dateNonMutatorMethods = internalNonMutators;
 	var dateMutatorMethods = ["setDate", "setFullYear", "setHours", "setMinutes", "setMilliseconds", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 
-	var Modelico = Object.freeze({
+	var index = Object.freeze({
 	  about: Object.freeze({ version: version, author: author, homepage: homepage, license: license }),
 	  Any: Any,
 	  AsIs: AsIs,
@@ -764,7 +893,7 @@
 	  EnumMap: EnumMap,
 	  List: List,
 	  Map: ModelicoMap$1,
-	  Modelico: Modelico$2,
+	  Modelico: Modelico$1,
 	  Set: ModelicoSet$1,
 	  proxyMap: partial(proxyFactory$1, mapNonMutatorMethods, mapMutatorMethods, 'innerMap'),
 	  proxyList: partial(proxyFactory$1, listNonMutatorMethods, listMutatorMethods, 'innerList'),
@@ -772,6 +901,6 @@
 	  proxyDate: partial(proxyFactory$1, dateNonMutatorMethods, dateMutatorMethods, 'date')
 	});
 
-	return Modelico;
+	return index;
 
 }));

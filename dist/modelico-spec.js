@@ -1860,6 +1860,39 @@
     };
   })
 
+  var c51 = (function (should, M) {
+    return function () {
+      var Modelico = M.Modelico;
+
+      var Country = function (_Modelico) {
+        babelHelpers.inherits(Country, _Modelico);
+
+        function Country(code) {
+          babelHelpers.classCallCheck(this, Country);
+          return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Country).call(this, Country, { code: code }));
+        }
+
+        babelHelpers.createClass(Country, null, [{
+          key: 'metadata',
+          value: function metadata() {
+            return Modelico.metadata(Country);
+          }
+        }]);
+        return Country;
+      }(Modelico);
+
+      it('should leave root elements that are not plain objects untouched', function () {
+        Modelico.fromJSON(Country, '"ESP"').code().should.be.exactly('ESP');
+      });
+    };
+  })
+
+  var cases = (function (should, M) {
+    return function () {
+      describe('51: root elements', c51(should, M));
+    };
+  })
+
   var hasObjectFreeze = function () {
     var a = {};
 
@@ -1929,6 +1962,8 @@
         describe('Set', proxySet.apply(_, deps));
         describe('Date', proxyDate.apply(_, deps));
       });
+
+      describe('Cases', cases.apply(_, deps));
     };
   })
 
