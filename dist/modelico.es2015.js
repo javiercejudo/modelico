@@ -1,4 +1,4 @@
-var version = "14.0.1";
+var version = "14.1.0";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -485,56 +485,17 @@ var proxyFactory$1 = proxyFactory;
 
 const internalNonMutators = ['set', 'setPath'];
 
-const mapNonMutatorMethods = internalNonMutators;
-const mapMutatorMethods = [
-  "set",
-  "delete",
-  "clear"
-];
+const mapNonMutators = internalNonMutators;
+const mapMutators = ['set', 'delete', 'clear'];
 
-const setNonMutatorMethods = internalNonMutators;
-const setMutatorMethods = [
-  "add",
-  "delete",
-  "clear"
-];
+const setNonMutators = internalNonMutators;
+const setMutators = ['add', 'delete', 'clear'];
 
-const listNonMutatorMethods = internalNonMutators.concat([
-  "concat",
-  "slice",
-  "filter"
-]);
-const listMutatorMethods = [
-  "copyWithin",
-  "fill",
-  "pop",
-  "push",
-  "reverse",
-  "shift",
-  "sort",
-  "splice",
-  "unshift"
-];
+const listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter']);
+const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'];
 
-const dateNonMutatorMethods = internalNonMutators;
-const dateMutatorMethods = [
-  "setDate",
-  "setFullYear",
-  "setHours",
-  "setMinutes",
-  "setMilliseconds",
-  "setMonth",
-  "setSeconds",
-  "setTime",
-  "setUTCDate",
-  "setUTCFullYear",
-  "setUTCHours",
-  "setUTCMilliseconds",
-  "setUTCMinutes",
-  "setUTCMonth",
-  "setUTCSeconds",
-  "setYear"
-];
+const dateNonMutators = internalNonMutators;
+const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
 var index = Object.freeze({
   about: Object.freeze({ version, author, homepage, license }),
@@ -547,10 +508,10 @@ var index = Object.freeze({
   Map: ModelicoMap$1,
   Modelico: Modelico$1,
   Set: ModelicoSet$1,
-  proxyMap: partial(proxyFactory$1, mapNonMutatorMethods, mapMutatorMethods, 'innerMap'),
-  proxyList: partial(proxyFactory$1, listNonMutatorMethods, listMutatorMethods, 'innerList'),
-  proxySet: partial(proxyFactory$1, setNonMutatorMethods, setMutatorMethods, 'innerSet'),
-  proxyDate: partial(proxyFactory$1, dateNonMutatorMethods, dateMutatorMethods, 'date')
+  proxyMap: partial(proxyFactory$1, mapNonMutators, mapMutators, 'innerMap'),
+  proxyList: partial(proxyFactory$1, listNonMutators, listMutators, 'innerList'),
+  proxySet: partial(proxyFactory$1, setNonMutators, setMutators, 'innerSet'),
+  proxyDate: partial(proxyFactory$1, dateNonMutators, dateMutators, 'date')
 });
 
 export default index;
