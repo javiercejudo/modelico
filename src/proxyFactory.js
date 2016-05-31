@@ -1,10 +1,12 @@
 'use strict';
 
+import { innerSymbol } from './symbols';
+
 // as `let` to prevent jshint from thinking we are using it before being declared,
 // which is not the case
 let proxyFactory;
 
-const proxyToSelf = (nonMutators, mutators, innerAccessor, target, prop) => {
+const proxyToSelf = (nonMutators, mutators, target, prop) => {
   if (!nonMutators.includes(prop)) {
     return target[prop];
   }
@@ -12,16 +14,16 @@ const proxyToSelf = (nonMutators, mutators, innerAccessor, target, prop) => {
   return (...args) => {
     const newObj = target[prop](...args);
 
-    return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
+    return proxyFactory(nonMutators, mutators, newObj);
   };
 };
 
-const proxyToInner = (inner, candidate, nonMutators, mutators, innerAccessor, target, prop) => {
+const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => {
   if (nonMutators.includes(prop)) {
     return (...args) => {
       const newObj = target.setPath([], candidate.apply(inner, args));
 
-      return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
+      return proxyFactory(nonMutators, mutators, newObj);
     };
   }
 
@@ -30,7 +32,7 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, innerAccessor, ta
       candidate.apply(inner, args);
       const newObj = target.setPath([], inner);
 
-      return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
+      return proxyFactory(nonMutators, mutators, newObj);
     };
   }
 
@@ -39,24 +41,23 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, innerAccessor, ta
   };
 };
 
-proxyFactory = (nonMutators, mutators, innerAccessor, obj) => {
+proxyFactory = (nonMutators, mutators, obj) => {
   const get = (target, prop) => {
     if (prop in target) {
-      return proxyToSelf(nonMutators, mutators, innerAccessor, target, prop);
+      return proxyToSelf(nonMutators, mutators, target, prop);
     }
 
-    const inner = target[innerAccessor]();
+    const inner = target[innerSymbol]();
     const candidate = inner[prop];
 
     if (typeof candidate === 'function') {
-      return proxyToInner(inner, candidate, nonMutators, mutators, innerAccessor, target, prop);
+      return proxyToInner(inner, candidate, nonMutators, mutators, target, prop);
     }
 
     return candidate;
   };
 
-  // not using shortcut get due to https://github.com/nodejs/node/issues/4237
-  return new Proxy(obj, {get: get});
+  return new Proxy(obj, {get});
 };
 
 export default proxyFactory;

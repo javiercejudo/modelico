@@ -1,6 +1,7 @@
 'use strict';
 
 import { reviverOrAsIs } from './U';
+import { fieldsSymbol } from './symbols';
 import AbstractMap from './AbstractMap';
 
 const stringifyReducer = (acc, pair) => {
@@ -9,7 +10,7 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper = (keyMetadata, valueMetadata, object) => (enumerator, index) => {
+const parseMapper = (keyMetadata, valueMetadata, object) => enumerator => {
   const reviveKey = reviverOrAsIs(keyMetadata);
   const key = reviveKey('', enumerator);
 
@@ -41,7 +42,7 @@ class ModelicoEnumMap extends AbstractMap {
   }
 
   toJSON() {
-    const innerMap = this.fields().innerMap;
+    const innerMap = this[fieldsSymbol]().innerMap;
 
     return (innerMap === null) ? null : [...innerMap].reduce(stringifyReducer, {});
   }

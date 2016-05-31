@@ -3,8 +3,8 @@
 import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
+  const { innerSymbol } = M.symbols;
   const Person = PersonFactory(M);
-
   const Modelico = M.Modelico;
 
   describe('setting', () => {
@@ -24,11 +24,11 @@ export default (should, M) => () => {
       const modelicoMap1 = new M.Map(M.AsIs(String), M.Date.metadata(), map);
       const modelicoMap2 = modelicoMap1.set('a', new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
-      should(modelicoMap2.innerMap().get('a').date().getFullYear())
+      should(modelicoMap2[innerSymbol]().get('a')[innerSymbol]().getFullYear())
         .be.exactly(1989);
 
       // verify that modelicoMap1 was not mutated
-      should(modelicoMap1.innerMap().get('a').date().getFullYear())
+      should(modelicoMap1[innerSymbol]().get('a')[innerSymbol]().getFullYear())
         .be.exactly(1988);
     });
 
@@ -37,11 +37,11 @@ export default (should, M) => () => {
       const author1 = Modelico.fromJSON(Person, authorJson);
       const author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
 
-      should(author2.lifeEvents().innerMap().get('wedding').date().getFullYear())
+      should(author2.lifeEvents()[innerSymbol]().get('wedding')[innerSymbol]().getFullYear())
         .be.exactly(2013);
 
       // verify that author1 was not mutated
-      should(author1.lifeEvents().innerMap().get('wedding').date().getFullYear())
+      should(author1.lifeEvents()[innerSymbol]().get('wedding')[innerSymbol]().getFullYear())
         .be.exactly(2012);
     });
 
@@ -51,7 +51,7 @@ export default (should, M) => () => {
 
       const map = author.lifeEvents();
 
-      should(map.innerMap().get('wedding').date().getFullYear())
+      should(map[innerSymbol]().get('wedding')[innerSymbol]().getFullYear())
         .be.exactly(2012);
 
       const customMap = new Map([
@@ -60,7 +60,7 @@ export default (should, M) => () => {
 
       const map2 = map.setPath([], customMap);
 
-      should(map2.innerMap().get('wedding').date().getFullYear())
+      should(map2[innerSymbol]().get('wedding')[innerSymbol]().getFullYear())
         .be.exactly(2013);
     });
   });
@@ -94,10 +94,10 @@ export default (should, M) => () => {
         M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver
       );
 
-      should(modelicoMap.innerMap().get('a').date().getFullYear())
+      should(modelicoMap[innerSymbol]().get('a')[innerSymbol]().getFullYear())
         .be.exactly(1988);
 
-      should(modelicoMap.innerMap().get('b').date())
+      should(modelicoMap[innerSymbol]().get('b')[innerSymbol]())
         .be.exactly(null);
     });
 
@@ -105,7 +105,7 @@ export default (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
       const author = Modelico.fromJSON(Person, authorJson);
 
-      should(author.lifeEvents().innerMap().get('wedding').date().getFullYear()).be.exactly(2013);
+      should(author.lifeEvents()[innerSymbol]().get('wedding')[innerSymbol]().getFullYear()).be.exactly(2013);
     });
 
     it('should support null maps', () => {
@@ -114,7 +114,7 @@ export default (should, M) => () => {
         M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver
       );
 
-      should(modelicoMap.innerMap())
+      should(modelicoMap[innerSymbol]())
         .be.exactly(null);
     });
   });
@@ -140,7 +140,7 @@ export default (should, M) => () => {
     it('should be able to create a set from an array', () => {
       var map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
 
-      should(map1.innerMap().get('b')).be.exactly(2);
+      should(map1[innerSymbol]().get('b')).be.exactly(2);
     });
   });
 
@@ -148,7 +148,7 @@ export default (should, M) => () => {
     it('should be able to create a set from a native set', () => {
       var map1 = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
 
-      should(map1.innerMap().get('b')).be.exactly(2);
+      should(map1[innerSymbol]().get('b')).be.exactly(2);
     });
   });
 };

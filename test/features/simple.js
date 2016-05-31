@@ -2,6 +2,7 @@
 
 export default (should, M) => () => {
   const Modelico = M.Modelico;
+  const { fieldsSymbol } = M.symbols;
 
   class Animal extends Modelico {
     constructor(fields) {
@@ -9,7 +10,7 @@ export default (should, M) => () => {
     }
 
     speak() {
-      const name = this.fields().name;
+      const name = this[fieldsSymbol]().name;
       return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
     }
   }

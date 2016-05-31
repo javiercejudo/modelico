@@ -1,6 +1,7 @@
 'use strict';
 
 import { always, defaultTo, reviverOrAsIs, isPlainObject } from './U';
+import { typeSymbol, fieldsSymbol } from './symbols';
 
 const reviverFactory = Type => {
   const innerTypes = Type.innerTypes && Type.innerTypes() || {};
@@ -29,8 +30,8 @@ const reviverFactory = Type => {
 class Modelico {
   constructor(Type, fields, thisArg) {
     thisArg = defaultTo(this)(thisArg);
-    thisArg.type = always(Type);
-    thisArg.fields = always(Object.freeze(fields));
+    thisArg[typeSymbol] = always(Type);
+    thisArg[fieldsSymbol] = always(Object.freeze(fields));
 
     Object.getOwnPropertyNames(fields)
       .forEach(field => thisArg[field] = always(fields[field]));
@@ -39,14 +40,14 @@ class Modelico {
   }
 
   set(field, value) {
-    const newFields = Object.assign({}, this.fields(), {[field]: value});
+    const newFields = Object.assign({}, this[fieldsSymbol](), {[field]: value});
 
-    return new (this.type())(newFields);
+    return new (this[typeSymbol]())(newFields);
   }
 
   setPath(path, value) {
     if (path.length === 0) {
-      return new (this.type())(value);
+      return new (this[typeSymbol]())(value);
     }
 
     if (path.length === 1) {
@@ -61,7 +62,7 @@ class Modelico {
   }
 
   toJSON() {
-    return this.fields();
+    return this[fieldsSymbol]();
   }
 
   static factory(Type, fields, thisArg) {

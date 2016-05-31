@@ -1,6 +1,7 @@
 'use strict';
 
 import { objToArr, reviverOrAsIs } from './U';
+import { fieldsSymbol } from './symbols';
 import AbstractMap from './AbstractMap';
 import AsIs from './AsIs';
 import Any from './Any';
@@ -39,7 +40,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   toJSON() {
-    const innerMap = this.fields().innerMap;
+    const innerMap = this[fieldsSymbol]().innerMap;
 
     return (innerMap === null) ? null : [...innerMap].map(stringifyMapper);
   }

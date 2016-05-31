@@ -2,6 +2,7 @@
 
 export default (should, M) => () => {
   const Modelico = M.Modelico;
+  const { fieldsSymbol, innerSymbol } = M.symbols;
 
   function Animal(fields) {
     Modelico.factory(Animal, fields, this);
@@ -10,7 +11,7 @@ export default (should, M) => () => {
   Animal.prototype = Object.create(Modelico.prototype);
 
   Animal.prototype.speak = function() {
-    var name = this.fields().name;
+    var name = this[fieldsSymbol]().name;
     return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
   };
 
@@ -21,7 +22,7 @@ export default (should, M) => () => {
   Person.prototype = Object.create(Modelico.prototype);
 
   Person.prototype.fullName = function() {
-    var fields = this.fields();
+    var fields = this[fieldsSymbol]();
     return [fields.givenName, fields.familyName].join(' ').trim();
   };
 
@@ -50,10 +51,10 @@ export default (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo');
     person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person1.pets().innerList().shift().speak()
+    person1.pets()[innerSymbol]().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
-    person1.pets().innerList().shift().speak()
+    person1.pets()[innerSymbol]().shift().speak()
       .should.be.exactly('My name is Robbie!');
   });
 };

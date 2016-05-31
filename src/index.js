@@ -12,6 +12,7 @@ import List from './List';
 import ModelicoSet from './Set';
 import Enum from './Enum';
 import Any from './Any';
+import * as symbols from './symbols';
 import proxyFactory from './proxyFactory';
 
 const internalNonMutators = ['set', 'setPath'];
@@ -39,8 +40,9 @@ export default Object.freeze({
   Map: ModelicoMap,
   Modelico,
   Set: ModelicoSet,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators, 'innerMap'),
-  proxyList: partial(proxyFactory, listNonMutators, listMutators, 'innerList'),
-  proxySet: partial(proxyFactory, setNonMutators, setMutators, 'innerSet'),
-  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, 'date')
+  symbols,
+  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
+  proxyList: partial(proxyFactory, listNonMutators, listMutators),
+  proxySet: partial(proxyFactory, setNonMutators, setMutators),
+  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)
 });

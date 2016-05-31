@@ -1,6 +1,7 @@
 'use strict';
 
 import { always } from './U';
+import { fieldsSymbol, innerSymbol, itemMetadataSymbol } from './symbols';
 import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
@@ -10,26 +11,26 @@ class ModelicoSet extends Modelico {
   constructor(itemMetadata, innerSet) {
     super(ModelicoSet, {innerSet});
 
-    this.itemMetadata = always(itemMetadata);
-    this.innerSet = () => (innerSet === null) ? null : new Set(innerSet);
+    this[itemMetadataSymbol] = always(itemMetadata);
+    this[innerSymbol] = () => (innerSet === null) ? null : new Set(innerSet);
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
     return Object.freeze(this);
   }
 
   set(index, value) {
-    const newSet = [...this.innerSet()];
+    const newSet = [...this[innerSymbol]()];
     newSet[index] = value;
 
-    return new ModelicoSet(this.itemMetadata(), newSet);
+    return new ModelicoSet(this[itemMetadataSymbol](), newSet);
   }
 
   setPath(path, value) {
     if (path.length === 0) {
-      return new ModelicoSet(this.itemMetadata(), value);
+      return new ModelicoSet(this[itemMetadataSymbol](), value);
     }
 
-    const item = [...this.innerSet()][path[0]];
+    const item = [...this[innerSymbol]()][path[0]];
 
     if (!item.setPath) {
       return this.set(path[0], value);
@@ -39,7 +40,7 @@ class ModelicoSet extends Modelico {
   }
 
   toJSON() {
-    const innerSet = this.fields().innerSet;
+    const innerSet = this[fieldsSymbol]().innerSet;
 
     return (innerSet === null) ? null : [...innerSet];
   }
