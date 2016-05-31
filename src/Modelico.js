@@ -1,7 +1,6 @@
 'use strict';
 
-import isPlainObject from 'lodash-es/isPlainObject';
-import { always, defaultTo, reviverOrAsIs } from './U';
+import { always, defaultTo, reviverOrAsIs, isPlainObject } from './U';
 
 const reviverFactory = Type => {
   const innerTypes = Type.innerTypes && Type.innerTypes() || {};

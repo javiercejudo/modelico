@@ -3,6 +3,7 @@
   "version": "14.0.1",
   "description": "Universal library for serialisable immutable models",
   "main": "dist/modelico.js",
+  "jsnext:main": "dist/modelico.es2015.js",
   "scripts": {
     "test": "npm run build && gulp test",
     "test-dev": "npm run build-dev && npm run build-browser-spec && gulp test",
@@ -10,7 +11,7 @@
     "send-coverage": "./scripts/coverage_reporter.sh",
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "npm run build-dev && npm run build-min && npm run build-browser-spec",
-    "build-dev": "rollup -c",
+    "build-dev": "rollup -c && rollup -c rollup.es2015.config.js",
     "build-min": "uglifyjs dist/modelico.js -c -m > dist/modelico.min.js",
     "build-browser-spec": "rollup -c ./test/rollup.config.js",
     "version": "npm run build && git add -A dist"
@@ -40,7 +41,6 @@
     "babel-preset-es2015-rollup": "^1.1.1",
     "gulp": "^3.9.0",
     "gulp-codecov": "^2.0.1",
-    "gulp-coverage": "^0.3.38",
     "gulp-istanbul": "^0.10.2",
     "gulp-mocha": "^2.1.3",
     "gulp-plumber": "^1.1.0",
@@ -57,9 +57,6 @@
     "rollup-plugin-json": "^2.0.0",
     "rollup-plugin-node-resolve": "^1.5.0",
     "should": "^8.3.0",
-    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#f63803e3e3753253721a4d7abbbe2ff46f11eecc"
-  },
-  "dependencies": {
-    "lodash-es": "^4.13.1"
+    "uglify-js": "^2.6.2"
   }
 }
