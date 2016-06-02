@@ -1,6 +1,7 @@
 'use strict';
 
 import { version, author, homepage, license } from '../package.json';
+import { fieldsSymbol } from './symbols';
 import { partial } from './U';
 
 import Modelico from './Modelico';
@@ -12,7 +13,6 @@ import List from './List';
 import ModelicoSet from './Set';
 import Enum from './Enum';
 import Any from './Any';
-import * as symbols from './symbols';
 import proxyFactory from './proxyFactory';
 
 const internalNonMutators = ['set', 'setPath'];
@@ -40,7 +40,7 @@ export default Object.freeze({
   Map: ModelicoMap,
   Modelico,
   Set: ModelicoSet,
-  symbols,
+  fields: x => x[fieldsSymbol](),
   proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
   proxyList: partial(proxyFactory, listNonMutators, listMutators),
   proxySet: partial(proxyFactory, setNonMutators, setMutators),

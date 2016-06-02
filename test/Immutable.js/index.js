@@ -1,14 +1,13 @@
 'use strict';
 
 export default (U, should, M) => () => {
-  const { innerSymbol } = M.symbols;
   const objToArr = U.objToArr;
 
   it('Getting started', () => {
     const map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
     const map2 = map1.set('b', 50);
-    should(map1[innerSymbol]().get('b')).be.exactly(2);
-    should(map2[innerSymbol]().get('b')).be.exactly(50);
+    should(map1.inner().get('b')).be.exactly(2);
+    should(map2.inner().get('b')).be.exactly(50);
   });
 
   it('The case for Immutability', () => {
@@ -22,27 +21,27 @@ export default (U, should, M) => () => {
   it('JavaScript-first API', () => {
     const list1 = M.List.fromArray([1, 2]);
 
-    const list2Array = list1[innerSymbol]();
+    const list2Array = list1.inner();
     list2Array.push(3, 4, 5);
     const list2 = M.List.fromArray(list2Array);
 
-    const list3Array = list2[innerSymbol]();
+    const list3Array = list2.inner();
     list3Array.unshift(0);
     const list3 = M.List.fromArray(list3Array);
 
-    const list4Array = list1[innerSymbol]();
-    const list4 = M.List.fromArray(list1[innerSymbol]().concat(list2[innerSymbol](), list3[innerSymbol]()));
+    const list4Array = list1.inner();
+    const list4 = M.List.fromArray(list1.inner().concat(list2.inner(), list3.inner()));
 
-    (list1[innerSymbol]().length === 2).should.be.exactly(true);
-    (list2[innerSymbol]().length === 5).should.be.exactly(true);
-    (list3[innerSymbol]().length === 6).should.be.exactly(true);
-    (list4[innerSymbol]().length === 13).should.be.exactly(true);
-    (list4[innerSymbol]()[0] === 1).should.be.exactly(true);
+    (list1.inner().length === 2).should.be.exactly(true);
+    (list2.inner().length === 5).should.be.exactly(true);
+    (list3.inner().length === 6).should.be.exactly(true);
+    (list4.inner().length === 13).should.be.exactly(true);
+    (list4.inner()[0] === 1).should.be.exactly(true);
   });
 
   it('JavaScript-first API (2)', () => {
     const alpha = M.Map.fromObject({a: 1, b: 2, c: 3, d: 4});
-    [...alpha[innerSymbol]()].map(kv =>  kv[0].toUpperCase()).join()
+    [...alpha.inner()].map(kv =>  kv[0].toUpperCase()).join()
       .should.be.exactly('A,B,C,D');
   });
 
@@ -53,7 +52,7 @@ export default (U, should, M) => () => {
     const obj = {d: 100, o: 200, g: 300};
 
     const map3 = M.Map.fromMap(
-      new Map([].concat([...map1[innerSymbol]()], [...map2[innerSymbol]()], objToArr(obj)))
+      new Map([].concat([...map1.inner()], [...map2.inner()], objToArr(obj)))
     );
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))
@@ -76,8 +75,8 @@ export default (U, should, M) => () => {
     obj[1].should.be.exactly('one');
 
     const map = M.Map.fromObject(obj);
-    map[innerSymbol]().get('1').should.be.exactly('one');
-    should(map[innerSymbol]().get(1)).be.exactly(undefined);
+    map.inner().get('1').should.be.exactly('one');
+    should(map.inner().get(1)).be.exactly(undefined);
   });
 
   it('Equality treats Collections as Data', () => {
@@ -90,11 +89,11 @@ export default (U, should, M) => () => {
 
   it('Batching Mutations', () => {
     const list1 = M.List.fromArray([1, 2, 3]);
-    const list2Array = list1[innerSymbol]();
+    const list2Array = list1.inner();
     list2Array.push(4, 5, 6);
     const list2 = M.List.fromArray(list2Array);
 
-    (list1[innerSymbol]().length === 3).should.be.exactly(true);
-    (list2[innerSymbol]().length === 6).should.be.exactly(true);
+    (list1.inner().length === 3).should.be.exactly(true);
+    (list2.inner().length === 6).should.be.exactly(true);
   });
 };

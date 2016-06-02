@@ -1,25 +1,25 @@
 'use strict';
 
 import { always } from './U';
-import { fieldsSymbol, innerSymbol, itemMetadataSymbol } from './symbols';
+import { itemMetadataSymbol } from './symbols';
 import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
 import Any from './Any';
 
 class ModelicoList extends Modelico {
-  constructor(itemMetadata, innerList) {
-    super(ModelicoList, {innerList});
+  constructor(itemMetadata, inner) {
+    super(ModelicoList, {});
 
     this[itemMetadataSymbol] = always(itemMetadata);
-    this[innerSymbol] = () => (innerList === null) ? null : innerList.slice();
-    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
+    this.inner = () => (inner === null) ? null : inner.slice();
+    this[Symbol.iterator] = () => inner[Symbol.iterator]();
 
     return Object.freeze(this);
   }
 
   set(index, value) {
-    const newList = this[innerSymbol]();
+    const newList = this.inner();
     newList[index] = value;
 
     return new ModelicoList(this[itemMetadataSymbol](), newList);
@@ -30,7 +30,7 @@ class ModelicoList extends Modelico {
       return new ModelicoList(this[itemMetadataSymbol](), value);
     }
 
-    const item = this[innerSymbol]()[path[0]];
+    const item = this.inner()[path[0]];
 
     if (!item.setPath) {
       return this.set(path[0], value);
@@ -40,7 +40,7 @@ class ModelicoList extends Modelico {
   }
 
   toJSON() {
-    return this[fieldsSymbol]().innerList;
+    return this.inner();
   }
 
   static fromArray(arr) {

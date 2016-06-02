@@ -1,7 +1,5 @@
 'use strict';
 
-import { innerSymbol } from './symbols';
-
 // as `let` to prevent jshint from thinking we are using it before being declared,
 // which is not the case
 let proxyFactory;
@@ -47,7 +45,7 @@ proxyFactory = (nonMutators, mutators, obj) => {
       return proxyToSelf(nonMutators, mutators, target, prop);
     }
 
-    const inner = target[innerSymbol]();
+    const inner = target.inner();
     const candidate = inner[prop];
 
     if (typeof candidate === 'function') {

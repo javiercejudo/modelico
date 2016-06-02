@@ -1,7 +1,6 @@
 'use strict';
 
 export default (U, should, M) => () => {
-  const { innerSymbol } = M.symbols;
   const _m = M.proxyMap;
   const _l = M.proxyList;
 
@@ -88,7 +87,7 @@ export default (U, should, M) => () => {
   it('Batching Mutations', () => {
     const list1 = _l(M.List.fromArray([1, 2, 3]));
 
-    const res = list1[innerSymbol]();
+    const res = list1.inner();
     res.push(4);
     res.push(5);
     res.push(6);

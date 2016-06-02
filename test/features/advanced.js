@@ -2,7 +2,6 @@
 
 export default (should, M) => () => {
   const Modelico = M.Modelico;
-  const { fieldsSymbol, innerSymbol } = M.symbols;
 
   class Animal extends Modelico {
     constructor(fields) {
@@ -10,7 +9,7 @@ export default (should, M) => () => {
     }
 
     speak() {
-      const name = this[fieldsSymbol]().name;
+      const name = M.fields(this).name;
       return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
     }
   }
@@ -21,7 +20,7 @@ export default (should, M) => () => {
     }
 
     fullName() {
-      const fields = this[fieldsSymbol]();
+      const fields = M.fields(this);
       return [fields.givenName, fields.familyName].join(' ').trim();
     }
 
@@ -51,18 +50,18 @@ export default (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo');
     person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person1.pets()[innerSymbol]().shift().speak()
+    person1.pets().inner().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
-    person1.pets()[innerSymbol]().shift().speak()
+    person1.pets().inner().shift().speak()
       .should.be.exactly('My name is Robbie!');
 
     const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-    person3.pets()[innerSymbol]()[0].name()
+    person3.pets().inner()[0].name()
       .should.be.exactly('Bane');
 
-    person1.pets()[innerSymbol]()[0].name()
+    person1.pets().inner()[0].name()
       .should.be.exactly('Robbie');
   });
 };

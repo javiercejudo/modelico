@@ -1,13 +1,12 @@
 'use strict';
 
 import Modelico from './Modelico';
-import { innerSymbol } from './symbols';
 
 class ModelicoDate extends Modelico {
   constructor(date) {
-    super(ModelicoDate, {date});
+    super(ModelicoDate, {});
 
-    this[innerSymbol] = () => date === null ? null : new Date(date.getTime());
+    this.inner = () => date === null ? null : new Date(date.getTime());
 
     return Object.freeze(this);
   }
@@ -21,7 +20,7 @@ class ModelicoDate extends Modelico {
   }
 
   toJSON() {
-    const date = this[innerSymbol]();
+    const date = this.inner();
 
     return (date === null) ? null : date.toISOString();
   }
