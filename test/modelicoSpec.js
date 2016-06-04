@@ -57,37 +57,37 @@ import proxyDate from './proxies/proxyDate';
 
 import cases from './cases/index';
 
-export default (options, should, M) => _ => {
+export default (options, should, M) => () => {
   const U = buildUtils(options);
   const deps = [should, M];
   const utilsAndDeps = [U].concat(deps);
 
-  describe('Base', Modelico.apply(_, deps));
-  describe('AsIs', ModelicoAsIs.apply(_, utilsAndDeps));
-  describe('Map', ModelicoMap.apply(_, deps));
-  describe('EnumMap', ModelicoEnumMap.apply(_, deps));
-  describe('ModelicoList', ModelicoList.apply(_, deps));
-  describe('ModelicoSet', ModelicoSet.apply(_, deps));
+  describe('Base', Modelico(...deps));
+  describe('AsIs', ModelicoAsIs(...utilsAndDeps));
+  describe('Map', ModelicoMap(...deps));
+  describe('EnumMap', ModelicoEnumMap(...deps));
+  describe('ModelicoList', ModelicoList(...deps));
+  describe('ModelicoSet', ModelicoSet(...deps));
 
-  describe('setPath', setPath.apply(_, deps));
+  describe('setPath', setPath(...deps));
 
-  describe('Readme simple features', featuresSimple.apply(_, deps));
-  describe('Readme advanced features', featuresAdvanced.apply(_, deps));
-  describe('Readme advanced features ES5', featuresAdvancedES5.apply(_, deps));
-  describe('Deep nesting features', featuresDeepNesting.apply(_, deps));
-  describe('Immutable.js examples', Immutable.apply(_, utilsAndDeps));
+  describe('Readme simple features', featuresSimple(...deps));
+  describe('Readme advanced features', featuresAdvanced(...deps));
+  describe('Readme advanced features ES5', featuresAdvancedES5(...deps));
+  describe('Deep nesting features', featuresDeepNesting(...deps));
+  describe('Immutable.js examples', Immutable(...utilsAndDeps));
 
   U.skipDescribeIfNoProxies(
     'Immutable.js examples (proxied)',
-    ImmutableProxied.apply(_, utilsAndDeps)
+    ImmutableProxied(...utilsAndDeps)
   );
 
   U.skipDescribeIfNoProxies('Proxies', () => {
-    describe('Map', proxyMap.apply(_, deps));
-    describe('List', proxyList.apply(_, deps));
-    describe('Set', proxySet.apply(_, deps));
-    describe('Date', proxyDate.apply(_, deps));
+    describe('Map', proxyMap(...deps));
+    describe('List', proxyList(...deps));
+    describe('Set', proxySet(...deps));
+    describe('Date', proxyDate(...deps));
   });
 
-  describe('Cases', cases.apply(_, deps));
+  describe('Cases', cases(...deps));
 };
