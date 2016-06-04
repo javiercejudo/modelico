@@ -3,9 +3,9 @@
 import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
+  const Modelico = M.Modelico;
   const Person = PersonFactory(M);
 
-  const Modelico = M.Modelico;
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
@@ -30,11 +30,11 @@ export default (should, M) => () => {
       const modelicoList1 = new M.List(M.Date.metadata(), list);
       const modelicoList2 = modelicoList1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
-      should(modelicoList2.innerList()[0].date().getFullYear())
+      should(modelicoList2.inner()[0].inner().getFullYear())
         .be.exactly(1989);
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.innerList()[0].date().getFullYear())
+      should(modelicoList1.inner()[0].inner().getFullYear())
         .be.exactly(1988);
     });
 
@@ -47,11 +47,11 @@ export default (should, M) => () => {
       const modelicoList1 = new M.List(M.Date.metadata(), list);
       const modelicoList2 = modelicoList1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
-      should(modelicoList2.innerList()[0].date().getFullYear())
+      should(modelicoList2.inner()[0].inner().getFullYear())
         .be.exactly(1989);
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.innerList()[0].date().getFullYear())
+      should(modelicoList1.inner()[0].inner().getFullYear())
         .be.exactly(1988);
     });
 
@@ -64,11 +64,11 @@ export default (should, M) => () => {
       const modelicoList1 = new M.List(M.Date.metadata(), list);
       const modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
-      should(modelicoList2.innerList()[0].date().getFullYear())
+      should(modelicoList2.inner()[0].inner().getFullYear())
         .be.exactly(2000);
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.innerList()[0].date().getFullYear())
+      should(modelicoList1.inner()[0].inner().getFullYear())
         .be.exactly(1988);
     });
 
@@ -76,7 +76,7 @@ export default (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
       const author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
-      const newListArray = author1.importantDatesList().innerList();
+      const newListArray = author1.importantDatesList().inner();
       newListArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
 
       const author2 = author1.set(
@@ -84,14 +84,14 @@ export default (should, M) => () => {
         new M.List(M.Date.metadata(), newListArray)
       );
 
-      should(author1.importantDatesList().innerList().length).be.exactly(2);
-      should(author1.importantDatesList().innerList()[0].date().getFullYear()).be.exactly(2013);
-      should(author1.importantDatesList().innerList()[1].date().getFullYear()).be.exactly(2012);
+      should(author1.importantDatesList().inner().length).be.exactly(2);
+      should(author1.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
+      should(author1.importantDatesList().inner()[1].inner().getFullYear()).be.exactly(2012);
 
-      should(author2.importantDatesList().innerList().length).be.exactly(3);
-      should(author2.importantDatesList().innerList()[0].date().getFullYear()).be.exactly(2013);
-      should(author2.importantDatesList().innerList()[1].date().getFullYear()).be.exactly(2016);
-      should(author2.importantDatesList().innerList()[2].date().getFullYear()).be.exactly(2012);
+      should(author2.importantDatesList().inner().length).be.exactly(3);
+      should(author2.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
+      should(author2.importantDatesList().inner()[1].inner().getFullYear()).be.exactly(2016);
+      should(author2.importantDatesList().inner()[2].inner().getFullYear()).be.exactly(2012);
     });
 
     it('edge case when List setPath is called with an empty path', () => {
@@ -107,10 +107,10 @@ export default (should, M) => () => {
       const listOfListOfDates1 = new M.List(M.List.metadata(M.Date.metadata()), [modelicoDatesList1]);
       const listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
 
-      should(listOfListOfDates1.innerList()[0].innerList()[0].date().getFullYear())
+      should(listOfListOfDates1.inner()[0].inner()[0].inner().getFullYear())
         .be.exactly(1988);
 
-      should(listOfListOfDates2.innerList()[0].innerList()[0].date().getFullYear())
+      should(listOfListOfDates2.inner()[0].inner()[0].inner().getFullYear())
         .be.exactly(2016);
     });
   });
@@ -144,10 +144,10 @@ export default (should, M) => () => {
         M.List.metadata(M.Date.metadata()).reviver
       );
 
-      should(modelicoList.innerList()[0].date().getFullYear())
+      should(modelicoList.inner()[0].inner().getFullYear())
         .be.exactly(1988);
 
-      should(modelicoList.innerList()[1].date())
+      should(modelicoList.inner()[1].inner())
         .be.exactly(null);
     });
 
@@ -155,13 +155,13 @@ export default (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
       const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
-      should(author.importantDatesList().innerList()[0].date().getFullYear()).be.exactly(2013);
+      should(author.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
     });
 
     it('should support null lists', () => {
       const modelicoList = JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver);
 
-      should(modelicoList.innerList())
+      should(modelicoList.inner())
         .be.exactly(null);
     });
   });
@@ -187,9 +187,9 @@ export default (should, M) => () => {
     it('should be able to create a list from an array', () => {
       const fibArray = [0, 1, 1, 2, 3, 5, 8];
 
-      const modelicoSet = M.List.fromArray(fibArray);
+      const modelicoList = M.List.fromArray(fibArray);
 
-      modelicoSet.innerList()
+      modelicoList.inner()
         .should.eql([0, 1, 1, 2, 3, 5, 8]);
     });
   });

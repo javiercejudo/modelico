@@ -39,7 +39,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   toJSON() {
-    const innerMap = this.fields().innerMap;
+    const innerMap = this.inner();
 
     return (innerMap === null) ? null : [...innerMap].map(stringifyMapper);
   }

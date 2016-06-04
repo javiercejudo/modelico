@@ -60,11 +60,11 @@ export default (should, M) => () => {
       const author2 = author1.setPath(['givenName'], 'Javi')
         .setPath(['birthday', 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
-      should(author2.birthday().date().getFullYear())
+      should(author2.birthday().inner().getFullYear())
         .be.exactly(1989);
 
       // verify that the original author1 was not mutated
-      should(author1.birthday().date().getFullYear())
+      should(author1.birthday().inner().getFullYear())
         .be.exactly(1988);
     });
 
@@ -74,11 +74,11 @@ export default (should, M) => () => {
       const listOfPeople1 = new M.List(Person.metadata(), [author]);
 
       const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
-      const listOfPeople3 = listOfPeople2.setPath([0], author.fields());
+      const listOfPeople3 = listOfPeople2.setPath([0], M.fields(author));
 
-      listOfPeople1.innerList()[0].givenName().should.be.exactly('Javier');
-      listOfPeople2.innerList()[0].givenName().should.be.exactly('Javi');
-      listOfPeople3.innerList()[0].givenName().should.be.exactly('Javier');
+      listOfPeople1.inner()[0].givenName().should.be.exactly('Javier');
+      listOfPeople2.inner()[0].givenName().should.be.exactly('Javi');
+      listOfPeople3.inner()[0].givenName().should.be.exactly('Javier');
     });
   });
 
@@ -120,8 +120,8 @@ export default (should, M) => () => {
         .and.exactly(author2.fullName());
 
       should(1988)
-        .be.exactly(author1.birthday().date().getFullYear())
-        .and.exactly(author2.birthday().date().getFullYear());
+        .be.exactly(author1.birthday().inner().getFullYear())
+        .and.exactly(author2.birthday().inner().getFullYear());
 
       should(PartOfDay.EVENING().minTime)
         .be.exactly(author1.favouritePartOfDay().minTime)

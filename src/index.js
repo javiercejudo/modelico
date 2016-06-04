@@ -1,6 +1,7 @@
 'use strict';
 
 import { version, author, homepage, license } from '../package.json';
+import { fieldsSymbol } from './symbols';
 import { partial } from './U';
 
 import Modelico from './Modelico';
@@ -39,8 +40,9 @@ export default Object.freeze({
   Map: ModelicoMap,
   Modelico,
   Set: ModelicoSet,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators, 'innerMap'),
-  proxyList: partial(proxyFactory, listNonMutators, listMutators, 'innerList'),
-  proxySet: partial(proxyFactory, setNonMutators, setMutators, 'innerSet'),
-  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, 'date')
+  fields: x => x[fieldsSymbol](),
+  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
+  proxyList: partial(proxyFactory, listNonMutators, listMutators),
+  proxySet: partial(proxyFactory, setNonMutators, setMutators),
+  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)
 });

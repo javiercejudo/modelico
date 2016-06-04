@@ -9,7 +9,7 @@ export default (should, M) => () => {
     }
 
     speak() {
-      const name = this.fields().name;
+      const name = M.fields(this).name;
       return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
     }
   }

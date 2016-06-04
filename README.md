@@ -63,7 +63,7 @@ class Animal extends Modelico {
   }
 
   speak() {
-    const name = this.fields().name;
+    const name = M.fields(this).name;
     return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
   }
 }
@@ -95,10 +95,10 @@ to be able to do things like
 const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
 person1.fullName(); //=> 'Javier Cejudo'
-person1.pets().innerList()[0].speak(); //=> 'my name is Robbie!'
+person1.pets().inner()[0].speak(); //=> 'my name is Robbie!'
 ```
 
-*Note: pets() returns a `Modelico.List`, hence the need to call `innerList`
+*Note: pets() returns a `Modelico.List`, hence the need to use `.inner()`
 to grab the underlying array. See the [proxies section](#es2015-proxies)
 for a way to use methods and properties of the inner structure directly.*
 
@@ -117,7 +117,7 @@ class Person extends Modelico {
   }
 
   fullName() {
-    const fields = this.fields();
+    const fields = M.fields(this);
     return [fields.givenName, fields.familyName].join(' ').trim();
   }
 
@@ -145,29 +145,29 @@ person1.fullName(); //=> 'Javier Cejudo'
 
 const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-person3.pets().innerList()[0].name(); //=> 'Bane'
-person1.pets().innerList()[0].name(); //=> 'Robbie'
+person3.pets().inner()[0].name(); //=> 'Bane'
+person1.pets().inner()[0].name(); //=> 'Robbie'
 ```
 
 The same principle applies across all Modélico classes:
 
 ```js
-// While person.pets().innerList() is a plain array,
+// While person.pets().inner() is a plain array,
 // we can shift to grab the first item without
 // modifying the internal list, as we are really
 // getting a clone of it
-person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
+person1.pets().inner().shift().speak(); //=> 'My name is Robbie!'
 
 // When called again, the list is still intact
-person1.pets().innerList().shift().speak(); //=> 'My name is Robbie!'
+person1.pets().inner().shift().speak(); //=> 'My name is Robbie!'
 ```
 
 ## ES2015 proxies
 
-Built-in types in Modélico (List, Set, Map, EnumMap and Date)
+Most built-in types in Modélico (List, Set, Map, EnumMap and Date)
 are wrappers around native structures. By default, it is necessary to
 retrieve those structures to access their properties and methods
-(eg. `list.innerList().length`).
+(eg. `list.inner().length`).
 
 However, if your environment
 [supports ES2015 proxies](https://kangax.github.io/compat-table/es6/#test-Proxy),
@@ -181,8 +181,8 @@ const defaultMap = M.Map.fromObject({a: 1, b: 2, c: 3});
 const proxiedMap = p(defaultMap);
 
 // without proxies
-defaultMap.innerMap().get('b'); //=> 2
-defaultMap.innerMap().size; //=> 3
+defaultMap.inner().get('b'); //=> 2
+defaultMap.inner().size; //=> 3
 
 // with proxies
 proxiedMap.get('b'); //=> 2
@@ -215,7 +215,7 @@ Animal.prototype = Object.create(Modelico.prototype);
 Animal.prototype.constructor = Animal;
 
 Animal.prototype.speak = function() {
-  var name = this.fields().name;
+  var name = M.fields(this).name;
   return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
 };
 ```

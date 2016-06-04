@@ -4,9 +4,9 @@ import Modelico from './Modelico';
 
 class ModelicoDate extends Modelico {
   constructor(date) {
-    super(ModelicoDate, {date});
+    super(ModelicoDate, {});
 
-    this.date = () => date === null ? null : new Date(date.getTime());
+    this.inner = () => date === null ? null : new Date(date.getTime());
 
     return Object.freeze(this);
   }
@@ -20,7 +20,9 @@ class ModelicoDate extends Modelico {
   }
 
   toJSON() {
-    return (this.date() === null) ? null : this.date().toISOString();
+    const date = this.inner();
+
+    return (date === null) ? null : date.toISOString();
   }
 
   static reviver(k, v) {

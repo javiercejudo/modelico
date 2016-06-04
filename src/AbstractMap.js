@@ -1,14 +1,15 @@
 'use strict';
 
 import { always } from './U';
+import { typeSymbol, innerTypesSymbol } from './symbols';
 import Modelico from './Modelico';
 
 class AbstractMap extends Modelico {
   constructor(Type, keyMetadata, valueMetadata, innerMap) {
-    super(Type, {innerMap});
+    super(Type, {});
 
-    this.innerTypes = always(Object.freeze({keyMetadata, valueMetadata}));
-    this.innerMap = () => (innerMap === null) ? null : new Map(innerMap);
+    this.inner = () => (innerMap === null) ? null : new Map(innerMap);
+    this[innerTypesSymbol] = always(Object.freeze({keyMetadata, valueMetadata}));
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
 
     return this;
@@ -16,12 +17,12 @@ class AbstractMap extends Modelico {
 
   setPath(path, value) {
     if (path.length === 0) {
-      const innerTypes = this.innerTypes();
+      const { keyMetadata, valueMetadata } = this[innerTypesSymbol]();
 
-      return new (this.type())(innerTypes.keyMetadata, innerTypes.keyMetadata, value);
+      return new (this[typeSymbol]())(keyMetadata, valueMetadata, value);
     }
 
-    const item = this.innerMap().get(path[0]);
+    const item = this.inner().get(path[0]);
 
     if (!item.setPath) {
       return this.set(path[0], value);
@@ -32,11 +33,11 @@ class AbstractMap extends Modelico {
 
   // as static to support IE < 11
   static set(Type, key, value) {
-    const innerTypes = this.innerTypes();
-    const newMap = this.innerMap();
+    const { keyMetadata, valueMetadata } = this[innerTypesSymbol]();
+    const newMap = this.inner();
     newMap.set(key, value);
 
-    return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
+    return new Type(keyMetadata, valueMetadata, newMap);
   }
 
   static metadata(Type, reviver) {

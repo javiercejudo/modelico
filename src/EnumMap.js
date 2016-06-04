@@ -9,7 +9,7 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper = (keyMetadata, valueMetadata, object) => (enumerator, index) => {
+const parseMapper = (keyMetadata, valueMetadata, object) => enumerator => {
   const reviveKey = reviverOrAsIs(keyMetadata);
   const key = reviveKey('', enumerator);
 
@@ -41,7 +41,7 @@ class ModelicoEnumMap extends AbstractMap {
   }
 
   toJSON() {
-    const innerMap = this.fields().innerMap;
+    const innerMap = this.inner();
 
     return (innerMap === null) ? null : [...innerMap].reduce(stringifyReducer, {});
   }
