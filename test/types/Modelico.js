@@ -172,4 +172,15 @@ export default (should, M) => () => {
       author1.should.not.be.exactly(author2);
     });
   });
+
+  describe('fields', () => {
+    it('creates an accessor method for every field and every inner type declared', () => {
+      const author = new Person({
+        undeclaredField: 'something'
+      });
+
+      author.undeclaredField().should.be.exactly('something');
+      should(author.givenName()).be.exactly(undefined);
+    });
+  });
 };

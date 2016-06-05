@@ -3,8 +3,10 @@
 import { always, defaultTo, reviverOrAsIs, isPlainObject } from './U';
 import { typeSymbol, fieldsSymbol } from './symbols';
 
+const getInnerTypes = Type => Type.innerTypes && Type.innerTypes() || {};
+
 const reviverFactory = Type => {
-  const innerTypes = Type.innerTypes && Type.innerTypes() || {};
+  const innerTypes = getInnerTypes(Type);
 
   return (k, v) => {
     if (k !== '') {
@@ -29,12 +31,14 @@ const reviverFactory = Type => {
 
 class Modelico {
   constructor(Type, fields, thisArg) {
+    const innerTypes = getInnerTypes(Type);
+
     thisArg = defaultTo(this)(thisArg);
     thisArg[typeSymbol] = always(Type);
     thisArg[fieldsSymbol] = always(Object.freeze(fields));
 
-    Object.getOwnPropertyNames(fields)
-      .forEach(field => thisArg[field] = always(fields[field]));
+    new Set([...Object.keys(innerTypes), ...Object.keys(fields)])
+      .forEach(key => thisArg[key] = always(fields[key]));
 
     return thisArg;
   }

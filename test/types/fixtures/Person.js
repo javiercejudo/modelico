@@ -23,6 +23,8 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
+        givenName: M.AsIs(String),
+        familyName: M.AsIs(String),
         birthday: M.Date.metadata(),
         favouritePartOfDay: PartOfDay.metadata(),
         lifeEvents: M.Map.metadata(String, M.Date.metadata()),
