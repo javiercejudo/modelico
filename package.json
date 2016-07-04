@@ -51,7 +51,7 @@
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-sauce-launcher": "^1.0.0",
     "phantomjs-prebuilt": "^2.1.7",
-    "rimraf": "^2.4.3",
+    "rimraf": "^2.5.3",
     "rollup": "^0.26.0",
     "rollup-plugin-babel": "2.4.0",
     "rollup-plugin-json": "^2.0.0",
