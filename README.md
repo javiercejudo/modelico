@@ -1,4 +1,4 @@
-Modélico (\[moˈðe.li.ko\]) is a universal-JS library for serialisable immutable models.
+Modélico \[moˈðe.li.ko\] is a universal-JS library for serialisable immutable models.
 
 [![Build Status](https://travis-ci.org/javiercejudo/modelico.svg?branch=master)](https://travis-ci.org/javiercejudo/modelico)
 [![codecov.io](https://codecov.io/github/javiercejudo/modelico/coverage.svg?branch=master)](https://codecov.io/github/javiercejudo/modelico?branch=master)
