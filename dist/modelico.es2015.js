@@ -1,4 +1,4 @@
-var version = "14.1.0";
+var version = "15.0.0";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
