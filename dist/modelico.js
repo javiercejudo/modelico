@@ -4,20 +4,29 @@
 	(global.Modelico = factory());
 }(this, function () { 'use strict';
 
-	var babelHelpers = {};
-	babelHelpers.typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	var version = "14.1.0";
+	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
+	var license = "MIT";
+	var homepage = "https://github.com/javiercejudo/modelico#readme";
+
+	var typeSymbol = Symbol('type');
+	var fieldsSymbol = Symbol('fields');
+	var innerTypesSymbol = Symbol('innerTypes');
+	var itemMetadataSymbol = Symbol('itemMetadata');
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	  return typeof obj;
 	} : function (obj) {
 	  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
 	};
 
-	babelHelpers.classCallCheck = function (instance, Constructor) {
+	var classCallCheck = function (instance, Constructor) {
 	  if (!(instance instanceof Constructor)) {
 	    throw new TypeError("Cannot call a class as a function");
 	  }
 	};
 
-	babelHelpers.createClass = function () {
+	var createClass = function () {
 	  function defineProperties(target, props) {
 	    for (var i = 0; i < props.length; i++) {
 	      var descriptor = props[i];
@@ -35,7 +44,7 @@
 	  };
 	}();
 
-	babelHelpers.defineProperty = function (obj, key, value) {
+	var defineProperty = function (obj, key, value) {
 	  if (key in obj) {
 	    Object.defineProperty(obj, key, {
 	      value: value,
@@ -50,7 +59,7 @@
 	  return obj;
 	};
 
-	babelHelpers.inherits = function (subClass, superClass) {
+	var inherits = function (subClass, superClass) {
 	  if (typeof superClass !== "function" && superClass !== null) {
 	    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
 	  }
@@ -66,7 +75,7 @@
 	  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 	};
 
-	babelHelpers.possibleConstructorReturn = function (self, call) {
+	var possibleConstructorReturn = function (self, call) {
 	  if (!self) {
 	    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
 	  }
@@ -74,7 +83,7 @@
 	  return call && (typeof call === "object" || typeof call === "function") ? call : self;
 	};
 
-	babelHelpers.toConsumableArray = function (arr) {
+	var toConsumableArray = function (arr) {
 	  if (Array.isArray(arr)) {
 	    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
 
@@ -83,13 +92,6 @@
 	    return Array.from(arr);
 	  }
 	};
-
-	babelHelpers;
-
-	var version = "14.1.0";
-	var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
-	var license = "MIT";
-	var homepage = "https://github.com/javiercejudo/modelico#readme";
 
 	var get = function get(field) {
 	  return function (obj) {
@@ -129,11 +131,15 @@
 	};
 	var reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver));
 	var isPlainObject = function isPlainObject(x) {
-	  return (typeof x === 'undefined' ? 'undefined' : babelHelpers.typeof(x)) === 'object' && !!x;
+	  return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x;
+	};
+
+	var getInnerTypes = function getInnerTypes(Type) {
+	  return Type.innerTypes && Type.innerTypes() || {};
 	};
 
 	var reviverFactory = function reviverFactory(Type) {
-	  var innerTypes = Type.innerTypes && Type.innerTypes() || {};
+	  var innerTypes = getInnerTypes(Type);
 
 	  return function (k, v) {
 	    if (k !== '') {
@@ -158,31 +164,33 @@
 
 	var Modelico = function () {
 	  function Modelico(Type, fields, thisArg) {
-	    babelHelpers.classCallCheck(this, Modelico);
+	    classCallCheck(this, Modelico);
+
+	    var innerTypes = getInnerTypes(Type);
 
 	    thisArg = defaultTo(this)(thisArg);
-	    thisArg.type = always(Type);
-	    thisArg.fields = always(Object.freeze(fields));
+	    thisArg[typeSymbol] = always(Type);
+	    thisArg[fieldsSymbol] = always(Object.freeze(fields));
 
-	    Object.getOwnPropertyNames(fields).forEach(function (field) {
-	      return thisArg[field] = always(fields[field]);
+	    new Set([].concat(toConsumableArray(Object.keys(innerTypes)), toConsumableArray(Object.keys(fields)))).forEach(function (key) {
+	      return thisArg[key] = always(fields[key]);
 	    });
 
 	    return thisArg;
 	  }
 
-	  babelHelpers.createClass(Modelico, [{
+	  createClass(Modelico, [{
 	    key: 'set',
 	    value: function set(field, value) {
-	      var newFields = Object.assign({}, this.fields(), babelHelpers.defineProperty({}, field, value));
+	      var newFields = Object.assign({}, this[fieldsSymbol](), defineProperty({}, field, value));
 
-	      return new (this.type())(newFields);
+	      return new (this[typeSymbol]())(newFields);
 	    }
 	  }, {
 	    key: 'setPath',
 	    value: function setPath(path, value) {
 	      if (path.length === 0) {
-	        return new (this.type())(value);
+	        return new (this[typeSymbol]())(value);
 	      }
 
 	      if (path.length === 1) {
@@ -199,7 +207,7 @@
 	  }, {
 	    key: 'toJSON',
 	    value: function toJSON() {
-	      return this.fields();
+	      return this[fieldsSymbol]();
 	    }
 	  }], [{
 	    key: 'factory',
@@ -223,36 +231,40 @@
 	var Modelico$1 = Object.freeze(Modelico);
 
 	var AbstractMap = function (_Modelico) {
-	  babelHelpers.inherits(AbstractMap, _Modelico);
+	  inherits(AbstractMap, _Modelico);
 
 	  function AbstractMap(Type, keyMetadata, valueMetadata, innerMap) {
 	    var _ret;
 
-	    babelHelpers.classCallCheck(this, AbstractMap);
+	    classCallCheck(this, AbstractMap);
 
-	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(AbstractMap).call(this, Type, { innerMap: innerMap }));
+	    var _this = possibleConstructorReturn(this, Object.getPrototypeOf(AbstractMap).call(this, Type, {}));
 
-	    _this.innerTypes = always(Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata }));
-	    _this.innerMap = function () {
+	    _this.inner = function () {
 	      return innerMap === null ? null : new Map(innerMap);
 	    };
+	    _this[innerTypesSymbol] = always(Object.freeze({ keyMetadata: keyMetadata, valueMetadata: valueMetadata }));
 	    _this[Symbol.iterator] = function () {
 	      return innerMap[Symbol.iterator]();
 	    };
 
-	    return _ret = _this, babelHelpers.possibleConstructorReturn(_this, _ret);
+	    return _ret = _this, possibleConstructorReturn(_this, _ret);
 	  }
 
-	  babelHelpers.createClass(AbstractMap, [{
+	  createClass(AbstractMap, [{
 	    key: 'setPath',
 	    value: function setPath(path, value) {
 	      if (path.length === 0) {
-	        var innerTypes = this.innerTypes();
+	        var _innerTypesSymbol = this[innerTypesSymbol]();
 
-	        return new (this.type())(innerTypes.keyMetadata, innerTypes.keyMetadata, value);
+	        var keyMetadata = _innerTypesSymbol.keyMetadata;
+	        var valueMetadata = _innerTypesSymbol.valueMetadata;
+
+
+	        return new (this[typeSymbol]())(keyMetadata, valueMetadata, value);
 	      }
 
-	      var item = this.innerMap().get(path[0]);
+	      var item = this.inner().get(path[0]);
 
 	      if (!item.setPath) {
 	        return this.set(path[0], value);
@@ -266,11 +278,15 @@
 	  }], [{
 	    key: 'set',
 	    value: function set(Type, key, value) {
-	      var innerTypes = this.innerTypes();
-	      var newMap = this.innerMap();
+	      var _innerTypesSymbol2 = this[innerTypesSymbol]();
+
+	      var keyMetadata = _innerTypesSymbol2.keyMetadata;
+	      var valueMetadata = _innerTypesSymbol2.valueMetadata;
+
+	      var newMap = this.inner();
 	      newMap.set(key, value);
 
-	      return new Type(innerTypes.keyMetadata, innerTypes.valueMetadata, newMap);
+	      return new Type(keyMetadata, valueMetadata, newMap);
 	    }
 	  }, {
 	    key: 'metadata',
@@ -285,7 +301,7 @@
 
 	var AsIs = (function (Type) {
 	  return Object.freeze({ type: Type, reviver: asIsReviver });
-	})
+	});
 
 	var Any = Object.freeze({ name: 'Any' });
 
@@ -318,19 +334,19 @@
 	};
 
 	var ModelicoMap = function (_AbstractMap) {
-	  babelHelpers.inherits(ModelicoMap, _AbstractMap);
+	  inherits(ModelicoMap, _AbstractMap);
 
 	  function ModelicoMap(keyMetadata, valueMetadata, innerMap) {
 	    var _ret;
 
-	    babelHelpers.classCallCheck(this, ModelicoMap);
+	    classCallCheck(this, ModelicoMap);
 
-	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoMap).call(this, ModelicoMap, keyMetadata, valueMetadata, innerMap));
+	    var _this = possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoMap).call(this, ModelicoMap, keyMetadata, valueMetadata, innerMap));
 
-	    return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+	    return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
 	  }
 
-	  babelHelpers.createClass(ModelicoMap, [{
+	  createClass(ModelicoMap, [{
 	    key: 'set',
 	    value: function set(enumerator, value) {
 	      return AbstractMap$1.set.call(this, ModelicoMap, enumerator, value);
@@ -338,9 +354,9 @@
 	  }, {
 	    key: 'toJSON',
 	    value: function toJSON() {
-	      var innerMap = this.fields().innerMap;
+	      var innerMap = this.inner();
 
-	      return innerMap === null ? null : [].concat(babelHelpers.toConsumableArray(innerMap)).map(stringifyMapper);
+	      return innerMap === null ? null : [].concat(toConsumableArray(innerMap)).map(stringifyMapper);
 	    }
 	  }], [{
 	    key: 'fromObject',
@@ -370,7 +386,7 @@
 	};
 
 	var parseMapper$1 = function parseMapper(keyMetadata, valueMetadata, object) {
-	  return function (enumerator, index) {
+	  return function (enumerator) {
 	    var reviveKey = reviverOrAsIs(keyMetadata);
 	    var key = reviveKey('', enumerator);
 
@@ -394,19 +410,19 @@
 	};
 
 	var ModelicoEnumMap = function (_AbstractMap) {
-	  babelHelpers.inherits(ModelicoEnumMap, _AbstractMap);
+	  inherits(ModelicoEnumMap, _AbstractMap);
 
 	  function ModelicoEnumMap(keyMetadata, valueMetadata, innerMap) {
 	    var _ret;
 
-	    babelHelpers.classCallCheck(this, ModelicoEnumMap);
+	    classCallCheck(this, ModelicoEnumMap);
 
-	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnumMap).call(this, ModelicoEnumMap, keyMetadata, valueMetadata, innerMap));
+	    var _this = possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnumMap).call(this, ModelicoEnumMap, keyMetadata, valueMetadata, innerMap));
 
-	    return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+	    return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
 	  }
 
-	  babelHelpers.createClass(ModelicoEnumMap, [{
+	  createClass(ModelicoEnumMap, [{
 	    key: 'set',
 	    value: function set(enumerator, value) {
 	      return AbstractMap$1.set.call(this, ModelicoEnumMap, enumerator, value);
@@ -414,9 +430,9 @@
 	  }, {
 	    key: 'toJSON',
 	    value: function toJSON() {
-	      var innerMap = this.fields().innerMap;
+	      var innerMap = this.inner();
 
-	      return innerMap === null ? null : [].concat(babelHelpers.toConsumableArray(innerMap)).reduce(stringifyReducer, {});
+	      return innerMap === null ? null : [].concat(toConsumableArray(innerMap)).reduce(stringifyReducer, {});
 	    }
 	  }], [{
 	    key: 'metadata',
@@ -430,23 +446,23 @@
 	var EnumMap = Object.freeze(ModelicoEnumMap);
 
 	var ModelicoDate = function (_Modelico) {
-	  babelHelpers.inherits(ModelicoDate, _Modelico);
+	  inherits(ModelicoDate, _Modelico);
 
 	  function ModelicoDate(date) {
 	    var _ret;
 
-	    babelHelpers.classCallCheck(this, ModelicoDate);
+	    classCallCheck(this, ModelicoDate);
 
-	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoDate).call(this, ModelicoDate, { date: date }));
+	    var _this = possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoDate).call(this, ModelicoDate, {}));
 
-	    _this.date = function () {
+	    _this.inner = function () {
 	      return date === null ? null : new Date(date.getTime());
 	    };
 
-	    return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+	    return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
 	  }
 
-	  babelHelpers.createClass(ModelicoDate, [{
+	  createClass(ModelicoDate, [{
 	    key: 'set',
 	    value: function set(date) {
 	      return new ModelicoDate(date);
@@ -459,7 +475,9 @@
 	  }, {
 	    key: 'toJSON',
 	    value: function toJSON() {
-	      return this.date() === null ? null : this.date().toISOString();
+	      var date = this.inner();
+
+	      return date === null ? null : date.toISOString();
 	    }
 	  }], [{
 	    key: 'reviver',
@@ -500,42 +518,42 @@
 	};
 
 	var ModelicoList = function (_Modelico) {
-	  babelHelpers.inherits(ModelicoList, _Modelico);
+	  inherits(ModelicoList, _Modelico);
 
-	  function ModelicoList(itemMetadata, innerList) {
+	  function ModelicoList(itemMetadata, inner) {
 	    var _ret;
 
-	    babelHelpers.classCallCheck(this, ModelicoList);
+	    classCallCheck(this, ModelicoList);
 
-	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoList).call(this, ModelicoList, { innerList: innerList }));
+	    var _this = possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoList).call(this, ModelicoList, {}));
 
-	    _this.itemMetadata = always(itemMetadata);
-	    _this.innerList = function () {
-	      return innerList === null ? null : innerList.slice();
+	    _this[itemMetadataSymbol] = always(itemMetadata);
+	    _this.inner = function () {
+	      return inner === null ? null : inner.slice();
 	    };
 	    _this[Symbol.iterator] = function () {
-	      return innerList[Symbol.iterator]();
+	      return inner[Symbol.iterator]();
 	    };
 
-	    return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+	    return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
 	  }
 
-	  babelHelpers.createClass(ModelicoList, [{
+	  createClass(ModelicoList, [{
 	    key: 'set',
 	    value: function set(index, value) {
-	      var newList = this.innerList();
+	      var newList = this.inner();
 	      newList[index] = value;
 
-	      return new ModelicoList(this.itemMetadata(), newList);
+	      return new ModelicoList(this[itemMetadataSymbol](), newList);
 	    }
 	  }, {
 	    key: 'setPath',
 	    value: function setPath(path, value) {
 	      if (path.length === 0) {
-	        return new ModelicoList(this.itemMetadata(), value);
+	        return new ModelicoList(this[itemMetadataSymbol](), value);
 	      }
 
-	      var item = this.innerList()[path[0]];
+	      var item = this.inner()[path[0]];
 
 	      if (!item.setPath) {
 	        return this.set(path[0], value);
@@ -546,7 +564,7 @@
 	  }, {
 	    key: 'toJSON',
 	    value: function toJSON() {
-	      return this.fields().innerList;
+	      return this.inner();
 	    }
 	  }], [{
 	    key: 'fromArray',
@@ -565,42 +583,42 @@
 	var List = Object.freeze(ModelicoList);
 
 	var ModelicoSet = function (_Modelico) {
-	  babelHelpers.inherits(ModelicoSet, _Modelico);
+	  inherits(ModelicoSet, _Modelico);
 
 	  function ModelicoSet(itemMetadata, innerSet) {
 	    var _ret;
 
-	    babelHelpers.classCallCheck(this, ModelicoSet);
+	    classCallCheck(this, ModelicoSet);
 
-	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoSet).call(this, ModelicoSet, { innerSet: innerSet }));
+	    var _this = possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoSet).call(this, ModelicoSet, {}));
 
-	    _this.itemMetadata = always(itemMetadata);
-	    _this.innerSet = function () {
+	    _this[itemMetadataSymbol] = always(itemMetadata);
+	    _this.inner = function () {
 	      return innerSet === null ? null : new Set(innerSet);
 	    };
 	    _this[Symbol.iterator] = function () {
 	      return innerSet[Symbol.iterator]();
 	    };
 
-	    return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+	    return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
 	  }
 
-	  babelHelpers.createClass(ModelicoSet, [{
+	  createClass(ModelicoSet, [{
 	    key: 'set',
 	    value: function set(index, value) {
-	      var newSet = [].concat(babelHelpers.toConsumableArray(this.innerSet()));
+	      var newSet = [].concat(toConsumableArray(this.inner()));
 	      newSet[index] = value;
 
-	      return new ModelicoSet(this.itemMetadata(), newSet);
+	      return new ModelicoSet(this[itemMetadataSymbol](), newSet);
 	    }
 	  }, {
 	    key: 'setPath',
 	    value: function setPath(path, value) {
 	      if (path.length === 0) {
-	        return new ModelicoSet(this.itemMetadata(), value);
+	        return new ModelicoSet(this[itemMetadataSymbol](), value);
 	      }
 
-	      var item = [].concat(babelHelpers.toConsumableArray(this.innerSet()))[path[0]];
+	      var item = [].concat(toConsumableArray(this.inner()))[path[0]];
 
 	      if (!item.setPath) {
 	        return this.set(path[0], value);
@@ -611,9 +629,9 @@
 	  }, {
 	    key: 'toJSON',
 	    value: function toJSON() {
-	      var innerSet = this.fields().innerSet;
+	      var innerSet = this.inner();
 
-	      return innerSet === null ? null : [].concat(babelHelpers.toConsumableArray(innerSet));
+	      return innerSet === null ? null : [].concat(toConsumableArray(innerSet));
 	    }
 	  }], [{
 	    key: 'fromArray',
@@ -647,16 +665,16 @@
 	};
 
 	var ModelicoEnum = function (_Modelico) {
-	  babelHelpers.inherits(ModelicoEnum, _Modelico);
+	  inherits(ModelicoEnum, _Modelico);
 
 	  function ModelicoEnum(input) {
 	    var _ret;
 
-	    babelHelpers.classCallCheck(this, ModelicoEnum);
+	    classCallCheck(this, ModelicoEnum);
 
 	    var enumerators = Array.isArray(input) ? input.reduce(enumeratorsReducer, {}) : input;
 
-	    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnum).call(this, ModelicoEnum, enumerators));
+	    var _this = possibleConstructorReturn(this, Object.getPrototypeOf(ModelicoEnum).call(this, ModelicoEnum, enumerators));
 
 	    Object.getOwnPropertyNames(enumerators).forEach(function (enumerator) {
 	      return _this[enumerator]().toJSON = always(enumerator);
@@ -667,7 +685,7 @@
 	      reviver: reviverFactory$3(enumerators)
 	    }));
 
-	    return _ret = Object.freeze(_this), babelHelpers.possibleConstructorReturn(_this, _ret);
+	    return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
 	  }
 
 	  return ModelicoEnum;
@@ -680,7 +698,7 @@
 
 	var proxyFactory = void 0;
 
-	var proxyToSelf = function proxyToSelf(nonMutators, mutators, innerAccessor, target, prop) {
+	var proxyToSelf = function proxyToSelf(nonMutators, mutators, target, prop) {
 	  if (!nonMutators.includes(prop)) {
 	    return target[prop];
 	  }
@@ -688,11 +706,11 @@
 	  return function () {
 	    var newObj = target[prop].apply(target, arguments);
 
-	    return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
+	    return proxyFactory(nonMutators, mutators, newObj);
 	  };
 	};
 
-	var proxyToInner = function proxyToInner(inner, candidate, nonMutators, mutators, innerAccessor, target, prop) {
+	var proxyToInner = function proxyToInner(inner, candidate, nonMutators, mutators, target, prop) {
 	  if (nonMutators.includes(prop)) {
 	    return function () {
 	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -701,7 +719,7 @@
 
 	      var newObj = target.setPath([], candidate.apply(inner, args));
 
-	      return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
+	      return proxyFactory(nonMutators, mutators, newObj);
 	    };
 	  }
 
@@ -714,7 +732,7 @@
 	      candidate.apply(inner, args);
 	      var newObj = target.setPath([], inner);
 
-	      return proxyFactory(nonMutators, mutators, innerAccessor, newObj);
+	      return proxyFactory(nonMutators, mutators, newObj);
 	    };
 	  }
 
@@ -727,23 +745,22 @@
 	  };
 	};
 
-	proxyFactory = function proxyFactory(nonMutators, mutators, innerAccessor, obj) {
+	proxyFactory = function proxyFactory(nonMutators, mutators, obj) {
 	  var get = function get(target, prop) {
 	    if (prop in target) {
-	      return proxyToSelf(nonMutators, mutators, innerAccessor, target, prop);
+	      return proxyToSelf(nonMutators, mutators, target, prop);
 	    }
 
-	    var inner = target[innerAccessor]();
+	    var inner = target.inner();
 	    var candidate = inner[prop];
 
 	    if (typeof candidate === 'function') {
-	      return proxyToInner(inner, candidate, nonMutators, mutators, innerAccessor, target, prop);
+	      return proxyToInner(inner, candidate, nonMutators, mutators, target, prop);
 	    }
 
 	    return candidate;
 	  };
 
-	  // not using shortcut get due to https://github.com/nodejs/node/issues/4237
 	  return new Proxy(obj, { get: get });
 	};
 
@@ -774,10 +791,13 @@
 	  Map: ModelicoMap$1,
 	  Modelico: Modelico$1,
 	  Set: ModelicoSet$1,
-	  proxyMap: partial(proxyFactory$1, mapNonMutators, mapMutators, 'innerMap'),
-	  proxyList: partial(proxyFactory$1, listNonMutators, listMutators, 'innerList'),
-	  proxySet: partial(proxyFactory$1, setNonMutators, setMutators, 'innerSet'),
-	  proxyDate: partial(proxyFactory$1, dateNonMutators, dateMutators, 'date')
+	  fields: function fields(x) {
+	    return x[fieldsSymbol]();
+	  },
+	  proxyMap: partial(proxyFactory$1, mapNonMutators, mapMutators),
+	  proxyList: partial(proxyFactory$1, listNonMutators, listMutators),
+	  proxySet: partial(proxyFactory$1, setNonMutators, setMutators),
+	  proxyDate: partial(proxyFactory$1, dateNonMutators, dateMutators)
 	});
 
 	return index;
