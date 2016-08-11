@@ -1,7 +1,6 @@
 language: node_js
 node_js:
   - '6'
-  - '4'
 env:
   global:
     - SL_BROWSERS=SL_Chrome,SL_Firefox,SL_Edge,SL_IE_11,SL_Safari,SL_Opera,SL_Android,SL_iOS
