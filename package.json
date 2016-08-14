@@ -60,7 +60,7 @@
     "rollup-plugin-flow": "^1.0.1",
     "rollup-plugin-json": "^2.0.1",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "should": "^8.4.0",
+    "should": "^11.1.0",
     "uglify-js": "^2.7.0"
   }
 }
