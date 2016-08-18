@@ -48,7 +48,7 @@
     "gulp-mocha": "^3.0.0",
     "gulp-plumber": "^1.1.0",
     "karma": "^1.1.2",
-    "karma-chrome-launcher": "^1.0.1",
+    "karma-chrome-launcher": "^2.0.0",
     "karma-firefox-launcher": "^1.0.0",
     "karma-mocha": "^1.1.1",
     "karma-phantomjs-launcher": "^1.0.1",
