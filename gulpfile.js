@@ -34,6 +34,4 @@ gulp.task('test', ['clean', 'instrument'], () => {
 
 gulp.task('codecov', () => gulp.src('coverage/coverage-final.json').pipe(codecov()));
 
-gulp.task('watch', () => gulp.watch(['src/**/*.js', 'test/**/*.js'], ['test']));
-
 gulp.task('default', ['test']);

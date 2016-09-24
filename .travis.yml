@@ -12,6 +12,7 @@ env:
 before_install:
   - npm install -g gulp
 script:
+  - npm run build
   - npm test
   - npm run test-browsers
 after_success:

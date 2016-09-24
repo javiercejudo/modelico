@@ -5,7 +5,7 @@
   "main": "dist/modelico.js",
   "jsnext:main": "dist/modelico.es2015.js",
   "scripts": {
-    "test": "flow && npm run build && gulp test",
+    "test": "flow && gulp test",
     "test-dev": "npm run build-dev && npm run build-browser-spec && gulp test",
     "test-browsers": "./scripts/browser_tester.sh",
     "send-coverage": "./scripts/coverage_reporter.sh",
@@ -14,6 +14,7 @@
     "build-dev": "rollup -c && rollup -c rollup.es2015.config.js",
     "build-min": "uglifyjs dist/modelico.js -c -m > dist/modelico.min.js",
     "build-browser-spec": "rollup -c ./test/rollup.config.js",
+    "watch": "rollup -c -w",
     "version": "npm run build && git add -A dist"
   },
   "repository": {
