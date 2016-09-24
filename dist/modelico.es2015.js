@@ -1,4 +1,4 @@
-var version = "15.0.0";
+var version = "15.1.0";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -8,16 +8,16 @@ const fieldsSymbol = Symbol('fields');
 const innerTypesSymbol = Symbol('innerTypes');
 const itemMetadataSymbol = Symbol('itemMetadata');
 
-const get = field => obj => obj[field];
-const pipe2 = (fn1, fn2) => (...args) => fn2(fn1(...args));
+const get = (field        ) => (obj        ) => obj[field];
+const pipe2 = (fn1          , fn2          ) => (...args              ) => fn2(fn1(...args));
 
-const partial = (fn, ...args) => fn.bind(undefined, ...args);
-const asIsReviver = (k, v) => v;
-const always = x => () => x;
-const defaultTo = fallback => optional => (optional === undefined) ? fallback : optional;
-const objToArr = obj => Object.keys(obj).map(k => [k, obj[k]]);
+const partial = (fn          , ...args              ) => fn.bind(undefined, ...args);
+const asIsReviver = (k        , v       ) => v;
+const always = (x       ) => () => x;
+const defaultTo = (fallback       ) => (optional       ) => (optional === undefined) ? fallback : optional;
+const objToArr = (obj        ) => Object.keys(obj).map(k => [k, obj[k]]);
 const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver));
-const isPlainObject = x => typeof x === 'object' && !!x;
+const isPlainObject = (x       ) => typeof x === 'object' && !!x;
 
 const getInnerTypes = Type => Type.innerTypes && Type.innerTypes() || {};
 
