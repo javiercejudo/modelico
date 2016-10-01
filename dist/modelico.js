@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "15.1.0";
+var version = "15.1.1";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -17,8 +17,121 @@ var itemMetadataSymbol = Symbol('itemMetadata');
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
+
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -655,7 +768,7 @@ var ModelicoSet = function (_Modelico) {
 var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
 var enumeratorsReducer = function enumeratorsReducer(acc, code) {
-  return (acc[code] = { code: code }) && acc;
+  return Object.assign(acc, defineProperty({}, code, { code: code }));
 };
 
 var reviverFactory$3 = function reviverFactory(enumerators) {
@@ -680,10 +793,13 @@ var ModelicoEnum = function (_Modelico) {
       return _this[enumerator]().toJSON = always(enumerator);
     });
 
-    _this.metadata = always(Object.freeze({
-      type: ModelicoEnum,
-      reviver: reviverFactory$3(enumerators)
-    }));
+    Object.defineProperty(_this, 'metadata', {
+      value: always(Object.freeze({
+        type: ModelicoEnum,
+        reviver: reviverFactory$3(enumerators)
+      })),
+      enumerable: false
+    });
 
     return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
   }

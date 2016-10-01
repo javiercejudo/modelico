@@ -1,4 +1,4 @@
-var version = "15.1.0";
+var version = "15.1.1";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -405,7 +405,7 @@ class ModelicoSet extends Modelico$1 {
 
 var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
-const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
+const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
 const reviverFactory$3 = enumerators => (k, v) => {
   return (v === null) ? null : enumerators[v];
@@ -422,10 +422,13 @@ class ModelicoEnum extends Modelico$1 {
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => this[enumerator]().toJSON = always(enumerator));
 
-    this.metadata = always(Object.freeze({
-      type: ModelicoEnum,
-      reviver: reviverFactory$3(enumerators)
-    }));
+    Object.defineProperty(this, 'metadata', {
+      value: always(Object.freeze({
+        type: ModelicoEnum,
+        reviver: reviverFactory$3(enumerators)
+      })),
+      enumerable: false
+    });
 
     return Object.freeze(this);
   }
