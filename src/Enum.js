@@ -3,7 +3,7 @@
 import { always } from './U';
 import Modelico from './Modelico';
 
-const enumeratorsReducer = (acc, code) => (acc[code] = {code}) && acc;
+const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
 const reviverFactory = enumerators => (k, v) => {
   return (v === null) ? null : enumerators[v];
@@ -20,10 +20,13 @@ class ModelicoEnum extends Modelico {
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => this[enumerator]().toJSON = always(enumerator));
 
-    this.metadata = always(Object.freeze({
-      type: ModelicoEnum,
-      reviver: reviverFactory(enumerators)
-    }));
+    Object.defineProperty(this, 'metadata', {
+      value: always(Object.freeze({
+        type: ModelicoEnum,
+        reviver: reviverFactory(enumerators)
+      })),
+      enumerable: false
+    });
 
     return Object.freeze(this);
   }

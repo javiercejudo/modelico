@@ -37,6 +37,7 @@ const buildUtils = (options) => Object.freeze({
 import Modelico from './types/Modelico';
 import ModelicoAsIs from './types/AsIs';
 import ModelicoMap from './types/Map';
+import ModelicoEnum from './types/Enum';
 import ModelicoEnumMap from './types/EnumMap';
 import ModelicoList from './types/List';
 import ModelicoSet from './types/Set';
@@ -65,6 +66,7 @@ export default (options, should, M) => () => {
   describe('Base', Modelico(...deps));
   describe('AsIs', ModelicoAsIs(...utilsAndDeps));
   describe('Map', ModelicoMap(...deps));
+  describe('Enum', ModelicoEnum(...deps));
   describe('EnumMap', ModelicoEnumMap(...deps));
   describe('ModelicoList', ModelicoList(...deps));
   describe('ModelicoSet', ModelicoSet(...deps));
