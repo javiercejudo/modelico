@@ -23,6 +23,11 @@ export default (should, M) => () => {
         .should.be.exactly('Good afternoon!');
     });
 
+    it('should not support null (wrap with Maybe)', () => {
+      (() => new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), null))
+        .should.throw();
+    });
+
     it('should set fields returning a new enum map when part of a path', () => {
       const map = new Map([
         [PartOfDay.MORNING(), new M.Date(new Date('1988-04-16T00:00:00.000Z'))],
@@ -77,15 +82,6 @@ export default (should, M) => () => {
       JSON.stringify(greetings)
         .should.be.exactly('{"MORNING":"Good morning!","AFTERNOON":"Good afternoon!","EVENING":"Good evening!"}');
     });
-
-    it('should support null enum maps', () => {
-      const map = null;
-
-      const greetings = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
-
-      JSON.stringify(greetings)
-        .should.be.exactly('null');
-    });
   });
 
   describe('parsing', () => {
@@ -99,13 +95,11 @@ export default (should, M) => () => {
         .should.be.exactly('Good morning!');
     });
 
-    it('should support null enum maps', () => {
-      const greetings = JSON.parse(
+    it('should not support null (wrap with Maybe)', () => {
+      (() => JSON.parse(
         'null',
         M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(String)).reviver
-      );
-
-      should(greetings.inner()).be.exactly(null);
+      )).should.throw();
     });
   });
 };

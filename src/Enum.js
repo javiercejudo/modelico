@@ -1,12 +1,18 @@
 'use strict';
 
-import { always } from './U';
+import { always, isNothing } from './U';
 import Modelico from './Modelico';
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
 const reviverFactory = enumerators => (k, v) => {
-  return (v === null) ? null : enumerators[v];
+  const enumerator = enumerators[v];
+
+  if (isNothing(enumerator)) {
+    throw TypeError(`missing enumerator (${v})`);
+  }
+
+  return enumerator;
 };
 
 class ModelicoEnum extends Modelico {
@@ -28,7 +34,7 @@ class ModelicoEnum extends Modelico {
       enumerable: false
     });
 
-    return Object.freeze(this);
+    Object.freeze(this);
   }
 }
 

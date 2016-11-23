@@ -36,11 +36,13 @@ const buildUtils = (options) => Object.freeze({
 
 import Modelico from './types/Modelico';
 import ModelicoAsIs from './types/AsIs';
+import ModelicoDate from './types/Date';
 import ModelicoMap from './types/Map';
 import ModelicoEnum from './types/Enum';
 import ModelicoEnumMap from './types/EnumMap';
 import ModelicoList from './types/List';
 import ModelicoSet from './types/Set';
+import ModelicoMaybe from './types/Maybe';
 
 import setPath from './types/setPath';
 
@@ -65,11 +67,13 @@ export default (options, should, M) => () => {
 
   describe('Base', Modelico(...deps));
   describe('AsIs', ModelicoAsIs(...utilsAndDeps));
+  describe('Date', ModelicoDate(...deps));
   describe('Map', ModelicoMap(...deps));
   describe('Enum', ModelicoEnum(...deps));
   describe('EnumMap', ModelicoEnumMap(...deps));
   describe('ModelicoList', ModelicoList(...deps));
   describe('ModelicoSet', ModelicoSet(...deps));
+  describe('ModelicoMaybe', ModelicoMaybe(...deps));
 
   describe('setPath', setPath(...deps));
 

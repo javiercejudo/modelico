@@ -21,8 +21,10 @@
   <script>
     mocha.setup('bdd');
 
-    describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
-    describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
+    describe('Modelico', () => {
+      describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
+      describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
+    });
 
     mocha.checkLeaks();
     mocha.run();

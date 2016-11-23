@@ -1,6 +1,6 @@
 'use strict';
 
-import { always } from './U';
+import { always, isNothing } from './U';
 import { itemMetadataSymbol } from './symbols';
 import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
@@ -11,11 +11,15 @@ class ModelicoList extends Modelico {
   constructor(itemMetadata, inner) {
     super(ModelicoList, {});
 
+    if (isNothing(inner)) {
+      throw TypeError('missing list');
+    }
+
     this[itemMetadataSymbol] = always(itemMetadata);
-    this.inner = () => (inner === null) ? null : inner.slice();
+    this.inner = () => inner.slice();
     this[Symbol.iterator] = () => inner[Symbol.iterator]();
 
-    return Object.freeze(this);
+    Object.freeze(this);
   }
 
   set(index, value) {

@@ -2,6 +2,7 @@
 
 export default (should, M) => () => {
   const Modelico = M.Modelico;
+  const { asIs, any, maybe, list, _ } = M.metadata;
 
   class Animal extends Modelico {
     constructor(fields) {
@@ -26,9 +27,10 @@ export default (should, M) => () => {
 
     static innerTypes() {
       return Object.freeze({
-        givenName: M.AsIs(M.Any),
-        familyName: M.AsIs(String),
-        pets: M.List.metadata(Modelico.metadata(Animal))
+        givenName: asIs(any),
+        middleName: maybe(asIs(any)),
+        familyName: asIs(String),
+        pets: list(maybe(_(Animal)))
       });
     }
   }
@@ -37,9 +39,12 @@ export default (should, M) => () => {
     const personJson = `{
       "givenName": "Javier",
       "familyName": "Cejudo",
-      "pets": [{
-        "name": "Robbie"
-      }]
+      "pets": [
+        {
+          "name": "Robbie"
+        },
+        null
+      ]
     }`;
 
     const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
@@ -50,18 +55,18 @@ export default (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo');
     person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person1.pets().inner().shift().speak()
+    person1.pets().inner().shift().getOrElse({ speak: () => 'hello' }).speak()
       .should.be.exactly('My name is Robbie!');
 
-    person1.pets().inner().shift().speak()
+    person1.pets().inner().shift().getOrElse({ speak: () => 'hello' }).speak()
       .should.be.exactly('My name is Robbie!');
 
     const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-    person3.pets().inner()[0].name()
+    person3.pets().inner()[0].getOrElse({ name: () => 'no' }).name()
       .should.be.exactly('Bane');
 
-    person1.pets().inner()[0].name()
+    person1.pets().inner()[0].getOrElse({ name: () => 'no' }).name()
       .should.be.exactly('Robbie');
   });
 };

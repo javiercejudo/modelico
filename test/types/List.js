@@ -6,7 +6,6 @@ export default (should, M) => () => {
   const Modelico = M.Modelico;
   const Person = PersonFactory(M);
 
-
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
       (() => M.List(M.AsIs(M.Any), [])).should.throw();
@@ -21,10 +20,15 @@ export default (should, M) => () => {
         .should.eql([1, 2, 3, 4]);
     });
 
+    it('should not support null (wrap with Maybe)', () => {
+      (() => new M.List(M.Date.metadata(), null))
+        .should.throw();
+    });
+
     it('should set items in the list correctly', () => {
       const list = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ];
 
       const modelicoList1 = new M.List(M.Date.metadata(), list);
@@ -41,7 +45,7 @@ export default (should, M) => () => {
     it('should set items in the list correctly when part of a path', () => {
       const list = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ];
 
       const modelicoList1 = new M.List(M.Date.metadata(), list);
@@ -58,7 +62,7 @@ export default (should, M) => () => {
     it('should set items in the list correctly when part of a path with a single element', () => {
       const list = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ];
 
       const modelicoList1 = new M.List(M.Date.metadata(), list);
@@ -73,7 +77,7 @@ export default (should, M) => () => {
     });
 
     it('should be able to set a whole list', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
       const author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
       const newListArray = author1.importantDatesList().inner();
@@ -97,7 +101,7 @@ export default (should, M) => () => {
     it('edge case when List setPath is called with an empty path', () => {
       const modelicoDatesList1 = new M.List(M.Date.metadata(), [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ]);
 
       const modelicoDatesList2 = [
@@ -119,50 +123,40 @@ export default (should, M) => () => {
     it('should stringify the list correctly', () => {
       const list = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date('2012-12-25T00:00:00.000Z'))
       ];
 
       const modelicoList = new M.List(M.Date.metadata(), list);
 
       JSON.stringify(modelicoList)
-        .should.be.exactly('["1988-04-16T00:00:00.000Z",null]');
-    });
-
-    it('should support null lists', () => {
-      const list = null;
-      const modelicoList = new M.List(M.Date.metadata(), list);
-
-      JSON.stringify(modelicoList)
-        .should.be.exactly('null');
+        .should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]');
     });
   });
 
   describe('parsing', () => {
     it('should parse the list correctly', () => {
       const modelicoList = JSON.parse(
-        '["1988-04-16T00:00:00.000Z",null]',
+        '["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]',
         M.List.metadata(M.Date.metadata()).reviver
       );
 
       should(modelicoList.inner()[0].inner().getFullYear())
         .be.exactly(1988);
 
-      should(modelicoList.inner()[1].inner())
-        .be.exactly(null);
+      should(modelicoList.inner()[1].inner().getMonth())
+        .be.exactly(11);
     });
 
     it('should be parsed correctly when used within another class', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
       const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
       should(author.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
     });
 
-    it('should support null lists', () => {
-      const modelicoList = JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver);
-
-      should(modelicoList.inner())
-        .be.exactly(null);
+    it('should not support null (wrap with Maybe)', () => {
+      (() => JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver))
+        .should.throw();
     });
   });
 

@@ -1,6 +1,6 @@
 'use strict';
 
-import { always } from './U';
+import { always, isNothing } from './U';
 import { itemMetadataSymbol } from './symbols';
 import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
@@ -11,11 +11,15 @@ class ModelicoSet extends Modelico {
   constructor(itemMetadata, innerSet) {
     super(ModelicoSet, {});
 
+    if (isNothing(innerSet)) {
+      throw TypeError('missing set');
+    }
+
     this[itemMetadataSymbol] = always(itemMetadata);
-    this.inner = () => (innerSet === null) ? null : new Set(innerSet);
+    this.inner = () => new Set(innerSet);
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
-    return Object.freeze(this);
+    Object.freeze(this);
   }
 
   set(index, value) {
@@ -40,9 +44,7 @@ class ModelicoSet extends Modelico {
   }
 
   toJSON() {
-    const innerSet = this.inner();
-
-    return (innerSet === null) ? null : [...innerSet];
+    return [...this.inner()];
   }
 
   static fromArray(arr) {

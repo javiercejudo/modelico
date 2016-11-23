@@ -14,10 +14,15 @@ export default (should, M) => () => {
         .should.eql([1, 2, 4]);
     });
 
+    it('should not support null (wrap with Maybe)', () => {
+      (() => JSON.parse('null', M.Set.metadata(M.Date.metadata()).reviver))
+        .should.throw();
+    });
+
     it('should set items in the set correctly', () => {
       const set = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ];
 
       const modelicoSet1 = new M.Set(M.Date.metadata(), set);
@@ -34,7 +39,7 @@ export default (should, M) => () => {
     it('should set items in the set correctly when part of a path', () => {
       const set = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ];
 
       const modelicoSet1 = new M.Set(M.Date.metadata(), set);
@@ -51,7 +56,7 @@ export default (should, M) => () => {
     it('should set items in the set correctly when part of a path with a single element', () => {
       const set = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ];
 
       const modelicoSet1 = new M.Set(M.Date.metadata(), set);
@@ -66,7 +71,7 @@ export default (should, M) => () => {
     });
 
     it('should be able to set a whole set', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
       const author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
       const newSetArray = [...author1.importantDatesSet().inner()];
@@ -94,7 +99,7 @@ export default (should, M) => () => {
     it('edge case when Set setPath is called with an empty path', () => {
       const modelicoDatesSet1 = new M.Set(M.Date.metadata(), [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date())
       ]);
 
       const modelicoDateSet2 = new Set([
@@ -116,51 +121,41 @@ export default (should, M) => () => {
     it('should stringify the set correctly', () => {
       const set = [
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(null)
+        new M.Date(new Date('2012-12-25T00:00:00.000Z'))
       ];
 
       const modelicoSet = new M.Set(M.Date.metadata(), set);
 
       JSON.stringify(modelicoSet)
-        .should.be.exactly('["1988-04-16T00:00:00.000Z",null]');
+        .should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]');
     });
 
-    it('should support null sets', () => {
-      const set = null;
-      const modelicoSet = new M.Set(M.Date.metadata(), set);
-
-      JSON.stringify(modelicoSet)
-        .should.be.exactly('null');
+    it('should not support null (wrap with Maybe)', () => {
+      (() => new M.Set(M.Date.metadata(), null))
+        .should.throw();
     });
   });
 
   describe('parsing', () => {
     it('should parse the set correctly', () => {
       const modelicoSet = JSON.parse(
-        '["1988-04-16T00:00:00.000Z",null]',
+        '["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]',
         M.Set.metadata(M.Date.metadata()).reviver
       );
 
       should([...modelicoSet.inner()][0].inner().getFullYear())
         .be.exactly(1988);
 
-      should([...modelicoSet.inner()][1].inner())
-        .be.exactly(null);
+      should([...modelicoSet.inner()][1].inner().getMonth())
+        .be.exactly(11);
     });
 
     it('should be parsed correctly when used within another class', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
       const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
       should([...author.importantDatesSet().inner()][0].inner().getFullYear())
         .be.exactly(2013);
-    });
-
-    it('should support null sets', () => {
-      const modelicoSet = JSON.parse('null', M.Set.metadata(M.Date.metadata()).reviver);
-
-      should(modelicoSet.inner())
-        .be.exactly(null);
     });
   });
 

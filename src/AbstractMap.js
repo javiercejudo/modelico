@@ -1,6 +1,6 @@
 'use strict';
 
-import { always } from './U';
+import { always, isNothing } from './U';
 import { typeSymbol, innerTypesSymbol } from './symbols';
 import Modelico from './Modelico';
 
@@ -8,11 +8,13 @@ class AbstractMap extends Modelico {
   constructor(Type, keyMetadata, valueMetadata, innerMap) {
     super(Type, {});
 
-    this.inner = () => (innerMap === null) ? null : new Map(innerMap);
+    if (isNothing(innerMap)) {
+      throw TypeError('missing map');
+    }
+
+    this.inner = () => new Map(innerMap);
     this[innerTypesSymbol] = always(Object.freeze({keyMetadata, valueMetadata}));
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
-
-    return this;
   }
 
   setPath(path, value) {
