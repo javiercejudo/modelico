@@ -33,7 +33,7 @@ class ModelicoEnumMap extends AbstractMap {
   constructor(keyMetadata, valueMetadata, innerMap) {
     super(ModelicoEnumMap, keyMetadata, valueMetadata, innerMap);
 
-    return Object.freeze(this);
+    Object.freeze(this);
   }
 
   set(enumerator, value) {
@@ -41,9 +41,7 @@ class ModelicoEnumMap extends AbstractMap {
   }
 
   toJSON() {
-    const innerMap = this.inner();
-
-    return (innerMap === null) ? null : [...innerMap].reduce(stringifyReducer, {});
+    return [...this.inner()].reduce(stringifyReducer, {});
   }
 
   static metadata(keyMetadata, valueMetadata) {

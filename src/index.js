@@ -4,6 +4,8 @@ import { version, author, homepage, license } from '../package.json';
 import { fieldsSymbol } from './symbols';
 import { partial } from './U';
 
+import Maybe from './Maybe';
+
 import Modelico from './Modelico';
 import ModelicoMap from './Map';
 import EnumMap from './EnumMap';
@@ -29,6 +31,18 @@ const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', '
 const dateNonMutators = internalNonMutators;
 const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
+const metadata = Object.freeze({
+  _: Modelico.metadata,
+  any: Any,
+  asIs: AsIs,
+  date: ModelicoDate.metadata,
+  enumMap: EnumMap.metadata,
+  list: List.metadata,
+  map: ModelicoMap.metadata,
+  maybe: Maybe.metadata,
+  set: ModelicoSet.metadata,
+});
+
 export default Object.freeze({
   about: Object.freeze({ version, author, homepage, license }),
   Any,
@@ -38,9 +52,11 @@ export default Object.freeze({
   EnumMap,
   List,
   Map: ModelicoMap,
+  Maybe,
   Modelico,
   Set: ModelicoSet,
   fields: x => x[fieldsSymbol](),
+  metadata,
   proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
   proxyList: partial(proxyFactory, listNonMutators, listMutators),
   proxySet: partial(proxyFactory, setNonMutators, setMutators),

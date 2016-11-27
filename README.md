@@ -106,6 +106,7 @@ that.
 ```js
 const M = require('modelico');
 const Modelico = M.Modelico;
+const { asIs, list, _ } = M.metadata;
 
 class Person extends Modelico {
   constructor(fields) {
@@ -119,9 +120,9 @@ class Person extends Modelico {
 
   static innerTypes() {
     return Object.freeze({
-      givenName: M.AsIs(String),  // can be omitted since it is a string
-      familyName: M.AsIs(String), // can be omitted since it is a string
-      pets: M.List.metadata(Modelico.metadata(Animal))
+      givenName: asIs(String),
+      familyName: asIs(String),
+      pets: list(_(Animal))
     });
   }
 }

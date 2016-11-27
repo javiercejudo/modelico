@@ -28,7 +28,7 @@ gulp.task('instrument', ['clean'], () => {
 
 gulp.task('test', ['clean', 'instrument'], () => {
   return gulp.src(['test/index.js'])
-    .pipe(mocha())
+    .pipe(mocha({ bail: false }))
     .pipe(istanbul.writeReports({ coverageVariable }));
 });
 

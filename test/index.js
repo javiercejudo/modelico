@@ -7,5 +7,7 @@ var modelicoSpec = require('../dist/modelico-spec.js');
 var Modelico = require('../dist/modelico.js');
 var ModelicoMin = require('../dist/modelico.min.js');
 
-describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
-describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
+describe('Modelico', () => {
+  describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
+  describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
+});

@@ -1,7 +1,9 @@
 'use strict';
 
-import { always, defaultTo, reviverOrAsIs, isPlainObject } from './U';
+import { always, defaultTo, reviverOrAsIs, isPlainObject, isNothing } from './U';
 import { typeSymbol, fieldsSymbol } from './symbols';
+
+import Maybe from './Maybe';
 
 const getInnerTypes = Type => Type.innerTypes && Type.innerTypes() || {};
 
@@ -31,6 +33,10 @@ const reviverFactory = Type => {
 
 class Modelico {
   constructor(Type, fields, thisArg) {
+    if (!isPlainObject(fields)) {
+      throw TypeError(`expected an object with fields for ${Type.name} but got ${fields}`);
+    }
+
     const innerTypes = getInnerTypes(Type);
 
     thisArg = defaultTo(this)(thisArg);
@@ -38,9 +44,16 @@ class Modelico {
     thisArg[fieldsSymbol] = always(Object.freeze(fields));
 
     new Set([...Object.keys(innerTypes), ...Object.keys(fields)])
-      .forEach(key => thisArg[key] = always(fields[key]));
+      .forEach(key => {
+        const value = fields[key];
+        const innerType = innerTypes[key];
 
-    return thisArg;
+        if (isNothing(value) && innerType && innerType.type !== Maybe) {
+          throw TypeError(`no value for key ${key}`);
+        }
+
+        thisArg[key] = always(value)
+      });
   }
 
   set(field, value) {

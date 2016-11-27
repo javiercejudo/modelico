@@ -61,8 +61,10 @@
   <script>
     mocha.setup('bdd');
 
-    describe('Modelico Dev (ES3 setup)', modelicoSpec({}, Should, Modelico));
-    describe('Modelico Min (ES3 setup)', modelicoSpec({}, Should, ModelicoMin));
+    describe('Modelico', () => {
+      describe('Modelico Dev (ES3 setup)', modelicoSpec({}, Should, Modelico));
+      describe('Modelico Min (ES3 setup)', modelicoSpec({}, Should, ModelicoMin));
+    });
 
     mocha.checkLeaks();
     mocha.run();

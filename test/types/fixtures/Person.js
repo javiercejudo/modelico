@@ -10,6 +10,10 @@ export default M => {
   const Modelico = M.Modelico;
   const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ');
 
+  const { asIs, date, map, list, set, maybe } = M.metadata;
+  const partOfDay = PartOfDay.metadata;
+  const sex = Sex.metadata;
+
   class Person extends Modelico {
     constructor(fields) {
       super(Person, fields);
@@ -23,14 +27,14 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        givenName: M.AsIs(String),
-        familyName: M.AsIs(String),
-        birthday: M.Date.metadata(),
-        favouritePartOfDay: PartOfDay.metadata(),
-        lifeEvents: M.Map.metadata(String, M.Date.metadata()),
-        importantDatesList: M.List.metadata(M.Date.metadata()),
-        importantDatesSet: M.Set.metadata(M.Date.metadata()),
-        sex: Sex.metadata()
+        givenName: asIs(String),
+        familyName: asIs(String),
+        birthday: date(),
+        favouritePartOfDay: partOfDay(),
+        lifeEvents: map(asIs(String), date()),
+        importantDatesList: list(date()),
+        importantDatesSet: set(date()),
+        sex: maybe(sex())
       });
     }
 

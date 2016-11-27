@@ -1,14 +1,19 @@
 'use strict';
 
+import { isNothing } from './U';
 import Modelico from './Modelico';
 
 class ModelicoDate extends Modelico {
   constructor(date) {
     super(ModelicoDate, {});
 
-    this.inner = () => date === null ? null : new Date(date.getTime());
+    if (isNothing(date)) {
+      throw TypeError('missing date');
+    }
 
-    return Object.freeze(this);
+    this.inner = () => new Date(date.getTime());
+
+    Object.freeze(this);
   }
 
   set(date) {
@@ -20,9 +25,7 @@ class ModelicoDate extends Modelico {
   }
 
   toJSON() {
-    const date = this.inner();
-
-    return (date === null) ? null : date.toISOString();
+    return this.inner().toISOString();
   }
 
   static reviver(k, v) {
