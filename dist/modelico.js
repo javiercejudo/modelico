@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "16.0.0";
+var version = "16.0.1";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -292,11 +292,16 @@ var Modelico = function () {
     thisArg[fieldsSymbol] = always(Object.freeze(fields));
 
     new Set([].concat(toConsumableArray(Object.keys(innerTypes)), toConsumableArray(Object.keys(fields)))).forEach(function (key) {
-      var value = fields[key];
+      var valueCandidate = fields[key];
       var innerType = innerTypes[key];
+      var value = valueCandidate;
 
-      if (isNothing(value) && innerType && innerType.type !== Maybe$1) {
-        throw TypeError('no value for key ' + key);
+      if (isNothing(valueCandidate) && innerType) {
+        if (innerType.type !== Maybe$1) {
+          throw TypeError('no value for key ' + key);
+        }
+
+        value = Maybe$1.of(null);
       }
 
       thisArg[key] = always(value);

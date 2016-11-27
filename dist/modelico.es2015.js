@@ -1,4 +1,4 @@
-var version = "16.0.0";
+var version = "16.0.1";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -59,11 +59,16 @@ class Modelico {
 
     new Set([...Object.keys(innerTypes), ...Object.keys(fields)])
       .forEach(key => {
-        const value = fields[key];
+        const valueCandidate = fields[key];
         const innerType = innerTypes[key];
+        let value = valueCandidate;
 
-        if (isNothing(value) && innerType && innerType.type !== Maybe$1) {
-          throw TypeError(`no value for key ${key}`);
+        if (isNothing(valueCandidate) && innerType) {
+          if (innerType.type !== Maybe$1) {
+            throw TypeError(`no value for key ${key}`);
+          }
+
+          value = Maybe$1.of(null);
         }
 
         thisArg[key] = always(value)

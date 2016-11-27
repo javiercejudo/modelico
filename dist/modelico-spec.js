@@ -1188,7 +1188,7 @@ var ModelicoMaybe = (function (should, M) {
         maybe.inner().get().equals(author).should.be.exactly(true);
       });
 
-      it('should parse missing keys of Maybe values as Nothing', function () {
+      it('should parse missing keys of Maybe values as Maybe with Nothing', function () {
         var authorJsonWithMissinMaybe = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}';
 
         var author = JSON.parse(authorJsonWithMissinMaybe, Person.metadata().reviver);
