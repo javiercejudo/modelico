@@ -1,7 +1,7 @@
 'use strict';
 
 import { always, isNothing } from './U';
-import { typeSymbol, innerTypesSymbol } from './symbols';
+import { typeSymbol } from './symbols';
 import Modelico from './Modelico';
 
 class AbstractMap extends Modelico {
