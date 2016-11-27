@@ -45,11 +45,16 @@ class Modelico {
 
     new Set([...Object.keys(innerTypes), ...Object.keys(fields)])
       .forEach(key => {
-        const value = fields[key];
+        const valueCandidate = fields[key];
         const innerType = innerTypes[key];
+        let value = valueCandidate;
 
-        if (isNothing(value) && innerType && innerType.type !== Maybe) {
-          throw TypeError(`no value for key ${key}`);
+        if (isNothing(valueCandidate) && innerType) {
+          if (innerType.type !== Maybe) {
+            throw TypeError(`no value for key ${key}`);
+          }
+
+          value = Maybe.of(null);
         }
 
         thisArg[key] = always(value)
