@@ -15,7 +15,7 @@ export default (should, M) => () => {
     });
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => new M.Map(M.AsIs(String), M.Date.metadata(), null))
+      (() => new M.Map(null))
         .should.throw();
     });
 
@@ -25,7 +25,7 @@ export default (should, M) => () => {
         ['b', new M.Date(new Date())]
       ]);
 
-      const modelicoMap1 = new M.Map(M.AsIs(String), M.Date.metadata(), map);
+      const modelicoMap1 = new M.Map(map);
       const modelicoMap2 = modelicoMap1.set('a', new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
       should(modelicoMap2.inner().get('a').inner().getFullYear())
@@ -76,7 +76,7 @@ export default (should, M) => () => {
         ['b', new M.Date(new Date('2012-12-25T00:00:00.000Z'))]
       ]);
 
-      const modelicoMap = new M.Map(M.AsIs(String), M.Date.metadata(), map);
+      const modelicoMap = new M.Map(map);
 
       JSON.stringify(modelicoMap)
         .should.be.exactly('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":"2012-12-25T00:00:00.000Z"}]');
@@ -114,11 +114,11 @@ export default (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoMap = new M.Map(M.AsIs(String), M.Date.metadata(), new Map([
+      const modelicoMap = new M.Map(new Map([
         ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 
-      const modelicoMap2 = new M.Map(M.AsIs(String), M.Date.metadata(), new Map([
+      const modelicoMap2 = new M.Map(new Map([
         ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 

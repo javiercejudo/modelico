@@ -25,7 +25,7 @@ export default (should, M) => () => {
         new M.Date(new Date())
       ];
 
-      const modelicoSet1 = new M.Set(M.Date.metadata(), set);
+      const modelicoSet1 = new M.Set(set);
       const modelicoSet2 = modelicoSet1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
       should([...modelicoSet2.inner()][0].inner().getFullYear())
@@ -42,7 +42,7 @@ export default (should, M) => () => {
         new M.Date(new Date())
       ];
 
-      const modelicoSet1 = new M.Set(M.Date.metadata(), set);
+      const modelicoSet1 = new M.Set(set);
       const modelicoSet2 = modelicoSet1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
       should([...modelicoSet2.inner()][0].inner().getFullYear())
@@ -59,7 +59,7 @@ export default (should, M) => () => {
         new M.Date(new Date())
       ];
 
-      const modelicoSet1 = new M.Set(M.Date.metadata(), set);
+      const modelicoSet1 = new M.Set(set);
       const modelicoSet2 = modelicoSet1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
       should([...modelicoSet2.inner()][0].inner().getFullYear())
@@ -79,7 +79,7 @@ export default (should, M) => () => {
 
       const author2 = author1.set(
         'importantDatesSet',
-        new M.Set(M.Date.metadata(), newSetArray)
+        new M.Set(newSetArray)
       );
 
       const author1InnerSet = author1.importantDatesSet().inner();
@@ -97,7 +97,7 @@ export default (should, M) => () => {
     });
 
     it('edge case when Set setPath is called with an empty path', () => {
-      const modelicoDatesSet1 = new M.Set(M.Date.metadata(), [
+      const modelicoDatesSet1 = new M.Set([
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
         new M.Date(new Date())
       ]);
@@ -106,7 +106,7 @@ export default (should, M) => () => {
         new M.Date(new Date('2016-04-16T00:00:00.000Z'))
       ]);
 
-      const setOfSetsOfDates1 = new M.Set(M.Set.metadata(M.Date.metadata()), [modelicoDatesSet1]);
+      const setOfSetsOfDates1 = new M.Set([modelicoDatesSet1]);
       const setOfSetsOfDates2 = setOfSetsOfDates1.setPath([0], modelicoDateSet2);
 
       should([...[...setOfSetsOfDates1.inner()][0].inner()][0].inner().getFullYear())
@@ -124,14 +124,14 @@ export default (should, M) => () => {
         new M.Date(new Date('2012-12-25T00:00:00.000Z'))
       ];
 
-      const modelicoSet = new M.Set(M.Date.metadata(), set);
+      const modelicoSet = new M.Set(set);
 
       JSON.stringify(modelicoSet)
         .should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]');
     });
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => new M.Set(M.Date.metadata(), null))
+      (() => new M.Set(null))
         .should.throw();
     });
   });
@@ -161,11 +161,11 @@ export default (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoSet1 = new M.Set(M.Date.metadata(), [
+      const modelicoSet1 = new M.Set([
         new M.Date(new Date('1988-04-16T00:00:00.000Z'))
       ]);
 
-      const modelicoSet2 = new M.Set(M.Date.metadata(), [
+      const modelicoSet2 = new M.Set([
         new M.Date(new Date('1988-04-16T00:00:00.000Z'))
       ]);
 

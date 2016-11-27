@@ -10,7 +10,7 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
   const revive = partial(itemMetadata.reviver, k);
   const iterable = (v === null) ? null : v.map(revive);
 
-  return new IterableType(itemMetadata, iterable);
+  return new IterableType(iterable);
 };
 
 export const iterableMetadata = (IterableType, itemMetadata) => {

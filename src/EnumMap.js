@@ -24,14 +24,16 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
     return v;
   }
 
-  const innerMap = (v === null) ? null : new Map(Object.keys(v).map(parseMapper(keyMetadata, valueMetadata, v)));
+  const innerMap = (v === null) ?
+    null :
+    new Map(Object.keys(v).map(parseMapper(keyMetadata, valueMetadata, v)));
 
-  return new ModelicoEnumMap(keyMetadata, valueMetadata, innerMap);
+  return new ModelicoEnumMap(innerMap);
 };
 
 class ModelicoEnumMap extends AbstractMap {
-  constructor(keyMetadata, valueMetadata, innerMap) {
-    super(ModelicoEnumMap, keyMetadata, valueMetadata, innerMap);
+  constructor(innerMap) {
+    super(ModelicoEnumMap, innerMap);
 
     Object.freeze(this);
   }
