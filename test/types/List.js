@@ -8,7 +8,7 @@ export default (should, M) => () => {
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
-      (() => M.List(M.AsIs(M.Any), [])).should.throw();
+      (() => M.List([])).should.throw();
     });
   });
 
@@ -21,7 +21,7 @@ export default (should, M) => () => {
     });
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => new M.List(M.Date.metadata(), null))
+      (() => new M.List(null))
         .should.throw();
     });
 
@@ -31,7 +31,7 @@ export default (should, M) => () => {
         new M.Date(new Date())
       ];
 
-      const modelicoList1 = new M.List(M.Date.metadata(), list);
+      const modelicoList1 = new M.List(list);
       const modelicoList2 = modelicoList1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
       should(modelicoList2.inner()[0].inner().getFullYear())
@@ -48,7 +48,7 @@ export default (should, M) => () => {
         new M.Date(new Date())
       ];
 
-      const modelicoList1 = new M.List(M.Date.metadata(), list);
+      const modelicoList1 = new M.List(list);
       const modelicoList2 = modelicoList1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
       should(modelicoList2.inner()[0].inner().getFullYear())
@@ -65,7 +65,7 @@ export default (should, M) => () => {
         new M.Date(new Date())
       ];
 
-      const modelicoList1 = new M.List(M.Date.metadata(), list);
+      const modelicoList1 = new M.List(list);
       const modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
       should(modelicoList2.inner()[0].inner().getFullYear())
@@ -85,7 +85,7 @@ export default (should, M) => () => {
 
       const author2 = author1.set(
         'importantDatesList',
-        new M.List(M.Date.metadata(), newListArray)
+        new M.List(newListArray)
       );
 
       should(author1.importantDatesList().inner().length).be.exactly(2);
@@ -99,7 +99,7 @@ export default (should, M) => () => {
     });
 
     it('edge case when List setPath is called with an empty path', () => {
-      const modelicoDatesList1 = new M.List(M.Date.metadata(), [
+      const modelicoDatesList1 = new M.List([
         new M.Date(new Date('1988-04-16T00:00:00.000Z')),
         new M.Date(new Date())
       ]);
@@ -108,7 +108,7 @@ export default (should, M) => () => {
         new M.Date(new Date('2016-04-16T00:00:00.000Z'))
       ];
 
-      const listOfListOfDates1 = new M.List(M.List.metadata(M.Date.metadata()), [modelicoDatesList1]);
+      const listOfListOfDates1 = new M.List([modelicoDatesList1]);
       const listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
 
       should(listOfListOfDates1.inner()[0].inner()[0].inner().getFullYear())
@@ -126,7 +126,7 @@ export default (should, M) => () => {
         new M.Date(new Date('2012-12-25T00:00:00.000Z'))
       ];
 
-      const modelicoList = new M.List(M.Date.metadata(), list);
+      const modelicoList = new M.List(list);
 
       JSON.stringify(modelicoList)
         .should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]');
@@ -162,11 +162,11 @@ export default (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoList1 = new M.List(M.Date.metadata(), [
+      const modelicoList1 = new M.List([
         new M.Date(new Date('1988-04-16T00:00:00.000Z'))
       ]);
 
-      const modelicoList2 = new M.List(M.Date.metadata(), [
+      const modelicoList2 = new M.List([
         new M.Date(new Date('1988-04-16T00:00:00.000Z'))
       ]);
 

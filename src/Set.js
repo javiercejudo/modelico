@@ -1,21 +1,19 @@
 'use strict';
 
 import { always, isNothing } from './U';
-import { itemMetadataSymbol } from './symbols';
 import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
 import Any from './Any';
 
 class ModelicoSet extends Modelico {
-  constructor(itemMetadata, innerSet) {
+  constructor(innerSet) {
     super(ModelicoSet, {});
 
     if (isNothing(innerSet)) {
       throw TypeError('missing set');
     }
 
-    this[itemMetadataSymbol] = always(itemMetadata);
     this.inner = () => new Set(innerSet);
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
@@ -26,12 +24,12 @@ class ModelicoSet extends Modelico {
     const newSet = [...this.inner()];
     newSet[index] = value;
 
-    return new ModelicoSet(this[itemMetadataSymbol](), newSet);
+    return new ModelicoSet(newSet);
   }
 
   setPath(path, value) {
     if (path.length === 0) {
-      return new ModelicoSet(this[itemMetadataSymbol](), value);
+      return new ModelicoSet(value);
     }
 
     const item = [...this.inner()][path[0]];
@@ -52,7 +50,7 @@ class ModelicoSet extends Modelico {
   }
 
   static fromSet(set) {
-    return new ModelicoSet(AsIs(Any), set);
+    return new ModelicoSet(set);
   }
 
   static metadata(itemMetadata) {

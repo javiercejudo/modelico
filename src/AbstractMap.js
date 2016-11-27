@@ -5,7 +5,7 @@ import { typeSymbol, innerTypesSymbol } from './symbols';
 import Modelico from './Modelico';
 
 class AbstractMap extends Modelico {
-  constructor(Type, keyMetadata, valueMetadata, innerMap) {
+  constructor(Type, innerMap) {
     super(Type, {});
 
     if (isNothing(innerMap)) {
@@ -13,15 +13,12 @@ class AbstractMap extends Modelico {
     }
 
     this.inner = () => new Map(innerMap);
-    this[innerTypesSymbol] = always(Object.freeze({keyMetadata, valueMetadata}));
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
   }
 
   setPath(path, value) {
     if (path.length === 0) {
-      const { keyMetadata, valueMetadata } = this[innerTypesSymbol]();
-
-      return new (this[typeSymbol]())(keyMetadata, valueMetadata, value);
+      return new (this[typeSymbol]())(value);
     }
 
     const item = this.inner().get(path[0]);
@@ -35,11 +32,10 @@ class AbstractMap extends Modelico {
 
   // as static to support IE < 11
   static set(Type, key, value) {
-    const { keyMetadata, valueMetadata } = this[innerTypesSymbol]();
     const newMap = this.inner();
     newMap.set(key, value);
 
-    return new Type(keyMetadata, valueMetadata, newMap);
+    return new Type(newMap);
   }
 
   static metadata(Type, reviver) {

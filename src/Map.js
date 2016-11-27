@@ -22,20 +22,22 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
     return v;
   }
 
-  const innerMap = (v === null) ? null : new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
+  const innerMap = (v === null) ?
+    null :
+    new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
 
-  return new ModelicoMap(keyMetadata, valueMetadata, innerMap);
+  return new ModelicoMap(innerMap);
 };
 
 class ModelicoMap extends AbstractMap {
-  constructor(keyMetadata, valueMetadata, innerMap) {
-    super(ModelicoMap, keyMetadata, valueMetadata, innerMap);
+  constructor(innerMap) {
+    super(ModelicoMap, innerMap);
 
     Object.freeze(this);
   }
 
-  set(enumerator, value) {
-    return AbstractMap.set.call(this, ModelicoMap, enumerator, value);
+  set(key, value) {
+    return AbstractMap.set.call(this, ModelicoMap, key, value);
   }
 
   toJSON() {
@@ -47,7 +49,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   static fromMap(map) {
-    return new ModelicoMap(AsIs(String), AsIs(Any), map);
+    return new ModelicoMap(map);
   }
 
   static metadata(keyMetadata, valueMetadata) {

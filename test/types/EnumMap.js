@@ -13,7 +13,7 @@ export default (should, M) => () => {
         [PartOfDay.EVENING(), 'Good evening!']
       ]);
 
-      const greetings1 = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
+      const greetings1 = new M.EnumMap(map);
       const greetings2 = greetings1.set(PartOfDay.AFTERNOON(), 'GOOD AFTERNOON!');
 
       greetings2.inner().get(PartOfDay.AFTERNOON())
@@ -24,7 +24,7 @@ export default (should, M) => () => {
     });
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), null))
+      (() => new M.EnumMap(null))
         .should.throw();
     });
 
@@ -35,7 +35,7 @@ export default (should, M) => () => {
         [PartOfDay.EVENING(), new M.Date(new Date('2012-04-16T00:00:00.000Z'))]
       ]);
 
-      const greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map);
+      const greetings1 = new M.EnumMap(map);
       const greetings2 = greetings1.setPath([PartOfDay.EVENING(), 'date'], new Date('2013-04-16T00:00:00.000Z'));
 
       should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear())
@@ -58,7 +58,7 @@ export default (should, M) => () => {
         [PartOfDay.EVENING(), new M.Date(new Date('2013-04-16T00:00:00.000Z'))]
       ]);
 
-      const greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map1);
+      const greetings1 = new M.EnumMap(map1);
       const greetings2 = greetings1.setPath([], map2);
 
       should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear())
@@ -77,7 +77,7 @@ export default (should, M) => () => {
         [PartOfDay.EVENING(), 'Good evening!']
       ]);
 
-      const greetings = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
+      const greetings = new M.EnumMap(map);
 
       JSON.stringify(greetings)
         .should.be.exactly('{"MORNING":"Good morning!","AFTERNOON":"Good afternoon!","EVENING":"Good evening!"}');

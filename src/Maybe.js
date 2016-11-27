@@ -1,8 +1,6 @@
 'use strict';
 
 import { always, isNothing } from './U';
-import { itemMetadataSymbol } from './symbols';
-
 import Modelico from './Modelico';
 
 const reviverFactory = itemMetadata => (k, v) => {
