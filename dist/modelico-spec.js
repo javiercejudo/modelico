@@ -1187,6 +1187,14 @@ var ModelicoMaybe = (function (should, M) {
         var maybe = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
         maybe.inner().get().equals(author).should.be.exactly(true);
       });
+
+      it('should parse missing keys of Maybe values as Nothing', function () {
+        var authorJsonWithMissinMaybe = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}';
+
+        var author = JSON.parse(authorJsonWithMissinMaybe, Person.metadata().reviver);
+
+        author.sex().isEmpty().should.be.exactly(true);
+      });
     });
 
     describe('isEmpty', function () {

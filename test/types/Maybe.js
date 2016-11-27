@@ -91,6 +91,15 @@ export default (should, M) => () => {
       const maybe = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
       maybe.inner().get().equals(author).should.be.exactly(true);
     });
+
+    it('should parse missing keys of Maybe values as Maybe with Nothing', () => {
+      const authorJsonWithMissinMaybe = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}';
+
+      const author = JSON.parse(authorJsonWithMissinMaybe, Person.metadata().reviver);
+
+      author.sex().isEmpty()
+        .should.be.exactly(true);
+    });
   });
 
   describe('isEmpty', () => {
