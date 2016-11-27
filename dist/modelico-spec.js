@@ -207,6 +207,17 @@ var PersonFactory = (function (M) {
     }).join(' ');
   };
 
+  var _M$metadata = M.metadata,
+      asIs = _M$metadata.asIs,
+      date = _M$metadata.date,
+      map = _M$metadata.map,
+      list = _M$metadata.list,
+      set = _M$metadata.set,
+      maybe = _M$metadata.maybe;
+
+  var partOfDay = PartOfDay.metadata;
+  var sex = Sex.metadata;
+
   var Person = function (_Modelico) {
     inherits(Person, _Modelico);
 
@@ -228,14 +239,14 @@ var PersonFactory = (function (M) {
       key: 'innerTypes',
       value: function innerTypes() {
         return Object.freeze({
-          givenName: M.AsIs(String),
-          familyName: M.AsIs(String),
-          birthday: M.Date.metadata(),
-          favouritePartOfDay: PartOfDay.metadata(),
-          lifeEvents: M.Map.metadata(String, M.Date.metadata()),
-          importantDatesList: M.List.metadata(M.Date.metadata()),
-          importantDatesSet: M.Set.metadata(M.Date.metadata()),
-          sex: Sex.metadata()
+          givenName: asIs(String),
+          familyName: asIs(String),
+          birthday: date(),
+          favouritePartOfDay: partOfDay(),
+          lifeEvents: map(asIs(String), date()),
+          importantDatesList: list(date()),
+          importantDatesSet: set(date()),
+          sex: maybe(sex())
         });
       }
     }, {
@@ -283,16 +294,29 @@ var Modelico = (function (should, M) {
     var Modelico = M.Modelico;
     var ModelicoDate = M.Date;
 
-    var author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","sex":"MALE"}';
+    var author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
     var author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
 
     describe('setting', function () {
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return Modelico.fromJSON(Person, author2Json);
+        }).should.throw();
+
+        (function () {
+          return new Person(null);
+        }).should.throw();
+      });
+
       it('should set fields returning a new object', function () {
         var author1 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
-          birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+          birthday: new M.Date(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
           sex: Sex.MALE()
         });
 
@@ -321,6 +345,9 @@ var Modelico = (function (should, M) {
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
           sex: Sex.MALE()
         });
 
@@ -333,9 +360,9 @@ var Modelico = (function (should, M) {
       });
 
       it('edge case when Modelico setPath is called with an empty path', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
-        var listOfPeople1 = new M.List(Person.metadata(), [author]);
+        var listOfPeople1 = new M.List([author]);
 
         var listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
         var listOfPeople3 = listOfPeople2.setPath([0], M.fields(author));
@@ -343,6 +370,21 @@ var Modelico = (function (should, M) {
         listOfPeople1.inner()[0].givenName().should.be.exactly('Javier');
         listOfPeople2.inner()[0].givenName().should.be.exactly('Javi');
         listOfPeople3.inner()[0].givenName().should.be.exactly('Javier');
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new Person({
+            givenName: 'Javier',
+            familyName: 'Cejudo',
+            birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+            favouritePartOfDay: null,
+            lifeEvents: new M.Map([]),
+            importantDatesList: new M.Map([]),
+            importantDatesSet: new M.Map([]),
+            sex: Sex.MALE()
+          });
+        }).should.throw();
       });
     });
 
@@ -353,22 +395,13 @@ var Modelico = (function (should, M) {
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
           sex: Sex.MALE()
         });
 
         JSON.stringify(author1).should.be.exactly(author1Json);
-      });
-
-      it('should support null in Enum', function () {
-        var author2 = new Person({
-          givenName: 'Javier',
-          familyName: 'Cejudo',
-          birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
-          favouritePartOfDay: null,
-          sex: Sex.MALE()
-        });
-
-        JSON.stringify(author2).should.be.exactly(author2Json);
       });
     });
 
@@ -383,13 +416,7 @@ var Modelico = (function (should, M) {
 
         should(PartOfDay.EVENING().minTime).be.exactly(author1.favouritePartOfDay().minTime).and.exactly(author2.favouritePartOfDay().minTime);
 
-        Sex.MALE().code.should.be.exactly(author1.sex().code).and.exactly(author2.sex().code);
-      });
-
-      it('should support null in Enum', function () {
-        var author2 = Modelico.fromJSON(Person, author2Json);
-
-        (author2.favouritePartOfDay() === null).should.be.exactly(true);
+        Sex.MALE().toJSON().should.be.exactly(author1.sex().toJSON()).and.exactly(author2.sex().toJSON());
       });
 
       it('should work with plain classes extending Modelico', function () {
@@ -405,19 +432,34 @@ var Modelico = (function (should, M) {
         var author1 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
-          birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
+          birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
+          sex: Sex.MALE()
         });
 
         var author2 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
-          birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
+          birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
+          sex: Sex.MALE()
         });
 
         var author3 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo Goñi',
-          birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z')
+          birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
+          sex: Sex.MALE()
         });
 
         author1.equals(author2).should.be.exactly(true);
@@ -428,13 +470,21 @@ var Modelico = (function (should, M) {
     });
 
     describe('fields', function () {
-      it('creates an accessor method for every field and every inner type declared', function () {
+      it('creates an accessor method for every field', function () {
         var author = new Person({
-          undeclaredField: 'something'
+          undeclaredField: 'something',
+          givenName: 'Javier',
+          familyName: 'Cejudo Goñi',
+          birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
+          sex: Sex.MALE()
         });
 
         author.undeclaredField().should.be.exactly('something');
-        should(author.givenName()).be.exactly(undefined);
+        JSON.stringify(author).should.be.exactly('{"undeclaredField":"something","givenName":"Javier","familyName":"Cejudo Go\xF1i","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}');
       });
     });
   };
@@ -481,6 +531,62 @@ var ModelicoAsIs = (function (U, should, M) {
   };
 });
 
+var ModelicoDate = (function (should, M) {
+  return function () {
+    var Modelico = M.Modelico;
+
+    describe('instantiation', function () {
+      it('must be instantiated with new', function () {
+        (function () {
+          return M.Date(M.AsIs(M.Any), new Date());
+        }).should.throw();
+      });
+    });
+
+    describe('setting', function () {
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new M.Date(null);
+        }).should.throw();
+      });
+
+      it('should set dates correctly', function () {
+        var date1 = new M.Date(new Date('1988-04-16T00:00:00.000Z'));
+        var date2 = date1.setPath([], new Date('1989-04-16T00:00:00.000Z'));
+        var date3 = date1.set(new Date('1987-04-16T00:00:00.000Z'));
+
+        should(date3.inner().getFullYear()).be.exactly(1987);
+
+        should(date2.inner().getFullYear()).be.exactly(1989);
+
+        should(date1.inner().getFullYear()).be.exactly(1988);
+      });
+    });
+
+    describe('stringifying', function () {
+      it('should stringify values correctly', function () {
+        var date = new M.Date(new Date('1988-04-16T00:00:00.000Z'));
+
+        JSON.stringify(date).should.be.exactly('"1988-04-16T00:00:00.000Z"');
+      });
+    });
+
+    describe('parsing', function () {
+      it('should parse Maybe values correctly', function () {
+        var date = JSON.parse('"1988-04-16T00:00:00.000Z"', M.Date.metadata().reviver);
+
+        should(date.inner().getFullYear()).be.exactly(1988);
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return JSON.parse('null', M.Date.metadata(M.Date.metadata()).reviver);
+        }).should.throw();
+      });
+    });
+  };
+});
+
 var ModelicoMap = (function (should, M) {
   return function () {
     var Person = PersonFactory(M);
@@ -493,10 +599,16 @@ var ModelicoMap = (function (should, M) {
         [].concat(toConsumableArray(map)).should.eql([['a', 1], ['b', 2], ['c', 3]]);
       });
 
-      it('should set fields returning a new map', function () {
-        var map = new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))], ['b', new M.Date(null)]]);
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new M.Map(null);
+        }).should.throw();
+      });
 
-        var modelicoMap1 = new M.Map(M.AsIs(String), M.Date.metadata(), map);
+      it('should set fields returning a new map', function () {
+        var map = new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))], ['b', new M.Date(new Date())]]);
+
+        var modelicoMap1 = new M.Map(map);
         var modelicoMap2 = modelicoMap1.set('a', new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
         should(modelicoMap2.inner().get('a').inner().getFullYear()).be.exactly(1989);
@@ -506,77 +618,70 @@ var ModelicoMap = (function (should, M) {
       });
 
       it('should set fields returning a new map when part of a path', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
         var author1 = Modelico.fromJSON(Person, authorJson);
-        var author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2013-03-28T00:00:00.000Z'));
+        var author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2010-03-28T00:00:00.000Z'));
 
-        should(author2.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
+        should(author2.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2010);
 
         // verify that author1 was not mutated
-        should(author1.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2012);
+        should(author1.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
       });
 
       it('edge case when setPath is called with an empty path', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2012-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
         var author = Modelico.fromJSON(Person, authorJson);
 
         var map = author.lifeEvents();
 
-        should(map.inner().get('wedding').inner().getFullYear()).be.exactly(2012);
+        should(map.inner().get('wedding').inner().getFullYear()).be.exactly(2013);
 
-        var customMap = new Map([['wedding', new M.Date(new Date('2013-03-28T00:00:00.000Z'))]]);
+        var customMap = new Map([['wedding', new M.Date(new Date('2010-03-28T00:00:00.000Z'))]]);
 
         var map2 = map.setPath([], customMap);
 
-        should(map2.inner().get('wedding').inner().getFullYear()).be.exactly(2013);
+        should(map2.inner().get('wedding').inner().getFullYear()).be.exactly(2010);
       });
     });
 
     describe('stringifying', function () {
       it('should stringify the map correctly', function () {
-        var map = new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))], ['b', new M.Date(null)]]);
+        var map = new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))], ['b', new M.Date(new Date('2012-12-25T00:00:00.000Z'))]]);
 
-        var modelicoMap = new M.Map(M.AsIs(String), M.Date.metadata(), map);
+        var modelicoMap = new M.Map(map);
 
-        JSON.stringify(modelicoMap).should.be.exactly('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]');
-      });
-
-      it('should support null maps', function () {
-        var map = null;
-        var modelicoMap = new M.Map(M.AsIs(String), M.Date.metadata(), map);
-
-        JSON.stringify(modelicoMap).should.be.exactly('null');
+        JSON.stringify(modelicoMap).should.be.exactly('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":"2012-12-25T00:00:00.000Z"}]');
       });
     });
 
     describe('parsing', function () {
       it('should parse the map correctly', function () {
-        var modelicoMap = JSON.parse('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":null}]', M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver);
+        var modelicoMap = JSON.parse('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":"2012-12-25T00:00:00.000Z"}]', M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver);
 
         should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(1988);
 
-        should(modelicoMap.inner().get('b').inner()).be.exactly(null);
+        should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11);
       });
 
       it('should be parsed correctly when used within another class', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
         var author = Modelico.fromJSON(Person, authorJson);
 
         should(author.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
       });
 
-      it('should support null maps', function () {
-        var modelicoMap = JSON.parse('null', M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver);
-
-        should(modelicoMap.inner()).be.exactly(null);
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return JSON.parse('null', M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver);
+        }).should.throw();
       });
     });
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoMap = new M.Map(M.AsIs(String), M.Date.metadata(), new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]]));
+        var modelicoMap = new M.Map(new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]]));
 
-        var modelicoMap2 = new M.Map(M.AsIs(String), M.Date.metadata(), new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]]));
+        var modelicoMap2 = new M.Map(new Map([['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]]));
 
         modelicoMap.should.not.be.exactly(modelicoMap2);
         modelicoMap.should.not.equal(modelicoMap2);
@@ -623,7 +728,7 @@ var ModelicoEnumMap = (function (should, M) {
       it('should set fields returning a new enum map', function () {
         var map = new Map([[PartOfDay.MORNING(), 'Good morning!'], [PartOfDay.AFTERNOON(), 'Good afternoon!'], [PartOfDay.EVENING(), 'Good evening!']]);
 
-        var greetings1 = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
+        var greetings1 = new M.EnumMap(map);
         var greetings2 = greetings1.set(PartOfDay.AFTERNOON(), 'GOOD AFTERNOON!');
 
         greetings2.inner().get(PartOfDay.AFTERNOON()).should.be.exactly('GOOD AFTERNOON!');
@@ -631,10 +736,16 @@ var ModelicoEnumMap = (function (should, M) {
         greetings1.inner().get(PartOfDay.AFTERNOON()).should.be.exactly('Good afternoon!');
       });
 
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new M.EnumMap(null);
+        }).should.throw();
+      });
+
       it('should set fields returning a new enum map when part of a path', function () {
         var map = new Map([[PartOfDay.MORNING(), new M.Date(new Date('1988-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), new M.Date(new Date('2000-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), new M.Date(new Date('2012-04-16T00:00:00.000Z'))]]);
 
-        var greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map);
+        var greetings1 = new M.EnumMap(map);
         var greetings2 = greetings1.setPath([PartOfDay.EVENING(), 'date'], new Date('2013-04-16T00:00:00.000Z'));
 
         should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear()).be.exactly(2013);
@@ -647,7 +758,7 @@ var ModelicoEnumMap = (function (should, M) {
 
         var map2 = new Map([[PartOfDay.MORNING(), new M.Date(new Date('1989-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), new M.Date(new Date('2001-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), new M.Date(new Date('2013-04-16T00:00:00.000Z'))]]);
 
-        var greetings1 = new M.EnumMap(PartOfDay.metadata(), M.Date.metadata(), map1);
+        var greetings1 = new M.EnumMap(map1);
         var greetings2 = greetings1.setPath([], map2);
 
         should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear()).be.exactly(2013);
@@ -660,17 +771,9 @@ var ModelicoEnumMap = (function (should, M) {
       it('should stringify the enum map correctly', function () {
         var map = new Map([[PartOfDay.MORNING(), 'Good morning!'], [PartOfDay.AFTERNOON(), 'Good afternoon!'], [PartOfDay.EVENING(), 'Good evening!']]);
 
-        var greetings = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
+        var greetings = new M.EnumMap(map);
 
         JSON.stringify(greetings).should.be.exactly('{"MORNING":"Good morning!","AFTERNOON":"Good afternoon!","EVENING":"Good evening!"}');
-      });
-
-      it('should support null enum maps', function () {
-        var map = null;
-
-        var greetings = new M.EnumMap(PartOfDay.metadata(), M.AsIs(String), map);
-
-        JSON.stringify(greetings).should.be.exactly('null');
       });
     });
 
@@ -681,10 +784,10 @@ var ModelicoEnumMap = (function (should, M) {
         greetings.inner().get(PartOfDay.MORNING()).should.be.exactly('Good morning!');
       });
 
-      it('should support null enum maps', function () {
-        var greetings = JSON.parse('null', M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(String)).reviver);
-
-        should(greetings.inner()).be.exactly(null);
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return JSON.parse('null', M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(String)).reviver);
+        }).should.throw();
       });
     });
   };
@@ -698,7 +801,7 @@ var ModelicoList = (function (should, M) {
     describe('instantiation', function () {
       it('must be instantiated with new', function () {
         (function () {
-          return M.List(M.AsIs(M.Any), []);
+          return M.List([]);
         }).should.throw();
       });
     });
@@ -710,10 +813,16 @@ var ModelicoList = (function (should, M) {
         [].concat(toConsumableArray(list)).should.eql([1, 2, 3, 4]);
       });
 
-      it('should set items in the list correctly', function () {
-        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new M.List(null);
+        }).should.throw();
+      });
 
-        var modelicoList1 = new M.List(M.Date.metadata(), list);
+      it('should set items in the list correctly', function () {
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
+
+        var modelicoList1 = new M.List(list);
         var modelicoList2 = modelicoList1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
         should(modelicoList2.inner()[0].inner().getFullYear()).be.exactly(1989);
@@ -723,9 +832,9 @@ var ModelicoList = (function (should, M) {
       });
 
       it('should set items in the list correctly when part of a path', function () {
-        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
 
-        var modelicoList1 = new M.List(M.Date.metadata(), list);
+        var modelicoList1 = new M.List(list);
         var modelicoList2 = modelicoList1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
         should(modelicoList2.inner()[0].inner().getFullYear()).be.exactly(1989);
@@ -735,9 +844,9 @@ var ModelicoList = (function (should, M) {
       });
 
       it('should set items in the list correctly when part of a path with a single element', function () {
-        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
 
-        var modelicoList1 = new M.List(M.Date.metadata(), list);
+        var modelicoList1 = new M.List(list);
         var modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
         should(modelicoList2.inner()[0].inner().getFullYear()).be.exactly(2000);
@@ -747,13 +856,13 @@ var ModelicoList = (function (should, M) {
       });
 
       it('should be able to set a whole list', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
         var newListArray = author1.importantDatesList().inner();
         newListArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
 
-        var author2 = author1.set('importantDatesList', new M.List(M.Date.metadata(), newListArray));
+        var author2 = author1.set('importantDatesList', new M.List(newListArray));
 
         should(author1.importantDatesList().inner().length).be.exactly(2);
         should(author1.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
@@ -766,11 +875,11 @@ var ModelicoList = (function (should, M) {
       });
 
       it('edge case when List setPath is called with an empty path', function () {
-        var modelicoDatesList1 = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)]);
+        var modelicoDatesList1 = new M.List([new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())]);
 
         var modelicoDatesList2 = [new M.Date(new Date('2016-04-16T00:00:00.000Z'))];
 
-        var listOfListOfDates1 = new M.List(M.List.metadata(M.Date.metadata()), [modelicoDatesList1]);
+        var listOfListOfDates1 = new M.List([modelicoDatesList1]);
         var listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
 
         should(listOfListOfDates1.inner()[0].inner()[0].inner().getFullYear()).be.exactly(1988);
@@ -781,49 +890,42 @@ var ModelicoList = (function (should, M) {
 
     describe('stringifying', function () {
       it('should stringify the list correctly', function () {
-        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+        var list = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date('2012-12-25T00:00:00.000Z'))];
 
-        var modelicoList = new M.List(M.Date.metadata(), list);
+        var modelicoList = new M.List(list);
 
-        JSON.stringify(modelicoList).should.be.exactly('["1988-04-16T00:00:00.000Z",null]');
-      });
-
-      it('should support null lists', function () {
-        var list = null;
-        var modelicoList = new M.List(M.Date.metadata(), list);
-
-        JSON.stringify(modelicoList).should.be.exactly('null');
+        JSON.stringify(modelicoList).should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]');
       });
     });
 
     describe('parsing', function () {
       it('should parse the list correctly', function () {
-        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z",null]', M.List.metadata(M.Date.metadata()).reviver);
+        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', M.List.metadata(M.Date.metadata()).reviver);
 
         should(modelicoList.inner()[0].inner().getFullYear()).be.exactly(1988);
 
-        should(modelicoList.inner()[1].inner()).be.exactly(null);
+        should(modelicoList.inner()[1].inner().getMonth()).be.exactly(11);
       });
 
       it('should be parsed correctly when used within another class', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
         should(author.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
       });
 
-      it('should support null lists', function () {
-        var modelicoList = JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver);
-
-        should(modelicoList.inner()).be.exactly(null);
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver);
+        }).should.throw();
       });
     });
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoList1 = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoList1 = new M.List([new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
-        var modelicoList2 = new M.List(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoList2 = new M.List([new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
         modelicoList1.should.not.be.exactly(modelicoList2);
         modelicoList1.should.not.equal(modelicoList2);
@@ -856,10 +958,16 @@ var ModelicoSet = (function (should, M) {
         [].concat(toConsumableArray(set)).should.eql([1, 2, 4]);
       });
 
-      it('should set items in the set correctly', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return JSON.parse('null', M.Set.metadata(M.Date.metadata()).reviver);
+        }).should.throw();
+      });
 
-        var modelicoSet1 = new M.Set(M.Date.metadata(), set);
+      it('should set items in the set correctly', function () {
+        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
+
+        var modelicoSet1 = new M.Set(set);
         var modelicoSet2 = modelicoSet1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
         should([].concat(toConsumableArray(modelicoSet2.inner()))[0].inner().getFullYear()).be.exactly(1989);
@@ -869,9 +977,9 @@ var ModelicoSet = (function (should, M) {
       });
 
       it('should set items in the set correctly when part of a path', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
 
-        var modelicoSet1 = new M.Set(M.Date.metadata(), set);
+        var modelicoSet1 = new M.Set(set);
         var modelicoSet2 = modelicoSet1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
         should([].concat(toConsumableArray(modelicoSet2.inner()))[0].inner().getFullYear()).be.exactly(1989);
@@ -881,9 +989,9 @@ var ModelicoSet = (function (should, M) {
       });
 
       it('should set items in the set correctly when part of a path with a single element', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
 
-        var modelicoSet1 = new M.Set(M.Date.metadata(), set);
+        var modelicoSet1 = new M.Set(set);
         var modelicoSet2 = modelicoSet1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
         should([].concat(toConsumableArray(modelicoSet2.inner()))[0].inner().getFullYear()).be.exactly(2000);
@@ -893,13 +1001,13 @@ var ModelicoSet = (function (should, M) {
       });
 
       it('should be able to set a whole set', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
         var author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
         var newSetArray = [].concat(toConsumableArray(author1.importantDatesSet().inner()));
         newSetArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
 
-        var author2 = author1.set('importantDatesSet', new M.Set(M.Date.metadata(), newSetArray));
+        var author2 = author1.set('importantDatesSet', new M.Set(newSetArray));
 
         var author1InnerSet = author1.importantDatesSet().inner();
 
@@ -916,11 +1024,11 @@ var ModelicoSet = (function (should, M) {
       });
 
       it('edge case when Set setPath is called with an empty path', function () {
-        var modelicoDatesSet1 = new M.Set(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)]);
+        var modelicoDatesSet1 = new M.Set([new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())]);
 
         var modelicoDateSet2 = new Set([new M.Date(new Date('2016-04-16T00:00:00.000Z'))]);
 
-        var setOfSetsOfDates1 = new M.Set(M.Set.metadata(M.Date.metadata()), [modelicoDatesSet1]);
+        var setOfSetsOfDates1 = new M.Set([modelicoDatesSet1]);
         var setOfSetsOfDates2 = setOfSetsOfDates1.setPath([0], modelicoDateSet2);
 
         should([].concat(toConsumableArray([].concat(toConsumableArray(setOfSetsOfDates1.inner()))[0].inner()))[0].inner().getFullYear()).be.exactly(1988);
@@ -931,49 +1039,42 @@ var ModelicoSet = (function (should, M) {
 
     describe('stringifying', function () {
       it('should stringify the set correctly', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(null)];
+        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date('2012-12-25T00:00:00.000Z'))];
 
-        var modelicoSet = new M.Set(M.Date.metadata(), set);
+        var modelicoSet = new M.Set(set);
 
-        JSON.stringify(modelicoSet).should.be.exactly('["1988-04-16T00:00:00.000Z",null]');
+        JSON.stringify(modelicoSet).should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]');
       });
 
-      it('should support null sets', function () {
-        var set = null;
-        var modelicoSet = new M.Set(M.Date.metadata(), set);
-
-        JSON.stringify(modelicoSet).should.be.exactly('null');
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new M.Set(null);
+        }).should.throw();
       });
     });
 
     describe('parsing', function () {
       it('should parse the set correctly', function () {
-        var modelicoSet = JSON.parse('["1988-04-16T00:00:00.000Z",null]', M.Set.metadata(M.Date.metadata()).reviver);
+        var modelicoSet = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', M.Set.metadata(M.Date.metadata()).reviver);
 
         should([].concat(toConsumableArray(modelicoSet.inner()))[0].inner().getFullYear()).be.exactly(1988);
 
-        should([].concat(toConsumableArray(modelicoSet.inner()))[1].inner()).be.exactly(null);
+        should([].concat(toConsumableArray(modelicoSet.inner()))[1].inner().getMonth()).be.exactly(11);
       });
 
       it('should be parsed correctly when used within another class', function () {
-        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"]}';
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
         var author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
 
         should([].concat(toConsumableArray(author.importantDatesSet().inner()))[0].inner().getFullYear()).be.exactly(2013);
-      });
-
-      it('should support null sets', function () {
-        var modelicoSet = JSON.parse('null', M.Set.metadata(M.Date.metadata()).reviver);
-
-        should(modelicoSet.inner()).be.exactly(null);
       });
     });
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoSet1 = new M.Set(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoSet1 = new M.Set([new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
-        var modelicoSet2 = new M.Set(M.Date.metadata(), [new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
+        var modelicoSet2 = new M.Set([new M.Date(new Date('1988-04-16T00:00:00.000Z'))]);
 
         modelicoSet1.should.not.be.exactly(modelicoSet2);
         modelicoSet1.should.not.equal(modelicoSet2);
@@ -999,6 +1100,156 @@ var ModelicoSet = (function (should, M) {
         var modelicoSet = M.Set.fromSet(fibSet);
 
         [].concat(toConsumableArray(modelicoSet.inner())).should.eql([0, 1, 2, 3, 5, 8]);
+      });
+    });
+  };
+});
+
+var ModelicoMaybe = (function (should, M) {
+  return function () {
+    var PartOfDay = PartOfDayFactory(M);
+    var Person = PersonFactory(M);
+    var Modelico = M.Modelico;
+
+    var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
+
+    describe('setting', function () {
+      it('should set fields recursively returning a new Maybe', function () {
+        var maybe1 = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
+        var maybe2 = maybe1.set('givenName', 'Javi');
+
+        maybe2.inner().get().givenName().should.be.exactly('Javi');
+      });
+
+      it('should set fields recursively returning a new Maybe', function () {
+        var maybe1 = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
+        var maybe2 = maybe1.set('givenName', 'Javi');
+
+        maybe2.inner().get().givenName().should.be.exactly('Javi');
+      });
+
+      it('should not throw upon setting if empty', function () {
+        var maybe = new M.Maybe(null);
+
+        maybe.set('givenName', 'Javier').isEmpty().should.be.exactly(true);
+
+        maybe.setPath(['lifeEvents', 'wedding'], new Date()).isEmpty().should.be.exactly(true);
+      });
+
+      it('should return a new maybe with a value when the path is empty', function () {
+        var maybe1 = new M.Maybe(21);
+        var maybe2 = new M.Maybe(null);
+
+        var maybe3 = maybe1.setPath([], 22);
+        var maybe4 = maybe2.setPath([], 10);
+        var maybe5 = maybe2.setPath([], null);
+
+        should(maybe3.getOrElse(0)).be.exactly(22);
+
+        should(maybe4.getOrElse(2)).be.exactly(10);
+
+        should(maybe5.getOrElse(2)).be.exactly(2);
+      });
+    });
+
+    describe('stringifying', function () {
+      it('should stringify Maybe values correctly', function () {
+        var maybe1 = new M.Maybe(2);
+        JSON.stringify(maybe1).should.be.exactly('2');
+
+        var maybe2 = new M.Maybe(null);
+        JSON.stringify(maybe2).should.be.exactly('null');
+      });
+
+      it('should support arbitrary Modelico types', function () {
+        var author = Modelico.fromJSON(Person, authorJson);
+
+        var maybe1 = new M.Maybe(author);
+        JSON.stringify(maybe1).should.be.exactly(authorJson);
+
+        var maybe2 = new M.Maybe(null);
+        JSON.stringify(maybe2).should.be.exactly('null');
+      });
+    });
+
+    describe('parsing', function () {
+      it('should parse Maybe values correctly', function () {
+        var maybe1 = JSON.parse('2', M.Maybe.metadata(M.AsIs(Number)).reviver);
+        should(maybe1.getOrElse(10)).be.exactly(2);
+
+        var maybe2 = JSON.parse('null', M.Maybe.metadata(M.AsIs(Number)).reviver);
+        maybe2.isEmpty().should.be.exactly(true);
+      });
+
+      it('should support arbitrary Modelico types', function () {
+        var author = JSON.parse(authorJson, Person.metadata().reviver);
+
+        var maybe = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
+        maybe.inner().get().equals(author).should.be.exactly(true);
+      });
+    });
+
+    describe('isEmpty', function () {
+      it('should return false if there is a value', function () {
+        var maybe = new M.Maybe(5);
+
+        maybe.isEmpty().should.be.exactly(false);
+      });
+
+      it('should return true if there is nothing', function () {
+        var maybe1 = new M.Maybe(null);
+        var maybe2 = new M.Maybe(undefined);
+        var maybe3 = new M.Maybe(NaN);
+
+        maybe1.isEmpty().should.be.exactly(true);
+        maybe2.isEmpty().should.be.exactly(true);
+        maybe3.isEmpty().should.be.exactly(true);
+      });
+    });
+
+    describe('getOrElse', function () {
+      it('should return the value if it exists', function () {
+        var maybe = new M.Maybe(5);
+
+        should(maybe.getOrElse(7)).be.exactly(5);
+      });
+
+      it('should return the provided default if there is nothing', function () {
+        var maybe = new M.Maybe(null);
+
+        should(maybe.getOrElse(7)).be.exactly(7);
+      });
+    });
+
+    describe('map', function () {
+      var partOfDayFromJson = PartOfDay.metadata().reviver.bind(undefined, '');
+
+      it('should apply a function f to the value and return another Maybe with it', function () {
+        var maybeFrom1 = new M.Maybe(5);
+        var maybeFrom2 = new M.Maybe('EVENING');
+
+        var maybeTo1 = maybeFrom1.map(function (x) {
+          return 2 * x;
+        });
+        var maybeTo2 = maybeFrom2.map(partOfDayFromJson);
+
+        should(maybeTo1.getOrElse(0)).be.exactly(10);
+        should(maybeTo2.getOrElse(PartOfDay.MORNING())).be.exactly(PartOfDay.EVENING());
+      });
+
+      it('should return an empty Maybe if there was nothing', function () {
+        var maybeFrom1 = M.Maybe.of(null);
+        var maybeFrom2 = M.Maybe.of(0);
+
+        var maybeTo1 = maybeFrom1.map(function (x) {
+          return 2 * x;
+        });
+        var maybeTo2 = maybeFrom2.map(function (x) {
+          return x / x;
+        });
+
+        maybeTo1.isEmpty().should.be.exactly(true);
+        maybeTo2.isEmpty().should.be.exactly(true);
       });
     });
   };
@@ -1085,6 +1336,12 @@ var featuresSimple = (function (should, M) {
 var featuresAdvanced = (function (should, M) {
   return function () {
     var Modelico = M.Modelico;
+    var _M$metadata = M.metadata,
+        asIs = _M$metadata.asIs,
+        any = _M$metadata.any,
+        maybe = _M$metadata.maybe,
+        list = _M$metadata.list,
+        _ = _M$metadata._;
 
     var Animal = function (_Modelico) {
       inherits(Animal, _Modelico);
@@ -1122,9 +1379,10 @@ var featuresAdvanced = (function (should, M) {
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
-            givenName: M.AsIs(M.Any),
-            familyName: M.AsIs(String),
-            pets: M.List.metadata(Modelico.metadata(Animal))
+            givenName: asIs(any),
+            middleName: maybe(asIs(any)),
+            familyName: asIs(String),
+            pets: list(maybe(_(Animal)))
           });
         }
       }]);
@@ -1132,7 +1390,7 @@ var featuresAdvanced = (function (should, M) {
     }(Modelico);
 
     it('should showcase the main features', function () {
-      var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
+      var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [\n        {\n          "name": "Robbie"\n        },\n        null\n      ]\n    }';
 
       var person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
 
@@ -1142,15 +1400,23 @@ var featuresAdvanced = (function (should, M) {
       person2.fullName().should.be.exactly('Javi Cejudo');
       person1.fullName().should.be.exactly('Javier Cejudo');
 
-      person1.pets().inner().shift().speak().should.be.exactly('My name is Robbie!');
+      person1.pets().inner().shift().getOrElse({ speak: function speak() {
+          return 'hello';
+        } }).speak().should.be.exactly('My name is Robbie!');
 
-      person1.pets().inner().shift().speak().should.be.exactly('My name is Robbie!');
+      person1.pets().inner().shift().getOrElse({ speak: function speak() {
+          return 'hello';
+        } }).speak().should.be.exactly('My name is Robbie!');
 
       var person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-      person3.pets().inner()[0].name().should.be.exactly('Bane');
+      person3.pets().inner()[0].getOrElse({ name: function name() {
+          return 'no';
+        } }).name().should.be.exactly('Bane');
 
-      person1.pets().inner()[0].name().should.be.exactly('Robbie');
+      person1.pets().inner()[0].getOrElse({ name: function name() {
+          return 'no';
+        } }).name().should.be.exactly('Robbie');
     });
   };
 });
@@ -1158,6 +1424,11 @@ var featuresAdvanced = (function (should, M) {
 var featuresAdvancedES5 = (function (should, M) {
   return function () {
     var Modelico = M.Modelico;
+    var _M$metadata = M.metadata,
+        asIs = _M$metadata.asIs,
+        list = _M$metadata.list,
+        _ = _M$metadata._;
+
 
     function Animal(fields) {
       Modelico.factory(Animal, fields, this);
@@ -1183,9 +1454,9 @@ var featuresAdvancedES5 = (function (should, M) {
 
     Person.innerTypes = function () {
       return Object.freeze({
-        givenName: M.AsIs(String),
-        familyName: M.AsIs(String),
-        pets: M.List.metadata(Modelico.metadata(Animal))
+        givenName: asIs(String),
+        familyName: asIs(String),
+        pets: list(_(Animal))
       });
     };
 
@@ -2074,11 +2345,13 @@ var modelicoSpec = (function (options, should, M) {
 
     describe('Base', Modelico.apply(undefined, deps));
     describe('AsIs', ModelicoAsIs.apply(undefined, toConsumableArray(utilsAndDeps)));
+    describe('Date', ModelicoDate.apply(undefined, deps));
     describe('Map', ModelicoMap.apply(undefined, deps));
     describe('Enum', ModelicoEnum.apply(undefined, deps));
     describe('EnumMap', ModelicoEnumMap.apply(undefined, deps));
     describe('ModelicoList', ModelicoList.apply(undefined, deps));
     describe('ModelicoSet', ModelicoSet.apply(undefined, deps));
+    describe('ModelicoMaybe', ModelicoMaybe.apply(undefined, deps));
 
     describe('setPath', setPath.apply(undefined, deps));
 
