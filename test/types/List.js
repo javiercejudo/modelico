@@ -6,6 +6,18 @@ export default (should, M) => () => {
   const Modelico = M.Modelico;
   const Person = PersonFactory(M);
 
+  describe('immutability', () => {
+    it('must not reflect changes in the wrapped input', () => {
+      const input = ['a', 'b', 'c'];
+      const list = new M.List(input);
+
+      input[1] = 'B';
+
+      list.inner()[1]
+        .should.be.exactly('b');
+    });
+  });
+
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
       (() => M.List([])).should.throw();

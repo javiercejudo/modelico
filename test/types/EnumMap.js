@@ -5,6 +5,23 @@ import PartOfDayFactory from './fixtures/PartOfDay';
 export default (should, M) => () => {
   const PartOfDay = PartOfDayFactory(M);
 
+  describe('immutability', () => {
+    it('must not reflect changes in the wrapped input', () => {
+      const input = new Map([
+        [PartOfDay.MORNING(), 'Good morning!'],
+        [PartOfDay.AFTERNOON(), 'Good afternoon!'],
+        [PartOfDay.EVENING(), 'Good evening!']
+      ]);
+
+      const enumMap = new M.EnumMap(input);
+
+      input.set(PartOfDay.MORNING(), "g'day!");
+
+      enumMap.inner().get(PartOfDay.MORNING())
+        .should.be.exactly('Good morning!');
+    });
+  });
+
   describe('setting', () => {
     it('should set fields returning a new enum map', () => {
       const map = new Map([

@@ -65,7 +65,7 @@ export default (options, should, M) => () => {
   const deps = [should, M];
   const utilsAndDeps = [U].concat(deps);
 
-  describe('Base', Modelico(...deps));
+  describe('Base', Modelico(...utilsAndDeps));
   describe('AsIs', ModelicoAsIs(...utilsAndDeps));
   describe('Date', ModelicoDate(...deps));
   describe('Map', ModelicoMap(...deps));

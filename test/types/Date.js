@@ -5,9 +5,21 @@ import PersonFactory from './fixtures/Person';
 export default (should, M) => () => {
   const Modelico = M.Modelico;
 
+  describe('immutability', () => {
+    it('must not reflect changes in the wrapped input', () => {
+      const input = new Date('1988-04-16T00:00:00.000Z');
+      const date = new M.Date(input);
+
+      input.setFullYear(2017);
+
+      should(date.inner().getFullYear())
+        .be.exactly(1988);
+    });
+  });
+
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
-      (() => M.Date(M.AsIs(M.Any), new Date())).should.throw();
+      (() => M.Date(new Date())).should.throw();
     });
   });
 
