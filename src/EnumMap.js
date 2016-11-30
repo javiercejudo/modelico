@@ -46,9 +46,15 @@ class ModelicoEnumMap extends AbstractMap {
     return [...this.inner()].reduce(stringifyReducer, {});
   }
 
+  static fromMap(map) {
+    return new ModelicoEnumMap(map);
+  }
+
   static metadata(keyMetadata, valueMetadata) {
     return AbstractMap.metadata(ModelicoEnumMap, reviverFactory(keyMetadata, valueMetadata));
   }
 }
+
+ModelicoEnumMap.EMPTY = ModelicoEnumMap.fromMap(new Map([]));
 
 export default Object.freeze(ModelicoEnumMap);

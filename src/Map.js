@@ -44,17 +44,39 @@ class ModelicoMap extends AbstractMap {
     return [...this.inner()].map(stringifyMapper);
   }
 
-  static fromObject(obj) {
-    return ModelicoMap.fromMap(new Map(objToArr(obj)));
-  }
-
   static fromMap(map) {
     return new ModelicoMap(map);
+  }
+
+  static fromArray(pairs) {
+    return ModelicoMap.fromMap(new Map(pairs));
+  }
+
+  static of(...arr) {
+    const len = arr.length;
+
+    if (len % 2 === 1) {
+      throw TypeError('Map.of requires an even number of arguments');
+    }
+
+    const pairs = [];
+
+    for (let i = 0; i < len; i += 2) {
+      pairs.push([arr[i], arr[i + 1]]);
+    }
+
+    return ModelicoMap.fromArray(pairs);
+  }
+
+  static fromObject(obj) {
+    return ModelicoMap.fromArray(objToArr(obj));
   }
 
   static metadata(keyMetadata, valueMetadata) {
     return AbstractMap.metadata(ModelicoMap, reviverFactory(keyMetadata, valueMetadata));
   }
 }
+
+ModelicoMap.EMPTY = ModelicoMap.fromArray([]);
 
 export default Object.freeze(ModelicoMap);

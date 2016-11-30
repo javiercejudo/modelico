@@ -146,19 +146,40 @@ export default (should, M) => () => {
     });
   });
 
-  describe('from object', () => {
-    it('should be able to create a set from an array', () => {
-      var map1 = M.Map.fromObject({a: 1, b: 2, c: 3});
+  describe('EMPTY / of / fromArray / fromObject / fromMap', () => {
+    it('should have a static property for the empty map', () => {
+      should(M.Map.EMPTY.inner().size)
+        .be.exactly(0);
 
-      should(map1.inner().get('b')).be.exactly(2);
+      M.Map.EMPTY.toJSON()
+        .should.eql([]);
     });
-  });
 
-  describe('from map', () => {
-    it('should be able to create a set from a native set', () => {
-      var map1 = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+    it('should be able to create a map from an even number of params', () => {
+      var map = M.Map.of('a', 1, 'b', 2, 'c', 3);
 
-      should(map1.inner().get('b')).be.exactly(2);
+      should(map.inner().get('b')).be.exactly(2);
+
+      (() => M.Map.of('a', 1, 'b', 2, 'c', 3, 'd'))
+        .should.throw();
+    });
+
+    it('should be able to create a map from an array', () => {
+      var map = M.Map.fromArray([['a', 1], ['b', 2], ['c', 3]]);
+
+      should(map.inner().get('b')).be.exactly(2);
+    });
+
+    it('should be able to create a map from an object', () => {
+      var map = M.Map.fromObject({a: 1, b: 2, c: 3});
+
+      should(map.inner().get('b')).be.exactly(2);
+    });
+
+    it('should be able to create a map from a native map', () => {
+      var map = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+
+      should(map.inner().get('b')).be.exactly(2);
     });
   });
 };

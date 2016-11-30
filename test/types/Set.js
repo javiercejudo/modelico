@@ -188,7 +188,22 @@ export default (should, M) => () => {
     });
   });
 
-  describe('from array', () => {
+  describe('EMPTY / of / fromArray / fromSet', () => {
+    it('should have a static property for the empty set', () => {
+      should(M.Set.EMPTY.inner().size)
+        .be.exactly(0);
+
+      M.Set.EMPTY.toJSON()
+        .should.eql([]);
+    });
+
+    it('should be able to create a set from arbitrary parameters', () => {
+      const modelicoSet = M.Set.of(0, 1, 1, 2, 3, 5, 8);
+
+      [...modelicoSet.inner()]
+        .should.eql([0, 1, 2, 3, 5, 8]);
+    });
+
     it('should be able to create a set from an array', () => {
       const fibArray = [0, 1, 1, 2, 3, 5, 8];
 
@@ -197,9 +212,7 @@ export default (should, M) => () => {
       [...modelicoSet.inner()]
         .should.eql([0, 1, 2, 3, 5, 8]);
     });
-  });
 
-  describe('from set', () => {
     it('should be able to create a set from a native set', () => {
       const fibSet = new Set([0, 1, 1, 2, 3, 5, 8]);
 

@@ -119,4 +119,20 @@ export default (should, M) => () => {
       )).should.throw();
     });
   });
+
+  describe('EMPTY /  fromMap', () => {
+    it('should have a static property for the empty map', () => {
+      should(M.EnumMap.EMPTY.inner().size)
+        .be.exactly(0);
+
+      M.EnumMap.EMPTY.toJSON()
+        .should.eql({});
+    });
+
+    it('should be able to create an enum map from a native map', () => {
+      var enumMap = M.EnumMap.fromMap(new Map([[PartOfDay.MORNING(), 1], [PartOfDay.AFTERNOON(), 2]]));
+
+      should(enumMap.inner().get(PartOfDay.AFTERNOON())).be.exactly(2);
+    });
+  });
 };

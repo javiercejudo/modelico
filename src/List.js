@@ -51,9 +51,15 @@ class ModelicoList extends Modelico {
     return new ModelicoList(arr);
   }
 
+  static of(...arr) {
+    return ModelicoList.fromArray(arr);
+  }
+
   static metadata(itemMetadata) {
     return iterableMetadata(ModelicoList, itemMetadata);
   }
 }
+
+ModelicoList.EMPTY = ModelicoList.of();
 
 export default Object.freeze(ModelicoList);

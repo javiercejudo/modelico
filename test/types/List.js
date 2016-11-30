@@ -189,7 +189,22 @@ export default (should, M) => () => {
     });
   });
 
-  describe('from array', () => {
+  describe('EMPTY / of / fromArray', () => {
+    it('should have a static property for the empty list', () => {
+      should(M.List.EMPTY.inner().length)
+        .be.exactly(0);
+
+      M.List.EMPTY.toJSON()
+        .should.eql([]);
+    });
+
+    it('should be able to create a list from arbitrary parameters', () => {
+      const modelicoList = M.List.of(0, 1, 1, 2, 3, 5, 8);
+
+      modelicoList.inner()
+        .should.eql([0, 1, 1, 2, 3, 5, 8]);
+    });
+
     it('should be able to create a list from an array', () => {
       const fibArray = [0, 1, 1, 2, 3, 5, 8];
 

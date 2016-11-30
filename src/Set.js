@@ -51,6 +51,10 @@ class ModelicoSet extends Modelico {
     return ModelicoSet.fromSet(new Set(arr));
   }
 
+  static of(...arr) {
+    return ModelicoSet.fromArray(arr);
+  }
+
   static fromSet(set) {
     return new ModelicoSet(set);
   }
@@ -59,5 +63,7 @@ class ModelicoSet extends Modelico {
     return iterableMetadata(ModelicoSet, itemMetadata);
   }
 }
+
+ModelicoSet.EMPTY = ModelicoSet.of();
 
 export default Object.freeze(ModelicoSet);
