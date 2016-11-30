@@ -3,7 +3,7 @@
 import { always, isNothing } from './U';
 import Modelico from './Modelico';
 
-const reviverFactory = itemMetadata => (k, v) => {
+const reviverFactory = itemMetadata => { return (k, v) => {
   if (k !== '') {
     return v;
   }
@@ -11,7 +11,7 @@ const reviverFactory = itemMetadata => (k, v) => {
   const maybeValue = (v === null) ? null : itemMetadata.reviver(k, v);
 
   return new Maybe(maybeValue);
-}
+}};
 
 class Nothing {
   toJSON() {
