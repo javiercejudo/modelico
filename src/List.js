@@ -7,15 +7,17 @@ import AsIs from './AsIs';
 import Any from './Any';
 
 class ModelicoList extends Modelico {
-  constructor(inner) {
+  constructor(innerListOrig) {
     super(ModelicoList, {});
 
-    if (isNothing(inner)) {
+    if (isNothing(innerListOrig)) {
       throw TypeError('missing list');
     }
 
-    this.inner = () => inner.slice();
-    this[Symbol.iterator] = () => inner[Symbol.iterator]();
+    const innerList = [...innerListOrig];
+
+    this.inner = () => [...innerList];
+    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     Object.freeze(this);
   }

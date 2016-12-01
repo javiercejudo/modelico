@@ -6,6 +6,23 @@ export default (should, M) => () => {
   const Person = PersonFactory(M);
   const Modelico = M.Modelico;
 
+  describe('immutability', () => {
+    it('must not reflect changes in the wrapped input', () => {
+      const input = new Map([
+        ['A', 'Good morning!'],
+        ['B', 'Good afternoon!'],
+        ['C', 'Good evening!']
+      ]);
+
+      const enumMap = new M.Map(input);
+
+      input.set('A', "g'day!");
+
+      enumMap.inner().get('A')
+        .should.be.exactly('Good morning!');
+    });
+  });
+
   describe('setting', () => {
     it('should implement Symbol.iterator', () => {
       const map = M.Map.fromObject({a: 1, b: 2, c: 3});

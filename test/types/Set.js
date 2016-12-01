@@ -6,6 +6,18 @@ export default (should, M) => () => {
   const Modelico = M.Modelico;
   const Person = PersonFactory(M);
 
+  describe('immutability', () => {
+    it('must not reflect changes in the wrapped input', () => {
+      const input = new Set(['a', 'b', 'c']);
+      const set = new M.Set(input);
+
+      input.delete('a');
+
+      set.inner().has('a')
+        .should.be.exactly(true);
+    });
+  });
+
   describe('setting', () => {
     it('should implement Symbol.iterator', () => {
       const set = M.Set.fromArray([1, 2, 2, 4]);

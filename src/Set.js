@@ -7,12 +7,14 @@ import AsIs from './AsIs';
 import Any from './Any';
 
 class ModelicoSet extends Modelico {
-  constructor(innerSet) {
+  constructor(innerSetOrig) {
     super(ModelicoSet, {});
 
-    if (isNothing(innerSet)) {
+    if (isNothing(innerSetOrig)) {
       throw TypeError('missing set');
     }
+
+    const innerSet = new Set(innerSetOrig);
 
     this.inner = () => new Set(innerSet);
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();

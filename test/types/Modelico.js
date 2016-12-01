@@ -5,7 +5,7 @@ import PartOfDayFactory from './fixtures/PartOfDay';
 import SexFactory from './fixtures/Sex';
 import AnimalFactory from './fixtures/Animal';
 
-export default (should, M) => () => {
+export default (U, should, M) => () => {
   const Person = PersonFactory(M);
   const PartOfDay = PartOfDayFactory(M);
   const Sex = SexFactory(M);
@@ -16,6 +16,29 @@ export default (should, M) => () => {
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
   const author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
+
+  describe('immutability', () => {
+    U.skipIfNoObjectFreeze('must freeze wrapped input', () => {
+      const authorFields = {
+        givenName: 'Javier',
+        familyName: 'Cejudo',
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+        favouritePartOfDay: PartOfDay.EVENING(),
+        lifeEvents: new M.Map([]),
+        importantDatesList: new M.Map([]),
+        importantDatesSet: new M.Map([]),
+        sex: Sex.MALE()
+      };
+
+      const author = new Person(authorFields);
+
+      (() => authorFields.givenName = 'Javi')
+        .should.throw();
+
+      author.givenName()
+        .should.be.exactly('Javier');
+    });
+  });
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {

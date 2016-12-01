@@ -5,12 +5,14 @@ import { typeSymbol } from './symbols';
 import Modelico from './Modelico';
 
 class AbstractMap extends Modelico {
-  constructor(Type, innerMap) {
+  constructor(Type, innerMapOrig) {
     super(Type, {});
 
-    if (isNothing(innerMap)) {
+    if (isNothing(innerMapOrig)) {
       throw TypeError('missing map');
     }
+
+    const innerMap = new Map(innerMapOrig);
 
     this.inner = () => new Map(innerMap);
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();

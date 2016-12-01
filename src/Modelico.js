@@ -37,11 +37,13 @@ class Modelico {
       throw TypeError(`expected an object with fields for ${Type.name} but got ${fields}`);
     }
 
+    Object.freeze(fields);
+
     const innerTypes = getInnerTypes(Type);
 
     thisArg = defaultTo(this)(thisArg);
     thisArg[typeSymbol] = always(Type);
-    thisArg[fieldsSymbol] = always(Object.freeze(fields));
+    thisArg[fieldsSymbol] = always(fields);
 
     new Set([...Object.keys(innerTypes), ...Object.keys(fields)])
       .forEach(key => {

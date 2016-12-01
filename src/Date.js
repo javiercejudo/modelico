@@ -4,12 +4,14 @@ import { isNothing } from './U';
 import Modelico from './Modelico';
 
 class ModelicoDate extends Modelico {
-  constructor(date) {
+  constructor(dateOrig) {
     super(ModelicoDate, {});
 
-    if (isNothing(date)) {
+    if (isNothing(dateOrig)) {
       throw TypeError('missing date');
     }
+
+    const date = new Date(dateOrig.getTime());;
 
     this.inner = () => new Date(date.getTime());
 
