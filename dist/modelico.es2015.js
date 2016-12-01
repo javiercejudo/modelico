@@ -1,4 +1,4 @@
-var version = "16.0.1";
+var version = "16.0.2";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -51,11 +51,13 @@ class Modelico {
       throw TypeError(`expected an object with fields for ${Type.name} but got ${fields}`);
     }
 
+    Object.freeze(fields);
+
     const innerTypes = getInnerTypes(Type);
 
     thisArg = defaultTo(this)(thisArg);
     thisArg[typeSymbol] = always(Type);
-    thisArg[fieldsSymbol] = always(Object.freeze(fields));
+    thisArg[fieldsSymbol] = always(fields);
 
     new Set([...Object.keys(innerTypes), ...Object.keys(fields)])
       .forEach(key => {
@@ -208,12 +210,14 @@ class Maybe extends Modelico$1 {
 var Maybe$1 = Object.freeze(Maybe);
 
 class AbstractMap extends Modelico$1 {
-  constructor(Type, innerMap) {
+  constructor(Type, innerMapOrig) {
     super(Type, {});
 
-    if (isNothing(innerMap)) {
+    if (isNothing(innerMapOrig)) {
       throw TypeError('missing map');
     }
+
+    const innerMap = new Map(innerMapOrig);
 
     this.inner = () => new Map(innerMap);
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
@@ -357,12 +361,14 @@ class ModelicoEnumMap extends AbstractMap$1 {
 var EnumMap = Object.freeze(ModelicoEnumMap);
 
 class ModelicoDate extends Modelico$1 {
-  constructor(date) {
+  constructor(dateOrig) {
     super(ModelicoDate, {});
 
-    if (isNothing(date)) {
+    if (isNothing(dateOrig)) {
       throw TypeError('missing date');
     }
+
+    const date = new Date(dateOrig.getTime());;
 
     this.inner = () => new Date(date.getTime());
 
@@ -413,15 +419,17 @@ const iterableMetadata = (IterableType, itemMetadata) => {
 };
 
 class ModelicoList extends Modelico$1 {
-  constructor(inner) {
+  constructor(innerListOrig) {
     super(ModelicoList, {});
 
-    if (isNothing(inner)) {
+    if (isNothing(innerListOrig)) {
       throw TypeError('missing list');
     }
 
-    this.inner = () => inner.slice();
-    this[Symbol.iterator] = () => inner[Symbol.iterator]();
+    const innerList = [...innerListOrig];
+
+    this.inner = () => [...innerList];
+    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     Object.freeze(this);
   }
@@ -463,12 +471,14 @@ class ModelicoList extends Modelico$1 {
 var List = Object.freeze(ModelicoList);
 
 class ModelicoSet extends Modelico$1 {
-  constructor(innerSet) {
+  constructor(innerSetOrig) {
     super(ModelicoSet, {});
 
-    if (isNothing(innerSet)) {
+    if (isNothing(innerSetOrig)) {
       throw TypeError('missing set');
     }
+
+    const innerSet = new Set(innerSetOrig);
 
     this.inner = () => new Set(innerSet);
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();

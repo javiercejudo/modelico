@@ -284,7 +284,7 @@ var AnimalFactory = (function (M) {
   return Object.freeze(Animal);
 });
 
-var Modelico = (function (should, M) {
+var Modelico = (function (U, should, M) {
   return function () {
     var Person = PersonFactory(M);
     var PartOfDay = PartOfDayFactory(M);
@@ -296,6 +296,29 @@ var Modelico = (function (should, M) {
 
     var author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
     var author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
+
+    describe('immutability', function () {
+      U.skipIfNoObjectFreeze('must freeze wrapped input', function () {
+        var authorFields = {
+          givenName: 'Javier',
+          familyName: 'Cejudo',
+          birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: new M.Map([]),
+          importantDatesList: new M.Map([]),
+          importantDatesSet: new M.Map([]),
+          sex: Sex.MALE()
+        };
+
+        var author = new Person(authorFields);
+
+        (function () {
+          return authorFields.givenName = 'Javi';
+        }).should.throw();
+
+        author.givenName().should.be.exactly('Javier');
+      });
+    });
 
     describe('setting', function () {
       it('should not support null (wrap with Maybe)', function () {
@@ -535,10 +558,21 @@ var ModelicoDate = (function (should, M) {
   return function () {
     var Modelico = M.Modelico;
 
+    describe('immutability', function () {
+      it('must not reflect changes in the wrapped input', function () {
+        var input = new Date('1988-04-16T00:00:00.000Z');
+        var date = new M.Date(input);
+
+        input.setFullYear(2017);
+
+        should(date.inner().getFullYear()).be.exactly(1988);
+      });
+    });
+
     describe('instantiation', function () {
       it('must be instantiated with new', function () {
         (function () {
-          return M.Date(M.AsIs(M.Any), new Date());
+          return M.Date(new Date());
         }).should.throw();
       });
     });
@@ -591,6 +625,18 @@ var ModelicoMap = (function (should, M) {
   return function () {
     var Person = PersonFactory(M);
     var Modelico = M.Modelico;
+
+    describe('immutability', function () {
+      it('must not reflect changes in the wrapped input', function () {
+        var input = new Map([['A', 'Good morning!'], ['B', 'Good afternoon!'], ['C', 'Good evening!']]);
+
+        var enumMap = new M.Map(input);
+
+        input.set('A', "g'day!");
+
+        enumMap.inner().get('A').should.be.exactly('Good morning!');
+      });
+    });
 
     describe('setting', function () {
       it('should implement Symbol.iterator', function () {
@@ -724,6 +770,18 @@ var ModelicoEnumMap = (function (should, M) {
   return function () {
     var PartOfDay = PartOfDayFactory(M);
 
+    describe('immutability', function () {
+      it('must not reflect changes in the wrapped input', function () {
+        var input = new Map([[PartOfDay.MORNING(), 'Good morning!'], [PartOfDay.AFTERNOON(), 'Good afternoon!'], [PartOfDay.EVENING(), 'Good evening!']]);
+
+        var enumMap = new M.EnumMap(input);
+
+        input.set(PartOfDay.MORNING(), "g'day!");
+
+        enumMap.inner().get(PartOfDay.MORNING()).should.be.exactly('Good morning!');
+      });
+    });
+
     describe('setting', function () {
       it('should set fields returning a new enum map', function () {
         var map = new Map([[PartOfDay.MORNING(), 'Good morning!'], [PartOfDay.AFTERNOON(), 'Good afternoon!'], [PartOfDay.EVENING(), 'Good evening!']]);
@@ -797,6 +855,17 @@ var ModelicoList = (function (should, M) {
   return function () {
     var Modelico = M.Modelico;
     var Person = PersonFactory(M);
+
+    describe('immutability', function () {
+      it('must not reflect changes in the wrapped input', function () {
+        var input = ['a', 'b', 'c'];
+        var list = new M.List(input);
+
+        input[1] = 'B';
+
+        list.inner()[1].should.be.exactly('b');
+      });
+    });
 
     describe('instantiation', function () {
       it('must be instantiated with new', function () {
@@ -950,6 +1019,17 @@ var ModelicoSet = (function (should, M) {
   return function () {
     var Modelico = M.Modelico;
     var Person = PersonFactory(M);
+
+    describe('immutability', function () {
+      it('must not reflect changes in the wrapped input', function () {
+        var input = new Set(['a', 'b', 'c']);
+        var set = new M.Set(input);
+
+        input.delete('a');
+
+        set.inner().has('a').should.be.exactly(true);
+      });
+    });
 
     describe('setting', function () {
       it('should implement Symbol.iterator', function () {
@@ -2351,7 +2431,7 @@ var modelicoSpec = (function (options, should, M) {
     var deps = [should, M];
     var utilsAndDeps = [U].concat(deps);
 
-    describe('Base', Modelico.apply(undefined, deps));
+    describe('Base', Modelico.apply(undefined, toConsumableArray(utilsAndDeps)));
     describe('AsIs', ModelicoAsIs.apply(undefined, toConsumableArray(utilsAndDeps)));
     describe('Date', ModelicoDate.apply(undefined, deps));
     describe('Map', ModelicoMap.apply(undefined, deps));

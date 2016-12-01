@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "16.0.1";
+var version = "16.0.2";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 var homepage = "https://github.com/javiercejudo/modelico#readme";
@@ -285,11 +285,13 @@ var Modelico = function () {
       throw TypeError('expected an object with fields for ' + Type.name + ' but got ' + fields);
     }
 
+    Object.freeze(fields);
+
     var innerTypes = getInnerTypes(Type);
 
     thisArg = defaultTo(this)(thisArg);
     thisArg[typeSymbol] = always(Type);
-    thisArg[fieldsSymbol] = always(Object.freeze(fields));
+    thisArg[fieldsSymbol] = always(fields);
 
     new Set([].concat(toConsumableArray(Object.keys(innerTypes)), toConsumableArray(Object.keys(fields)))).forEach(function (key) {
       var valueCandidate = fields[key];
@@ -485,14 +487,16 @@ var Maybe$1 = Object.freeze(Maybe);
 var AbstractMap = function (_Modelico) {
   inherits(AbstractMap, _Modelico);
 
-  function AbstractMap(Type, innerMap) {
+  function AbstractMap(Type, innerMapOrig) {
     classCallCheck(this, AbstractMap);
 
     var _this = possibleConstructorReturn(this, (AbstractMap.__proto__ || Object.getPrototypeOf(AbstractMap)).call(this, Type, {}));
 
-    if (isNothing(innerMap)) {
+    if (isNothing(innerMapOrig)) {
       throw TypeError('missing map');
     }
+
+    var innerMap = new Map(innerMapOrig);
 
     _this.inner = function () {
       return new Map(innerMap);
@@ -683,14 +687,16 @@ var EnumMap = Object.freeze(ModelicoEnumMap);
 var ModelicoDate = function (_Modelico) {
   inherits(ModelicoDate, _Modelico);
 
-  function ModelicoDate(date) {
+  function ModelicoDate(dateOrig) {
     classCallCheck(this, ModelicoDate);
 
     var _this = possibleConstructorReturn(this, (ModelicoDate.__proto__ || Object.getPrototypeOf(ModelicoDate)).call(this, ModelicoDate, {}));
 
-    if (isNothing(date)) {
+    if (isNothing(dateOrig)) {
       throw TypeError('missing date');
     }
+
+    var date = new Date(dateOrig.getTime());;
 
     _this.inner = function () {
       return new Date(date.getTime());
@@ -756,20 +762,22 @@ var iterableMetadata = function iterableMetadata(IterableType, itemMetadata) {
 var ModelicoList = function (_Modelico) {
   inherits(ModelicoList, _Modelico);
 
-  function ModelicoList(inner) {
+  function ModelicoList(innerListOrig) {
     classCallCheck(this, ModelicoList);
 
     var _this = possibleConstructorReturn(this, (ModelicoList.__proto__ || Object.getPrototypeOf(ModelicoList)).call(this, ModelicoList, {}));
 
-    if (isNothing(inner)) {
+    if (isNothing(innerListOrig)) {
       throw TypeError('missing list');
     }
 
+    var innerList = [].concat(toConsumableArray(innerListOrig));
+
     _this.inner = function () {
-      return inner.slice();
+      return [].concat(toConsumableArray(innerList));
     };
     _this[Symbol.iterator] = function () {
-      return inner[Symbol.iterator]();
+      return innerList[Symbol.iterator]();
     };
 
     Object.freeze(_this);
@@ -823,14 +831,16 @@ var List = Object.freeze(ModelicoList);
 var ModelicoSet = function (_Modelico) {
   inherits(ModelicoSet, _Modelico);
 
-  function ModelicoSet(innerSet) {
+  function ModelicoSet(innerSetOrig) {
     classCallCheck(this, ModelicoSet);
 
     var _this = possibleConstructorReturn(this, (ModelicoSet.__proto__ || Object.getPrototypeOf(ModelicoSet)).call(this, ModelicoSet, {}));
 
-    if (isNothing(innerSet)) {
+    if (isNothing(innerSetOrig)) {
       throw TypeError('missing set');
     }
+
+    var innerSet = new Set(innerSetOrig);
 
     _this.inner = function () {
       return new Set(innerSet);
