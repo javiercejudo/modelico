@@ -22,7 +22,7 @@ export default (U, should, M) => () => {
   });
 
   it('JavaScript-first API', () => {
-    const list1 = _l(M.List.fromArray([1, 2]));
+    const list1 = _l(M.List.of(1, 2));
 
     const list2 = list1.push(3, 4, 5);
     const list3 = list2.unshift(0);
@@ -85,7 +85,7 @@ export default (U, should, M) => () => {
   });
 
   it('Batching Mutations', () => {
-    const list1 = _l(M.List.fromArray([1, 2, 3]));
+    const list1 = _l(M.List.of(1, 2, 3));
 
     const res = list1.inner();
     res.push(4);

@@ -47,16 +47,16 @@ class ModelicoSet extends Modelico {
     return [...this.inner()];
   }
 
+  static fromSet(set) {
+    return new ModelicoSet(set);
+  }
+
   static fromArray(arr) {
     return ModelicoSet.fromSet(new Set(arr));
   }
 
   static of(...arr) {
     return ModelicoSet.fromArray(arr);
-  }
-
-  static fromSet(set) {
-    return new ModelicoSet(set);
   }
 
   static metadata(itemMetadata) {

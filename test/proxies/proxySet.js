@@ -4,13 +4,13 @@ export default (should, M) => () => {
   const p = M.proxySet;
 
   it('size', () => {
-    const set = p(M.Set.fromArray([1, 2, 2, 3]));
+    const set = p(M.Set.of(1, 2, 2, 3));
 
     (set.size).should.be.exactly(3);
   });
 
   it('has() / add() / delete() / clear()', () => {
-    const set1 = p(M.Set.fromArray([1, 2, 2, 3]));
+    const set1 = p(M.Set.of(1, 2, 2, 3));
 
     (set1.has(3)).should.be.exactly(true);
     (set1.has(50)).should.be.exactly(false);
@@ -31,14 +31,14 @@ export default (should, M) => () => {
   });
 
   it('entries()', () => {
-    const set = p(M.Set.fromArray([1, 2, 2, 3]));
+    const set = p(M.Set.of(1, 2, 2, 3));
 
     [...set.entries()]
       .should.eql([[1, 1], [2, 2], [3, 3]]);
   });
 
   it('values() / keys() / [@@iterator]()', () => {
-    const set = p(M.Set.fromArray([1, 2, 2, 3]));
+    const set = p(M.Set.of(1, 2, 2, 3));
 
     [...set.values()]
       .should.eql([1, 2, 3]);
@@ -51,7 +51,7 @@ export default (should, M) => () => {
   });
 
   it('forEach()', () => {
-    const set = p(M.Set.fromArray([1, 2, 2, 3]));
+    const set = p(M.Set.of(1, 2, 2, 3));
 
     let sum = 0;
     set.forEach(x => sum += x);
