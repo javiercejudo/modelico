@@ -28,7 +28,7 @@ export default (should, M) => () => {
     });
 
     it('should not throw upon setting if empty', () => {
-      const maybe = new M.Maybe(null);
+      const maybe = M.Maybe.of(null);
 
       maybe.set('givenName', 'Javier').isEmpty()
         .should.be.exactly(true);
@@ -38,8 +38,8 @@ export default (should, M) => () => {
     });
 
     it('should return a new maybe with a value when the path is empty', () => {
-      const maybe1 = new M.Maybe(21);
-      const maybe2 = new M.Maybe(null);
+      const maybe1 = M.Maybe.of(21);
+      const maybe2 = M.Maybe.of(null);
 
       const maybe3 = maybe1.setPath([], 22);
       const maybe4 = maybe2.setPath([], 10);
@@ -58,20 +58,20 @@ export default (should, M) => () => {
 
   describe('stringifying', () => {
     it('should stringify Maybe values correctly', () => {
-      const maybe1 = new M.Maybe(2);
+      const maybe1 = M.Maybe.of(2);
       JSON.stringify(maybe1).should.be.exactly('2');
 
-      const maybe2 = new M.Maybe(null);
+      const maybe2 = M.Maybe.of(null);
       JSON.stringify(maybe2).should.be.exactly('null');
     });
 
     it('should support arbitrary Modelico types', () => {
       const author = Modelico.fromJSON(Person, authorJson);
 
-      const maybe1 = new M.Maybe(author);
+      const maybe1 = M.Maybe.of(author);
       JSON.stringify(maybe1).should.be.exactly(authorJson);
 
-      const maybe2 = new M.Maybe(null);
+      const maybe2 = M.Maybe.of(null);
       JSON.stringify(maybe2).should.be.exactly('null');
     });
   });
@@ -104,15 +104,15 @@ export default (should, M) => () => {
 
   describe('isEmpty', () => {
     it('should return false if there is a value', () => {
-      const maybe = new M.Maybe(5);
+      const maybe = M.Maybe.of(5);
 
       maybe.isEmpty().should.be.exactly(false);
     });
 
     it('should return true if there is nothing', () => {
-      const maybe1 = new M.Maybe(null);
-      const maybe2 = new M.Maybe(undefined);
-      const maybe3 = new M.Maybe(NaN);
+      const maybe1 = M.Maybe.of(null);
+      const maybe2 = M.Maybe.of(undefined);
+      const maybe3 = M.Maybe.of(NaN);
 
       maybe1.isEmpty().should.be.exactly(true);
       maybe2.isEmpty().should.be.exactly(true);
@@ -122,13 +122,13 @@ export default (should, M) => () => {
 
   describe('getOrElse', () => {
     it('should return the value if it exists', () => {
-      const maybe = new M.Maybe(5);
+      const maybe = M.Maybe.of(5);
 
       should(maybe.getOrElse(7)).be.exactly(5);
     });
 
     it('should return the provided default if there is nothing', () => {
-      const maybe = new M.Maybe(null);
+      const maybe = M.Maybe.of(null);
 
       should(maybe.getOrElse(7)).be.exactly(7);
     });
@@ -138,8 +138,8 @@ export default (should, M) => () => {
     const partOfDayFromJson = PartOfDay.metadata().reviver.bind(undefined, '');
 
     it('should apply a function f to the value and return another Maybe with it', () => {
-      const maybeFrom1 = new M.Maybe(5);
-      const maybeFrom2 = new M.Maybe('EVENING');
+      const maybeFrom1 = M.Maybe.of(5);
+      const maybeFrom2 = M.Maybe.of('EVENING');
 
       const maybeTo1 = maybeFrom1.map(x => 2 * x);
       const maybeTo2 = maybeFrom2.map(partOfDayFromJson);

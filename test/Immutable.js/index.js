@@ -19,7 +19,7 @@ export default (U, should, M) => () => {
   });
 
   it('JavaScript-first API', () => {
-    const list1 = M.List.fromArray([1, 2]);
+    const list1 = M.List.of(1, 2);
 
     const list2Array = list1.inner();
     list2Array.push(3, 4, 5);
@@ -81,6 +81,7 @@ export default (U, should, M) => () => {
 
   it('Equality treats Collections as Data', () => {
     const map1 = M.Map.fromObject({a: 1, b: 1, c: 1});
+    const map11 = M.Map.of('a', 1, 'b', 1, 'c', 1);
     const map2 = M.Map.fromObject({a: 1, b: 1, c: 1});
 
     (map1 !== map2).should.be.exactly(true); // two different instances
@@ -88,7 +89,7 @@ export default (U, should, M) => () => {
   });
 
   it('Batching Mutations', () => {
-    const list1 = M.List.fromArray([1, 2, 3]);
+    const list1 = M.List.of(1, 2, 3);
     const list2Array = list1.inner();
     list2Array.push(4, 5, 6);
     const list2 = M.List.fromArray(list2Array);

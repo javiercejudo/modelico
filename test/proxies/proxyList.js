@@ -4,13 +4,13 @@ export default (should, M) => () => {
   const p = M.proxyList;
 
   it('length', () => {
-    const list1 = p(M.List.fromArray([1, 2, 2, 3]));
+    const list1 = p(M.List.of(1, 2, 2, 3));
 
     (list1.length).should.be.exactly(4);
   });
 
   it('[n]', () => {
-    const list1 = p(M.List.fromArray([1, 2, 2, 3]));
+    const list1 = p(M.List.of(1, 2, 2, 3));
 
     (list1[0]).should.be.exactly(1);
     (list1[1]).should.be.exactly(2);
@@ -28,7 +28,7 @@ export default (should, M) => () => {
   });
 
   it('includes()', () => {
-    const list = p(M.List.fromArray([1, 2, 3]));
+    const list = p(M.List.of(1, 2, 3));
 
     list.includes(2)
       .should.be.exactly(true);
@@ -42,19 +42,19 @@ export default (should, M) => () => {
     list.includes(3, -1)
       .should.be.exactly(true);
 
-    p(M.List.fromArray([1, 2, NaN])).includes(NaN)
+    p(M.List.of(1, 2, NaN)).includes(NaN)
       .should.be.exactly(true);
   });
 
   it('join()', () => {
-    const list = p(M.List.fromArray([1, 2, 2, 3]));
+    const list = p(M.List.of(1, 2, 2, 3));
 
     list.join('-')
       .should.be.exactly('1-2-2-3');
   });
 
   it('indexOf()', () => {
-    const list = p(M.List.fromArray([2, 9, 9]));
+    const list = p(M.List.of(2, 9, 9));
 
     list.indexOf(2)
       .should.be.exactly(0);
@@ -76,7 +76,7 @@ export default (should, M) => () => {
   });
 
   it('lastIndexOf()', () => {
-    const list = p(M.List.fromArray([2, 5, 9, 2]));
+    const list = p(M.List.of(2, 5, 9, 2));
 
     list.lastIndexOf(2)
       .should.be.exactly(3);
@@ -98,7 +98,7 @@ export default (should, M) => () => {
   });
 
   it('concat()', () => {
-    const list = p(M.List.fromArray([1, 2, 2, 3]));
+    const list = p(M.List.of(1, 2, 2, 3));
 
     list.concat(100).toJSON()
       .should.eql([1, 2, 2, 3, 100]);
@@ -108,7 +108,7 @@ export default (should, M) => () => {
   });
 
   it('slice()', () => {
-    const list = p(M.List.fromArray([1, 2, 2, 3]));
+    const list = p(M.List.of(1, 2, 2, 3));
 
     list.slice(1).toJSON()
       .should.eql([2, 2, 3]);
@@ -127,14 +127,14 @@ export default (should, M) => () => {
   });
 
   it('filter()', () => {
-    const list = p(M.List.fromArray([1, 2, 3]));
+    const list = p(M.List.of(1, 2, 3));
 
     list.filter(x => (x % 2 === 1)).toJSON()
       .should.eql([1, 3]);
   });
 
   it('forEach()', () => {
-    const list = p(M.List.fromArray([1, 2, 2, 3]));
+    const list = p(M.List.of(1, 2, 2, 3));
 
     let sum = 0;
     list.forEach(x => sum += x);
@@ -143,7 +143,7 @@ export default (should, M) => () => {
   });
 
   it('keys() / entries() / [@@iterator]()', () => {
-    const list = p(M.List.fromArray([1, 2, 2, 3]));
+    const list = p(M.List.of(1, 2, 2, 3));
 
     [...list.entries()]
       .should.eql([[0, 1], [1, 2], [2, 2], [3, 3]]);
@@ -156,7 +156,7 @@ export default (should, M) => () => {
   });
 
   it('every() / some()', () => {
-    const list = p(M.List.fromArray([1, 2, 3]));
+    const list = p(M.List.of(1, 2, 3));
 
     list.every(x => x < 5)
       .should.be.exactly(true);
@@ -172,7 +172,7 @@ export default (should, M) => () => {
   });
 
   it('find() / findIndex()', () => {
-    const list = p(M.List.fromArray([2, 5, 9, 2]));
+    const list = p(M.List.of(2, 5, 9, 2));
 
     const multipleOf = x => n => (n % x === 0);
 
@@ -184,7 +184,7 @@ export default (should, M) => () => {
   });
 
   it('reduce() / reduceRight()', () => {
-    const list = p(M.List.fromArray([1, 2, 2, 3]));
+    const list = p(M.List.of(1, 2, 2, 3));
 
     list.reduce((a, b) => a + b, 0)
       .should.be.exactly(8);
@@ -197,7 +197,7 @@ export default (should, M) => () => {
   });
 
   it('reverse()', () => {
-    const list = p(M.List.fromArray([1, 2, 2, 3]));
+    const list = p(M.List.of(1, 2, 2, 3));
 
     list.reverse().toJSON()
       .should.eql([3, 2, 2, 1]);
@@ -207,7 +207,7 @@ export default (should, M) => () => {
   });
 
   it('copyWithin()', () => {
-    const list = p(M.List.fromArray([1, 2, 3, 4, 5]));
+    const list = p(M.List.of(1, 2, 3, 4, 5));
 
     list.copyWithin(-2).toJSON()
       .should.eql([1, 2, 3, 1, 2]);
@@ -223,7 +223,7 @@ export default (should, M) => () => {
   });
 
   it('fill()', () => {
-    const list = p(M.List.fromArray([1, 2, 3]));
+    const list = p(M.List.of(1, 2, 3));
 
     list.fill(4).toJSON()
       .should.eql([4, 4, 4]);
@@ -245,7 +245,7 @@ export default (should, M) => () => {
   });
 
   it('sort()', () => {
-    const list = p(M.List.fromArray([1, 2, 5, 4, 3]));
+    const list = p(M.List.of(1, 2, 5, 4, 3));
 
     list.sort().toJSON()
       .should.eql([1, 2, 3, 4, 5]);
@@ -255,7 +255,7 @@ export default (should, M) => () => {
   });
 
   it('sort(fn)', () => {
-    const list = p(M.List.fromArray([1, 2, 5, 4, 3]));
+    const list = p(M.List.of(1, 2, 5, 4, 3));
 
     const isEven = n => (n % 2 === 0);
 
@@ -272,7 +272,7 @@ export default (should, M) => () => {
   });
 
   it('map()', () => {
-    const list = p(M.List.fromArray([1, 2, 3]));
+    const list = p(M.List.of(1, 2, 3));
 
     list.map(x => x + 10)
       .should.eql([11, 12, 13]);

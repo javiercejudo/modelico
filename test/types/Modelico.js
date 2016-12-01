@@ -24,9 +24,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       };
 
@@ -55,9 +55,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new M.Date(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       });
 
@@ -88,9 +88,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       });
 
@@ -108,7 +108,7 @@ export default (U, should, M) => () => {
     it('edge case when Modelico setPath is called with an empty path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
       const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
-      const listOfPeople1 = new M.List([author]);
+      const listOfPeople1 = M.List.of(author);
 
       const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
       const listOfPeople3 = listOfPeople2.setPath([0], M.fields(author));
@@ -124,9 +124,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: null,
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       })).should.throw();
     });
@@ -139,9 +139,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       });
 
@@ -187,9 +187,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       });
 
@@ -198,9 +198,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       });
 
@@ -209,9 +209,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo Goñi',
         birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       });
 
@@ -230,9 +230,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo Goñi',
         birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: new M.Map([]),
-        importantDatesList: new M.Map([]),
-        importantDatesSet: new M.Map([]),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
         sex: Sex.MALE()
       });
 
