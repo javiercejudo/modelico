@@ -4,9 +4,15 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "16.0.2";
+var version = "16.1.0";
+
+
+
+
+
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
+
 var homepage = "https://github.com/javiercejudo/modelico#readme";
 
 var typeSymbol = Symbol('type');
@@ -18,118 +24,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
 
-  function AsyncGenerator(gen) {
-    var front, back;
 
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
 
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
 
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
 
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
 
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
 
-        case "throw":
-          front.reject(value);
-          break;
 
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
 
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -155,6 +58,10 @@ var createClass = function () {
   };
 }();
 
+
+
+
+
 var defineProperty = function (obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -168,6 +75,31 @@ var defineProperty = function (obj, key, value) {
   }
 
   return obj;
+};
+
+var get$1 = function get$1(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get$1(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
 };
 
 var inherits = function (subClass, superClass) {
@@ -186,6 +118,16 @@ var inherits = function (subClass, superClass) {
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
 
+
+
+
+
+
+
+
+
+
+
 var possibleConstructorReturn = function (self, call) {
   if (!self) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -193,6 +135,44 @@ var possibleConstructorReturn = function (self, call) {
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
+
+
+
+var set$1 = function set$1(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set$1(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
@@ -204,7 +184,9 @@ var toConsumableArray = function (arr) {
   }
 };
 
-var get = function get(field) {
+//      
+
+var get$$1 = function get$$1(field) {
   return function (obj) {
     return obj[field];
   };
@@ -214,6 +196,7 @@ var pipe2 = function pipe2(fn1, fn2) {
     return fn2(fn1.apply(undefined, arguments));
   };
 };
+
 
 var partial = function partial(fn) {
   for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
@@ -244,7 +227,7 @@ var objToArr = function objToArr(obj) {
     return [k, obj[k]];
   });
 };
-var reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver));
+var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver));
 var isPlainObject = function isPlainObject(x) {
   return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x;
 };
@@ -253,7 +236,7 @@ var getInnerTypes = function getInnerTypes(Type) {
   return Type.innerTypes && Type.innerTypes() || {};
 };
 
-var reviverFactory$1 = function reviverFactory(Type) {
+var reviverFactory$1 = function reviverFactory$1(Type) {
   var innerTypes = getInnerTypes(Type);
 
   return function (k, v) {
@@ -566,7 +549,7 @@ var parseMapper = function parseMapper(keyMetadata, valueMetadata) {
   };
 };
 
-var reviverFactory$2 = function reviverFactory(keyMetadata, valueMetadata) {
+var reviverFactory$2 = function reviverFactory$2(keyMetadata, valueMetadata) {
   return function (k, v) {
     if (k !== '') {
       return v;
@@ -601,14 +584,36 @@ var ModelicoMap = function (_AbstractMap) {
       return [].concat(toConsumableArray(this.inner())).map(stringifyMapper);
     }
   }], [{
-    key: 'fromObject',
-    value: function fromObject(obj) {
-      return ModelicoMap.fromMap(new Map(objToArr(obj)));
-    }
-  }, {
     key: 'fromMap',
     value: function fromMap(map) {
       return new ModelicoMap(map);
+    }
+  }, {
+    key: 'fromArray',
+    value: function fromArray(pairs) {
+      return ModelicoMap.fromMap(new Map(pairs));
+    }
+  }, {
+    key: 'of',
+    value: function of() {
+      var len = arguments.length;
+
+      if (len % 2 === 1) {
+        throw TypeError('Map.of requires an even number of arguments');
+      }
+
+      var pairs = [];
+
+      for (var i = 0; i < len; i += 2) {
+        pairs.push([arguments.length <= i ? undefined : arguments[i], arguments.length <= i + 1 ? undefined : arguments[i + 1]]);
+      }
+
+      return ModelicoMap.fromArray(pairs);
+    }
+  }, {
+    key: 'fromObject',
+    value: function fromObject(obj) {
+      return ModelicoMap.fromArray(objToArr(obj));
     }
   }, {
     key: 'metadata',
@@ -619,6 +624,8 @@ var ModelicoMap = function (_AbstractMap) {
   return ModelicoMap;
 }(AbstractMap$1);
 
+ModelicoMap.EMPTY = ModelicoMap.fromArray([]);
+
 var ModelicoMap$1 = Object.freeze(ModelicoMap);
 
 var stringifyReducer = function stringifyReducer(acc, pair) {
@@ -627,7 +634,7 @@ var stringifyReducer = function stringifyReducer(acc, pair) {
   return acc;
 };
 
-var parseMapper$1 = function parseMapper(keyMetadata, valueMetadata, object) {
+var parseMapper$1 = function parseMapper$1(keyMetadata, valueMetadata, object) {
   return function (enumerator) {
     var reviveKey = reviverOrAsIs(keyMetadata);
     var key = reviveKey('', enumerator);
@@ -639,7 +646,7 @@ var parseMapper$1 = function parseMapper(keyMetadata, valueMetadata, object) {
   };
 };
 
-var reviverFactory$3 = function reviverFactory(keyMetadata, valueMetadata) {
+var reviverFactory$3 = function reviverFactory$3(keyMetadata, valueMetadata) {
   return function (k, v) {
     if (k !== '') {
       return v;
@@ -674,6 +681,11 @@ var ModelicoEnumMap = function (_AbstractMap) {
       return [].concat(toConsumableArray(this.inner())).reduce(stringifyReducer, {});
     }
   }], [{
+    key: 'fromMap',
+    value: function fromMap(map) {
+      return new ModelicoEnumMap(map);
+    }
+  }, {
     key: 'metadata',
     value: function metadata(keyMetadata, valueMetadata) {
       return AbstractMap$1.metadata(ModelicoEnumMap, reviverFactory$3(keyMetadata, valueMetadata));
@@ -681,6 +693,8 @@ var ModelicoEnumMap = function (_AbstractMap) {
   }]);
   return ModelicoEnumMap;
 }(AbstractMap$1);
+
+ModelicoEnumMap.EMPTY = ModelicoEnumMap.fromMap(new Map([]));
 
 var EnumMap = Object.freeze(ModelicoEnumMap);
 
@@ -696,7 +710,7 @@ var ModelicoDate = function (_Modelico) {
       throw TypeError('missing date');
     }
 
-    var date = new Date(dateOrig.getTime());;
+    var date = new Date(dateOrig.getTime());
 
     _this.inner = function () {
       return new Date(date.getTime());
@@ -818,6 +832,15 @@ var ModelicoList = function (_Modelico) {
       return new ModelicoList(arr);
     }
   }, {
+    key: 'of',
+    value: function of() {
+      for (var _len = arguments.length, arr = Array(_len), _key = 0; _key < _len; _key++) {
+        arr[_key] = arguments[_key];
+      }
+
+      return ModelicoList.fromArray(arr);
+    }
+  }, {
     key: 'metadata',
     value: function metadata(itemMetadata) {
       return iterableMetadata(ModelicoList, itemMetadata);
@@ -825,6 +848,8 @@ var ModelicoList = function (_Modelico) {
   }]);
   return ModelicoList;
 }(Modelico$1);
+
+ModelicoList.EMPTY = ModelicoList.of();
 
 var List = Object.freeze(ModelicoList);
 
@@ -887,9 +912,18 @@ var ModelicoSet = function (_Modelico) {
       return ModelicoSet.fromSet(new Set(arr));
     }
   }, {
+    key: 'of',
+    value: function of() {
+      for (var _len = arguments.length, arr = Array(_len), _key = 0; _key < _len; _key++) {
+        arr[_key] = arguments[_key];
+      }
+
+      return ModelicoSet.fromArray(arr);
+    }
+  }, {
     key: 'fromSet',
-    value: function fromSet(set) {
-      return new ModelicoSet(set);
+    value: function fromSet(set$$1) {
+      return new ModelicoSet(set$$1);
     }
   }, {
     key: 'metadata',
@@ -900,13 +934,15 @@ var ModelicoSet = function (_Modelico) {
   return ModelicoSet;
 }(Modelico$1);
 
+ModelicoSet.EMPTY = ModelicoSet.of();
+
 var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
 var enumeratorsReducer = function enumeratorsReducer(acc, code) {
   return Object.assign(acc, defineProperty({}, code, { code: code }));
 };
 
-var reviverFactory$4 = function reviverFactory(enumerators) {
+var reviverFactory$4 = function reviverFactory$4(enumerators) {
   return function (k, v) {
     var enumerator = enumerators[v];
 
@@ -1036,7 +1072,7 @@ var listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'so
 var dateNonMutators = internalNonMutators;
 var dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
-var metadata = Object.freeze({
+var metadata$1 = Object.freeze({
   _: Modelico$1.metadata,
   any: Any,
   asIs: AsIs,
@@ -1063,7 +1099,7 @@ var index = Object.freeze({
   fields: function fields(x) {
     return x[fieldsSymbol]();
   },
-  metadata: metadata,
+  metadata: metadata$1,
   proxyMap: partial(proxyFactory$1, mapNonMutators, mapMutators),
   proxyList: partial(proxyFactory$1, listNonMutators, listMutators),
   proxySet: partial(proxyFactory$1, setNonMutators, setMutators),

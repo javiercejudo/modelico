@@ -21,119 +21,6 @@ var SexFactory = (function (M) {
   return new M.Enum(['FEMALE', 'MALE', 'OTHER']);
 });
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
-
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -158,6 +45,37 @@ var createClass = function () {
   };
 }();
 
+
+
+
+
+
+
+var get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
 var inherits = function (subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
     throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
@@ -174,6 +92,16 @@ var inherits = function (subClass, superClass) {
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
 
+
+
+
+
+
+
+
+
+
+
 var possibleConstructorReturn = function (self, call) {
   if (!self) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -181,6 +109,44 @@ var possibleConstructorReturn = function (self, call) {
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
+
+
+
+var set = function set(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
@@ -212,7 +178,7 @@ var PersonFactory = (function (M) {
       date = _M$metadata.date,
       map = _M$metadata.map,
       list = _M$metadata.list,
-      set = _M$metadata.set,
+      set$$1 = _M$metadata.set,
       maybe = _M$metadata.maybe;
 
   var partOfDay = PartOfDay.metadata;
@@ -245,7 +211,7 @@ var PersonFactory = (function (M) {
           favouritePartOfDay: partOfDay(),
           lifeEvents: map(asIs(String), date()),
           importantDatesList: list(date()),
-          importantDatesSet: set(date()),
+          importantDatesSet: set$$1(date()),
           sex: maybe(sex())
         });
       }
@@ -736,19 +702,39 @@ var ModelicoMap = (function (should, M) {
       });
     });
 
-    describe('from object', function () {
-      it('should be able to create a set from an array', function () {
-        var map1 = M.Map.fromObject({ a: 1, b: 2, c: 3 });
+    describe('EMPTY / of / fromArray / fromObject / fromMap', function () {
+      it('should have a static property for the empty map', function () {
+        should(M.Map.EMPTY.inner().size).be.exactly(0);
 
-        should(map1.inner().get('b')).be.exactly(2);
+        M.Map.EMPTY.toJSON().should.eql([]);
       });
-    });
 
-    describe('from map', function () {
-      it('should be able to create a set from a native set', function () {
-        var map1 = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+      it('should be able to create a map from an even number of params', function () {
+        var map = M.Map.of('a', 1, 'b', 2, 'c', 3);
 
-        should(map1.inner().get('b')).be.exactly(2);
+        should(map.inner().get('b')).be.exactly(2);
+
+        (function () {
+          return M.Map.of('a', 1, 'b', 2, 'c', 3, 'd');
+        }).should.throw();
+      });
+
+      it('should be able to create a map from an array', function () {
+        var map = M.Map.fromArray([['a', 1], ['b', 2], ['c', 3]]);
+
+        should(map.inner().get('b')).be.exactly(2);
+      });
+
+      it('should be able to create a map from an object', function () {
+        var map = M.Map.fromObject({ a: 1, b: 2, c: 3 });
+
+        should(map.inner().get('b')).be.exactly(2);
+      });
+
+      it('should be able to create a map from a native map', function () {
+        var map = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+
+        should(map.inner().get('b')).be.exactly(2);
       });
     });
   };
@@ -846,6 +832,20 @@ var ModelicoEnumMap = (function (should, M) {
         (function () {
           return JSON.parse('null', M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(String)).reviver);
         }).should.throw();
+      });
+    });
+
+    describe('EMPTY /  fromMap', function () {
+      it('should have a static property for the empty map', function () {
+        should(M.EnumMap.EMPTY.inner().size).be.exactly(0);
+
+        M.EnumMap.EMPTY.toJSON().should.eql({});
+      });
+
+      it('should be able to create an enum map from a native map', function () {
+        var enumMap = M.EnumMap.fromMap(new Map([[PartOfDay.MORNING(), 1], [PartOfDay.AFTERNOON(), 2]]));
+
+        should(enumMap.inner().get(PartOfDay.AFTERNOON())).be.exactly(2);
       });
     });
   };
@@ -1003,7 +1003,19 @@ var ModelicoList = (function (should, M) {
       });
     });
 
-    describe('from array', function () {
+    describe('EMPTY / of / fromArray', function () {
+      it('should have a static property for the empty list', function () {
+        should(M.List.EMPTY.inner().length).be.exactly(0);
+
+        M.List.EMPTY.toJSON().should.eql([]);
+      });
+
+      it('should be able to create a list from arbitrary parameters', function () {
+        var modelicoList = M.List.of(0, 1, 1, 2, 3, 5, 8);
+
+        modelicoList.inner().should.eql([0, 1, 1, 2, 3, 5, 8]);
+      });
+
       it('should be able to create a list from an array', function () {
         var fibArray = [0, 1, 1, 2, 3, 5, 8];
 
@@ -1023,19 +1035,19 @@ var ModelicoSet = (function (should, M) {
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
         var input = new Set(['a', 'b', 'c']);
-        var set = new M.Set(input);
+        var set$$1 = new M.Set(input);
 
         input.delete('a');
 
-        set.inner().has('a').should.be.exactly(true);
+        set$$1.inner().has('a').should.be.exactly(true);
       });
     });
 
     describe('setting', function () {
       it('should implement Symbol.iterator', function () {
-        var set = M.Set.fromArray([1, 2, 2, 4]);
+        var set$$1 = M.Set.fromArray([1, 2, 2, 4]);
 
-        [].concat(toConsumableArray(set)).should.eql([1, 2, 4]);
+        [].concat(toConsumableArray(set$$1)).should.eql([1, 2, 4]);
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -1045,9 +1057,9 @@ var ModelicoSet = (function (should, M) {
       });
 
       it('should set items in the set correctly', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
+        var set$$1 = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
 
-        var modelicoSet1 = new M.Set(set);
+        var modelicoSet1 = new M.Set(set$$1);
         var modelicoSet2 = modelicoSet1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
 
         should([].concat(toConsumableArray(modelicoSet2.inner()))[0].inner().getFullYear()).be.exactly(1989);
@@ -1057,9 +1069,9 @@ var ModelicoSet = (function (should, M) {
       });
 
       it('should set items in the set correctly when part of a path', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
+        var set$$1 = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
 
-        var modelicoSet1 = new M.Set(set);
+        var modelicoSet1 = new M.Set(set$$1);
         var modelicoSet2 = modelicoSet1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
 
         should([].concat(toConsumableArray(modelicoSet2.inner()))[0].inner().getFullYear()).be.exactly(1989);
@@ -1069,9 +1081,9 @@ var ModelicoSet = (function (should, M) {
       });
 
       it('should set items in the set correctly when part of a path with a single element', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
+        var set$$1 = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date())];
 
-        var modelicoSet1 = new M.Set(set);
+        var modelicoSet1 = new M.Set(set$$1);
         var modelicoSet2 = modelicoSet1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
         should([].concat(toConsumableArray(modelicoSet2.inner()))[0].inner().getFullYear()).be.exactly(2000);
@@ -1119,9 +1131,9 @@ var ModelicoSet = (function (should, M) {
 
     describe('stringifying', function () {
       it('should stringify the set correctly', function () {
-        var set = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date('2012-12-25T00:00:00.000Z'))];
+        var set$$1 = [new M.Date(new Date('1988-04-16T00:00:00.000Z')), new M.Date(new Date('2012-12-25T00:00:00.000Z'))];
 
-        var modelicoSet = new M.Set(set);
+        var modelicoSet = new M.Set(set$$1);
 
         JSON.stringify(modelicoSet).should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]');
       });
@@ -1163,7 +1175,19 @@ var ModelicoSet = (function (should, M) {
       });
     });
 
-    describe('from array', function () {
+    describe('EMPTY / of / fromArray / fromSet', function () {
+      it('should have a static property for the empty set', function () {
+        should(M.Set.EMPTY.inner().size).be.exactly(0);
+
+        M.Set.EMPTY.toJSON().should.eql([]);
+      });
+
+      it('should be able to create a set from arbitrary parameters', function () {
+        var modelicoSet = M.Set.of(0, 1, 1, 2, 3, 5, 8);
+
+        [].concat(toConsumableArray(modelicoSet.inner())).should.eql([0, 1, 2, 3, 5, 8]);
+      });
+
       it('should be able to create a set from an array', function () {
         var fibArray = [0, 1, 1, 2, 3, 5, 8];
 
@@ -1171,9 +1195,7 @@ var ModelicoSet = (function (should, M) {
 
         [].concat(toConsumableArray(modelicoSet.inner())).should.eql([0, 1, 2, 3, 5, 8]);
       });
-    });
 
-    describe('from set', function () {
       it('should be able to create a set from a native set', function () {
         var fibSet = new Set([0, 1, 1, 2, 3, 5, 8]);
 
@@ -2276,9 +2298,9 @@ var proxySet = (function (should, M) {
     var p = M.proxySet;
 
     it('size', function () {
-      var set = p(M.Set.fromArray([1, 2, 2, 3]));
+      var set$$1 = p(M.Set.fromArray([1, 2, 2, 3]));
 
-      set.size.should.be.exactly(3);
+      set$$1.size.should.be.exactly(3);
     });
 
     it('has() / add() / delete() / clear()', function () {
@@ -2303,26 +2325,26 @@ var proxySet = (function (should, M) {
     });
 
     it('entries()', function () {
-      var set = p(M.Set.fromArray([1, 2, 2, 3]));
+      var set$$1 = p(M.Set.fromArray([1, 2, 2, 3]));
 
-      [].concat(toConsumableArray(set.entries())).should.eql([[1, 1], [2, 2], [3, 3]]);
+      [].concat(toConsumableArray(set$$1.entries())).should.eql([[1, 1], [2, 2], [3, 3]]);
     });
 
     it('values() / keys() / [@@iterator]()', function () {
-      var set = p(M.Set.fromArray([1, 2, 2, 3]));
+      var set$$1 = p(M.Set.fromArray([1, 2, 2, 3]));
 
-      [].concat(toConsumableArray(set.values())).should.eql([1, 2, 3]);
+      [].concat(toConsumableArray(set$$1.values())).should.eql([1, 2, 3]);
 
-      [].concat(toConsumableArray(set.keys())).should.eql([1, 2, 3]);
+      [].concat(toConsumableArray(set$$1.keys())).should.eql([1, 2, 3]);
 
-      [].concat(toConsumableArray(set[Symbol.iterator]())).should.eql([1, 2, 3]);
+      [].concat(toConsumableArray(set$$1[Symbol.iterator]())).should.eql([1, 2, 3]);
     });
 
     it('forEach()', function () {
-      var set = p(M.Set.fromArray([1, 2, 2, 3]));
+      var set$$1 = p(M.Set.fromArray([1, 2, 2, 3]));
 
       var sum = 0;
-      set.forEach(function (x) {
+      set$$1.forEach(function (x) {
         return sum += x;
       });
 
