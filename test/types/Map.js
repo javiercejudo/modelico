@@ -54,7 +54,7 @@ export default (should, M) => () => {
     });
 
     it('should set fields returning a new map when part of a path', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
       const author1 = Modelico.fromJSON(Person, authorJson);
       const author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2010-03-28T00:00:00.000Z'));
 
@@ -67,7 +67,7 @@ export default (should, M) => () => {
     });
 
     it('edge case when setPath is called with an empty path', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
       const author = Modelico.fromJSON(Person, authorJson);
 
       const map = author.lifeEvents();
@@ -96,14 +96,14 @@ export default (should, M) => () => {
       const modelicoMap = M.Map.fromMap(map);
 
       JSON.stringify(modelicoMap)
-        .should.be.exactly('[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":"2012-12-25T00:00:00.000Z"}]');
+        .should.be.exactly('[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]');
     });
   });
 
   describe('parsing', () => {
     it('should parse the map correctly', () => {
       const modelicoMap = JSON.parse(
-        '[{"key":"a","value":"1988-04-16T00:00:00.000Z"},{"key":"b","value":"2012-12-25T00:00:00.000Z"}]',
+        '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]',
         M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver
       );
 
@@ -115,7 +115,7 @@ export default (should, M) => () => {
     });
 
     it('should be parsed correctly when used within another class', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
       const author = Modelico.fromJSON(Person, authorJson);
 
       should(author.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
