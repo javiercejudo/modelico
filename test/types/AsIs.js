@@ -6,10 +6,10 @@ export default (U, should, M) => () => {
 
   describe('toJSON', () => {
     it('should stringify the value as is', () => {
-      const mapOfNumbers = M.Map.fromObject({a: 1, b: 2});
+      const mapOfNumbers = M.Map.of('a', 1, 'b', 2);
 
       JSON.stringify(mapOfNumbers)
-        .should.be.exactly('[{"key":"a","value":1},{"key":"b","value":2}]');
+        .should.be.exactly('[["a",1],["b",2]]');
     });
   });
 

@@ -5,19 +5,17 @@ import AbstractMap from './AbstractMap';
 import AsIs from './AsIs';
 import Any from './Any';
 
-const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
-
-const parseMapper = (keyMetadata, valueMetadata) => { return pairObject => {
+const parseMapper = (keyMetadata, valueMetadata) => (([key, value]) => {
   const reviveKey = reviverOrAsIs(keyMetadata);
-  const key = reviveKey('', pairObject.key);
+  const revivedKey = reviveKey('', key);
 
   const reviveVal = reviverOrAsIs(valueMetadata);
-  const val = reviveVal('', pairObject.value);
+  const revivedVal = reviveVal('', value);
 
-  return [key, val];
-}};
+  return [revivedKey, revivedVal];
+});
 
-const reviverFactory = (keyMetadata, valueMetadata) => { return (k, v) => {
+const reviverFactory = (keyMetadata, valueMetadata) => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -27,7 +25,7 @@ const reviverFactory = (keyMetadata, valueMetadata) => { return (k, v) => {
     new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
 
   return new ModelicoMap(innerMap);
-}};
+});
 
 class ModelicoMap extends AbstractMap {
   constructor(innerMap) {
@@ -41,7 +39,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   toJSON() {
-    return [...this.inner()].map(stringifyMapper);
+    return [...this.inner()];
   }
 
   static fromMap(map) {
