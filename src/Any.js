@@ -1,3 +1,9 @@
 'use strict';
 
-export default Object.freeze({name: 'Any'});
+import { identity } from './U';
+
+const Any = x => identity(x);
+
+// Any.name = 'Any';
+
+export default Object.freeze(Any);
