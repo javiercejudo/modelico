@@ -7,14 +7,14 @@ export default M => {
   const PartOfDay = PartOfDayFactory(M);
   const Sex = SexFactory(M);
 
-  const Modelico = M.Modelico;
+  const Base = M.Base;
   const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ');
 
   const { asIs, date, map, list, set, maybe } = M.metadata;
   const partOfDay = PartOfDay.metadata;
   const sex = Sex.metadata;
 
-  class Person extends Modelico {
+  class Person extends Base {
     constructor(fields) {
       super(Person, fields);
 
@@ -39,7 +39,7 @@ export default M => {
     }
 
     static metadata() {
-      return Modelico.metadata(Person);
+      return Base.metadata(Person);
     }
   }
 

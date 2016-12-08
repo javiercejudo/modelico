@@ -1,7 +1,7 @@
 'use strict';
 
 import { always, isNothing } from './U';
-import Modelico from './Modelico';
+import Base from './Base';
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
@@ -15,7 +15,7 @@ const reviverFactory = enumerators => ((k, v) => {
   return enumerator;
 });
 
-class ModelicoEnum extends Modelico {
+class ModelicoEnum extends Base {
   constructor(input) {
     const enumerators = Array.isArray(input) ?
       input.reduce(enumeratorsReducer, {}) :

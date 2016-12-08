@@ -2,9 +2,9 @@
 
 import { always, isNothing } from './U';
 import { typeSymbol } from './symbols';
-import Modelico from './Modelico';
+import Base from './Base';
 
-class AbstractMap extends Modelico {
+class AbstractMap extends Base {
   constructor(Type, innerMapOrig) {
     super(Type, {});
 

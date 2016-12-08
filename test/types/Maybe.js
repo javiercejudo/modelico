@@ -6,7 +6,7 @@ import PartOfDayFactory from './fixtures/PartOfDay';
 export default (should, M) => () => {
   const PartOfDay = PartOfDayFactory(M);
   const Person = PersonFactory(M);
-  const Modelico = M.Modelico;
+  const Base = M.Base;
 
   const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
 
@@ -66,7 +66,7 @@ export default (should, M) => () => {
     });
 
     it('should support arbitrary Modelico types', () => {
-      const author = Modelico.fromJSON(Person, authorJson);
+      const author = M.fromJSON(Person, authorJson);
 
       const maybe1 = M.Maybe.of(author);
       JSON.stringify(maybe1).should.be.exactly(authorJson);

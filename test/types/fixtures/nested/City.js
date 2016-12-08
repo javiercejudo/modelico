@@ -3,10 +3,10 @@
 import CountryFactory from './Country';
 
 export default (M, Region) => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
   const Country = CountryFactory(M, Region);
 
-  class City extends Modelico {
+  class City extends Base {
     constructor(fields) {
       super(City, fields);
 
@@ -16,7 +16,7 @@ export default (M, Region) => {
     static innerTypes() {
       return Object.freeze({
         name: M.AsIs(String),
-        country: Modelico.metadata(Country)
+        country: Base.metadata(Country)
       });
     }
   }

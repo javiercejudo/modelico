@@ -2,11 +2,11 @@
 
 import { always, isNothing, unsupported } from './U';
 import { iterableMetadata } from './iterable';
-import Modelico from './Modelico';
+import Base from './Base';
 import AsIs from './AsIs';
 import Any from './Any';
 
-class ModelicoSet extends Modelico {
+class ModelicoSet extends Base {
   constructor(innerSetOrig) {
     super(ModelicoSet, {});
 

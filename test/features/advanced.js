@@ -1,10 +1,10 @@
 'use strict';
 
 export default (should, M) => () => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
   const { asIs, any, maybe, list, _ } = M.metadata;
 
-  class Animal extends Modelico {
+  class Animal extends Base {
     constructor(fields) {
       super(Animal, fields);
     }
@@ -15,7 +15,7 @@ export default (should, M) => () => {
     }
   }
 
-  class Person extends Modelico {
+  class Person extends Base {
     constructor(fields) {
       super(Person, fields);
     }
@@ -47,7 +47,7 @@ export default (should, M) => () => {
       ]
     }`;
 
-    const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
+    const person1 = JSON.parse(personJson, Base.metadata(Person).reviver);
 
     person1.fullName().should.be.exactly('Javier Cejudo');
 

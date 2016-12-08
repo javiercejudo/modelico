@@ -1,20 +1,20 @@
 'use strict';
 
 export default (should, M) => () => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
 
-  class Country extends Modelico {
+  class Country extends Base {
     constructor(code) {
       super(Country, {code});
     }
 
     static metadata() {
-      return Modelico.metadata(Country);
+      return Base.metadata(Country);
     }
   }
 
   it('should leave root elements that are not plain objects untouched', () => {
-    Modelico.fromJSON(Country, '"ESP"').code()
+    M.fromJSON(Country, '"ESP"').code()
       .should.be.exactly('ESP');
   });
 };
