@@ -56,7 +56,7 @@ export default (should, M) => () => {
     it('should set fields returning a new map when part of a path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
       const author1 = Modelico.fromJSON(Person, authorJson);
-      const author2 = author1.setPath(['lifeEvents', 'wedding', 'date'], new Date('2010-03-28T00:00:00.000Z'));
+      const author2 = author1.setPath(['lifeEvents', 'wedding'], new Date('2010-03-28T00:00:00.000Z'));
 
       should(author2.lifeEvents().inner().get('wedding').inner().getFullYear())
         .be.exactly(2010);

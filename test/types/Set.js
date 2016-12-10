@@ -31,57 +31,6 @@ export default (should, M) => () => {
         .should.throw();
     });
 
-    it('should set items in the set correctly', () => {
-      const set = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
-      ];
-
-      const modelicoSet1 = M.Set.fromArray(set);
-      const modelicoSet2 = modelicoSet1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
-
-      should([...modelicoSet2.inner()][0].inner().getFullYear())
-        .be.exactly(1989);
-
-      // verify that modelicoSet1 was not mutated
-      should([...modelicoSet1.inner()][0].inner().getFullYear())
-        .be.exactly(1988);
-    });
-
-    it('should set items in the set correctly when part of a path', () => {
-      const set = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
-      ];
-
-      const modelicoSet1 = M.Set.fromArray(set);
-      const modelicoSet2 = modelicoSet1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
-
-      should([...modelicoSet2.inner()][0].inner().getFullYear())
-        .be.exactly(1989);
-
-      // verify that modelicoSet1 was not mutated
-      should([...modelicoSet1.inner()][0].inner().getFullYear())
-        .be.exactly(1988);
-    });
-
-    it('should set items in the set correctly when part of a path with a single element', () => {
-      const set = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
-      ];
-
-      const modelicoSet1 = M.Set.fromArray(set);
-      const modelicoSet2 = modelicoSet1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
-
-      should([...modelicoSet2.inner()][0].inner().getFullYear())
-        .be.exactly(2000);
-
-      // verify that modelicoSet1 was not mutated
-      should([...modelicoSet1.inner()][0].inner().getFullYear())
-        .be.exactly(1988);
-    });
-
     it('should be able to set a whole set', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[{"key":"wedding","value":"2013-03-28T00:00:00.000Z"},{"key":"moved to Australia","value":"2012-12-03T00:00:00.000Z"}],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
       const author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
@@ -114,18 +63,32 @@ export default (should, M) => () => {
         new M.Date(new Date())
       );
 
-      const modelicoDateSet2 = new Set([
+      const modelicoDatesSet2 = new Set([
         new M.Date(new Date('2016-04-16T00:00:00.000Z'))
       ]);
 
-      const setOfSetsOfDates1 = M.Set.of(modelicoDatesSet1);
-      const setOfSetsOfDates2 = setOfSetsOfDates1.setPath([0], modelicoDateSet2);
+      const listOfSetsOfDates1 = M.List.of(modelicoDatesSet1);
+      const listOfSetsOfDates2 = listOfSetsOfDates1.setPath([0], modelicoDatesSet2);
 
-      should([...[...setOfSetsOfDates1.inner()][0].inner()][0].inner().getFullYear())
+      should([...[...listOfSetsOfDates1.inner()][0].inner()][0].inner().getFullYear())
         .be.exactly(1988);
 
-      should([...[...setOfSetsOfDates2.inner()][0].inner()][0].inner().getFullYear())
+      should([...[...listOfSetsOfDates2.inner()][0].inner()][0].inner().getFullYear())
         .be.exactly(2016);
+    });
+
+    it('should not support the set operation', () => {
+      const mySet = M.Set.of(1, 2);
+
+      (() => mySet.set(0, 3))
+        .should.throw();
+    });
+
+    it('should not support the setPath operation with non-empty paths', () => {
+      const mySet = M.Set.of(1, 2);
+
+      (() => mySet.setPath([0], 3))
+        .should.throw();
     });
   });
 

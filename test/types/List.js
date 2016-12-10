@@ -61,7 +61,7 @@ export default (should, M) => () => {
       ];
 
       const modelicoList1 = M.List.fromArray(list);
-      const modelicoList2 = modelicoList1.setPath([0, 'date'], new Date('1989-04-16T00:00:00.000Z'));
+      const modelicoList2 = modelicoList1.setPath([0], new Date('1989-04-16T00:00:00.000Z'));
 
       should(modelicoList2.inner()[0].inner().getFullYear())
         .be.exactly(1989);

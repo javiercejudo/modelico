@@ -95,7 +95,7 @@ export default (U, should, M) => () => {
       });
 
       const author2 = author1.setPath(['givenName'], 'Javi')
-        .setPath(['birthday', 'date'], new Date('1989-04-16T00:00:00.000Z'));
+        .setPath(['birthday'], new Date('1989-04-16T00:00:00.000Z'));
 
       should(author2.birthday().inner().getFullYear())
         .be.exactly(1989);
