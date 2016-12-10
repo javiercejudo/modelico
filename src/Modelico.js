@@ -74,11 +74,13 @@ class Modelico {
       return new (this[typeSymbol]())(value);
     }
 
-    if (path.length === 1) {
+    const item = this[path[0]]();
+
+    if (!item.setPath) {
       return this.set(path[0], value);
     }
 
-    return this.set(path[0], this[path[0]]().setPath(path.slice(1), value));
+    return this.set(path[0], item.setPath(path.slice(1), value));
   }
 
   equals(other) {

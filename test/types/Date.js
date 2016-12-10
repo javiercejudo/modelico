@@ -32,16 +32,26 @@ export default (should, M) => () => {
     it('should set dates correctly', () => {
       const date1 = new M.Date(new Date('1988-04-16T00:00:00.000Z'));
       const date2 = date1.setPath([], new Date('1989-04-16T00:00:00.000Z'));
-      const date3 = date1.set(new Date('1987-04-16T00:00:00.000Z'));
-
-      should(date3.inner().getFullYear())
-        .be.exactly(1987);
 
       should(date2.inner().getFullYear())
         .be.exactly(1989);
 
       should(date1.inner().getFullYear())
         .be.exactly(1988);
+    });
+
+    it('should not support the set operation', () => {
+      const myDate = new M.Date(new Date());
+
+      (() => myDate.set())
+        .should.throw();
+    });
+
+    it('should not support the setPath operation with non-empty paths', () => {
+      const myDate = new M.Date(new Date());
+
+      (() => myDate.setPath([0], new Date()))
+        .should.throw();
     });
   });
 

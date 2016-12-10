@@ -15,3 +15,7 @@ export const defaultTo = (d: mixed) => { return (v: mixed) => isNothing(v) ? d :
 export const objToArr = (obj: Object) => { return Object.keys(obj).map(k => [k, obj[k]]) };
 export const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver));
 export const isPlainObject = (x: mixed) => typeof x === 'object' && !!x;
+
+export const unsupported = (message: string = 'Unsupported operation') => {
+  throw Error(message);
+};

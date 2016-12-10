@@ -53,7 +53,7 @@ export default (should, M) => () => {
       ]);
 
       const greetings1 = new M.EnumMap(map);
-      const greetings2 = greetings1.setPath([PartOfDay.EVENING(), 'date'], new Date('2013-04-16T00:00:00.000Z'));
+      const greetings2 = greetings1.setPath([PartOfDay.EVENING()], new Date('2013-04-16T00:00:00.000Z'));
 
       should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear())
         .be.exactly(2013);

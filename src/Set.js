@@ -1,6 +1,6 @@
 'use strict';
 
-import { always, isNothing } from './U';
+import { always, isNothing, unsupported } from './U';
 import { iterableMetadata } from './iterable';
 import Modelico from './Modelico';
 import AsIs from './AsIs';
@@ -22,25 +22,16 @@ class ModelicoSet extends Modelico {
     Object.freeze(this);
   }
 
-  set(index, value) {
-    const newSet = [...this.inner()];
-    newSet[index] = value;
-
-    return new ModelicoSet(newSet);
+  set() {
+    unsupported('Set.set is not supported');
   }
 
-  setPath(path, value) {
+  setPath(path, set) {
     if (path.length === 0) {
-      return new ModelicoSet(value);
+      return new ModelicoSet(set);
     }
 
-    const item = [...this.inner()][path[0]];
-
-    if (!item.setPath) {
-      return this.set(path[0], value);
-    }
-
-    return this.set(path[0], item.setPath(path.slice(1), value));
+    unsupported('Set.setPath is not supported for non-empty paths');
   }
 
   toJSON() {

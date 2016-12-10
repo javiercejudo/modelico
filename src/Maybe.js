@@ -60,7 +60,12 @@ class Maybe extends Modelico {
       return new Maybe(v);
     }
 
-    const inner = this.isEmpty() ? null : this.inner().get().setPath(path, v);
+    if (this.isEmpty()) {
+      return new Maybe(null);
+    }
+
+    const item = this.inner().get();
+    const inner = (item.setPath) ? item.setPath(path, v) : v;
 
     return new Maybe(inner);
   }

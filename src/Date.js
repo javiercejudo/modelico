@@ -1,6 +1,6 @@
 'use strict';
 
-import { isNothing } from './U';
+import { isNothing, unsupported } from './U';
 import Modelico from './Modelico';
 
 class ModelicoDate extends Modelico {
@@ -18,12 +18,16 @@ class ModelicoDate extends Modelico {
     Object.freeze(this);
   }
 
-  set(date) {
-    return new ModelicoDate(date);
+  set() {
+    unsupported('Date.set is not supported');
   }
 
-  setPath(path, value) {
-    return this.set(value);
+  setPath(path, date) {
+    if (path.length === 0) {
+      return new ModelicoDate(date);
+    }
+
+    unsupported('Date.setPath is not supported for non-empty paths');
   }
 
   toJSON() {
