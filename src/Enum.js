@@ -5,7 +5,7 @@ import Modelico from './Modelico';
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
-const reviverFactory = enumerators => { return (k, v) => {
+const reviverFactory = enumerators => ((k, v) => {
   const enumerator = enumerators[v];
 
   if (isNothing(enumerator)) {
@@ -13,7 +13,7 @@ const reviverFactory = enumerators => { return (k, v) => {
   }
 
   return enumerator;
-}};
+});
 
 class ModelicoEnum extends Modelico {
   constructor(input) {

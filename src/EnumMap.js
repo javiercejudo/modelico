@@ -9,7 +9,7 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper = (keyMetadata, valueMetadata, object) => { return enumerator => {
+const parseMapper = (keyMetadata, valueMetadata, object) => (enumerator => {
   const reviveKey = reviverOrAsIs(keyMetadata);
   const key = reviveKey('', enumerator);
 
@@ -17,9 +17,9 @@ const parseMapper = (keyMetadata, valueMetadata, object) => { return enumerator 
   const val = reviveVal('', object[enumerator]);
 
   return [key, val];
-}};
+});
 
-const reviverFactory = (keyMetadata, valueMetadata) => { return (k, v) => {
+const reviverFactory = (keyMetadata, valueMetadata) => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -29,7 +29,7 @@ const reviverFactory = (keyMetadata, valueMetadata) => { return (k, v) => {
     new Map(Object.keys(v).map(parseMapper(keyMetadata, valueMetadata, v)));
 
   return new ModelicoEnumMap(innerMap);
-}};
+});
 
 class ModelicoEnumMap extends AbstractMap {
   constructor(innerMap) {
