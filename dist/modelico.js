@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "16.1.0";
+var version = "17.0.0";
 
 
 
@@ -160,7 +160,43 @@ var set$1 = function set$1(object, property, value, receiver) {
   return value;
 };
 
+var slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
 
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
 
 
 
@@ -206,8 +242,13 @@ var partial = function partial(fn) {
   return fn.bind.apply(fn, [undefined].concat(args));
 };
 // export const is = (Ctor: Object, val: Object) => val != null && val.constructor === Ctor || val instanceof Ctor;
-var asIsReviver = function asIsReviver(k, v) {
-  return v;
+var asIsReviver = function asIsReviver(Type) {
+  return function (k, v) {
+    return Type(v);
+  };
+};
+var identity = function identity(x) {
+  return x;
 };
 var always = function always(x) {
   return function () {
@@ -227,9 +268,15 @@ var objToArr = function objToArr(obj) {
     return [k, obj[k]];
   });
 };
-var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver));
+var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver(identity)));
 var isPlainObject = function isPlainObject(x) {
   return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x;
+};
+
+var unsupported = function unsupported() {
+  var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Unsupported operation';
+
+  throw Error(message);
 };
 
 var getInnerTypes = function getInnerTypes(Type) {
@@ -260,9 +307,9 @@ var reviverFactory$1 = function reviverFactory$1(Type) {
   };
 };
 
-var Modelico = function () {
-  function Modelico(Type, fields, thisArg) {
-    classCallCheck(this, Modelico);
+var Base = function () {
+  function Base(Type, fields, thisArg) {
+    classCallCheck(this, Base);
 
     if (!isPlainObject(fields)) {
       throw TypeError('expected an object with fields for ' + Type.name + ' but got ' + fields);
@@ -293,7 +340,7 @@ var Modelico = function () {
     });
   }
 
-  createClass(Modelico, [{
+  createClass(Base, [{
     key: 'set',
     value: function set(field, value) {
       var newFields = Object.assign({}, this[fieldsSymbol](), defineProperty({}, field, value));
@@ -307,11 +354,13 @@ var Modelico = function () {
         return new (this[typeSymbol]())(value);
       }
 
-      if (path.length === 1) {
+      var item = this[path[0]]();
+
+      if (!item.setPath) {
         return this.set(path[0], value);
       }
 
-      return this.set(path[0], this[path[0]]().setPath(path.slice(1), value));
+      return this.set(path[0], item.setPath(path.slice(1), value));
     }
   }, {
     key: 'equals',
@@ -326,12 +375,7 @@ var Modelico = function () {
   }], [{
     key: 'factory',
     value: function factory(Type, fields, thisArg) {
-      return new Modelico(Type, fields, thisArg);
-    }
-  }, {
-    key: 'fromJSON',
-    value: function fromJSON(Type, json) {
-      return JSON.parse(json, reviverFactory$1(Type));
+      return new Base(Type, fields, thisArg);
     }
   }, {
     key: 'metadata',
@@ -339,10 +383,10 @@ var Modelico = function () {
       return Object.freeze({ type: Type, reviver: reviverFactory$1(Type) });
     }
   }]);
-  return Modelico;
+  return Base;
 }();
 
-var Modelico$1 = Object.freeze(Modelico);
+var Base$1 = Object.freeze(Base);
 
 var reviverFactory = function reviverFactory(itemMetadata) {
   return function (k, v) {
@@ -392,8 +436,8 @@ var Just = function () {
 
 var nothing = new Nothing();
 
-var Maybe = function (_Modelico) {
-  inherits(Maybe, _Modelico);
+var Maybe = function (_Base) {
+  inherits(Maybe, _Base);
 
   function Maybe(v) {
     classCallCheck(this, Maybe);
@@ -425,7 +469,12 @@ var Maybe = function (_Modelico) {
         return new Maybe(v);
       }
 
-      var inner = this.isEmpty() ? null : this.inner().get().setPath(path, v);
+      if (this.isEmpty()) {
+        return new Maybe(null);
+      }
+
+      var item = this.inner().get();
+      var inner = item.setPath ? item.setPath(path, v) : v;
 
       return new Maybe(inner);
     }
@@ -463,12 +512,12 @@ var Maybe = function (_Modelico) {
     }
   }]);
   return Maybe;
-}(Modelico$1);
+}(Base$1);
 
 var Maybe$1 = Object.freeze(Maybe);
 
-var AbstractMap = function (_Modelico) {
-  inherits(AbstractMap, _Modelico);
+var AbstractMap = function (_Base) {
+  inherits(AbstractMap, _Base);
 
   function AbstractMap(Type, innerMapOrig) {
     classCallCheck(this, AbstractMap);
@@ -523,29 +572,35 @@ var AbstractMap = function (_Modelico) {
     }
   }]);
   return AbstractMap;
-}(Modelico$1);
+}(Base$1);
 
 var AbstractMap$1 = Object.freeze(AbstractMap);
 
 var AsIs = (function (Type) {
-  return Object.freeze({ type: Type, reviver: asIsReviver });
+  return Object.freeze({ type: Type, reviver: asIsReviver(Type) });
 });
 
-var Any = Object.freeze({ name: 'Any' });
-
-var stringifyMapper = function stringifyMapper(pair) {
-  return { key: pair[0], value: pair[1] };
+var Any = function Any(x) {
+  return identity(x);
 };
 
+// Any.name = 'Any';
+
+var Any$1 = Object.freeze(Any);
+
 var parseMapper = function parseMapper(keyMetadata, valueMetadata) {
-  return function (pairObject) {
+  return function (_ref) {
+    var _ref2 = slicedToArray(_ref, 2),
+        key = _ref2[0],
+        value = _ref2[1];
+
     var reviveKey = reviverOrAsIs(keyMetadata);
-    var key = reviveKey('', pairObject.key);
+    var revivedKey = reviveKey('', key);
 
     var reviveVal = reviverOrAsIs(valueMetadata);
-    var val = reviveVal('', pairObject.value);
+    var revivedVal = reviveVal('', value);
 
-    return [key, val];
+    return [revivedKey, revivedVal];
   };
 };
 
@@ -581,7 +636,7 @@ var ModelicoMap = function (_AbstractMap) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      return [].concat(toConsumableArray(this.inner())).map(stringifyMapper);
+      return [].concat(toConsumableArray(this.inner()));
     }
   }], [{
     key: 'fromMap',
@@ -698,8 +753,8 @@ ModelicoEnumMap.EMPTY = ModelicoEnumMap.fromMap(new Map([]));
 
 var EnumMap = Object.freeze(ModelicoEnumMap);
 
-var ModelicoDate = function (_Modelico) {
-  inherits(ModelicoDate, _Modelico);
+var ModelicoDate = function (_Base) {
+  inherits(ModelicoDate, _Base);
 
   function ModelicoDate(dateOrig) {
     classCallCheck(this, ModelicoDate);
@@ -722,13 +777,17 @@ var ModelicoDate = function (_Modelico) {
 
   createClass(ModelicoDate, [{
     key: 'set',
-    value: function set(date) {
-      return new ModelicoDate(date);
+    value: function set() {
+      unsupported('Date.set is not supported');
     }
   }, {
     key: 'setPath',
-    value: function setPath(path, value) {
-      return this.set(value);
+    value: function setPath(path, date) {
+      if (path.length === 0) {
+        return new ModelicoDate(date);
+      }
+
+      unsupported('Date.setPath is not supported for non-empty paths');
     }
   }, {
     key: 'toJSON',
@@ -749,7 +808,7 @@ var ModelicoDate = function (_Modelico) {
     }
   }]);
   return ModelicoDate;
-}(Modelico$1);
+}(Base$1);
 
 var ModelicoDate$1 = Object.freeze(ModelicoDate);
 
@@ -773,8 +832,8 @@ var iterableMetadata = function iterableMetadata(IterableType, itemMetadata) {
   });
 };
 
-var ModelicoList = function (_Modelico) {
-  inherits(ModelicoList, _Modelico);
+var ModelicoList = function (_Base) {
+  inherits(ModelicoList, _Base);
 
   function ModelicoList(innerListOrig) {
     classCallCheck(this, ModelicoList);
@@ -847,14 +906,14 @@ var ModelicoList = function (_Modelico) {
     }
   }]);
   return ModelicoList;
-}(Modelico$1);
+}(Base$1);
 
 ModelicoList.EMPTY = ModelicoList.of();
 
 var List = Object.freeze(ModelicoList);
 
-var ModelicoSet = function (_Modelico) {
-  inherits(ModelicoSet, _Modelico);
+var ModelicoSet = function (_Base) {
+  inherits(ModelicoSet, _Base);
 
   function ModelicoSet(innerSetOrig) {
     classCallCheck(this, ModelicoSet);
@@ -880,26 +939,17 @@ var ModelicoSet = function (_Modelico) {
 
   createClass(ModelicoSet, [{
     key: 'set',
-    value: function set(index, value) {
-      var newSet = [].concat(toConsumableArray(this.inner()));
-      newSet[index] = value;
-
-      return new ModelicoSet(newSet);
+    value: function set() {
+      unsupported('Set.set is not supported');
     }
   }, {
     key: 'setPath',
-    value: function setPath(path, value) {
+    value: function setPath(path, set$$1) {
       if (path.length === 0) {
-        return new ModelicoSet(value);
+        return new ModelicoSet(set$$1);
       }
 
-      var item = [].concat(toConsumableArray(this.inner()))[path[0]];
-
-      if (!item.setPath) {
-        return this.set(path[0], value);
-      }
-
-      return this.set(path[0], item.setPath(path.slice(1), value));
+      unsupported('Set.setPath is not supported for non-empty paths');
     }
   }, {
     key: 'toJSON',
@@ -907,6 +957,11 @@ var ModelicoSet = function (_Modelico) {
       return [].concat(toConsumableArray(this.inner()));
     }
   }], [{
+    key: 'fromSet',
+    value: function fromSet(set$$1) {
+      return new ModelicoSet(set$$1);
+    }
+  }, {
     key: 'fromArray',
     value: function fromArray(arr) {
       return ModelicoSet.fromSet(new Set(arr));
@@ -921,18 +976,13 @@ var ModelicoSet = function (_Modelico) {
       return ModelicoSet.fromArray(arr);
     }
   }, {
-    key: 'fromSet',
-    value: function fromSet(set$$1) {
-      return new ModelicoSet(set$$1);
-    }
-  }, {
     key: 'metadata',
     value: function metadata(itemMetadata) {
       return iterableMetadata(ModelicoSet, itemMetadata);
     }
   }]);
   return ModelicoSet;
-}(Modelico$1);
+}(Base$1);
 
 ModelicoSet.EMPTY = ModelicoSet.of();
 
@@ -954,8 +1004,8 @@ var reviverFactory$4 = function reviverFactory$4(enumerators) {
   };
 };
 
-var ModelicoEnum = function (_Modelico) {
-  inherits(ModelicoEnum, _Modelico);
+var ModelicoEnum = function (_Base) {
+  inherits(ModelicoEnum, _Base);
 
   function ModelicoEnum(input) {
     classCallCheck(this, ModelicoEnum);
@@ -981,7 +1031,7 @@ var ModelicoEnum = function (_Modelico) {
   }
 
   return ModelicoEnum;
-}(Modelico$1);
+}(Base$1);
 
 var Enum = Object.freeze(ModelicoEnum);
 
@@ -1072,9 +1122,11 @@ var listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'so
 var dateNonMutators = internalNonMutators;
 var dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
+var _ = Base$1.metadata;
+
 var metadata$1 = Object.freeze({
-  _: Modelico$1.metadata,
-  any: Any,
+  _: _,
+  any: Any$1,
   asIs: AsIs,
   date: ModelicoDate$1.metadata,
   enumMap: EnumMap.metadata,
@@ -1086,7 +1138,7 @@ var metadata$1 = Object.freeze({
 
 var index = Object.freeze({
   about: Object.freeze({ version: version, author: author, homepage: homepage, license: license }),
-  Any: Any,
+  Any: Any$1,
   AsIs: AsIs,
   Date: ModelicoDate$1,
   Enum: Enum,
@@ -1094,10 +1146,13 @@ var index = Object.freeze({
   List: List,
   Map: ModelicoMap$1,
   Maybe: Maybe$1,
-  Modelico: Modelico$1,
+  Base: Base$1,
   Set: ModelicoSet$1,
   fields: function fields(x) {
     return x[fieldsSymbol]();
+  },
+  fromJSON: function fromJSON(Type, json) {
+    return JSON.parse(json, _(Type).reviver);
   },
   metadata: metadata$1,
   proxyMap: partial(proxyFactory$1, mapNonMutators, mapMutators),
