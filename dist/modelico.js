@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "17.0.0";
+var version = "17.1.0";
 
 
 
