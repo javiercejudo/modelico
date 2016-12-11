@@ -4,13 +4,15 @@ import PersonFactory from './fixtures/Person';
 import PartOfDayFactory from './fixtures/PartOfDay';
 import SexFactory from './fixtures/Sex';
 import AnimalFactory from './fixtures/Animal';
+import FriendFactory from './fixtures/Friend';
 
 export default (U, should, M) => () => {
   const Person = PersonFactory(M);
   const PartOfDay = PartOfDayFactory(M);
   const Sex = SexFactory(M);
   const Animal = AnimalFactory(M);
-  const { _ } = M.metadata;
+  const Friend = FriendFactory(M);
+  const { _, asIs } = M.metadata;
 
   const ModelicoDate = M.Date;
 
@@ -37,6 +39,19 @@ export default (U, should, M) => () => {
 
       author.givenName()
         .should.be.exactly('Javier');
+    });
+  });
+
+  describe('innerTypes check', () => {
+    class Country extends M.Base {
+      constructor(code) {
+        super(Country, {code});
+      }
+    }
+
+    it('should throw when static innerTypes are missing', () => {
+      (() => M.fromJSON(Country, '"ESP"'))
+        .should.throw(/missing static innerTypes/);
     });
   });
 
@@ -223,21 +238,30 @@ export default (U, should, M) => () => {
   });
 
   describe('fields', () => {
-    it('creates an accessor method for every field', () => {
-      const author = new Person({
-        undeclaredField: 'something',
-        givenName: 'Javier',
-        familyName: 'Cejudo Goñi',
-        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
-        favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
-        sex: Sex.MALE()
+    it('preserves undeclared properties', () => {
+      const authorJson = '{"undeclaredField":"something","givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
+      const author = JSON.parse(authorJson, _(Person).reviver);
+
+      JSON.stringify(author).should.be.exactly('{"undeclaredField":"something","givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}');
+    });
+  });
+
+  describe('circular innerTypes', () => {
+    it('a Modelico type can have a key that is a Maybe of its own type', () => {
+      const bestFriend = new Friend({
+        name: 'John',
+        bestFriend: M.Maybe.EMPTY
       });
 
-      author.undeclaredField().should.be.exactly('something');
-      JSON.stringify(author).should.be.exactly(`{"undeclaredField":"something","givenName":"Javier","familyName":"Cejudo Goñi","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}`);
+      const marc = new Friend({
+        name: 'Marc',
+        bestFriend: M.Maybe.of(bestFriend)
+      });
+
+      marc
+        .bestFriend().getOrElse(Friend.EMPTY)
+        .name()
+        .should.be.exactly('John');
     });
   });
 };

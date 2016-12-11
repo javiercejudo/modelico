@@ -1,9 +1,9 @@
 'use strict';
 
-import { always, isNothing } from './U';
+import { always, isNothing, emptyObject } from './U';
 import Base from './Base';
 
-const reviverFactory = itemMetadata => ((k, v) => {
+const reviverFactory = itemMetadata => (k, v) => {
   if (k !== '') {
     return v;
   }
@@ -11,7 +11,7 @@ const reviverFactory = itemMetadata => ((k, v) => {
   const maybeValue = (v === null) ? null : itemMetadata.reviver(k, v);
 
   return new Maybe(maybeValue);
-});
+};
 
 class Nothing {
   toJSON() {
@@ -95,6 +95,13 @@ class Maybe extends Base {
   static metadata(itemMetadata) {
     return Object.freeze({type: Maybe, reviver: reviverFactory(itemMetadata)});
   }
+
+  static innerTypes() {
+    return emptyObject;
+  }
 }
+
+Maybe.displayName = 'Maybe';
+Maybe.EMPTY = Maybe.of();
 
 export default Object.freeze(Maybe);

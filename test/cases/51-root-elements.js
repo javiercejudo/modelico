@@ -1,9 +1,17 @@
 'use strict';
 
 export default (should, M) => () => {
+  const { asIs } = M.metadata;
+
   class Country extends M.Base {
     constructor(code) {
       super(Country, {code});
+    }
+
+    static innerTypes() {
+      return Object.freeze({
+        code: asIs(String)
+      });
     }
   }
 

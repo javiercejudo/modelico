@@ -10,8 +10,14 @@ export default (should, M) => () => {
   Animal.prototype = Object.create(M.Base.prototype);
 
   Animal.prototype.speak = function() {
-    var name = M.fields(this).name;
-    return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
+    var name = this.name();
+    return (name === '') ? "I don't have a name" : 'My name is ' + name + '!';
+  };
+
+  Animal.innerTypes = function() {
+    return Object.freeze({
+      name: asIs(String)
+    });
   };
 
   function Person(fields) {
@@ -21,8 +27,7 @@ export default (should, M) => () => {
   Person.prototype = Object.create(M.Base.prototype);
 
   Person.prototype.fullName = function() {
-    var fields = M.fields(this);
-    return [fields.givenName, fields.familyName].join(' ').trim();
+    return [this.givenName(), this.familyName()].join(' ').trim();
   };
 
   Person.innerTypes = function() {

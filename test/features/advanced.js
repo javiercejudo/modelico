@@ -9,8 +9,14 @@ export default (should, M) => () => {
     }
 
     speak() {
-      const name = M.fields(this).name;
-      return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
+      const name = this.name().getOrElse('');
+      return (name === '') ? `I don't have a name` : `My name is ${name}!`;
+    }
+
+    static innerTypes() {
+      return Object.freeze({
+        name: maybe(asIs(String))
+      });
     }
   }
 
@@ -54,18 +60,20 @@ export default (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo');
     person1.fullName().should.be.exactly('Javier Cejudo');
 
-    person1.pets().inner().shift().getOrElse({ speak: () => 'hello' }).speak()
+    const defaultAnimal = new Animal({});
+
+    person1.pets().inner().shift().getOrElse(defaultAnimal).speak()
       .should.be.exactly('My name is Robbie!');
 
-    person1.pets().inner().shift().getOrElse({ speak: () => 'hello' }).speak()
+    person1.pets().inner().shift().getOrElse(defaultAnimal).speak()
       .should.be.exactly('My name is Robbie!');
 
     const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-    person3.pets().inner()[0].getOrElse({ name: () => 'no' }).name()
+    person3.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('')
       .should.be.exactly('Bane');
 
-    person1.pets().inner()[0].getOrElse({ name: () => 'no' }).name()
+    person1.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('')
       .should.be.exactly('Robbie');
   });
 };

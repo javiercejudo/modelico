@@ -1,6 +1,6 @@
 'use strict';
 
-import { always, isNothing, unsupported } from './U';
+import { always, isNothing, unsupported, emptyObject } from './U';
 import { iterableMetadata } from './iterable';
 import Base from './Base';
 import AsIs from './AsIs';
@@ -53,8 +53,13 @@ class ModelicoSet extends Base {
   static metadata(itemMetadata) {
     return iterableMetadata(ModelicoSet, itemMetadata);
   }
+
+  static innerTypes() {
+    return emptyObject;
+  }
 }
 
+ModelicoSet.displayName = 'ModelicoSet';
 ModelicoSet.EMPTY = ModelicoSet.of();
 
 export default Object.freeze(ModelicoSet);

@@ -1,11 +1,11 @@
 'use strict';
 
-import { always, isNothing } from './U';
+import { always, isNothing, emptyObject } from './U';
 import Base from './Base';
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
-const reviverFactory = enumerators => ((k, v) => {
+const reviverFactory = enumerators => (k, v) => {
   const enumerator = enumerators[v];
 
   if (isNothing(enumerator)) {
@@ -13,22 +13,25 @@ const reviverFactory = enumerators => ((k, v) => {
   }
 
   return enumerator;
-});
+};
 
-class ModelicoEnum extends Base {
+class Enum extends Base {
   constructor(input) {
     const enumerators = Array.isArray(input) ?
       input.reduce(enumeratorsReducer, {}) :
       input;
 
-    super(ModelicoEnum, enumerators);
+    super(Enum, {});
 
     Object.getOwnPropertyNames(enumerators)
-      .forEach(enumerator => this[enumerator]().toJSON = always(enumerator));
+      .forEach(enumerator => {
+        this[enumerator] = always(enumerators[enumerator]);
+        this[enumerator]().toJSON = always(enumerator)
+      });
 
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
-        type: ModelicoEnum,
+        type: Enum,
         reviver: reviverFactory(enumerators)
       })),
       enumerable: false
@@ -36,6 +39,12 @@ class ModelicoEnum extends Base {
 
     Object.freeze(this);
   }
+
+  static innerTypes() {
+    return emptyObject;
+  }
 }
 
-export default Object.freeze(ModelicoEnum);
+Enum.displayName = 'Enum';
+
+export default Object.freeze(Enum);

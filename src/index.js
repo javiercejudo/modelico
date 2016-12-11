@@ -5,16 +5,17 @@ import { fieldsSymbol } from './symbols';
 import { partial } from './U';
 import reviverFactory from './reviverFactory';
 
-import Maybe from './Maybe';
-
 import Base from './Base';
+
+import Maybe from './Maybe';
+import Enum from './Enum';
+
 import ModelicoMap from './Map';
 import EnumMap from './EnumMap';
 import ModelicoDate from './Date';
 import AsIs from './AsIs';
 import List from './List';
 import ModelicoSet from './Set';
-import Enum from './Enum';
 import Any from './Any';
 import proxyFactory from './proxyFactory';
 
@@ -30,14 +31,16 @@ const listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter']
 const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'];
 
 const dateNonMutators = internalNonMutators;
-const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
+const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds',
+  'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
+  'setUTCSeconds', 'setYear'];
 
-const _ = function(Type) {
+const _ = function(Type, depth = 0, innerMetadata = []) {
   if (Type.metadata) {
-    return Type.metadata();
+    return Type.metadata(...innerMetadata);
   }
 
-  return Object.freeze({type: Type, reviver: reviverFactory(Type)});
+  return Object.freeze({type: Type, reviver: reviverFactory(depth, Type)});
 };
 
 const metadata = Object.freeze({
@@ -66,6 +69,7 @@ export default Object.freeze({
   Set: ModelicoSet,
   fields: x => x[fieldsSymbol](),
   fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
+  genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
   metadata,
   proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
   proxyList: partial(proxyFactory, listNonMutators, listMutators),

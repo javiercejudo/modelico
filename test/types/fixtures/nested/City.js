@@ -13,10 +13,10 @@ export default (M, Region) => {
       return Object.freeze(this);
     }
 
-    static innerTypes() {
+    static innerTypes(depth) {
       return Object.freeze({
         name: asIs(String),
-        country: _(Country)
+        country: _(Country, depth)
       });
     }
   }
