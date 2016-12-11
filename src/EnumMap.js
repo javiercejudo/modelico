@@ -1,6 +1,6 @@
 'use strict';
 
-import { reviverOrAsIs } from './U';
+import { reviverOrAsIs, emptyObject } from './U';
 import AbstractMap from './AbstractMap';
 
 const stringifyReducer = (acc, pair) => {
@@ -9,7 +9,7 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper = (keyMetadata, valueMetadata, object) => (enumerator => {
+const parseMapper = (keyMetadata, valueMetadata, object) => enumerator => {
   const reviveKey = reviverOrAsIs(keyMetadata);
   const key = reviveKey('', enumerator);
 
@@ -17,9 +17,9 @@ const parseMapper = (keyMetadata, valueMetadata, object) => (enumerator => {
   const val = reviveVal('', object[enumerator]);
 
   return [key, val];
-});
+};
 
-const reviverFactory = (keyMetadata, valueMetadata) => ((k, v) => {
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v;
   }
@@ -28,18 +28,18 @@ const reviverFactory = (keyMetadata, valueMetadata) => ((k, v) => {
     null :
     new Map(Object.keys(v).map(parseMapper(keyMetadata, valueMetadata, v)));
 
-  return new ModelicoEnumMap(innerMap);
-});
+  return new EnumMap(innerMap);
+};
 
-class ModelicoEnumMap extends AbstractMap {
+class EnumMap extends AbstractMap {
   constructor(innerMap) {
-    super(ModelicoEnumMap, innerMap);
+    super(EnumMap, innerMap);
 
     Object.freeze(this);
   }
 
   set(enumerator, value) {
-    return AbstractMap.set.call(this, ModelicoEnumMap, enumerator, value);
+    return AbstractMap.set.call(this, EnumMap, enumerator, value);
   }
 
   toJSON() {
@@ -47,14 +47,19 @@ class ModelicoEnumMap extends AbstractMap {
   }
 
   static fromMap(map) {
-    return new ModelicoEnumMap(map);
+    return new EnumMap(map);
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoEnumMap, reviverFactory(keyMetadata, valueMetadata));
+    return AbstractMap.metadata(EnumMap, reviverFactory(keyMetadata, valueMetadata));
+  }
+
+  static innerTypes() {
+    return emptyObject;
   }
 }
 
-ModelicoEnumMap.EMPTY = ModelicoEnumMap.fromMap(new Map([]));
+EnumMap.displayName = 'EnumMap';
+EnumMap.EMPTY = EnumMap.fromMap(new Map());
 
-export default Object.freeze(ModelicoEnumMap);
+export default Object.freeze(EnumMap);

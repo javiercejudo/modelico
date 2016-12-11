@@ -19,14 +19,6 @@ export default (should, M) => () => {
         .should.be.exactly('Javi');
     });
 
-    it('should set fields recursively returning a new Maybe', () => {
-      const maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver);
-      const maybe2 = maybe1.set('givenName', 'Javi');
-
-      maybe2.inner().get().givenName()
-        .should.be.exactly('Javi');
-    });
-
     it('should not throw upon setting if empty', () => {
       const maybe = M.Maybe.of(null);
 

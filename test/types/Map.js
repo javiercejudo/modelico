@@ -121,6 +121,13 @@ export default (should, M) => () => {
       should(author.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
     });
 
+    it('should be able to work with M.genericsFromJSON', () => {
+      const myMap = M.genericsFromJSON(M.Map, [asIs(Number), asIs(String)], '[[1, "10"], [2, "20"], [3, "30"]]');
+
+      myMap.inner().get(2)
+        .should.be.exactly('20');
+    });
+
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',

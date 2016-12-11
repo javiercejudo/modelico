@@ -1,7 +1,7 @@
 'use strict';
 
 export default (should, M) => () => {
-  const { _ } = M.metadata;
+  const { _, asIs } = M.metadata;
 
   class Animal extends M.Base {
     constructor(fields) {
@@ -9,8 +9,14 @@ export default (should, M) => () => {
     }
 
     speak() {
-      const name = M.fields(this).name;
-      return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
+      const name = this.name();
+      return (name === '') ? `I don't have a name` : `My name is ${name}!`;
+    }
+
+    static innerTypes() {
+      return Object.freeze({
+        name: asIs(String)
+      });
     }
   }
 

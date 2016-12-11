@@ -1,6 +1,6 @@
 'use strict';
 
-import { isNothing, unsupported } from './U';
+import { isNothing, unsupported, emptyObject } from './U';
 import Base from './Base';
 
 class ModelicoDate extends Base {
@@ -11,7 +11,7 @@ class ModelicoDate extends Base {
       throw TypeError('missing date');
     }
 
-    const date = new Date(dateOrig.getTime());;
+    const date = new Date(dateOrig.getTime());
 
     this.inner = () => new Date(date.getTime());
 
@@ -43,6 +43,12 @@ class ModelicoDate extends Base {
   static metadata() {
     return Object.freeze({type: ModelicoDate, reviver: ModelicoDate.reviver});
   }
+
+  static innerTypes() {
+    return emptyObject;
+  }
 }
+
+ModelicoDate.displayName = 'ModelicoDate';
 
 export default Object.freeze(ModelicoDate);

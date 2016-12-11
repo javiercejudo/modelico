@@ -1,14 +1,14 @@
 'use strict';
 
-import { always, isNothing } from './U';
+import { always, isNothing, emptyObject } from './U';
 import { iterableMetadata } from './iterable';
 import Base from './Base';
 import AsIs from './AsIs';
 import Any from './Any';
 
-class ModelicoList extends Base {
+class List extends Base {
   constructor(innerListOrig) {
-    super(ModelicoList, {});
+    super(List, {});
 
     if (isNothing(innerListOrig)) {
       throw TypeError('missing list');
@@ -26,12 +26,12 @@ class ModelicoList extends Base {
     const newList = this.inner();
     newList[index] = value;
 
-    return new ModelicoList(newList);
+    return new List(newList);
   }
 
   setPath(path, value) {
     if (path.length === 0) {
-      return new ModelicoList(value);
+      return new List(value);
     }
 
     const item = this.inner()[path[0]];
@@ -48,18 +48,23 @@ class ModelicoList extends Base {
   }
 
   static fromArray(arr) {
-    return new ModelicoList(arr);
+    return new List(arr);
   }
 
   static of(...arr) {
-    return ModelicoList.fromArray(arr);
+    return List.fromArray(arr);
   }
 
   static metadata(itemMetadata) {
-    return iterableMetadata(ModelicoList, itemMetadata);
+    return iterableMetadata(List, itemMetadata);
+  }
+
+  static innerTypes() {
+    return emptyObject;
   }
 }
 
-ModelicoList.EMPTY = ModelicoList.of();
+List.displayName = 'List';
+List.EMPTY = List.of();
 
-export default Object.freeze(ModelicoList);
+export default Object.freeze(List);

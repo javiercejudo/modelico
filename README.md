@@ -36,8 +36,7 @@ The goal is to parse JSON strings like the following into JavaScript custom obje
 so that we can do things like this:
 
 ```js
-const { _ } = M.metadata;
-const pet1 = JSON.parse(petJson, _(Animal).reviver);
+const pet1 = M.fromJSON(Animal, petJson);
 
 pet1.speak(); //=> 'my name is Robbie!'
 
@@ -48,10 +47,18 @@ pet2.name(); //=> 'Bane'
 pet1.name(); //=> 'Robbie'
 ```
 
+`M.fromJSON` is a simpler way to do the following:
+
+```js
+const { _ } = M.metadata;
+const pet1 = JSON.parse(petJson, _(Animal).reviver);
+```
+
 Here is how `Animal` would look like:
 
 ```js
 const M = require('modelico');
+const { asIs } = M.metadata;
 
 class Animal extends M.Base {
   constructor(fields) {
@@ -59,8 +66,17 @@ class Animal extends M.Base {
   }
 
   speak() {
-    const name = M.fields(this).name;
-    return (name === undefined) ? `I don't have a name` : `My name is ${name}!`;
+    const name = this.name();
+
+    return (name === '') ?
+      `I don't have a name` :
+      `My name is ${name}!`;
+  }
+
+  static innerTypes() {
+    return Object.freeze({
+      name: asIs(String)
+    });
   }
 }
 ```
@@ -88,8 +104,7 @@ Again, our goal is to parse JSON into JavaScript classes
 to be able to do things like
 
 ```js
-const { _ } = M.metadata;
-const person1 = JSON.parse(personJson, _(Person).reviver);
+const person1 = M.fromJSON(Person, personJson);
 
 person1.fullName(); //=> 'Javier Cejudo'
 person1.pets().inner()[0].speak(); //=> 'my name is Robbie!'
@@ -100,9 +115,7 @@ to grab the underlying array. See the [proxies section](#es2015-proxies)
 for a way to use methods and properties of the inner structure directly.*
 
 We are going to need a `Person` class much like the `Animal`
-class we have already defined. Since `Person` contains a list
-of `Animal`, we use the static method `innerTypes` to specify
-that.
+class we have already defined.
 
 ```js
 const M = require('modelico');
@@ -114,8 +127,7 @@ class Person extends M.Base {
   }
 
   fullName() {
-    const fields = M.fields(this);
-    return [fields.givenName, fields.familyName].join(' ').trim();
+    return [this.givenName(), this.familyName()].join(' ').trim();
   }
 
   static innerTypes() {
@@ -157,6 +169,44 @@ person1.pets().inner().shift().speak(); //=> 'My name is Robbie!'
 
 // When called again, the list is still intact
 person1.pets().inner().shift().speak(); //=> 'My name is Robbie!'
+```
+
+## Optional / null values
+
+In the examples above, a pet with a `null` or missing `name` would cause a
+`TypeError` while reviving.
+
+```js
+const pet = M.fromJSON(Animal, '{"name": null}');
+//=> TypeError: no value for key "name"
+```
+
+To support missing properties or `null` values, you can declare the property
+as a `Maybe`:
+
+```js
+const M = require('modelico');
+const { asIs, maybe } = M.metadata;
+
+class Animal extends M.Base {
+
+  // ... same as before
+
+  static innerTypes() {
+    return Object.freeze({
+      name: maybe(asIs(String))
+    });
+  }
+}
+```
+
+Then, we can use it as follows:
+
+```js
+const pet = M.fromJSON(Animal, '{"name": null}');
+
+pet.isEmpty(); //=> true
+pet.getOrElse('Bane'); //=> Bane
 ```
 
 ## ES2015 proxies
@@ -213,9 +263,18 @@ with ES5-style classes. In the case of our `Animal` class:
   Animal.prototype.constructor = Animal;
 
   Animal.prototype.speak = function() {
-    var name = M.fields(this).name;
-    return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
+    var name = this.name();
+
+    return (name === '') ?
+      "I don't have a name" :
+      'My name is ' + name + '!';
   };
+
+  Animal.innerTypes = function() {
+    return Object.freeze({
+      name: asIs(String)
+    });
+  }
 }(window.Modelico));
 ```
 

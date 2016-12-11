@@ -1,40 +1,39 @@
 'use strict';
 
-import { always, defaultTo, reviverOrAsIs, isPlainObject, isNothing, getInnerTypes } from './U';
+import {
+  always, defaultTo, reviverOrAsIs, isPlainObject, isNothing, isSomething, getInnerTypes
+} from './U';
+
 import { typeSymbol, fieldsSymbol } from './symbols';
 
-import Maybe from './Maybe';
+import M from './';
 
 class Base {
   constructor(Type, fields, thisArg) {
     if (!isPlainObject(fields)) {
-      throw TypeError(`expected an object with fields for ${Type.name} but got ${fields}`);
+      throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`);
     }
 
     Object.freeze(fields);
 
-    const innerTypes = getInnerTypes(Type);
+    const innerTypes = getInnerTypes(0, Type);
 
     thisArg = defaultTo(this)(thisArg);
     thisArg[typeSymbol] = always(Type);
     thisArg[fieldsSymbol] = always(fields);
 
-    new Set([...Object.keys(innerTypes), ...Object.keys(fields)])
-      .forEach(key => {
-        const valueCandidate = fields[key];
-        const innerType = innerTypes[key];
-        let value = valueCandidate;
+    Object.keys(innerTypes).forEach(key => {
+      const valueCandidate = fields[key];
+      let value = M.Maybe.EMPTY;
 
-        if (isNothing(valueCandidate) && innerType) {
-          if (innerType.type !== Maybe) {
-            throw TypeError(`no value for key ${key}`);
-          }
+      if (isSomething(valueCandidate)) {
+        value = valueCandidate;
+      } else if (innerTypes[key].type !== M.Maybe) {
+        throw TypeError(`no value for key "${key}"`);
+      }
 
-          value = Maybe.of(null);
-        }
-
-        thisArg[key] = always(value)
-      });
+      thisArg[key] = always(value);
+    });
   }
 
   set(field, value) {
