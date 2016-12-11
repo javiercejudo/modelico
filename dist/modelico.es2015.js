@@ -1,4 +1,4 @@
-var version = "17.1.1";
+var version = "18.0.0";
 
 
 
@@ -28,14 +28,13 @@ const defaultTo = (d       ) => ((v       ) => isNothing(v) ? d : v );
 const objToArr = (obj        ) => (Object.keys(obj).map(k => [k, obj[k]]));
 const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
 const isPlainObject = (x       ) => typeof x === 'object' && !!x;
+const getInnerTypes = (Type          ) => Type.innerTypes && Type.innerTypes() || {};
 
 const unsupported = (message        ) => {
   throw Error(message);
 };
 
-const getInnerTypes = Type => Type.innerTypes && Type.innerTypes() || {};
-
-const reviverFactory$1 = Type => {
+const reviverFactory = Type => {
   const innerTypes = getInnerTypes(Type);
 
   return (k, v) => {
@@ -122,15 +121,11 @@ class Base {
   static factory(Type, fields, thisArg) {
     return new Base(Type, fields, thisArg);
   }
-
-  static metadata(Type) {
-    return Object.freeze({type: Type, reviver: reviverFactory$1(Type)});
-  }
 }
 
 var Base$1 = Object.freeze(Base);
 
-const reviverFactory = itemMetadata => ((k, v) => {
+const reviverFactory$2 = itemMetadata => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -220,7 +215,7 @@ class Maybe extends Base$1 {
   }
 
   static metadata(itemMetadata) {
-    return Object.freeze({type: Maybe, reviver: reviverFactory(itemMetadata)});
+    return Object.freeze({type: Maybe, reviver: reviverFactory$2(itemMetadata)});
   }
 }
 
@@ -287,7 +282,7 @@ const parseMapper = (keyMetadata, valueMetadata) => (([key, value]) => {
   return [revivedKey, revivedVal];
 });
 
-const reviverFactory$2 = (keyMetadata, valueMetadata) => ((k, v) => {
+const reviverFactory$3 = (keyMetadata, valueMetadata) => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -343,7 +338,7 @@ class ModelicoMap extends AbstractMap$1 {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap$1.metadata(ModelicoMap, reviverFactory$2(keyMetadata, valueMetadata));
+    return AbstractMap$1.metadata(ModelicoMap, reviverFactory$3(keyMetadata, valueMetadata));
   }
 }
 
@@ -367,7 +362,7 @@ const parseMapper$1 = (keyMetadata, valueMetadata, object) => (enumerator => {
   return [key, val];
 });
 
-const reviverFactory$3 = (keyMetadata, valueMetadata) => ((k, v) => {
+const reviverFactory$4 = (keyMetadata, valueMetadata) => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -399,7 +394,7 @@ class ModelicoEnumMap extends AbstractMap$1 {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap$1.metadata(ModelicoEnumMap, reviverFactory$3(keyMetadata, valueMetadata));
+    return AbstractMap$1.metadata(ModelicoEnumMap, reviverFactory$4(keyMetadata, valueMetadata));
   }
 }
 
@@ -582,7 +577,7 @@ var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
-const reviverFactory$4 = enumerators => ((k, v) => {
+const reviverFactory$5 = enumerators => ((k, v) => {
   const enumerator = enumerators[v];
 
   if (isNothing(enumerator)) {
@@ -606,7 +601,7 @@ class ModelicoEnum extends Base$1 {
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
         type: ModelicoEnum,
-        reviver: reviverFactory$4(enumerators)
+        reviver: reviverFactory$5(enumerators)
       })),
       enumerable: false
     });
@@ -691,7 +686,13 @@ const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', '
 const dateNonMutators = internalNonMutators;
 const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
-const _ = Base$1.metadata;
+const _ = function(Type) {
+  if (Type.metadata) {
+    return Type.metadata();
+  }
+
+  return Object.freeze({type: Type, reviver: reviverFactory(Type)});
+};
 
 const metadata = Object.freeze({
   _,

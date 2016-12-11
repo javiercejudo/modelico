@@ -162,7 +162,6 @@ var PersonFactory = (function (M) {
   var PartOfDay = PartOfDayFactory(M);
   var Sex = SexFactory(M);
 
-  var Base = M.Base;
   var joinWithSpace = function joinWithSpace() {
     for (var _len = arguments.length, parts = Array(_len), _key = 0; _key < _len; _key++) {
       parts[_key] = arguments[_key];
@@ -174,6 +173,7 @@ var PersonFactory = (function (M) {
   };
 
   var _M$metadata = M.metadata,
+      _ = _M$metadata._,
       asIs = _M$metadata.asIs,
       date = _M$metadata.date,
       map = _M$metadata.map,
@@ -184,8 +184,8 @@ var PersonFactory = (function (M) {
   var partOfDay = PartOfDay.metadata;
   var sex = Sex.metadata;
 
-  var Person = function (_Base) {
-    inherits(Person, _Base);
+  var Person = function (_M$Base) {
+    inherits(Person, _M$Base);
 
     function Person(fields) {
       classCallCheck(this, Person);
@@ -207,7 +207,11 @@ var PersonFactory = (function (M) {
         return Object.freeze({
           givenName: asIs(String),
           familyName: asIs(String),
-          birthday: date(),
+
+          birthday: _(M.Date),
+          // alternative (leaving the above for testing purposes)
+          // birthday: date(),
+
           favouritePartOfDay: partOfDay(),
           lifeEvents: map(asIs(String), date()),
           importantDatesList: list(date()),
@@ -215,23 +219,16 @@ var PersonFactory = (function (M) {
           sex: maybe(sex())
         });
       }
-    }, {
-      key: 'metadata',
-      value: function metadata() {
-        return Base.metadata(Person);
-      }
     }]);
     return Person;
-  }(Base);
+  }(M.Base);
 
   return Object.freeze(Person);
 });
 
 var AnimalFactory = (function (M) {
-  var Base = M.Base;
-
-  var Animal = function (_Base) {
-    inherits(Animal, _Base);
+  var Animal = function (_M$Base) {
+    inherits(Animal, _M$Base);
 
     function Animal(fields) {
       classCallCheck(this, Animal);
@@ -245,7 +242,7 @@ var AnimalFactory = (function (M) {
       }
     }]);
     return Animal;
-  }(Base);
+  }(M.Base);
 
   return Object.freeze(Animal);
 });
@@ -256,8 +253,9 @@ var Base = (function (U, should, M) {
     var PartOfDay = PartOfDayFactory(M);
     var Sex = SexFactory(M);
     var Animal = AnimalFactory(M);
+    var _ = M.metadata._;
 
-    var Base = M.Base;
+
     var ModelicoDate = M.Date;
 
     var author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
@@ -350,7 +348,7 @@ var Base = (function (U, should, M) {
 
       it('edge case when Modelico setPath is called with an empty path', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
-        var author = JSON.parse(authorJson, Base.metadata(Person).reviver);
+        var author = JSON.parse(authorJson, _(Person).reviver);
         var listOfPeople1 = M.List.of(author);
 
         var listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
@@ -397,7 +395,7 @@ var Base = (function (U, should, M) {
     describe('parsing', function () {
       it('should parse types correctly', function () {
         var author1 = M.fromJSON(Person, author1Json);
-        var author2 = JSON.parse(author1Json, Base.metadata(Person).reviver);
+        var author2 = JSON.parse(author1Json, _(Person).reviver);
 
         'Javier Cejudo'.should.be.exactly(author1.fullName()).and.exactly(author2.fullName());
 
@@ -409,7 +407,7 @@ var Base = (function (U, should, M) {
       });
 
       it('should work with plain classes extending Modelico', function () {
-        var animal = JSON.parse('{"name": "Sam"}', Base.metadata(Animal).reviver);
+        var animal = JSON.parse('{"name": "Sam"}', _(Animal).reviver);
 
         animal.speak().should.be.exactly('hello');
         animal.name().should.be.exactly('Sam');
@@ -544,16 +542,17 @@ var ModelicoAsIs = (function (U, should, M) {
 
 var ModelicoDate = (function (should, M) {
   return function () {
-    var Base = M.Base;
+    var date = M.metadata.date;
+
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
         var input = new Date('1988-04-16T00:00:00.000Z');
-        var date = new M.Date(input);
+        var myDate = new M.Date(input);
 
         input.setFullYear(2017);
 
-        should(date.inner().getFullYear()).be.exactly(1988);
+        should(myDate.inner().getFullYear()).be.exactly(1988);
       });
     });
 
@@ -600,22 +599,22 @@ var ModelicoDate = (function (should, M) {
 
     describe('stringifying', function () {
       it('should stringify values correctly', function () {
-        var date = new M.Date(new Date('1988-04-16T00:00:00.000Z'));
+        var myDate = new M.Date(new Date('1988-04-16T00:00:00.000Z'));
 
-        JSON.stringify(date).should.be.exactly('"1988-04-16T00:00:00.000Z"');
+        JSON.stringify(myDate).should.be.exactly('"1988-04-16T00:00:00.000Z"');
       });
     });
 
     describe('parsing', function () {
       it('should parse Maybe values correctly', function () {
-        var date = JSON.parse('"1988-04-16T00:00:00.000Z"', M.Date.metadata().reviver);
+        var myDate = JSON.parse('"1988-04-16T00:00:00.000Z"', date().reviver);
 
-        should(date.inner().getFullYear()).be.exactly(1988);
+        should(myDate.inner().getFullYear()).be.exactly(1988);
       });
 
       it('should not support null (wrap with Maybe)', function () {
         (function () {
-          return JSON.parse('null', M.Date.metadata(M.Date.metadata()).reviver);
+          return JSON.parse('null', date().reviver);
         }).should.throw();
       });
     });
@@ -625,7 +624,10 @@ var ModelicoDate = (function (should, M) {
 var ModelicoMap = (function (should, M) {
   return function () {
     var Person = PersonFactory(M);
-    var Base = M.Base;
+    var _M$metadata = M.metadata,
+        date = _M$metadata.date,
+        map = _M$metadata.map;
+
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -703,7 +705,7 @@ var ModelicoMap = (function (should, M) {
 
     describe('parsing', function () {
       it('should parse the map correctly', function () {
-        var modelicoMap = JSON.parse('[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]', M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver);
+        var modelicoMap = JSON.parse('[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]', map(M.AsIs(String), date()).reviver);
 
         should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(1988);
 
@@ -719,7 +721,7 @@ var ModelicoMap = (function (should, M) {
 
       it('should not support null (wrap with Maybe)', function () {
         (function () {
-          return JSON.parse('null', M.Map.metadata(M.AsIs(String), M.Date.metadata()).reviver);
+          return JSON.parse('null', map(M.AsIs(String), date()).reviver);
         }).should.throw();
       });
     });
@@ -790,6 +792,10 @@ var ModelicoEnum = (function (should, M) {
 var ModelicoEnumMap = (function (should, M) {
   return function () {
     var PartOfDay = PartOfDayFactory(M);
+    var _M$metadata = M.metadata,
+        _ = _M$metadata._,
+        enumMap = _M$metadata.enumMap;
+
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -858,14 +864,14 @@ var ModelicoEnumMap = (function (should, M) {
 
     describe('parsing', function () {
       it('should parse the enum map correctly', function () {
-        var greetings = JSON.parse('{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":[]}', M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(M.Any)).reviver);
+        var greetings = JSON.parse('{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":[]}', enumMap(_(PartOfDay), M.AsIs(M.Any)).reviver);
 
         greetings.inner().get(PartOfDay.MORNING()).should.be.exactly('Good morning!');
       });
 
       it('should not support null (wrap with Maybe)', function () {
         (function () {
-          return JSON.parse('null', M.EnumMap.metadata(PartOfDay.metadata(), M.AsIs(String)).reviver);
+          return JSON.parse('null', enumMap(_(PartOfDay), M.AsIs(String)).reviver);
         }).should.throw();
       });
     });
@@ -888,8 +894,12 @@ var ModelicoEnumMap = (function (should, M) {
 
 var ModelicoList = (function (should, M) {
   return function () {
-    var Base = M.Base;
     var Person = PersonFactory(M);
+    var _M$metadata = M.metadata,
+        _ = _M$metadata._,
+        list = _M$metadata.list,
+        date = _M$metadata.date;
+
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -961,7 +971,7 @@ var ModelicoList = (function (should, M) {
 
       it('should be able to set a whole list', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
-        var author1 = JSON.parse(authorJson, Base.metadata(Person).reviver);
+        var author1 = JSON.parse(authorJson, _(Person).reviver);
 
         var newListArray = author1.importantDatesList().inner();
         newListArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
@@ -1004,7 +1014,7 @@ var ModelicoList = (function (should, M) {
 
     describe('parsing', function () {
       it('should parse the list correctly', function () {
-        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', M.List.metadata(M.Date.metadata()).reviver);
+        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', list(date()).reviver);
 
         should(modelicoList.inner()[0].inner().getFullYear()).be.exactly(1988);
 
@@ -1013,14 +1023,14 @@ var ModelicoList = (function (should, M) {
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
-        var author = JSON.parse(authorJson, Base.metadata(Person).reviver);
+        var author = JSON.parse(authorJson, _(Person).reviver);
 
         should(author.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
       });
 
       it('should not support null (wrap with Maybe)', function () {
         (function () {
-          return JSON.parse('null', M.List.metadata(M.Date.metadata()).reviver);
+          return JSON.parse('null', list(date()).reviver);
         }).should.throw();
       });
     });
@@ -1063,8 +1073,12 @@ var ModelicoList = (function (should, M) {
 
 var ModelicoSet = (function (should, M) {
   return function () {
-    var Base = M.Base;
     var Person = PersonFactory(M);
+    var _M$metadata = M.metadata,
+        _ = _M$metadata._,
+        date = _M$metadata.date,
+        set$$1 = _M$metadata.set;
+
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -1086,13 +1100,13 @@ var ModelicoSet = (function (should, M) {
 
       it('should not support null (wrap with Maybe)', function () {
         (function () {
-          return JSON.parse('null', M.Set.metadata(M.Date.metadata()).reviver);
+          return JSON.parse('null', set$$1(date()).reviver);
         }).should.throw();
       });
 
       it('should be able to set a whole set', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
-        var author1 = JSON.parse(authorJson, Base.metadata(Person).reviver);
+        var author1 = JSON.parse(authorJson, _(Person).reviver);
 
         var newSetArray = [].concat(toConsumableArray(author1.importantDatesSet().inner()));
         newSetArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
@@ -1161,7 +1175,7 @@ var ModelicoSet = (function (should, M) {
 
     describe('parsing', function () {
       it('should parse the set correctly', function () {
-        var modelicoSet = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', M.Set.metadata(M.Date.metadata()).reviver);
+        var modelicoSet = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', set$$1(date()).reviver);
 
         should([].concat(toConsumableArray(modelicoSet.inner()))[0].inner().getFullYear()).be.exactly(1988);
 
@@ -1170,7 +1184,7 @@ var ModelicoSet = (function (should, M) {
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
-        var author = JSON.parse(authorJson, Base.metadata(Person).reviver);
+        var author = JSON.parse(authorJson, _(Person).reviver);
 
         should([].concat(toConsumableArray(author.importantDatesSet().inner()))[0].inner().getFullYear()).be.exactly(2013);
       });
@@ -1224,20 +1238,23 @@ var ModelicoMaybe = (function (should, M) {
   return function () {
     var PartOfDay = PartOfDayFactory(M);
     var Person = PersonFactory(M);
-    var Base = M.Base;
+    var _M$metadata = M.metadata,
+        _ = _M$metadata._,
+        maybe = _M$metadata.maybe;
+
 
     var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
 
     describe('setting', function () {
       it('should set fields recursively returning a new Maybe', function () {
-        var maybe1 = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
+        var maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver);
         var maybe2 = maybe1.set('givenName', 'Javi');
 
         maybe2.inner().get().givenName().should.be.exactly('Javi');
       });
 
       it('should set fields recursively returning a new Maybe', function () {
-        var maybe1 = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
+        var maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver);
         var maybe2 = maybe1.set('givenName', 'Javi');
 
         maybe2.inner().get().givenName().should.be.exactly('Javi');
@@ -1297,24 +1314,24 @@ var ModelicoMaybe = (function (should, M) {
 
     describe('parsing', function () {
       it('should parse Maybe values correctly', function () {
-        var maybe1 = JSON.parse('2', M.Maybe.metadata(M.AsIs(Number)).reviver);
+        var maybe1 = JSON.parse('2', maybe(M.AsIs(Number)).reviver);
         should(maybe1.getOrElse(10)).be.exactly(2);
 
-        var maybe2 = JSON.parse('null', M.Maybe.metadata(M.AsIs(Number)).reviver);
+        var maybe2 = JSON.parse('null', maybe(M.AsIs(Number)).reviver);
         maybe2.isEmpty().should.be.exactly(true);
       });
 
       it('should support arbitrary Modelico types', function () {
-        var author = JSON.parse(authorJson, Person.metadata().reviver);
+        var author = JSON.parse(authorJson, _(Person).reviver);
 
-        var maybe = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
-        maybe.inner().get().equals(author).should.be.exactly(true);
+        var myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver);
+        myMaybe.inner().get().equals(author).should.be.exactly(true);
       });
 
       it('should parse missing keys of Maybe values as Maybe with Nothing', function () {
         var authorJsonWithMissinMaybe = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}';
 
-        var author = JSON.parse(authorJsonWithMissinMaybe, Person.metadata().reviver);
+        var author = JSON.parse(authorJsonWithMissinMaybe, _(Person).reviver);
 
         author.sex().isEmpty().should.be.exactly(true);
       });
@@ -1353,7 +1370,7 @@ var ModelicoMaybe = (function (should, M) {
     });
 
     describe('map', function () {
-      var partOfDayFromJson = PartOfDay.metadata().reviver.bind(undefined, '');
+      var partOfDayFromJson = _(PartOfDay).reviver.bind(undefined, '');
 
       it('should apply a function f to the value and return another Maybe with it', function () {
         var maybeFrom1 = M.Maybe.of(5);
@@ -1417,10 +1434,10 @@ var setPath = (function (should, M) {
 
 var featuresSimple = (function (should, M) {
   return function () {
-    var Base = M.Base;
+    var _ = M.metadata._;
 
-    var Animal = function (_Base) {
-      inherits(Animal, _Base);
+    var Animal = function (_M$Base) {
+      inherits(Animal, _M$Base);
 
       function Animal(fields) {
         classCallCheck(this, Animal);
@@ -1435,12 +1452,12 @@ var featuresSimple = (function (should, M) {
         }
       }]);
       return Animal;
-    }(Base);
+    }(M.Base);
 
     it('should showcase the main features', function () {
       var petJson = '{"name": "Robbie"}';
 
-      var pet1 = JSON.parse(petJson, Base.metadata(Animal).reviver);
+      var pet1 = JSON.parse(petJson, _(Animal).reviver);
 
       pet1.speak().should.be.exactly('My name is Robbie!');
 
@@ -1454,16 +1471,15 @@ var featuresSimple = (function (should, M) {
 
 var featuresAdvanced = (function (should, M) {
   return function () {
-    var Base = M.Base;
     var _M$metadata = M.metadata,
+        _ = _M$metadata._,
         asIs = _M$metadata.asIs,
         any = _M$metadata.any,
         maybe = _M$metadata.maybe,
-        list = _M$metadata.list,
-        _ = _M$metadata._;
+        list = _M$metadata.list;
 
-    var Animal = function (_Base) {
-      inherits(Animal, _Base);
+    var Animal = function (_M$Base) {
+      inherits(Animal, _M$Base);
 
       function Animal(fields) {
         classCallCheck(this, Animal);
@@ -1478,10 +1494,10 @@ var featuresAdvanced = (function (should, M) {
         }
       }]);
       return Animal;
-    }(Base);
+    }(M.Base);
 
-    var Person = function (_Base2) {
-      inherits(Person, _Base2);
+    var Person = function (_M$Base2) {
+      inherits(Person, _M$Base2);
 
       function Person(fields) {
         classCallCheck(this, Person);
@@ -1506,12 +1522,12 @@ var featuresAdvanced = (function (should, M) {
         }
       }]);
       return Person;
-    }(Base);
+    }(M.Base);
 
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [\n        {\n          "name": "Robbie"\n        },\n        null\n      ]\n    }';
 
-      var person1 = JSON.parse(personJson, Base.metadata(Person).reviver);
+      var person1 = JSON.parse(personJson, _(Person).reviver);
 
       person1.fullName().should.be.exactly('Javier Cejudo');
 
@@ -1542,18 +1558,17 @@ var featuresAdvanced = (function (should, M) {
 
 var featuresAdvancedES5 = (function (should, M) {
   return function () {
-    var Base = M.Base;
     var _M$metadata = M.metadata,
+        _ = _M$metadata._,
         asIs = _M$metadata.asIs,
-        list = _M$metadata.list,
-        _ = _M$metadata._;
+        list = _M$metadata.list;
 
 
     function Animal(fields) {
-      Base.factory(Animal, fields, this);
+      M.Base.factory(Animal, fields, this);
     }
 
-    Animal.prototype = Object.create(Base.prototype);
+    Animal.prototype = Object.create(M.Base.prototype);
 
     Animal.prototype.speak = function () {
       var name = M.fields(this).name;
@@ -1561,10 +1576,10 @@ var featuresAdvancedES5 = (function (should, M) {
     };
 
     function Person(fields) {
-      Base.factory(Person, fields, this);
+      M.Base.factory(Person, fields, this);
     }
 
-    Person.prototype = Object.create(Base.prototype);
+    Person.prototype = Object.create(M.Base.prototype);
 
     Person.prototype.fullName = function () {
       var fields = M.fields(this);
@@ -1582,7 +1597,7 @@ var featuresAdvancedES5 = (function (should, M) {
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
 
-      var person1 = JSON.parse(personJson, Base.metadata(Person).reviver);
+      var person1 = JSON.parse(personJson, _(Person).reviver);
 
       person1.fullName().should.be.exactly('Javier Cejudo');
 
@@ -1598,10 +1613,12 @@ var featuresAdvancedES5 = (function (should, M) {
 });
 
 var CountryFactory = (function (M, Region) {
-  var Base = M.Base;
+  var _M$metadata = M.metadata,
+      _ = _M$metadata._,
+      asIs = _M$metadata.asIs;
 
-  var Country = function (_Base) {
-    inherits(Country, _Base);
+  var Country = function (_M$Base) {
+    inherits(Country, _M$Base);
 
     function Country(fields) {
       var _ret;
@@ -1617,24 +1634,26 @@ var CountryFactory = (function (M, Region) {
       key: 'innerTypes',
       value: function innerTypes() {
         return Object.freeze({
-          name: M.AsIs(String),
-          code: M.AsIs(String),
-          region: Base.metadata(Region)
+          name: asIs(String),
+          code: asIs(String),
+          region: _(Region)
         });
       }
     }]);
     return Country;
-  }(Base);
+  }(M.Base);
 
   return Object.freeze(Country);
 });
 
 var CityFactory = (function (M, Region) {
-  var Base = M.Base;
   var Country = CountryFactory(M, Region);
+  var _M$metadata = M.metadata,
+      _ = _M$metadata._,
+      asIs = _M$metadata.asIs;
 
-  var City = function (_Base) {
-    inherits(City, _Base);
+  var City = function (_M$Base) {
+    inherits(City, _M$Base);
 
     function City(fields) {
       var _ret;
@@ -1650,22 +1669,22 @@ var CityFactory = (function (M, Region) {
       key: 'innerTypes',
       value: function innerTypes() {
         return Object.freeze({
-          name: M.AsIs(String),
-          country: Base.metadata(Country)
+          name: asIs(String),
+          country: _(Country)
         });
       }
     }]);
     return City;
-  }(Base);
+  }(M.Base);
 
   return Object.freeze(City);
 });
 
 var RegionFactory = (function (M) {
-  var Base = M.Base;
+  var asIs = M.metadata.asIs;
 
-  var Region = function (_Base) {
-    inherits(Region, _Base);
+  var Region = function (_M$Base) {
+    inherits(Region, _M$Base);
 
     function Region(fields) {
       var _ret;
@@ -1686,22 +1705,24 @@ var RegionFactory = (function (M) {
       key: 'innerTypes',
       value: function innerTypes() {
         return Object.freeze({
-          name: M.AsIs(String),
-          code: M.AsIs(String)
+          name: asIs(String),
+          code: asIs(String)
         });
       }
     }]);
     return Region;
-  }(Base);
+  }(M.Base);
 
   return Object.freeze(Region);
 });
 
 var RegionIncompatibleNameKeyFactory = (function (M) {
-  var Base = M.Base;
+  var _M$metadata = M.metadata,
+      _ = _M$metadata._,
+      asIs = _M$metadata.asIs;
 
-  var Code = function (_Base) {
-    inherits(Code, _Base);
+  var Code = function (_M$Base) {
+    inherits(Code, _M$Base);
 
     function Code(fields) {
       var _ret;
@@ -1723,10 +1744,10 @@ var RegionIncompatibleNameKeyFactory = (function (M) {
       }
     }]);
     return Code;
-  }(Base);
+  }(M.Base);
 
-  var Region = function (_Base2) {
-    inherits(Region, _Base2);
+  var Region = function (_M$Base2) {
+    inherits(Region, _M$Base2);
 
     function Region(fields) {
       var _ret2;
@@ -1747,26 +1768,27 @@ var RegionIncompatibleNameKeyFactory = (function (M) {
       key: 'innerTypes',
       value: function innerTypes() {
         return Object.freeze({
-          name: M.AsIs(String),
-          code: Base.metadata(Code)
+          name: asIs(String),
+          code: _(Code)
         });
       }
     }]);
     return Region;
-  }(Base);
+  }(M.Base);
 
   return Object.freeze(Region);
 });
 
 var featuresDeepNesting = (function (should, M) {
   return function () {
-    var Base = M.Base;
+    var _ = M.metadata._;
+
 
     it('should revive deeply nested JSON', function () {
       var City = CityFactory(M, RegionFactory(M));
       var cityJson = '{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":"EU"}}}';
 
-      var city = JSON.parse(cityJson, Base.metadata(City).reviver);
+      var city = JSON.parse(cityJson, _(City).reviver);
 
       city.name().should.be.exactly('Pamplona');
       city.country().name().should.be.exactly('Spain');
@@ -1778,7 +1800,7 @@ var featuresDeepNesting = (function (should, M) {
       var City = CityFactory(M, RegionIncompatibleNameKeyFactory(M));
       var cityJson = '{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"id": 1,"value":"EU"}}}}';
 
-      var city = JSON.parse(cityJson, Base.metadata(City).reviver);
+      var city = JSON.parse(cityJson, _(City).reviver);
 
       city.name().should.be.exactly('Pamplona');
       city.country().name().should.be.exactly('Spain');
@@ -2386,24 +2408,16 @@ var proxyDate = (function (should, M) {
 
 var c51 = (function (should, M) {
   return function () {
-    var Base = M.Base;
-
-    var Country = function (_Base) {
-      inherits(Country, _Base);
+    var Country = function (_M$Base) {
+      inherits(Country, _M$Base);
 
       function Country(code) {
         classCallCheck(this, Country);
         return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, { code: code }));
       }
 
-      createClass(Country, null, [{
-        key: 'metadata',
-        value: function metadata() {
-          return Base.metadata(Country);
-        }
-      }]);
       return Country;
-    }(Base);
+    }(M.Base);
 
     it('should leave root elements that are not plain objects untouched', function () {
       M.fromJSON(Country, '"ESP"').code().should.be.exactly('ESP');

@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "17.1.1";
+var version = "18.0.0";
 
 
 
@@ -272,16 +272,15 @@ var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver(identity)));
 var isPlainObject = function isPlainObject(x) {
   return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x;
 };
+var getInnerTypes = function getInnerTypes(Type) {
+  return Type.innerTypes && Type.innerTypes() || {};
+};
 
 var unsupported = function unsupported(message) {
   throw Error(message);
 };
 
-var getInnerTypes = function getInnerTypes(Type) {
-  return Type.innerTypes && Type.innerTypes() || {};
-};
-
-var reviverFactory$1 = function reviverFactory$1(Type) {
+var reviverFactory = function reviverFactory(Type) {
   var innerTypes = getInnerTypes(Type);
 
   return function (k, v) {
@@ -375,18 +374,13 @@ var Base = function () {
     value: function factory(Type, fields, thisArg) {
       return new Base(Type, fields, thisArg);
     }
-  }, {
-    key: 'metadata',
-    value: function metadata(Type) {
-      return Object.freeze({ type: Type, reviver: reviverFactory$1(Type) });
-    }
   }]);
   return Base;
 }();
 
 var Base$1 = Object.freeze(Base);
 
-var reviverFactory = function reviverFactory(itemMetadata) {
+var reviverFactory$2 = function reviverFactory$2(itemMetadata) {
   return function (k, v) {
     if (k !== '') {
       return v;
@@ -506,7 +500,7 @@ var Maybe = function (_Base) {
   }, {
     key: 'metadata',
     value: function metadata(itemMetadata) {
-      return Object.freeze({ type: Maybe, reviver: reviverFactory(itemMetadata) });
+      return Object.freeze({ type: Maybe, reviver: reviverFactory$2(itemMetadata) });
     }
   }]);
   return Maybe;
@@ -602,7 +596,7 @@ var parseMapper = function parseMapper(keyMetadata, valueMetadata) {
   };
 };
 
-var reviverFactory$2 = function reviverFactory$2(keyMetadata, valueMetadata) {
+var reviverFactory$3 = function reviverFactory$3(keyMetadata, valueMetadata) {
   return function (k, v) {
     if (k !== '') {
       return v;
@@ -671,7 +665,7 @@ var ModelicoMap = function (_AbstractMap) {
   }, {
     key: 'metadata',
     value: function metadata(keyMetadata, valueMetadata) {
-      return AbstractMap$1.metadata(ModelicoMap, reviverFactory$2(keyMetadata, valueMetadata));
+      return AbstractMap$1.metadata(ModelicoMap, reviverFactory$3(keyMetadata, valueMetadata));
     }
   }]);
   return ModelicoMap;
@@ -699,7 +693,7 @@ var parseMapper$1 = function parseMapper$1(keyMetadata, valueMetadata, object) {
   };
 };
 
-var reviverFactory$3 = function reviverFactory$3(keyMetadata, valueMetadata) {
+var reviverFactory$4 = function reviverFactory$4(keyMetadata, valueMetadata) {
   return function (k, v) {
     if (k !== '') {
       return v;
@@ -741,7 +735,7 @@ var ModelicoEnumMap = function (_AbstractMap) {
   }, {
     key: 'metadata',
     value: function metadata(keyMetadata, valueMetadata) {
-      return AbstractMap$1.metadata(ModelicoEnumMap, reviverFactory$3(keyMetadata, valueMetadata));
+      return AbstractMap$1.metadata(ModelicoEnumMap, reviverFactory$4(keyMetadata, valueMetadata));
     }
   }]);
   return ModelicoEnumMap;
@@ -990,7 +984,7 @@ var enumeratorsReducer = function enumeratorsReducer(acc, code) {
   return Object.assign(acc, defineProperty({}, code, { code: code }));
 };
 
-var reviverFactory$4 = function reviverFactory$4(enumerators) {
+var reviverFactory$5 = function reviverFactory$5(enumerators) {
   return function (k, v) {
     var enumerator = enumerators[v];
 
@@ -1019,7 +1013,7 @@ var ModelicoEnum = function (_Base) {
     Object.defineProperty(_this, 'metadata', {
       value: always(Object.freeze({
         type: ModelicoEnum,
-        reviver: reviverFactory$4(enumerators)
+        reviver: reviverFactory$5(enumerators)
       })),
       enumerable: false
     });
@@ -1120,7 +1114,13 @@ var listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'so
 var dateNonMutators = internalNonMutators;
 var dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
-var _ = Base$1.metadata;
+var _ = function _(Type) {
+  if (Type.metadata) {
+    return Type.metadata();
+  }
+
+  return Object.freeze({ type: Type, reviver: reviverFactory(Type) });
+};
 
 var metadata$1 = Object.freeze({
   _: _,
