@@ -65,7 +65,7 @@ class Maybe extends Base {
     }
 
     const item = this.inner().get();
-    const inner = (item.setPath) ? item.setPath(path, v) : v;
+    const inner = (item.setPath) ? item.setPath(path, v) : null;
 
     return new Maybe(inner);
   }

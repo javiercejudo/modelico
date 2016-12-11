@@ -17,6 +17,6 @@ export const objToArr = (obj: Object) => (Object.keys(obj).map(k => [k, obj[k]])
 export const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
 export const isPlainObject = (x: mixed) => typeof x === 'object' && !!x;
 
-export const unsupported = (message: string = 'Unsupported operation') => {
+export const unsupported = (message: string) => {
   throw Error(message);
 };
