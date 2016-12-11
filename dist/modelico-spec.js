@@ -1265,6 +1265,14 @@ var ModelicoMaybe = (function (should, M) {
 
         should(maybe5.getOrElse(2)).be.exactly(2);
       });
+
+      it('should return an empty Maybe when setting a path beyond Modelico boundaries', function () {
+        var maybe1 = M.Maybe.of({ a: 2 });
+
+        var maybe2 = maybe1.setPath(['a'], 200);
+
+        maybe2.isEmpty().should.be.exactly(true);
+      });
     });
 
     describe('stringifying', function () {

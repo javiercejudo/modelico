@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "17.1.0";
+var version = "17.1.1";
 
 
 
@@ -273,9 +273,7 @@ var isPlainObject = function isPlainObject(x) {
   return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x;
 };
 
-var unsupported = function unsupported() {
-  var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Unsupported operation';
-
+var unsupported = function unsupported(message) {
   throw Error(message);
 };
 
@@ -474,7 +472,7 @@ var Maybe = function (_Base) {
       }
 
       var item = this.inner().get();
-      var inner = item.setPath ? item.setPath(path, v) : v;
+      var inner = item.setPath ? item.setPath(path, v) : null;
 
       return new Maybe(inner);
     }

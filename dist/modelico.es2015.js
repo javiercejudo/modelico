@@ -1,4 +1,4 @@
-var version = "17.1.0";
+var version = "17.1.1";
 
 
 
@@ -29,7 +29,7 @@ const objToArr = (obj        ) => (Object.keys(obj).map(k => [k, obj[k]]));
 const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
 const isPlainObject = (x       ) => typeof x === 'object' && !!x;
 
-const unsupported = (message         = 'Unsupported operation') => {
+const unsupported = (message        ) => {
   throw Error(message);
 };
 
@@ -192,7 +192,7 @@ class Maybe extends Base$1 {
     }
 
     const item = this.inner().get();
-    const inner = (item.setPath) ? item.setPath(path, v) : v;
+    const inner = (item.setPath) ? item.setPath(path, v) : null;
 
     return new Maybe(inner);
   }
