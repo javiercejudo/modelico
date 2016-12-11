@@ -4,7 +4,7 @@ import PartOfDayFactory from './fixtures/PartOfDay';
 
 export default (should, M) => () => {
   const PartOfDay = PartOfDayFactory(M);
-  const { _, enumMap } = M.metadata;
+  const { _, asIs, enumMap } = M.metadata;
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
@@ -106,7 +106,7 @@ export default (should, M) => () => {
     it('should parse the enum map correctly', () => {
       const greetings = JSON.parse(
         '{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":[]}',
-        enumMap(_(PartOfDay), M.AsIs(M.Any)).reviver
+        enumMap(_(PartOfDay), asIs(M.Any)).reviver
       );
 
       greetings.inner().get(PartOfDay.MORNING())
@@ -116,7 +116,7 @@ export default (should, M) => () => {
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',
-        enumMap(_(PartOfDay), M.AsIs(String)).reviver
+        enumMap(_(PartOfDay), asIs(String)).reviver
       )).should.throw();
     });
   });

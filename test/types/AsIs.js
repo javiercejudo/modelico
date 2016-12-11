@@ -1,8 +1,7 @@
 'use strict';
 
 export default (U, should, M) => () => {
-  const AsIs = M.AsIs;
-  const List = M.List;
+  const { asIs } = M.metadata;
 
   describe('toJSON', () => {
     it('should stringify the value as is', () => {
@@ -15,19 +14,19 @@ export default (U, should, M) => () => {
 
   describe('reviver', () => {
     it('should revive the value as is, without the wrapper', () => {
-      const asIsObject = JSON.parse('{"two":2}', AsIs(M.Any).reviver);
+      const asIsObject = JSON.parse('{"two":2}', asIs(M.Any).reviver);
 
       should(asIsObject.two).be.exactly(2);
     });
 
     it('should support non-trivial native constructors: Function', () => {
-      const asIsObject = JSON.parse('"return (function(x) { return x * 4 })(arguments[0])"', AsIs(Function).reviver);
+      const asIsObject = JSON.parse('"return (function(x) { return x * 4 })(arguments[0])"', asIs(Function).reviver);
 
       should(asIsObject(5)).be.exactly(20);
     });
 
     it('should support non-trivial native constructors: RegExp', () => {
-      const asIsObject = JSON.parse('"^[a-z]+$"', AsIs(RegExp).reviver);
+      const asIsObject = JSON.parse('"^[a-z]+$"', asIs(RegExp).reviver);
 
       asIsObject.test('abc').should.be.exactly(true);
       asIsObject.test('abc1').should.be.exactly(false);
@@ -35,7 +34,7 @@ export default (U, should, M) => () => {
     });
 
     it('should support any function', () => {
-      const asIsObject = JSON.parse('9', AsIs(x => x * 2).reviver);
+      const asIsObject = JSON.parse('9', asIs(x => x * 2).reviver);
 
       should(asIsObject).be.exactly(18);
     });
@@ -43,15 +42,15 @@ export default (U, should, M) => () => {
 
   describe('metadata', () => {
     it('should return metadata like type', () => {
-      AsIs(String).type.should.be.exactly(String);
+      asIs(String).type.should.be.exactly(String);
 
-      const asIsObject = JSON.parse('{"two":2}', AsIs(M.Any).reviver);
+      const asIsObject = JSON.parse('{"two":2}', asIs(M.Any).reviver);
 
       should(asIsObject.two).be.exactly(2);
     });
 
     U.skipIfNoObjectFreeze('should be immutable', () => {
-      (() => AsIs().reviver = x => x).should.throw();
+      (() => asIs().reviver = x => x).should.throw();
     });
   });
 };

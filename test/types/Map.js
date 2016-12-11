@@ -4,7 +4,7 @@ import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
   const Person = PersonFactory(M);
-  const { date, map } = M.metadata;
+  const { asIs, date, map } = M.metadata;
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
@@ -104,7 +104,7 @@ export default (should, M) => () => {
     it('should parse the map correctly', () => {
       const modelicoMap = JSON.parse(
         '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]',
-        map(M.AsIs(String), date()).reviver
+        map(asIs(String), date()).reviver
       );
 
       should(modelicoMap.inner().get('a').inner().getFullYear())
@@ -124,7 +124,7 @@ export default (should, M) => () => {
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',
-        map(M.AsIs(String), date()).reviver
+        map(asIs(String), date()).reviver
       )).should.throw();
     });
   });
