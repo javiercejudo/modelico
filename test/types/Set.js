@@ -3,7 +3,7 @@
 import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
   const Person = PersonFactory(M);
 
   describe('immutability', () => {
@@ -33,7 +33,7 @@ export default (should, M) => () => {
 
     it('should be able to set a whole set', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
-      const author1 = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+      const author1 = JSON.parse(authorJson, Base.metadata(Person).reviver);
 
       const newSetArray = [...author1.importantDatesSet().inner()];
       newSetArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
@@ -127,7 +127,7 @@ export default (should, M) => () => {
 
     it('should be parsed correctly when used within another class', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
-      const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+      const author = JSON.parse(authorJson, Base.metadata(Person).reviver);
 
       should([...author.importantDatesSet().inner()][0].inner().getFullYear())
         .be.exactly(2013);

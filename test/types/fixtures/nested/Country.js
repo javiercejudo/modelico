@@ -1,9 +1,9 @@
 'use strict';
 
 export default (M, Region) => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
 
-  class Country extends Modelico {
+  class Country extends Base {
     constructor(fields) {
       super(Country, fields);
 
@@ -14,7 +14,7 @@ export default (M, Region) => {
       return Object.freeze({
         name: M.AsIs(String),
         code: M.AsIs(String),
-        region: Modelico.metadata(Region)
+        region: Base.metadata(Region)
       });
     }
   }

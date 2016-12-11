@@ -3,7 +3,7 @@
 import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {

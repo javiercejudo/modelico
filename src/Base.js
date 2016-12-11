@@ -31,7 +31,7 @@ const reviverFactory = Type => {
   };
 };
 
-class Modelico {
+class Base {
   constructor(Type, fields, thisArg) {
     if (!isPlainObject(fields)) {
       throw TypeError(`expected an object with fields for ${Type.name} but got ${fields}`);
@@ -92,11 +92,7 @@ class Modelico {
   }
 
   static factory(Type, fields, thisArg) {
-    return new Modelico(Type, fields, thisArg);
-  }
-
-  static fromJSON(Type, json) {
-    return JSON.parse(json, reviverFactory(Type));
+    return new Base(Type, fields, thisArg);
   }
 
   static metadata(Type) {
@@ -104,4 +100,4 @@ class Modelico {
   }
 }
 
-export default Object.freeze(Modelico);
+export default Object.freeze(Base);

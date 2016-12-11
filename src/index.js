@@ -6,7 +6,7 @@ import { partial } from './U';
 
 import Maybe from './Maybe';
 
-import Modelico from './Modelico';
+import Base from './Base';
 import ModelicoMap from './Map';
 import EnumMap from './EnumMap';
 import ModelicoDate from './Date';
@@ -31,8 +31,10 @@ const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', '
 const dateNonMutators = internalNonMutators;
 const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
+const _ = Base.metadata;
+
 const metadata = Object.freeze({
-  _: Modelico.metadata,
+  _,
   any: Any,
   asIs: AsIs,
   date: ModelicoDate.metadata,
@@ -53,9 +55,10 @@ export default Object.freeze({
   List,
   Map: ModelicoMap,
   Maybe,
-  Modelico,
+  Base,
   Set: ModelicoSet,
   fields: x => x[fieldsSymbol](),
+  fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
   metadata,
   proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
   proxyList: partial(proxyFactory, listNonMutators, listMutators),

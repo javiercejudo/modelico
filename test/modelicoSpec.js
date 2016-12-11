@@ -34,7 +34,7 @@ const buildUtils = (options) => Object.freeze({
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
 });
 
-import Modelico from './types/Modelico';
+import Base from './types/Base';
 import ModelicoAsIs from './types/AsIs';
 import ModelicoDate from './types/Date';
 import ModelicoMap from './types/Map';
@@ -65,7 +65,7 @@ export default (options, should, M) => () => {
   const deps = [should, M];
   const utilsAndDeps = [U].concat(deps);
 
-  describe('Base', Modelico(...utilsAndDeps));
+  describe('Base', Base(...utilsAndDeps));
   describe('AsIs', ModelicoAsIs(...utilsAndDeps));
   describe('Date', ModelicoDate(...deps));
   describe('Map', ModelicoMap(...deps));

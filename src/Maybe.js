@@ -1,7 +1,7 @@
 'use strict';
 
 import { always, isNothing } from './U';
-import Modelico from './Modelico';
+import Base from './Base';
 
 const reviverFactory = itemMetadata => ((k, v) => {
   if (k !== '') {
@@ -35,7 +35,7 @@ export class Just {
 
 export const nothing = new Nothing();
 
-class Maybe extends Modelico {
+class Maybe extends Base {
   constructor(v) {
     super(Maybe, {});
 

@@ -11,7 +11,7 @@ export default (U, should, M) => () => {
   const Sex = SexFactory(M);
   const Animal = AnimalFactory(M);
 
-  const Modelico = M.Modelico;
+  const Base = M.Base;
   const ModelicoDate = M.Date;
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
@@ -42,7 +42,7 @@ export default (U, should, M) => () => {
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
-      (() => Modelico.fromJSON(Person, author2Json))
+      (() => M.fromJSON(Person, author2Json))
         .should.throw();
 
       (() => new Person(null))
@@ -107,7 +107,7 @@ export default (U, should, M) => () => {
 
     it('edge case when Modelico setPath is called with an empty path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
-      const author = JSON.parse(authorJson, Modelico.metadata(Person).reviver);
+      const author = JSON.parse(authorJson, Base.metadata(Person).reviver);
       const listOfPeople1 = M.List.of(author);
 
       const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
@@ -152,8 +152,8 @@ export default (U, should, M) => () => {
 
   describe('parsing', () => {
     it('should parse types correctly', () => {
-      const author1 = Modelico.fromJSON(Person, author1Json);
-      const author2 = JSON.parse(author1Json, Modelico.metadata(Person).reviver);
+      const author1 = M.fromJSON(Person, author1Json);
+      const author2 = JSON.parse(author1Json, Base.metadata(Person).reviver);
 
       'Javier Cejudo'
         .should.be.exactly(author1.fullName())
@@ -173,7 +173,7 @@ export default (U, should, M) => () => {
     });
 
     it('should work with plain classes extending Modelico', () => {
-      const animal = JSON.parse('{"name": "Sam"}', Modelico.metadata(Animal).reviver);
+      const animal = JSON.parse('{"name": "Sam"}', Base.metadata(Animal).reviver);
 
       animal.speak().should.be.exactly('hello');
       animal.name().should.be.exactly('Sam');

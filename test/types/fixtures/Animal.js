@@ -1,9 +1,9 @@
 'use strict';
 
 export default M => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
 
-  class Animal extends Modelico {
+  class Animal extends Base {
     constructor(fields) {
       super(Animal, fields);
     }

@@ -1,9 +1,9 @@
 'use strict';
 
 export default M => {
-  const Modelico = M.Modelico;
+  const Base = M.Base;
 
-  class Code extends Modelico {
+  class Code extends Base {
     constructor(fields) {
       super(Code, fields);
 
@@ -18,7 +18,7 @@ export default M => {
     }
   }
 
-  class Region extends Modelico {
+  class Region extends Base {
     constructor(fields) {
       super(Region, fields);
 
@@ -32,7 +32,7 @@ export default M => {
     static innerTypes() {
       return Object.freeze({
         name: M.AsIs(String),
-        code: Modelico.metadata(Code)
+        code: Base.metadata(Code)
       });
     }
   }

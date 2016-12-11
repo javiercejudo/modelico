@@ -36,7 +36,7 @@ The goal is to parse JSON strings like the following into JavaScript custom obje
 so that we can do things like this:
 
 ```js
-const pet1 = JSON.parse(petJson, Modelico.metadata(Animal).reviver);
+const pet1 = JSON.parse(petJson, Base.metadata(Animal).reviver);
 
 pet1.speak(); //=> 'my name is Robbie!'
 
@@ -51,9 +51,9 @@ Here is how `Animal` would look like:
 
 ```js
 const M = require('modelico');
-const Modelico = M.Modelico;
+const Base = M.Base;
 
-class Animal extends Modelico {
+class Animal extends Base {
   constructor(fields) {
     super(Animal, fields);
   }
@@ -88,7 +88,7 @@ Again, our goal is to parse JSON into JavaScript classes
 to be able to do things like
 
 ```js
-const person1 = JSON.parse(personJson, Modelico.metadata(Person).reviver);
+const person1 = JSON.parse(personJson, Base.metadata(Person).reviver);
 
 person1.fullName(); //=> 'Javier Cejudo'
 person1.pets().inner()[0].speak(); //=> 'my name is Robbie!'
@@ -105,10 +105,10 @@ that.
 
 ```js
 const M = require('modelico');
-const Modelico = M.Modelico;
+const Base = M.Base;
 const { asIs, list, _ } = M.metadata;
 
-class Person extends Modelico {
+class Person extends Base {
   constructor(fields) {
     super(Person, fields);
   }
@@ -205,10 +205,10 @@ with ES5-style classes. In the case of our `Animal` class:
 
 ```js
 function Animal(fields) {
-  Modelico.factory(Animal, fields, this);
+  Base.factory(Animal, fields, this);
 }
 
-Animal.prototype = Object.create(Modelico.prototype);
+Animal.prototype = Object.create(Base.prototype);
 Animal.prototype.constructor = Animal;
 
 Animal.prototype.speak = function() {

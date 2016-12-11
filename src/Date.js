@@ -1,9 +1,9 @@
 'use strict';
 
 import { isNothing, unsupported } from './U';
-import Modelico from './Modelico';
+import Base from './Base';
 
-class ModelicoDate extends Modelico {
+class ModelicoDate extends Base {
   constructor(dateOrig) {
     super(ModelicoDate, {});
 
