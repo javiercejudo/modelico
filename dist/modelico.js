@@ -4,7 +4,7 @@
 	(global.Modelico = factory());
 }(this, (function () { 'use strict';
 
-var version = "16.1.0";
+var version = "17.0.0";
 
 
 
@@ -160,7 +160,43 @@ var set$1 = function set$1(object, property, value, receiver) {
   return value;
 };
 
+var slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
 
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
 
 
 
@@ -206,8 +242,13 @@ var partial = function partial(fn) {
   return fn.bind.apply(fn, [undefined].concat(args));
 };
 // export const is = (Ctor: Object, val: Object) => val != null && val.constructor === Ctor || val instanceof Ctor;
-var asIsReviver = function asIsReviver(k, v) {
-  return v;
+var asIsReviver = function asIsReviver(Type) {
+  return function (k, v) {
+    return Type(v);
+  };
+};
+var identity = function identity(x) {
+  return x;
 };
 var always = function always(x) {
   return function () {
@@ -227,9 +268,15 @@ var objToArr = function objToArr(obj) {
     return [k, obj[k]];
   });
 };
-var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver));
+var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver(identity)));
 var isPlainObject = function isPlainObject(x) {
   return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x;
+};
+
+var unsupported = function unsupported() {
+  var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Unsupported operation';
+
+  throw Error(message);
 };
 
 var getInnerTypes = function getInnerTypes(Type) {
@@ -307,11 +354,13 @@ var Modelico = function () {
         return new (this[typeSymbol]())(value);
       }
 
-      if (path.length === 1) {
+      var item = this[path[0]]();
+
+      if (!item.setPath) {
         return this.set(path[0], value);
       }
 
-      return this.set(path[0], this[path[0]]().setPath(path.slice(1), value));
+      return this.set(path[0], item.setPath(path.slice(1), value));
     }
   }, {
     key: 'equals',
@@ -425,7 +474,12 @@ var Maybe = function (_Modelico) {
         return new Maybe(v);
       }
 
-      var inner = this.isEmpty() ? null : this.inner().get().setPath(path, v);
+      if (this.isEmpty()) {
+        return new Maybe(null);
+      }
+
+      var item = this.inner().get();
+      var inner = item.setPath ? item.setPath(path, v) : v;
 
       return new Maybe(inner);
     }
@@ -528,24 +582,30 @@ var AbstractMap = function (_Modelico) {
 var AbstractMap$1 = Object.freeze(AbstractMap);
 
 var AsIs = (function (Type) {
-  return Object.freeze({ type: Type, reviver: asIsReviver });
+  return Object.freeze({ type: Type, reviver: asIsReviver(Type) });
 });
 
-var Any = Object.freeze({ name: 'Any' });
-
-var stringifyMapper = function stringifyMapper(pair) {
-  return { key: pair[0], value: pair[1] };
+var Any = function Any(x) {
+  return identity(x);
 };
 
+// Any.name = 'Any';
+
+var Any$1 = Object.freeze(Any);
+
 var parseMapper = function parseMapper(keyMetadata, valueMetadata) {
-  return function (pairObject) {
+  return function (_ref) {
+    var _ref2 = slicedToArray(_ref, 2),
+        key = _ref2[0],
+        value = _ref2[1];
+
     var reviveKey = reviverOrAsIs(keyMetadata);
-    var key = reviveKey('', pairObject.key);
+    var revivedKey = reviveKey('', key);
 
     var reviveVal = reviverOrAsIs(valueMetadata);
-    var val = reviveVal('', pairObject.value);
+    var revivedVal = reviveVal('', value);
 
-    return [key, val];
+    return [revivedKey, revivedVal];
   };
 };
 
@@ -581,7 +641,7 @@ var ModelicoMap = function (_AbstractMap) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      return [].concat(toConsumableArray(this.inner())).map(stringifyMapper);
+      return [].concat(toConsumableArray(this.inner()));
     }
   }], [{
     key: 'fromMap',
@@ -722,13 +782,17 @@ var ModelicoDate = function (_Modelico) {
 
   createClass(ModelicoDate, [{
     key: 'set',
-    value: function set(date) {
-      return new ModelicoDate(date);
+    value: function set() {
+      unsupported('Date.set is not supported');
     }
   }, {
     key: 'setPath',
-    value: function setPath(path, value) {
-      return this.set(value);
+    value: function setPath(path, date) {
+      if (path.length === 0) {
+        return new ModelicoDate(date);
+      }
+
+      unsupported('Date.setPath is not supported for non-empty paths');
     }
   }, {
     key: 'toJSON',
@@ -880,26 +944,17 @@ var ModelicoSet = function (_Modelico) {
 
   createClass(ModelicoSet, [{
     key: 'set',
-    value: function set(index, value) {
-      var newSet = [].concat(toConsumableArray(this.inner()));
-      newSet[index] = value;
-
-      return new ModelicoSet(newSet);
+    value: function set() {
+      unsupported('Set.set is not supported');
     }
   }, {
     key: 'setPath',
-    value: function setPath(path, value) {
+    value: function setPath(path, set$$1) {
       if (path.length === 0) {
-        return new ModelicoSet(value);
+        return new ModelicoSet(set$$1);
       }
 
-      var item = [].concat(toConsumableArray(this.inner()))[path[0]];
-
-      if (!item.setPath) {
-        return this.set(path[0], value);
-      }
-
-      return this.set(path[0], item.setPath(path.slice(1), value));
+      unsupported('Set.setPath is not supported for non-empty paths');
     }
   }, {
     key: 'toJSON',
@@ -907,6 +962,11 @@ var ModelicoSet = function (_Modelico) {
       return [].concat(toConsumableArray(this.inner()));
     }
   }], [{
+    key: 'fromSet',
+    value: function fromSet(set$$1) {
+      return new ModelicoSet(set$$1);
+    }
+  }, {
     key: 'fromArray',
     value: function fromArray(arr) {
       return ModelicoSet.fromSet(new Set(arr));
@@ -919,11 +979,6 @@ var ModelicoSet = function (_Modelico) {
       }
 
       return ModelicoSet.fromArray(arr);
-    }
-  }, {
-    key: 'fromSet',
-    value: function fromSet(set$$1) {
-      return new ModelicoSet(set$$1);
     }
   }, {
     key: 'metadata',
@@ -1074,7 +1129,7 @@ var dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMill
 
 var metadata$1 = Object.freeze({
   _: Modelico$1.metadata,
-  any: Any,
+  any: Any$1,
   asIs: AsIs,
   date: ModelicoDate$1.metadata,
   enumMap: EnumMap.metadata,
@@ -1086,7 +1141,7 @@ var metadata$1 = Object.freeze({
 
 var index = Object.freeze({
   about: Object.freeze({ version: version, author: author, homepage: homepage, license: license }),
-  Any: Any,
+  Any: Any$1,
   AsIs: AsIs,
   Date: ModelicoDate$1,
   Enum: Enum,

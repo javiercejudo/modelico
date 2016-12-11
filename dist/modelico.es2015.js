@@ -1,4 +1,4 @@
-var version = "16.1.0";
+var version = "17.0.0";
 
 
 
@@ -14,19 +14,24 @@ const fieldsSymbol = Symbol('fields');
 
 //      
 
-const get = (field        ) => { return (obj        ) => obj[field] };
-const pipe2 = (fn1          , fn2          ) => { return (...args              ) => fn2(fn1(...args)) };
+const get = (field        ) => ((obj        ) => obj[field]);
+const pipe2 = (fn1          , fn2          ) => ((...args              ) => fn2(fn1(...args)));
 
 
 const partial = (fn          , ...args              ) => fn.bind(undefined, ...args);
 // export const is = (Ctor: Object, val: Object) => val != null && val.constructor === Ctor || val instanceof Ctor;
-const asIsReviver = (k        , v       ) => v;
-const always = (x       ) => { return () => x };
+const asIsReviver = (Type          ) => ((k        , v       ) => Type(v));
+const identity = (x       ) => x;
+const always = (x       ) => (() => x);
 const isNothing = (v       ) => v == null || v !== v;
-const defaultTo = (d       ) => { return (v       ) => isNothing(v) ? d : v };
-const objToArr = (obj        ) => { return Object.keys(obj).map(k => [k, obj[k]]) };
-const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver));
+const defaultTo = (d       ) => ((v       ) => isNothing(v) ? d : v );
+const objToArr = (obj        ) => (Object.keys(obj).map(k => [k, obj[k]]));
+const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
 const isPlainObject = (x       ) => typeof x === 'object' && !!x;
+
+const unsupported = (message         = 'Unsupported operation') => {
+  throw Error(message);
+};
 
 const getInnerTypes = Type => Type.innerTypes && Type.innerTypes() || {};
 
@@ -97,11 +102,13 @@ class Modelico {
       return new (this[typeSymbol]())(value);
     }
 
-    if (path.length === 1) {
+    const item = this[path[0]]();
+
+    if (!item.setPath) {
       return this.set(path[0], value);
     }
 
-    return this.set(path[0], this[path[0]]().setPath(path.slice(1), value));
+    return this.set(path[0], item.setPath(path.slice(1), value));
   }
 
   equals(other) {
@@ -127,7 +134,7 @@ class Modelico {
 
 var Modelico$1 = Object.freeze(Modelico);
 
-const reviverFactory = itemMetadata => { return (k, v) => {
+const reviverFactory = itemMetadata => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -135,7 +142,7 @@ const reviverFactory = itemMetadata => { return (k, v) => {
   const maybeValue = (v === null) ? null : itemMetadata.reviver(k, v);
 
   return new Maybe(maybeValue);
-}};
+});
 
 class Nothing {
   toJSON() {
@@ -184,7 +191,12 @@ class Maybe extends Modelico$1 {
       return new Maybe(v);
     }
 
-    const inner = this.isEmpty() ? null : this.inner().get().setPath(path, v);
+    if (this.isEmpty()) {
+      return new Maybe(null);
+    }
+
+    const item = this.inner().get();
+    const inner = (item.setPath) ? item.setPath(path, v) : v;
 
     return new Maybe(inner);
   }
@@ -261,23 +273,25 @@ class AbstractMap extends Modelico$1 {
 
 var AbstractMap$1 = Object.freeze(AbstractMap);
 
-var AsIs = Type => Object.freeze({type: Type, reviver: asIsReviver});
+var AsIs = Type => Object.freeze({type: Type, reviver: asIsReviver(Type)});
 
-var Any = Object.freeze({name: 'Any'});
+const Any = x => identity(x);
 
-const stringifyMapper = pair => ({key: pair[0], value: pair[1]});
+// Any.name = 'Any';
 
-const parseMapper = (keyMetadata, valueMetadata) => { return pairObject => {
+var Any$1 = Object.freeze(Any);
+
+const parseMapper = (keyMetadata, valueMetadata) => (([key, value]) => {
   const reviveKey = reviverOrAsIs(keyMetadata);
-  const key = reviveKey('', pairObject.key);
+  const revivedKey = reviveKey('', key);
 
   const reviveVal = reviverOrAsIs(valueMetadata);
-  const val = reviveVal('', pairObject.value);
+  const revivedVal = reviveVal('', value);
 
-  return [key, val];
-}};
+  return [revivedKey, revivedVal];
+});
 
-const reviverFactory$2 = (keyMetadata, valueMetadata) => { return (k, v) => {
+const reviverFactory$2 = (keyMetadata, valueMetadata) => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -287,7 +301,7 @@ const reviverFactory$2 = (keyMetadata, valueMetadata) => { return (k, v) => {
     new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
 
   return new ModelicoMap(innerMap);
-}};
+});
 
 class ModelicoMap extends AbstractMap$1 {
   constructor(innerMap) {
@@ -301,7 +315,7 @@ class ModelicoMap extends AbstractMap$1 {
   }
 
   toJSON() {
-    return [...this.inner()].map(stringifyMapper);
+    return [...this.inner()];
   }
 
   static fromMap(map) {
@@ -347,7 +361,7 @@ const stringifyReducer = (acc, pair) => {
   return acc;
 };
 
-const parseMapper$1 = (keyMetadata, valueMetadata, object) => { return enumerator => {
+const parseMapper$1 = (keyMetadata, valueMetadata, object) => (enumerator => {
   const reviveKey = reviverOrAsIs(keyMetadata);
   const key = reviveKey('', enumerator);
 
@@ -355,9 +369,9 @@ const parseMapper$1 = (keyMetadata, valueMetadata, object) => { return enumerato
   const val = reviveVal('', object[enumerator]);
 
   return [key, val];
-}};
+});
 
-const reviverFactory$3 = (keyMetadata, valueMetadata) => { return (k, v) => {
+const reviverFactory$3 = (keyMetadata, valueMetadata) => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -367,7 +381,7 @@ const reviverFactory$3 = (keyMetadata, valueMetadata) => { return (k, v) => {
     new Map(Object.keys(v).map(parseMapper$1(keyMetadata, valueMetadata, v)));
 
   return new ModelicoEnumMap(innerMap);
-}};
+});
 
 class ModelicoEnumMap extends AbstractMap$1 {
   constructor(innerMap) {
@@ -412,12 +426,16 @@ class ModelicoDate extends Modelico$1 {
     Object.freeze(this);
   }
 
-  set(date) {
-    return new ModelicoDate(date);
+  set() {
+    unsupported('Date.set is not supported');
   }
 
-  setPath(path, value) {
-    return this.set(value);
+  setPath(path, date) {
+    if (path.length === 0) {
+      return new ModelicoDate(date);
+    }
+
+    unsupported('Date.setPath is not supported for non-empty paths');
   }
 
   toJSON() {
@@ -437,7 +455,7 @@ class ModelicoDate extends Modelico$1 {
 
 var ModelicoDate$1 = Object.freeze(ModelicoDate);
 
-const iterableReviverFactory = (IterableType, itemMetadata) => { return (k, v) => {
+const iterableReviverFactory = (IterableType, itemMetadata) => ((k, v) => {
   if (k !== '') {
     return v;
   }
@@ -446,7 +464,7 @@ const iterableReviverFactory = (IterableType, itemMetadata) => { return (k, v) =
   const iterable = (v === null) ? null : v.map(revive);
 
   return new IterableType(iterable);
-}};
+});
 
 const iterableMetadata = (IterableType, itemMetadata) => {
   return Object.freeze({
@@ -529,29 +547,24 @@ class ModelicoSet extends Modelico$1 {
     Object.freeze(this);
   }
 
-  set(index, value) {
-    const newSet = [...this.inner()];
-    newSet[index] = value;
-
-    return new ModelicoSet(newSet);
+  set() {
+    unsupported('Set.set is not supported');
   }
 
-  setPath(path, value) {
+  setPath(path, set) {
     if (path.length === 0) {
-      return new ModelicoSet(value);
+      return new ModelicoSet(set);
     }
 
-    const item = [...this.inner()][path[0]];
-
-    if (!item.setPath) {
-      return this.set(path[0], value);
-    }
-
-    return this.set(path[0], item.setPath(path.slice(1), value));
+    unsupported('Set.setPath is not supported for non-empty paths');
   }
 
   toJSON() {
     return [...this.inner()];
+  }
+
+  static fromSet(set) {
+    return new ModelicoSet(set);
   }
 
   static fromArray(arr) {
@@ -560,10 +573,6 @@ class ModelicoSet extends Modelico$1 {
 
   static of(...arr) {
     return ModelicoSet.fromArray(arr);
-  }
-
-  static fromSet(set) {
-    return new ModelicoSet(set);
   }
 
   static metadata(itemMetadata) {
@@ -577,7 +586,7 @@ var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
-const reviverFactory$4 = enumerators => { return (k, v) => {
+const reviverFactory$4 = enumerators => ((k, v) => {
   const enumerator = enumerators[v];
 
   if (isNothing(enumerator)) {
@@ -585,7 +594,7 @@ const reviverFactory$4 = enumerators => { return (k, v) => {
   }
 
   return enumerator;
-}};
+});
 
 class ModelicoEnum extends Modelico$1 {
   constructor(input) {
@@ -688,7 +697,7 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
 
 const metadata = Object.freeze({
   _: Modelico$1.metadata,
-  any: Any,
+  any: Any$1,
   asIs: AsIs,
   date: ModelicoDate$1.metadata,
   enumMap: EnumMap.metadata,
@@ -700,7 +709,7 @@ const metadata = Object.freeze({
 
 var index = Object.freeze({
   about: Object.freeze({ version, author, homepage, license }),
-  Any,
+  Any: Any$1,
   AsIs,
   Date: ModelicoDate$1,
   Enum,
