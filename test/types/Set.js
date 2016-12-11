@@ -3,8 +3,8 @@
 import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
-  const Base = M.Base;
   const Person = PersonFactory(M);
+  const { _, date, set } = M.metadata;
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
@@ -27,13 +27,13 @@ export default (should, M) => () => {
     });
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => JSON.parse('null', M.Set.metadata(M.Date.metadata()).reviver))
+      (() => JSON.parse('null', set(date()).reviver))
         .should.throw();
     });
 
     it('should be able to set a whole set', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
-      const author1 = JSON.parse(authorJson, Base.metadata(Person).reviver);
+      const author1 = JSON.parse(authorJson, _(Person).reviver);
 
       const newSetArray = [...author1.importantDatesSet().inner()];
       newSetArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
@@ -115,7 +115,7 @@ export default (should, M) => () => {
     it('should parse the set correctly', () => {
       const modelicoSet = JSON.parse(
         '["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]',
-        M.Set.metadata(M.Date.metadata()).reviver
+        set(date()).reviver
       );
 
       should([...modelicoSet.inner()][0].inner().getFullYear())
@@ -127,7 +127,7 @@ export default (should, M) => () => {
 
     it('should be parsed correctly when used within another class', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
-      const author = JSON.parse(authorJson, Base.metadata(Person).reviver);
+      const author = JSON.parse(authorJson, _(Person).reviver);
 
       should([...author.importantDatesSet().inner()][0].inner().getFullYear())
         .be.exactly(2013);

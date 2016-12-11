@@ -1,15 +1,9 @@
 'use strict';
 
 export default (should, M) => () => {
-  const Base = M.Base;
-
-  class Country extends Base {
+  class Country extends M.Base {
     constructor(code) {
       super(Country, {code});
-    }
-
-    static metadata() {
-      return Base.metadata(Country);
     }
   }
 

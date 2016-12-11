@@ -3,16 +3,16 @@
 import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
-  const Base = M.Base;
+  const { date } = M.metadata;
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
       const input = new Date('1988-04-16T00:00:00.000Z');
-      const date = new M.Date(input);
+      const myDate = new M.Date(input);
 
       input.setFullYear(2017);
 
-      should(date.inner().getFullYear())
+      should(myDate.inner().getFullYear())
         .be.exactly(1988);
     });
   });
@@ -57,23 +57,23 @@ export default (should, M) => () => {
 
   describe('stringifying', () => {
     it('should stringify values correctly', () => {
-      const date = new M.Date(new Date('1988-04-16T00:00:00.000Z'));
+      const myDate = new M.Date(new Date('1988-04-16T00:00:00.000Z'));
 
-      JSON.stringify(date).should.be.exactly('"1988-04-16T00:00:00.000Z"');
+      JSON.stringify(myDate).should.be.exactly('"1988-04-16T00:00:00.000Z"');
     });
   });
 
   describe('parsing', () => {
     it('should parse Maybe values correctly', () => {
-      const date = JSON.parse('"1988-04-16T00:00:00.000Z"', M.Date.metadata().reviver);
+      const myDate = JSON.parse('"1988-04-16T00:00:00.000Z"', date().reviver);
 
-      should(date.inner().getFullYear()).be.exactly(1988);
+      should(myDate.inner().getFullYear()).be.exactly(1988);
     });
 
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',
-        M.Date.metadata(M.Date.metadata()).reviver
+        date().reviver
       )).should.throw();
     });
   });

@@ -1,9 +1,9 @@
 'use strict';
 
 export default (should, M) => () => {
-  const Base = M.Base;
+  const { _ } = M.metadata;
 
-  class Animal extends Base {
+  class Animal extends M.Base {
     constructor(fields) {
       super(Animal, fields);
     }
@@ -17,7 +17,7 @@ export default (should, M) => () => {
   it('should showcase the main features', () => {
     const petJson = `{"name": "Robbie"}`;
 
-    const pet1 = JSON.parse(petJson, Base.metadata(Animal).reviver);
+    const pet1 = JSON.parse(petJson, _(Animal).reviver);
 
     pet1.speak()
       .should.be.exactly('My name is Robbie!');

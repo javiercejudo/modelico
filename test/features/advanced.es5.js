@@ -1,14 +1,13 @@
 'use strict';
 
 export default (should, M) => () => {
-  const Base = M.Base;
-  const { asIs, list, _ } = M.metadata;
+  const { _, asIs, list } = M.metadata;
 
   function Animal(fields) {
-    Base.factory(Animal, fields, this);
+    M.Base.factory(Animal, fields, this);
   }
 
-  Animal.prototype = Object.create(Base.prototype);
+  Animal.prototype = Object.create(M.Base.prototype);
 
   Animal.prototype.speak = function() {
     var name = M.fields(this).name;
@@ -16,10 +15,10 @@ export default (should, M) => () => {
   };
 
   function Person(fields) {
-    Base.factory(Person, fields, this);
+    M.Base.factory(Person, fields, this);
   }
 
-  Person.prototype = Object.create(Base.prototype);
+  Person.prototype = Object.create(M.Base.prototype);
 
   Person.prototype.fullName = function() {
     var fields = M.fields(this);
@@ -43,7 +42,7 @@ export default (should, M) => () => {
       }]
     }`;
 
-    const person1 = JSON.parse(personJson, Base.metadata(Person).reviver);
+    const person1 = JSON.parse(personJson, _(Person).reviver);
 
     person1.fullName().should.be.exactly('Javier Cejudo');
 

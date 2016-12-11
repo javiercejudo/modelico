@@ -1,35 +1,9 @@
 'use strict';
 
-import { always, defaultTo, reviverOrAsIs, isPlainObject, isNothing } from './U';
+import { always, defaultTo, reviverOrAsIs, isPlainObject, isNothing, getInnerTypes } from './U';
 import { typeSymbol, fieldsSymbol } from './symbols';
 
 import Maybe from './Maybe';
-
-const getInnerTypes = Type => Type.innerTypes && Type.innerTypes() || {};
-
-const reviverFactory = Type => {
-  const innerTypes = getInnerTypes(Type);
-
-  return (k, v) => {
-    if (k !== '') {
-      return v;
-    }
-
-    const fields = !isPlainObject(v) ? v : Object.keys(v).reduce((acc, field) => {
-      const metadata = innerTypes[field];
-
-      if (metadata) {
-        acc[field] = reviverOrAsIs(metadata)(k, v[field]);
-      } else {
-        acc[field] = v[field];
-      }
-
-      return acc;
-    }, {});
-
-    return new Type(fields);
-  };
-};
 
 class Base {
   constructor(Type, fields, thisArg) {
@@ -93,10 +67,6 @@ class Base {
 
   static factory(Type, fields, thisArg) {
     return new Base(Type, fields, thisArg);
-  }
-
-  static metadata(Type) {
-    return Object.freeze({type: Type, reviver: reviverFactory(Type)});
   }
 }
 

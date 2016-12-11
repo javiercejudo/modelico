@@ -1,9 +1,7 @@
 'use strict';
 
 export default M => {
-  const Base = M.Base;
-
-  class Animal extends Base {
+  class Animal extends M.Base {
     constructor(fields) {
       super(Animal, fields);
     }

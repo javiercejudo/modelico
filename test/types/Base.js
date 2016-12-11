@@ -10,8 +10,8 @@ export default (U, should, M) => () => {
   const PartOfDay = PartOfDayFactory(M);
   const Sex = SexFactory(M);
   const Animal = AnimalFactory(M);
+  const { _ } = M.metadata;
 
-  const Base = M.Base;
   const ModelicoDate = M.Date;
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
@@ -107,7 +107,7 @@ export default (U, should, M) => () => {
 
     it('edge case when Modelico setPath is called with an empty path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
-      const author = JSON.parse(authorJson, Base.metadata(Person).reviver);
+      const author = JSON.parse(authorJson, _(Person).reviver);
       const listOfPeople1 = M.List.of(author);
 
       const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
@@ -153,7 +153,7 @@ export default (U, should, M) => () => {
   describe('parsing', () => {
     it('should parse types correctly', () => {
       const author1 = M.fromJSON(Person, author1Json);
-      const author2 = JSON.parse(author1Json, Base.metadata(Person).reviver);
+      const author2 = JSON.parse(author1Json, _(Person).reviver);
 
       'Javier Cejudo'
         .should.be.exactly(author1.fullName())
@@ -173,7 +173,7 @@ export default (U, should, M) => () => {
     });
 
     it('should work with plain classes extending Modelico', () => {
-      const animal = JSON.parse('{"name": "Sam"}', Base.metadata(Animal).reviver);
+      const animal = JSON.parse('{"name": "Sam"}', _(Animal).reviver);
 
       animal.speak().should.be.exactly('hello');
       animal.name().should.be.exactly('Sam');

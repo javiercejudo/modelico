@@ -1,9 +1,9 @@
 'use strict';
 
 export default (M, Region) => {
-  const Base = M.Base;
+  const { _, asIs } = M.metadata;
 
-  class Country extends Base {
+  class Country extends M.Base {
     constructor(fields) {
       super(Country, fields);
 
@@ -12,9 +12,9 @@ export default (M, Region) => {
 
     static innerTypes() {
       return Object.freeze({
-        name: M.AsIs(String),
-        code: M.AsIs(String),
-        region: Base.metadata(Region)
+        name: asIs(String),
+        code: asIs(String),
+        region: _(Region)
       });
     }
   }
