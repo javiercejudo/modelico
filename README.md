@@ -36,7 +36,8 @@ The goal is to parse JSON strings like the following into JavaScript custom obje
 so that we can do things like this:
 
 ```js
-const pet1 = JSON.parse(petJson, Base.metadata(Animal).reviver);
+const { _ } = M.metadata;
+const pet1 = JSON.parse(petJson, _(Animal).reviver);
 
 pet1.speak(); //=> 'my name is Robbie!'
 
@@ -51,9 +52,8 @@ Here is how `Animal` would look like:
 
 ```js
 const M = require('modelico');
-const Base = M.Base;
 
-class Animal extends Base {
+class Animal extends M.Base {
   constructor(fields) {
     super(Animal, fields);
   }
@@ -88,7 +88,8 @@ Again, our goal is to parse JSON into JavaScript classes
 to be able to do things like
 
 ```js
-const person1 = JSON.parse(personJson, Base.metadata(Person).reviver);
+const { _ } = M.metadata;
+const person1 = JSON.parse(personJson, _(Person).reviver);
 
 person1.fullName(); //=> 'Javier Cejudo'
 person1.pets().inner()[0].speak(); //=> 'my name is Robbie!'
@@ -105,10 +106,9 @@ that.
 
 ```js
 const M = require('modelico');
-const Base = M.Base;
-const { asIs, list, _ } = M.metadata;
+const { _, asIs, list } = M.metadata;
 
-class Person extends Base {
+class Person extends M.Base {
   constructor(fields) {
     super(Person, fields);
   }
@@ -204,17 +204,19 @@ To support legacy browsers without transpiling, Modélico can be used
 with ES5-style classes. In the case of our `Animal` class:
 
 ```js
-function Animal(fields) {
-  Base.factory(Animal, fields, this);
-}
+(function(M) {
+  function Animal(fields) {
+    M.Base.factory(Animal, fields, this);
+  }
 
-Animal.prototype = Object.create(Base.prototype);
-Animal.prototype.constructor = Animal;
+  Animal.prototype = Object.create(M.Base.prototype);
+  Animal.prototype.constructor = Animal;
 
-Animal.prototype.speak = function() {
-  var name = M.fields(this).name;
-  return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
-};
+  Animal.prototype.speak = function() {
+    var name = M.fields(this).name;
+    return (name === undefined) ? "I don't have a name" : 'My name is ' + name + '!';
+  };
+}(window.Modelico));
 ```
 
 ## Acknowledgments :bow:

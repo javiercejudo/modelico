@@ -1,10 +1,9 @@
 'use strict';
 
 export default (should, M) => () => {
-  const Base = M.Base;
-  const { asIs, any, maybe, list, _ } = M.metadata;
+  const { _, asIs, any, maybe, list } = M.metadata;
 
-  class Animal extends Base {
+  class Animal extends M.Base {
     constructor(fields) {
       super(Animal, fields);
     }
@@ -15,7 +14,7 @@ export default (should, M) => () => {
     }
   }
 
-  class Person extends Base {
+  class Person extends M.Base {
     constructor(fields) {
       super(Person, fields);
     }
@@ -47,7 +46,7 @@ export default (should, M) => () => {
       ]
     }`;
 
-    const person1 = JSON.parse(personJson, Base.metadata(Person).reviver);
+    const person1 = JSON.parse(personJson, _(Person).reviver);
 
     person1.fullName().should.be.exactly('Javier Cejudo');
 

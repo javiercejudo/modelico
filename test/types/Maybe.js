@@ -6,13 +6,13 @@ import PartOfDayFactory from './fixtures/PartOfDay';
 export default (should, M) => () => {
   const PartOfDay = PartOfDayFactory(M);
   const Person = PersonFactory(M);
-  const Base = M.Base;
+  const { _, maybe } = M.metadata;
 
   const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
 
   describe('setting', () => {
     it('should set fields recursively returning a new Maybe', () => {
-      const maybe1 = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
+      const maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver);
       const maybe2 = maybe1.set('givenName', 'Javi');
 
       maybe2.inner().get().givenName()
@@ -20,7 +20,7 @@ export default (should, M) => () => {
     });
 
     it('should set fields recursively returning a new Maybe', () => {
-      const maybe1 = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
+      const maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver);
       const maybe2 = maybe1.set('givenName', 'Javi');
 
       maybe2.inner().get().givenName()
@@ -87,24 +87,24 @@ export default (should, M) => () => {
 
   describe('parsing', () => {
     it('should parse Maybe values correctly', () => {
-      const maybe1 = JSON.parse('2', M.Maybe.metadata(M.AsIs(Number)).reviver);
+      const maybe1 = JSON.parse('2', maybe(M.AsIs(Number)).reviver);
       should(maybe1.getOrElse(10)).be.exactly(2);
 
-      const maybe2 = JSON.parse('null', M.Maybe.metadata(M.AsIs(Number)).reviver);
+      const maybe2 = JSON.parse('null', maybe(M.AsIs(Number)).reviver);
       maybe2.isEmpty().should.be.exactly(true);
     });
 
     it('should support arbitrary Modelico types', () => {
-      const author = JSON.parse(authorJson, Person.metadata().reviver);
+      const author = JSON.parse(authorJson, _(Person).reviver);
 
-      const maybe = JSON.parse(authorJson, M.Maybe.metadata(Person.metadata()).reviver);
-      maybe.inner().get().equals(author).should.be.exactly(true);
+      const myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver);
+      myMaybe.inner().get().equals(author).should.be.exactly(true);
     });
 
     it('should parse missing keys of Maybe values as Maybe with Nothing', () => {
       const authorJsonWithMissinMaybe = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}';
 
-      const author = JSON.parse(authorJsonWithMissinMaybe, Person.metadata().reviver);
+      const author = JSON.parse(authorJsonWithMissinMaybe, _(Person).reviver);
 
       author.sex().isEmpty()
         .should.be.exactly(true);
@@ -144,7 +144,7 @@ export default (should, M) => () => {
   });
 
   describe('map', () => {
-    const partOfDayFromJson = PartOfDay.metadata().reviver.bind(undefined, '');
+    const partOfDayFromJson = _(PartOfDay).reviver.bind(undefined, '');
 
     it('should apply a function f to the value and return another Maybe with it', () => {
       const maybeFrom1 = M.Maybe.of(5);

@@ -3,6 +3,7 @@
 import { version, author, homepage, license } from '../package.json';
 import { fieldsSymbol } from './symbols';
 import { partial } from './U';
+import reviverFactory from './reviverFactory';
 
 import Maybe from './Maybe';
 
@@ -31,7 +32,13 @@ const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', '
 const dateNonMutators = internalNonMutators;
 const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
-const _ = Base.metadata;
+const _ = function(Type) {
+  if (Type.metadata) {
+    return Type.metadata();
+  }
+
+  return Object.freeze({type: Type, reviver: reviverFactory(Type)});
+};
 
 const metadata = Object.freeze({
   _,

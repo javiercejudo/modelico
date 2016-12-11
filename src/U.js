@@ -16,6 +16,7 @@ export const defaultTo = (d: mixed) => ((v: mixed) => isNothing(v) ? d : v );
 export const objToArr = (obj: Object) => (Object.keys(obj).map(k => [k, obj[k]]));
 export const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
 export const isPlainObject = (x: mixed) => typeof x === 'object' && !!x;
+export const getInnerTypes = (Type: Function) => Type.innerTypes && Type.innerTypes() || {};
 
 export const unsupported = (message: string) => {
   throw Error(message);

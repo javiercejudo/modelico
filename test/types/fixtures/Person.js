@@ -7,14 +7,13 @@ export default M => {
   const PartOfDay = PartOfDayFactory(M);
   const Sex = SexFactory(M);
 
-  const Base = M.Base;
   const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ');
 
-  const { asIs, date, map, list, set, maybe } = M.metadata;
+  const { _, asIs, date, map, list, set, maybe } = M.metadata;
   const partOfDay = PartOfDay.metadata;
   const sex = Sex.metadata;
 
-  class Person extends Base {
+  class Person extends M.Base {
     constructor(fields) {
       super(Person, fields);
 
@@ -29,17 +28,17 @@ export default M => {
       return Object.freeze({
         givenName: asIs(String),
         familyName: asIs(String),
-        birthday: date(),
+
+        birthday: _(M.Date),
+        // alternative (leaving the above for testing purposes)
+        // birthday: date(),
+
         favouritePartOfDay: partOfDay(),
         lifeEvents: map(asIs(String), date()),
         importantDatesList: list(date()),
         importantDatesSet: set(date()),
         sex: maybe(sex())
       });
-    }
-
-    static metadata() {
-      return Base.metadata(Person);
     }
   }
 
