@@ -2,8 +2,6 @@
 
 import { objToArr, reviverOrAsIs, emptyObject } from './U';
 import { default as AbstractMap, set, metadata } from './AbstractMap';
-import AsIs from './AsIs';
-import Any from './Any';
 
 const parseMapper = (keyMetadata, valueMetadata) => pair => {
   const reviveKey = reviverOrAsIs(keyMetadata);

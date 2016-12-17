@@ -1,7 +1,7 @@
 'use strict';
 
 export default M => {
-  const { _, asIs, maybe } = M.metadata;
+  const { _, string, maybe } = M.metadata;
 
   class Friend extends M.Base {
     constructor(fields) {
@@ -10,7 +10,7 @@ export default M => {
 
     static innerTypes(depth) {
       return Object.freeze({
-        name: asIs(String),
+        name: string(),
         bestFriend: maybe(_(Friend, depth))
       });
     }

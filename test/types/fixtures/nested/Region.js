@@ -1,7 +1,7 @@
 'use strict';
 
 export default M => {
-  const { asIs } = M.metadata;
+  const { string } = M.metadata;
 
   class Region extends M.Base {
     constructor(fields) {
@@ -16,8 +16,8 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        name: asIs(String),
-        code: asIs(String)
+        name: string(),
+        code: string()
       });
     }
   }

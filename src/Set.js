@@ -3,8 +3,6 @@
 import { always, isNothing, unsupported, emptyObject } from './U';
 import { iterableMetadata } from './iterable';
 import Base from './Base';
-import AsIs from './AsIs';
-import Any from './Any';
 
 class ModelicoSet extends Base {
   constructor(innerSetOrig) {

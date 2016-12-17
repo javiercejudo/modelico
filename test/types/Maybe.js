@@ -6,7 +6,7 @@ import PartOfDayFactory from './fixtures/PartOfDay';
 export default (should, M) => () => {
   const PartOfDay = PartOfDayFactory(M);
   const Person = PersonFactory(M);
-  const { _, asIs, maybe } = M.metadata;
+  const { _, number, maybe } = M.metadata;
 
   const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
 
@@ -79,10 +79,10 @@ export default (should, M) => () => {
 
   describe('parsing', () => {
     it('should parse Maybe values correctly', () => {
-      const maybe1 = JSON.parse('2', maybe(asIs(Number)).reviver);
+      const maybe1 = JSON.parse('2', maybe(number()).reviver);
       should(maybe1.getOrElse(10)).be.exactly(2);
 
-      const maybe2 = JSON.parse('null', maybe(asIs(Number)).reviver);
+      const maybe2 = JSON.parse('null', maybe(number()).reviver);
       maybe2.isEmpty().should.be.exactly(true);
     });
 

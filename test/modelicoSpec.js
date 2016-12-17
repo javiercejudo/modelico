@@ -35,7 +35,7 @@ const buildUtils = (options) => Object.freeze({
 });
 
 import Base from './types/Base';
-import ModelicoAsIs from './types/AsIs';
+import ModelicoNumber from './types/Number';
 import ModelicoDate from './types/Date';
 import ModelicoMap from './types/Map';
 import ModelicoEnum from './types/Enum';
@@ -44,6 +44,7 @@ import ModelicoList from './types/List';
 import ModelicoSet from './types/Set';
 import ModelicoMaybe from './types/Maybe';
 
+import asIs from './asIs';
 import setPath from './types/setPath';
 
 import featuresSimple from './features/simple';
@@ -66,7 +67,7 @@ export default (options, should, M) => () => {
   const utilsAndDeps = [U].concat(deps);
 
   describe('Base', Base(...utilsAndDeps));
-  describe('AsIs', ModelicoAsIs(...utilsAndDeps));
+  describe('Number', ModelicoNumber(...deps));
   describe('Date', ModelicoDate(...deps));
   describe('Map', ModelicoMap(...deps));
   describe('Enum', ModelicoEnum(...deps));
@@ -75,6 +76,7 @@ export default (options, should, M) => () => {
   describe('ModelicoSet', ModelicoSet(...deps));
   describe('ModelicoMaybe', ModelicoMaybe(...deps));
 
+  describe('asIs', asIs(...utilsAndDeps));
   describe('setPath', setPath(...deps));
 
   describe('Readme simple features', featuresSimple(...deps));

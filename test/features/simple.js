@@ -1,7 +1,7 @@
 'use strict';
 
 export default (should, M) => () => {
-  const { _, asIs } = M.metadata;
+  const { _, string } = M.metadata;
 
   class Animal extends M.Base {
     constructor(fields) {
@@ -15,7 +15,7 @@ export default (should, M) => () => {
 
     static innerTypes() {
       return Object.freeze({
-        name: asIs(String)
+        name: string()
       });
     }
   }

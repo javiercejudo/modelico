@@ -4,7 +4,7 @@ import PersonFactory from './fixtures/Person';
 
 export default (should, M) => () => {
   const Person = PersonFactory(M);
-  const { asIs, date, map } = M.metadata;
+  const { date, map, number, string } = M.metadata;
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
@@ -104,7 +104,7 @@ export default (should, M) => () => {
     it('should parse the map correctly', () => {
       const modelicoMap = JSON.parse(
         '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]',
-        map(asIs(String), date()).reviver
+        map(string(), date()).reviver
       );
 
       should(modelicoMap.inner().get('a').inner().getFullYear())
@@ -122,7 +122,7 @@ export default (should, M) => () => {
     });
 
     it('should be able to work with M.genericsFromJSON', () => {
-      const myMap = M.genericsFromJSON(M.Map, [asIs(Number), asIs(String)], '[[1, "10"], [2, "20"], [3, "30"]]');
+      const myMap = M.genericsFromJSON(M.Map, [number(), string()], '[[1, "10"], [2, "20"], [3, "30"]]');
 
       myMap.inner().get(2)
         .should.be.exactly('20');
@@ -131,7 +131,7 @@ export default (should, M) => () => {
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',
-        map(asIs(String), date()).reviver
+        map(string(), date()).reviver
       )).should.throw();
     });
   });

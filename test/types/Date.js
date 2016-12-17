@@ -1,7 +1,5 @@
 'use strict';
 
-import PersonFactory from './fixtures/Person';
-
 export default (should, M) => () => {
   const { date } = M.metadata;
 

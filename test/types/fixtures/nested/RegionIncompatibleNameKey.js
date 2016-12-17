@@ -1,7 +1,7 @@
 'use strict';
 
 export default M => {
-  const { _, asIs } = M.metadata;
+  const { _, number, string } = M.metadata;
 
   class Code extends M.Base {
     constructor(fields) {
@@ -12,8 +12,8 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        id: asIs(Number),
-        value: asIs(String)
+        id: number(),
+        value: string()
       });
     }
   }
@@ -31,7 +31,7 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        name: asIs(String),
+        name: string(),
         code: _(Code)
       });
     }

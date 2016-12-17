@@ -4,7 +4,7 @@ import CountryFactory from './Country';
 
 export default (M, Region) => {
   const Country = CountryFactory(M, Region);
-  const { _, asIs } = M.metadata;
+  const { _, string } = M.metadata;
 
   class City extends M.Base {
     constructor(fields) {
@@ -15,7 +15,7 @@ export default (M, Region) => {
 
     static innerTypes(depth) {
       return Object.freeze({
-        name: asIs(String),
+        name: string(),
         country: _(Country, depth)
       });
     }

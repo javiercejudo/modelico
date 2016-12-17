@@ -1,10 +1,10 @@
 'use strict';
 
 export default (U, should, M) => () => {
-  const { asIs, any } = M.metadata;
+  const { asIs, any, fn, regExp, string } = M.metadata;
 
   describe('toJSON', () => {
-    it('should stringify the value as is', () => {
+    it('should stringify the valfnue as is', () => {
       const mapOfNumbers = M.Map.of('a', 1, 'b', 2);
 
       JSON.stringify(mapOfNumbers)
@@ -20,13 +20,13 @@ export default (U, should, M) => () => {
     });
 
     it('should support non-trivial native constructors: Function', () => {
-      const asIsObject = JSON.parse('"return (function(x) { return x * 4 })(arguments[0])"', asIs(Function).reviver);
+      const asIsObject = JSON.parse('"return (function(x) { return x * 4 })(arguments[0])"', fn().reviver);
 
       should(asIsObject(5)).be.exactly(20);
     });
 
     it('should support non-trivial native constructors: RegExp', () => {
-      const asIsObject = JSON.parse('"^[a-z]+$"', asIs(RegExp).reviver);
+      const asIsObject = JSON.parse('"^[a-z]+$"', regExp().reviver);
 
       asIsObject.test('abc').should.be.exactly(true);
       asIsObject.test('abc1').should.be.exactly(false);
@@ -42,7 +42,7 @@ export default (U, should, M) => () => {
 
   describe('metadata', () => {
     it('should return metadata like type', () => {
-      asIs(String).type.should.be.exactly(String);
+      string().type.should.be.exactly(String);
 
       const asIsObject = JSON.parse('{"two":2}', any().reviver);
 

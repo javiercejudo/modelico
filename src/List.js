@@ -3,8 +3,6 @@
 import { always, isNothing, emptyObject } from './U';
 import { iterableMetadata } from './iterable';
 import Base from './Base';
-import AsIs from './AsIs';
-import Any from './Any';
 
 class List extends Base {
   constructor(innerListOrig) {

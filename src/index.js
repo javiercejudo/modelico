@@ -12,12 +12,14 @@ import Enum from './Enum';
 
 import ModelicoMap from './Map';
 import EnumMap from './EnumMap';
+import ModelicoNumber from './Number';
 import ModelicoDate from './Date';
-import AsIs from './AsIs';
 import List from './List';
 import ModelicoSet from './Set';
 import Any from './Any';
 import proxyFactory from './proxyFactory';
+
+import asIs from './asIs';
 
 const internalNonMutators = ['set', 'setPath'];
 
@@ -45,13 +47,18 @@ const _ = function(Type, depth = 0, innerMetadata = []) {
 
 const metadata = Object.freeze({
   _,
+  asIs,
+  any: always(asIs(Any)),
+  number: (wrapped = false) => {
+    // console.log(ModelicoNumber.metadata().reviver.toString());
+    return wrapped ? ModelicoNumber.metadata() : asIs(Number);
+  },
 
-  string: always(AsIs(String)),
-  number: always(AsIs(Number)),
-  boolean: always(AsIs(Boolean)),
+  string: always(asIs(String)),
+  boolean: always(asIs(Boolean)),
+  regExp: always(asIs(RegExp)),
+  fn: always(asIs(Function)),
 
-  any: always(AsIs(Any)),
-  asIs: AsIs,
   date: ModelicoDate.metadata,
   enumMap: EnumMap.metadata,
   list: List.metadata,
@@ -63,7 +70,7 @@ const metadata = Object.freeze({
 export default Object.freeze({
   about: Object.freeze({ version, author, homepage, license }),
   Any,
-  AsIs,
+  Number: ModelicoNumber,
   Date: ModelicoDate,
   Enum,
   EnumMap,
@@ -77,6 +84,7 @@ export default Object.freeze({
   genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
   metadata,
   proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
+  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators),
   proxyList: partial(proxyFactory, listNonMutators, listMutators),
   proxySet: partial(proxyFactory, setNonMutators, setMutators),
   proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)

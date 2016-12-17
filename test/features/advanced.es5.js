@@ -17,7 +17,7 @@ export default (should, M) => () => {
 
   Animal.innerTypes = function() {
     return Object.freeze({
-      name: m.asIs(String)
+      name: m.string()
     });
   };
 
@@ -33,8 +33,8 @@ export default (should, M) => () => {
 
   Person.innerTypes = function() {
     return Object.freeze({
-      givenName: m.asIs(String),
-      familyName: m.asIs(String),
+      givenName: m.string(),
+      familyName: m.string(),
       pets: m.list(m._(Animal))
     });
   };

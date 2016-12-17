@@ -9,7 +9,7 @@ export default M => {
 
   const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ');
 
-  const { _, asIs, date, map, list, set, maybe } = M.metadata;
+  const { _, string, date, map, list, set, maybe } = M.metadata;
   const partOfDay = PartOfDay.metadata;
   const sex = Sex.metadata;
 
@@ -26,15 +26,15 @@ export default M => {
 
     static innerTypes() {
       return Object.freeze({
-        givenName: asIs(String),
-        familyName: asIs(String),
+        givenName: string(),
+        familyName: string(),
 
         birthday: _(M.Date),
         // alternative (leaving the above for testing purposes)
         // birthday: date(),
 
         favouritePartOfDay: partOfDay(),
-        lifeEvents: map(asIs(String), date()),
+        lifeEvents: map(string(), date()),
         importantDatesList: list(date()),
         importantDatesSet: set(date()),
         sex: maybe(sex())

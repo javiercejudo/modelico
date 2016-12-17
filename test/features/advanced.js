@@ -1,7 +1,7 @@
 'use strict';
 
 export default (should, M) => () => {
-  const { _, asIs, any, maybe, list } = M.metadata;
+  const { _, any, maybe, list, string } = M.metadata;
 
   class Animal extends M.Base {
     constructor(fields) {
@@ -15,7 +15,7 @@ export default (should, M) => () => {
 
     static innerTypes() {
       return Object.freeze({
-        name: maybe(asIs(String))
+        name: maybe(string())
       });
     }
   }
@@ -34,7 +34,7 @@ export default (should, M) => () => {
       return Object.freeze({
         givenName: any(),
         middleName: maybe(any()),
-        familyName: asIs(String),
+        familyName: string(),
         pets: list(maybe(_(Animal)))
       });
     }
