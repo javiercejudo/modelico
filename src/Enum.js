@@ -21,12 +21,12 @@ class Enum extends Base {
       input.reduce(enumeratorsReducer, {}) :
       input;
 
-    super(Enum, {});
+    super(Enum);
 
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {
         this[enumerator] = always(enumerators[enumerator]);
-        this[enumerator]().toJSON = always(enumerator)
+        enumerators[enumerator].toJSON = always(enumerator)
       });
 
     Object.defineProperty(this, 'metadata', {
@@ -38,6 +38,14 @@ class Enum extends Base {
     });
 
     Object.freeze(this);
+  }
+
+  static fromObject(obj) {
+    return new Enum(obj);
+  }
+
+  static fromArray(arr) {
+    return new Enum(arr);
   }
 
   static innerTypes() {

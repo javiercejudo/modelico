@@ -12,12 +12,8 @@ const getInnerTypesWithCache = (depth, Type) => {
   return innerTypesCache.get(Type);
 }
 
-const reviverFactory = (depth, Type) => (k, v) => {
-  if (k !== '') {
-    return v;
-  }
-
-  const fields = !isPlainObject(v) ? v : Object.keys(v).reduce((acc, field) => {
+const plainObjectReviverFactory = (depth, Type, k, v) =>
+  Object.keys(v).reduce((acc, field) => {
     const innerTypes = getInnerTypesWithCache(depth, Type);
 
     const metadata = innerTypes[field];
@@ -30,6 +26,15 @@ const reviverFactory = (depth, Type) => (k, v) => {
 
     return acc;
   }, {});
+
+const reviverFactory = (depth, Type) => (k, v) => {
+  if (k !== '') {
+    return v;
+  }
+
+  const fields = isPlainObject(v) ?
+    plainObjectReviverFactory(depth, Type, k, v) :
+    v;
 
   return new Type(fields);
 };

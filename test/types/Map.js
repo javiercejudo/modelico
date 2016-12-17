@@ -38,12 +38,12 @@ export default (should, M) => () => {
 
     it('should set fields returning a new map', () => {
       const map = new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))],
-        ['b', new M.Date(new Date())]
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', M.Date.of(new Date())]
       ]);
 
       const modelicoMap1 = M.Map.fromMap(map);
-      const modelicoMap2 = modelicoMap1.set('a', new M.Date(new Date('1989-04-16T00:00:00.000Z')));
+      const modelicoMap2 = modelicoMap1.set('a', M.Date.of(new Date('1989-04-16T00:00:00.000Z')));
 
       should(modelicoMap2.inner().get('a').inner().getFullYear())
         .be.exactly(1989);
@@ -76,7 +76,7 @@ export default (should, M) => () => {
         .be.exactly(2013);
 
       const customMap = new Map([
-        ['wedding', new M.Date(new Date('2010-03-28T00:00:00.000Z'))]
+        ['wedding', M.Date.of(new Date('2010-03-28T00:00:00.000Z'))]
       ]);
 
       const map2 = map.setPath([], customMap);
@@ -89,8 +89,8 @@ export default (should, M) => () => {
   describe('stringifying', () => {
     it('should stringify the map correctly', () => {
       const map = new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))],
-        ['b', new M.Date(new Date('2012-12-25T00:00:00.000Z'))]
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', M.Date.of(new Date('2012-12-25T00:00:00.000Z'))]
       ]);
 
       const modelicoMap = M.Map.fromMap(map);
@@ -139,11 +139,11 @@ export default (should, M) => () => {
   describe('comparing', () => {
     it('should identify equal instances', () => {
       const modelicoMap = M.Map.fromMap(new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 
       const modelicoMap2 = M.Map.fromMap(new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]
       ]));
 
       modelicoMap.should.not.be.exactly(modelicoMap2);

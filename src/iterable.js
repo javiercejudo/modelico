@@ -8,7 +8,9 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
   }
 
   const revive = partial(reviverOrAsIs(itemMetadata), k);
-  const iterable = (v === null) ? null : v.map(revive);
+  const iterable = (v === null) ?
+    null :
+    v.map(revive);
 
   return new IterableType(iterable);
 };

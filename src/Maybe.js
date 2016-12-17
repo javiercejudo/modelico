@@ -8,7 +8,9 @@ const reviverFactory = itemMetadata => (k, v) => {
     return v;
   }
 
-  const maybeValue = (v === null) ? null : itemMetadata.reviver(k, v);
+  const maybeValue = (v === null) ?
+    null :
+    itemMetadata.reviver(k, v);
 
   return new Maybe(maybeValue);
 };
@@ -29,17 +31,22 @@ export class Just {
   toJSON() {
     const v = this.get();
 
-    return (v.toJSON) ? v.toJSON() : v;
+    return (v.toJSON) ?
+      v.toJSON() :
+      v;
   }
 }
 
 export const nothing = new Nothing();
 
 class Maybe extends Base {
-  constructor(v) {
-    super(Maybe, {});
+  constructor(v, nothingCheck = true) {
+    super(Maybe);
 
-    const inner = (isNothing(v)) ? nothing : new Just(v);
+    const inner = (nothingCheck && isNothing(v)) ?
+      nothing :
+      new Just(v);
+
     this.inner = always(inner);
 
     Object.freeze(this);
@@ -47,7 +54,7 @@ class Maybe extends Base {
 
   set(field, v) {
     if (this.isEmpty()) {
-      return new Maybe(null);
+      return this;
     }
 
     const item = this.inner().get();
@@ -57,17 +64,20 @@ class Maybe extends Base {
 
   setPath(path, v) {
     if (path.length === 0) {
-      return new Maybe(v);
+      return Maybe.of(v);
     }
 
     if (this.isEmpty()) {
-      return new Maybe(null);
+      return this;
     }
 
     const item = this.inner().get();
-    const inner = (item.setPath) ? item.setPath(path, v) : null;
 
-    return new Maybe(inner);
+    const inner = (item.setPath) ?
+      item.setPath(path, v) :
+      null;
+
+    return Maybe.of(inner);
   }
 
   isEmpty() {
@@ -75,13 +85,15 @@ class Maybe extends Base {
   }
 
   getOrElse(v) {
-    return this.isEmpty() ? v : this.inner().get();
+    return this.isEmpty() ?
+      v :
+      this.inner().get();
   }
 
   map(f) {
-    const v = this.isEmpty() ? null : f(this.inner().get());
-
-    return new Maybe(v);
+    return this.isEmpty() ?
+      this :
+      Maybe.ofAny(f(this.inner().get()));
   }
 
   toJSON() {
@@ -90,6 +102,10 @@ class Maybe extends Base {
 
   static of(v) {
     return new Maybe(v);
+  }
+
+  static ofAny(v) {
+    return new Maybe(v, false);
   }
 
   static metadata(itemMetadata) {

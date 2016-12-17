@@ -8,7 +8,7 @@ import Any from './Any';
 
 class ModelicoSet extends Base {
   constructor(innerSetOrig) {
-    super(ModelicoSet, {});
+    super(ModelicoSet);
 
     if (isNothing(innerSetOrig)) {
       throw TypeError('missing set');

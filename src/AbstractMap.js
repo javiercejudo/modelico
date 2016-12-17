@@ -4,9 +4,20 @@ import { always, isNothing } from './U';
 import { typeSymbol } from './symbols';
 import Base from './Base';
 
+export const set = (thisArg, Type, key, value) => {
+  const newMap = thisArg.inner();
+  newMap.set(key, value);
+
+  return Type.fromMap(newMap);
+};
+
+export const metadata = (Type, reviver) => {
+  return Object.freeze({type: Type, reviver});
+};
+
 class AbstractMap extends Base {
   constructor(Type, innerMapOrig) {
-    super(Type, {});
+    super(Type);
 
     if (isNothing(innerMapOrig)) {
       throw TypeError('missing map');
@@ -30,18 +41,6 @@ class AbstractMap extends Base {
     }
 
     return this.set(path[0], item.setPath(path.slice(1), value));
-  }
-
-  // as static to support IE < 11
-  static set(Type, key, value) {
-    const newMap = this.inner();
-    newMap.set(key, value);
-
-    return new Type(newMap);
-  }
-
-  static metadata(Type, reviver) {
-    return Object.freeze({type: Type, reviver});
   }
 }
 

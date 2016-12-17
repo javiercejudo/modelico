@@ -1,7 +1,7 @@
 'use strict';
 
 export default (U, should, M) => () => {
-  const { asIs } = M.metadata;
+  const { asIs, any } = M.metadata;
 
   describe('toJSON', () => {
     it('should stringify the value as is', () => {
@@ -14,7 +14,7 @@ export default (U, should, M) => () => {
 
   describe('reviver', () => {
     it('should revive the value as is, without the wrapper', () => {
-      const asIsObject = JSON.parse('{"two":2}', asIs(M.Any).reviver);
+      const asIsObject = JSON.parse('{"two":2}', any().reviver);
 
       should(asIsObject.two).be.exactly(2);
     });
@@ -44,7 +44,7 @@ export default (U, should, M) => () => {
     it('should return metadata like type', () => {
       asIs(String).type.should.be.exactly(String);
 
-      const asIsObject = JSON.parse('{"two":2}', asIs(M.Any).reviver);
+      const asIsObject = JSON.parse('{"two":2}', any().reviver);
 
       should(asIsObject.two).be.exactly(2);
     });

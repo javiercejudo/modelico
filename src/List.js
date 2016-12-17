@@ -8,7 +8,7 @@ import Any from './Any';
 
 class List extends Base {
   constructor(innerListOrig) {
-    super(List, {});
+    super(List);
 
     if (isNothing(innerListOrig)) {
       throw TypeError('missing list');
@@ -26,12 +26,12 @@ class List extends Base {
     const newList = this.inner();
     newList[index] = value;
 
-    return new List(newList);
+    return List.fromArray(newList);
   }
 
   setPath(path, value) {
     if (path.length === 0) {
-      return new List(value);
+      return List.fromArray(value);
     }
 
     const item = this.inner()[path[0]];

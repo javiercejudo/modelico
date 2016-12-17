@@ -14,7 +14,7 @@ export default (should, M) => () => {
         [PartOfDay.EVENING(), 'Good evening!']
       ]);
 
-      const enumMap = new M.EnumMap(input);
+      const enumMap = M.EnumMap.fromMap(input);
 
       input.set(PartOfDay.MORNING(), "g'day!");
 
@@ -25,13 +25,12 @@ export default (should, M) => () => {
 
   describe('setting', () => {
     it('should set fields returning a new enum map', () => {
-      const map = new Map([
-        [PartOfDay.MORNING(), 'Good morning!'],
-        [PartOfDay.AFTERNOON(), 'Good afternoon!'],
-        [PartOfDay.EVENING(), 'Good evening!']
-      ]);
+      const greetings1 = M.EnumMap.of(
+        PartOfDay.MORNING(), 'Good morning!',
+        PartOfDay.AFTERNOON(), 'Good afternoon!',
+        PartOfDay.EVENING(), 'Good evening!'
+      );
 
-      const greetings1 = new M.EnumMap(map);
       const greetings2 = greetings1.set(PartOfDay.AFTERNOON(), 'GOOD AFTERNOON!');
 
       greetings2.inner().get(PartOfDay.AFTERNOON())
@@ -48,12 +47,12 @@ export default (should, M) => () => {
 
     it('should set fields returning a new enum map when part of a path', () => {
       const map = new Map([
-        [PartOfDay.MORNING(), new M.Date(new Date('1988-04-16T00:00:00.000Z'))],
-        [PartOfDay.AFTERNOON(), new M.Date(new Date('2000-04-16T00:00:00.000Z'))],
-        [PartOfDay.EVENING(), new M.Date(new Date('2012-04-16T00:00:00.000Z'))]
+        [PartOfDay.MORNING(), M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
+        [PartOfDay.AFTERNOON(), M.Date.of(new Date('2000-04-16T00:00:00.000Z'))],
+        [PartOfDay.EVENING(), M.Date.of(new Date('2012-04-16T00:00:00.000Z'))]
       ]);
 
-      const greetings1 = new M.EnumMap(map);
+      const greetings1 = M.EnumMap.fromMap(map);
       const greetings2 = greetings1.setPath([PartOfDay.EVENING()], new Date('2013-04-16T00:00:00.000Z'));
 
       should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear())
@@ -65,18 +64,18 @@ export default (should, M) => () => {
 
     it('edge case when setPath is called with an empty path', () => {
       const map1 = new Map([
-        [PartOfDay.MORNING(), new M.Date(new Date('1988-04-16T00:00:00.000Z'))],
-        [PartOfDay.AFTERNOON(), new M.Date(new Date('2000-04-16T00:00:00.000Z'))],
-        [PartOfDay.EVENING(), new M.Date(new Date('2012-04-16T00:00:00.000Z'))]
+        [PartOfDay.MORNING(), M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
+        [PartOfDay.AFTERNOON(), M.Date.of(new Date('2000-04-16T00:00:00.000Z'))],
+        [PartOfDay.EVENING(), M.Date.of(new Date('2012-04-16T00:00:00.000Z'))]
       ]);
 
       const map2 = new Map([
-        [PartOfDay.MORNING(), new M.Date(new Date('1989-04-16T00:00:00.000Z'))],
-        [PartOfDay.AFTERNOON(), new M.Date(new Date('2001-04-16T00:00:00.000Z'))],
-        [PartOfDay.EVENING(), new M.Date(new Date('2013-04-16T00:00:00.000Z'))]
+        [PartOfDay.MORNING(), M.Date.of(new Date('1989-04-16T00:00:00.000Z'))],
+        [PartOfDay.AFTERNOON(), M.Date.of(new Date('2001-04-16T00:00:00.000Z'))],
+        [PartOfDay.EVENING(), M.Date.of(new Date('2013-04-16T00:00:00.000Z'))]
       ]);
 
-      const greetings1 = new M.EnumMap(map1);
+      const greetings1 = M.EnumMap.fromMap(map1);
       const greetings2 = greetings1.setPath([], map2);
 
       should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear())
@@ -95,7 +94,7 @@ export default (should, M) => () => {
         [PartOfDay.EVENING(), 'Good evening!']
       ]);
 
-      const greetings = new M.EnumMap(map);
+      const greetings = M.EnumMap.fromMap(map);
 
       JSON.stringify(greetings)
         .should.be.exactly('{"MORNING":"Good morning!","AFTERNOON":"Good afternoon!","EVENING":"Good evening!"}');
@@ -121,13 +120,26 @@ export default (should, M) => () => {
     });
   });
 
-  describe('EMPTY /  fromMap', () => {
+  describe('EMPTY /  of /fromMap', () => {
     it('should have a static property for the empty map', () => {
       should(M.EnumMap.EMPTY.inner().size)
         .be.exactly(0);
 
       M.EnumMap.EMPTY.toJSON()
         .should.eql({});
+    });
+
+    it('should be able to create an enum map from an even number of params', () => {
+      var map = M.EnumMap.of(
+        PartOfDay.MORNING(), 1,
+        PartOfDay.AFTERNOON(), 2,
+        PartOfDay.EVENING(), 3
+      );
+
+      should(map.inner().get(PartOfDay.AFTERNOON())).be.exactly(2);
+
+      (() => M.EnumMap.of(PartOfDay.MORNING(), 1, PartOfDay.AFTERNOON()))
+        .should.throw();
     });
 
     it('should be able to create an enum map from a native map', () => {

@@ -3,9 +3,17 @@
 import { isNothing, unsupported, emptyObject } from './U';
 import Base from './Base';
 
+const reviver = (k, v) => {
+  const date = (v === null) ?
+    null :
+    new Date(v);
+
+  return new ModelicoDate(date);
+};
+
 class ModelicoDate extends Base {
   constructor(dateOrig) {
-    super(ModelicoDate, {});
+    super(ModelicoDate);
 
     if (isNothing(dateOrig)) {
       throw TypeError('missing date');
@@ -24,7 +32,7 @@ class ModelicoDate extends Base {
 
   setPath(path, date) {
     if (path.length === 0) {
-      return new ModelicoDate(date);
+      return ModelicoDate.of(date);
     }
 
     unsupported('Date.setPath is not supported for non-empty paths');
@@ -34,14 +42,12 @@ class ModelicoDate extends Base {
     return this.inner().toISOString();
   }
 
-  static reviver(k, v) {
-    const date = (v === null) ? null : new Date(v);
-
+  static of(date) {
     return new ModelicoDate(date);
   }
 
   static metadata() {
-    return Object.freeze({type: ModelicoDate, reviver: ModelicoDate.reviver});
+    return Object.freeze({type: ModelicoDate, reviver});
   }
 
   static innerTypes() {

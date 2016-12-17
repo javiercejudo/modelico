@@ -2,7 +2,7 @@
 
 import { version, author, homepage, license } from '../package.json';
 import { fieldsSymbol } from './symbols';
-import { partial } from './U';
+import { partial, always } from './U';
 import reviverFactory from './reviverFactory';
 
 import Base from './Base';
@@ -45,7 +45,12 @@ const _ = function(Type, depth = 0, innerMetadata = []) {
 
 const metadata = Object.freeze({
   _,
-  any: Any,
+
+  string: always(AsIs(String)),
+  number: always(AsIs(Number)),
+  boolean: always(AsIs(Boolean)),
+
+  any: always(AsIs(Any)),
   asIs: AsIs,
   date: ModelicoDate.metadata,
   enumMap: EnumMap.metadata,

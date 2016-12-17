@@ -68,7 +68,7 @@ export default (U, should, M) => () => {
       const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: new M.Date(new Date('1988-04-16T00:00:00.000Z')),
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
         lifeEvents: M.Map.EMPTY,
         importantDatesList: M.List.EMPTY,
@@ -200,7 +200,7 @@ export default (U, should, M) => () => {
       const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
         lifeEvents: M.Map.EMPTY,
         importantDatesList: M.List.EMPTY,
@@ -211,7 +211,7 @@ export default (U, should, M) => () => {
       const author2 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
-        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
         lifeEvents: M.Map.EMPTY,
         importantDatesList: M.List.EMPTY,
@@ -222,7 +222,7 @@ export default (U, should, M) => () => {
       const author3 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo Goñi',
-        birthday: ModelicoDate.reviver('', '1988-04-16T00:00:00.000Z'),
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
         lifeEvents: M.Map.EMPTY,
         importantDatesList: M.List.EMPTY,

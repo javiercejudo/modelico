@@ -149,7 +149,7 @@ export default (should, M) => () => {
       should(maybeTo2.getOrElse(PartOfDay.MORNING())).be.exactly(PartOfDay.EVENING());
     });
 
-    it('should return an empty Maybe if there was nothing', () => {
+    it('should return a non-empty Maybe of whatever mapped function returns', () => {
       const maybeFrom1 = M.Maybe.of(null);
       const maybeFrom2 = M.Maybe.of(0);
 
@@ -157,7 +157,22 @@ export default (should, M) => () => {
       const maybeTo2 = maybeFrom2.map(x => x / x);
 
       maybeTo1.isEmpty().should.be.exactly(true);
-      maybeTo2.isEmpty().should.be.exactly(true);
+      maybeTo2.isEmpty().should.be.exactly(false);
+    });
+
+    it('should compose well', () => {
+      const double = x => (x === null) ? 0 : 2 * x;
+      const plus5 = x => (x === null) ? 5 : 5 + x;
+
+      const mdouble = x => x.isEmpty() ? x : M.Maybe.of(double(x.inner().get()));
+      const mplus5 = x => x.isEmpty() ? x : M.Maybe.of(plus5(x.inner().get()));
+
+      should(mplus5(mdouble(M.Maybe.of(10))).inner().get())
+        .be.exactly(M.Maybe.of(10).map(double).map(plus5).inner().get())
+        .and.exactly(25);
+
+      should(M.Maybe.of(10).map(x => null).map(plus5).inner().get())
+        .be.exactly(5);
     });
   });
 };

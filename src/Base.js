@@ -1,7 +1,8 @@
 'use strict';
 
 import {
-  always, defaultTo, reviverOrAsIs, isPlainObject, isNothing, isSomething, getInnerTypes
+  always, defaultTo, reviverOrAsIs, isPlainObject, isNothing, isSomething, getInnerTypes,
+  emptyObject
 } from './U';
 
 import { typeSymbol, fieldsSymbol } from './symbols';
@@ -9,7 +10,7 @@ import { typeSymbol, fieldsSymbol } from './symbols';
 import M from './';
 
 class Base {
-  constructor(Type, fields, thisArg) {
+  constructor(Type, fields = emptyObject, thisArg) {
     if (!isPlainObject(fields)) {
       throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`);
     }
@@ -62,10 +63,6 @@ class Base {
 
   toJSON() {
     return this[fieldsSymbol]();
-  }
-
-  static factory(Type, fields, thisArg) {
-    return new Base(Type, fields, thisArg);
   }
 }
 

@@ -36,7 +36,7 @@ export default (should, M) => () => {
       const author1 = JSON.parse(authorJson, _(Person).reviver);
 
       const newSetArray = [...author1.importantDatesSet().inner()];
-      newSetArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
+      newSetArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')));
 
       const author2 = author1.set(
         'importantDatesSet',
@@ -59,12 +59,12 @@ export default (should, M) => () => {
 
     it('edge case when Set setPath is called with an empty path', () => {
       const modelicoDatesSet1 = M.Set.of(
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        M.Date.of(new Date())
       );
 
       const modelicoDatesSet2 = new Set([
-        new M.Date(new Date('2016-04-16T00:00:00.000Z'))
+        M.Date.of(new Date('2016-04-16T00:00:00.000Z'))
       ]);
 
       const listOfSetsOfDates1 = M.List.of(modelicoDatesSet1);
@@ -95,8 +95,8 @@ export default (should, M) => () => {
   describe('stringifying', () => {
     it('should stringify the set correctly', () => {
       const set = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date('2012-12-25T00:00:00.000Z'))
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        M.Date.of(new Date('2012-12-25T00:00:00.000Z'))
       ];
 
       const modelicoSet = M.Set.fromArray(set);
@@ -136,8 +136,8 @@ export default (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoSet1 = M.Set.of(new M.Date(new Date('1988-04-16T00:00:00.000Z')));
-      const modelicoSet2 = M.Set.of(new M.Date(new Date('1988-04-16T00:00:00.000Z')));
+      const modelicoSet1 = M.Set.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')));
+      const modelicoSet2 = M.Set.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')));
 
       modelicoSet1.should.not.be.exactly(modelicoSet2);
       modelicoSet1.should.not.equal(modelicoSet2);

@@ -32,8 +32,8 @@ export default (should, M) => () => {
 
     static innerTypes() {
       return Object.freeze({
-        givenName: asIs(any),
-        middleName: maybe(asIs(any)),
+        givenName: any(),
+        middleName: maybe(any()),
         familyName: asIs(String),
         pets: list(maybe(_(Animal)))
       });

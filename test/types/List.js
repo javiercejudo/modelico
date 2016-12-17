@@ -39,12 +39,12 @@ export default (should, M) => () => {
 
     it('should set items in the list correctly', () => {
       const list = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        M.Date.of(new Date())
       ];
 
       const modelicoList1 = M.List.fromArray(list);
-      const modelicoList2 = modelicoList1.set(0, new M.Date(new Date('1989-04-16T00:00:00.000Z')));
+      const modelicoList2 = modelicoList1.set(0, M.Date.of(new Date('1989-04-16T00:00:00.000Z')));
 
       should(modelicoList2.inner()[0].inner().getFullYear())
         .be.exactly(1989);
@@ -56,8 +56,8 @@ export default (should, M) => () => {
 
     it('should set items in the list correctly when part of a path', () => {
       const list = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        M.Date.of(new Date())
       ];
 
       const modelicoList1 = M.List.fromArray(list);
@@ -73,8 +73,8 @@ export default (should, M) => () => {
 
     it('should set items in the list correctly when part of a path with a single element', () => {
       const list = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        M.Date.of(new Date())
       ];
 
       const modelicoList1 = M.List.fromArray(list);
@@ -93,7 +93,7 @@ export default (should, M) => () => {
       const author1 = JSON.parse(authorJson, _(Person).reviver);
 
       const newListArray = author1.importantDatesList().inner();
-      newListArray.splice(1, 0, new M.Date(new Date('2016-05-03T00:00:00.000Z')));
+      newListArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')));
 
       const author2 = author1.set(
         'importantDatesList',
@@ -112,12 +112,12 @@ export default (should, M) => () => {
 
     it('edge case when List setPath is called with an empty path', () => {
       const modelicoDatesList1 = M.List.of(
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date())
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        M.Date.of(new Date())
       );
 
       const modelicoDatesList2 = [
-        new M.Date(new Date('2016-04-16T00:00:00.000Z'))
+        M.Date.of(new Date('2016-04-16T00:00:00.000Z'))
       ];
 
       const listOfListOfDates1 = M.List.of(modelicoDatesList1);
@@ -134,8 +134,8 @@ export default (should, M) => () => {
   describe('stringifying', () => {
     it('should stringify the list correctly', () => {
       const list = [
-        new M.Date(new Date('1988-04-16T00:00:00.000Z')),
-        new M.Date(new Date('2012-12-25T00:00:00.000Z'))
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        M.Date.of(new Date('2012-12-25T00:00:00.000Z'))
       ];
 
       const modelicoList = M.List.fromArray(list);
@@ -174,8 +174,8 @@ export default (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoList1 = M.List.of(new M.Date(new Date('1988-04-16T00:00:00.000Z')));
-      const modelicoList2 = M.List.of(new M.Date(new Date('1988-04-16T00:00:00.000Z')));
+      const modelicoList1 = M.List.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')));
+      const modelicoList2 = M.List.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')));
 
       modelicoList1.should.not.be.exactly(modelicoList2);
       modelicoList1.should.not.equal(modelicoList2);

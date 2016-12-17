@@ -1,7 +1,7 @@
 'use strict';
 
 import { reviverOrAsIs, emptyObject } from './U';
-import AbstractMap from './AbstractMap';
+import { default as AbstractMap, set, metadata } from './AbstractMap';
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1];
@@ -39,7 +39,7 @@ class EnumMap extends AbstractMap {
   }
 
   set(enumerator, value) {
-    return AbstractMap.set.call(this, EnumMap, enumerator, value);
+    return set(this, EnumMap, enumerator, value);
   }
 
   toJSON() {
@@ -50,8 +50,28 @@ class EnumMap extends AbstractMap {
     return new EnumMap(map);
   }
 
+  static fromArray(pairs) {
+    return EnumMap.fromMap(new Map(pairs));
+  }
+
+  static of(...arr) {
+    const len = arr.length;
+
+    if (len % 2 === 1) {
+      throw TypeError('EnumMap.of requires an even number of arguments');
+    }
+
+    const pairs = [];
+
+    for (let i = 0; i < len; i += 2) {
+      pairs.push([arr[i], arr[i + 1]]);
+    }
+
+    return EnumMap.fromArray(pairs);
+  }
+
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(EnumMap, reviverFactory(keyMetadata, valueMetadata));
+    return metadata(EnumMap, reviverFactory(keyMetadata, valueMetadata));
   }
 
   static innerTypes() {
@@ -60,6 +80,6 @@ class EnumMap extends AbstractMap {
 }
 
 EnumMap.displayName = 'EnumMap';
-EnumMap.EMPTY = EnumMap.fromMap(new Map());
+EnumMap.EMPTY = EnumMap.of();
 
 export default Object.freeze(EnumMap);

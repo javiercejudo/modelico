@@ -1,7 +1,7 @@
 'use strict';
 
 import { objToArr, reviverOrAsIs, emptyObject } from './U';
-import AbstractMap from './AbstractMap';
+import { default as AbstractMap, set, metadata } from './AbstractMap';
 import AsIs from './AsIs';
 import Any from './Any';
 
@@ -24,7 +24,7 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
     null :
     new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
 
-  return new ModelicoMap(innerMap);
+  return ModelicoMap.fromMap(innerMap);
 };
 
 class ModelicoMap extends AbstractMap {
@@ -35,7 +35,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   set(key, value) {
-    return AbstractMap.set.call(this, ModelicoMap, key, value);
+    return set(this, ModelicoMap, key, value);
   }
 
   toJSON() {
@@ -71,7 +71,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return AbstractMap.metadata(ModelicoMap, reviverFactory(keyMetadata, valueMetadata));
+    return metadata(ModelicoMap, reviverFactory(keyMetadata, valueMetadata));
   }
 
   static innerTypes() {
@@ -80,6 +80,6 @@ class ModelicoMap extends AbstractMap {
 }
 
 ModelicoMap.displayName = 'ModelicoMap';
-ModelicoMap.EMPTY = ModelicoMap.fromArray([]);
+ModelicoMap.EMPTY = ModelicoMap.of();
 
 export default Object.freeze(ModelicoMap);

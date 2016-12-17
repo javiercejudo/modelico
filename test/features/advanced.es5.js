@@ -1,10 +1,11 @@
 'use strict';
 
 export default (should, M) => () => {
-  const { _, asIs, list } = M.metadata;
+  // use ES5 below
+  var m = M.metadata;
 
   function Animal(fields) {
-    M.Base.factory(Animal, fields, this);
+    new M.Base(Animal, fields, this);
   }
 
   Animal.prototype = Object.create(M.Base.prototype);
@@ -16,12 +17,12 @@ export default (should, M) => () => {
 
   Animal.innerTypes = function() {
     return Object.freeze({
-      name: asIs(String)
+      name: m.asIs(String)
     });
   };
 
   function Person(fields) {
-    M.Base.factory(Person, fields, this);
+    new M.Base(Person, fields, this);
   }
 
   Person.prototype = Object.create(M.Base.prototype);
@@ -32,12 +33,13 @@ export default (should, M) => () => {
 
   Person.innerTypes = function() {
     return Object.freeze({
-      givenName: asIs(String),
-      familyName: asIs(String),
-      pets: list(_(Animal))
+      givenName: m.asIs(String),
+      familyName: m.asIs(String),
+      pets: m.list(m._(Animal))
     });
   };
 
+  // use > ES5 below
   it('should showcase the main features', () => {
     const personJson = `{
       "givenName": "Javier",
@@ -47,7 +49,7 @@ export default (should, M) => () => {
       }]
     }`;
 
-    const person1 = JSON.parse(personJson, _(Person).reviver);
+    const person1 = JSON.parse(personJson, m._(Person).reviver);
 
     person1.fullName().should.be.exactly('Javier Cejudo');
 
