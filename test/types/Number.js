@@ -7,6 +7,12 @@ export default (should, M) => () => {
     it('must be instantiated with new', () => {
       (() => M.Number(5)).should.throw()
     })
+
+    it('should cast using Number', () => {
+      should(new M.Number(2).inner()).be.exactly(2)
+      should(new M.Number('2').inner()).be.exactly(2)
+      should(new M.Number('-Infinity').inner()).be.exactly(-Infinity)
+    })
   })
 
   describe('setting', () => {
@@ -75,7 +81,7 @@ export default (should, M) => () => {
 
   describe('parsing', () => {
     it('should parse values correctly', () => {
-      const myNumber = JSON.parse('2', number(true).reviver)
+      const myNumber = JSON.parse('2', number({ wrap: true }).reviver)
 
       should(myNumber.inner()).be.exactly(2)
     })
@@ -83,30 +89,30 @@ export default (should, M) => () => {
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',
-        number(true).reviver
+        number({ wrap: true }).reviver
       )).should.throw()
     })
 
     it('should support -0', () => {
-      const myNumber = JSON.parse('"-0"', number(true).reviver)
+      const myNumber = JSON.parse('"-0"', number({ wrap: true }).reviver)
 
       Object.is(myNumber.inner(), -0).should.be.exactly(true)
     })
 
     it('should support Infinity', () => {
-      const myNumber = JSON.parse('"Infinity"', number(true).reviver)
+      const myNumber = JSON.parse('"Infinity"', number({ wrap: true }).reviver)
 
       Object.is(myNumber.inner(), Infinity).should.be.exactly(true)
     })
 
     it('should support -Infinity', () => {
-      const myNumber = JSON.parse('"-Infinity"', number(true).reviver)
+      const myNumber = JSON.parse('"-Infinity"', number({ wrap: true }).reviver)
 
       Object.is(myNumber.inner(), -Infinity).should.be.exactly(true)
     })
 
     it('should support NaN', () => {
-      const myNumber = JSON.parse('"NaN"', number(true).reviver)
+      const myNumber = JSON.parse('"NaN"', number({ wrap: true }).reviver)
 
       Object.is(myNumber.inner(), NaN).should.be.exactly(true)
     })

@@ -2,14 +2,7 @@ import { isNothing, unsupported, emptyObject, always } from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
-  const number = (v === null) ? null
-    : (v === '-0') ? -0
-    : (v === 'Infinity') ? Infinity
-    : (v === '-Infinity') ? -Infinity
-    : (v === 'NaN') ? NaN
-    : v
-
-  return ModelicoNumber.of(number)
+  return ModelicoNumber.of(v)
 }
 
 class ModelicoNumber extends Base {
@@ -20,7 +13,7 @@ class ModelicoNumber extends Base {
       throw TypeError('missing number')
     }
 
-    this.inner = always(number)
+    this.inner = always(Number(number))
 
     Object.freeze(this)
   }
@@ -52,7 +45,7 @@ class ModelicoNumber extends Base {
   }
 
   static metadata () {
-    return Object.freeze({aaa: 1, type: ModelicoNumber, reviver})
+    return Object.freeze({type: ModelicoNumber, reviver})
   }
 
   static innerTypes () {

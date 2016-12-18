@@ -47,10 +47,7 @@ const metadata = Object.freeze({
   _,
   asIs,
   any: always(asIs(Any)),
-  number: (wrapped = false) => {
-    // console.log(ModelicoNumber.metadata().reviver.toString());
-    return wrapped ? ModelicoNumber.metadata() : asIs(Number)
-  },
+  number: ({ wrap = false } = {}) => wrap ? ModelicoNumber.metadata() : asIs(Number),
 
   string: always(asIs(String)),
   boolean: always(asIs(Boolean)),
