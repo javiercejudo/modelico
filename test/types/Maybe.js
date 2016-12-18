@@ -175,4 +175,47 @@ export default (should, M) => () => {
         .be.exactly(5)
     })
   })
+
+  describe('comparing', () => {
+    it('should identify equal instances', () => {
+      const modelicoMaybe1 = M.Maybe.of(2)
+      const modelicoMaybe2 = M.Maybe.of(2)
+
+      modelicoMaybe1.should.not.be.exactly(modelicoMaybe2)
+      modelicoMaybe1.should.not.equal(modelicoMaybe2)
+
+      modelicoMaybe1.equals(modelicoMaybe1).should.be.exactly(true)
+      modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(true)
+    })
+
+    it('supports non-primitive types', () => {
+      const modelicoMaybe1 = M.Maybe.of(M.Number.of(2))
+      const modelicoMaybe2 = M.Maybe.of(M.Number.of(2))
+
+      modelicoMaybe1.should.not.be.exactly(modelicoMaybe2)
+      modelicoMaybe1.should.not.equal(modelicoMaybe2)
+
+      modelicoMaybe1.equals(modelicoMaybe1).should.be.exactly(true)
+      modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(true)
+      modelicoMaybe1.equals(null).should.be.exactly(false)
+      modelicoMaybe1.equals().should.be.exactly(false)
+    })
+
+    it('handles nothing well', () => {
+      const modelicoMaybe1 = M.Maybe.of(M.Number.of(2))
+      const modelicoMaybe2 = M.Maybe.EMPTY
+      const modelicoMaybe3 = M.Maybe.of()
+
+      modelicoMaybe1.should.not.be.exactly(modelicoMaybe2)
+      modelicoMaybe1.should.not.equal(modelicoMaybe2)
+
+      modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(false)
+      modelicoMaybe2.equals(modelicoMaybe3).should.be.exactly(true)
+    })
+
+    it('should have Object.is semantics', () => {
+      M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(false)
+      M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true)
+    })
+  })
 }

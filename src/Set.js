@@ -1,5 +1,5 @@
 import { isNothing, unsupported, emptyObject } from './U'
-import { iterableMetadata } from './iterable'
+import { iterableMetadata, iterableEquals } from './iterable'
 import Base from './Base'
 
 class ModelicoSet extends Base {
@@ -32,6 +32,10 @@ class ModelicoSet extends Base {
 
   toJSON () {
     return [...this.inner()]
+  }
+
+  equals (other) {
+    return iterableEquals(this, other)
   }
 
   static fromSet (set) {

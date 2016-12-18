@@ -230,8 +230,10 @@ export default (U, should, M) => () => {
         sex: Sex.MALE()
       })
 
+      author1.equals(author1).should.be.exactly(true)
       author1.equals(author2).should.be.exactly(true)
       author1.equals(author3).should.be.exactly(false)
+      author1.equals(2).should.be.exactly(false)
 
       author1.should.not.be.exactly(author2)
     })

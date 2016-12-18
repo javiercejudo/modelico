@@ -1,5 +1,5 @@
 import { isNothing, emptyObject } from './U'
-import { iterableMetadata } from './iterable'
+import { iterableMetadata, iterableEquals } from './iterable'
 import Base from './Base'
 
 class List extends Base {
@@ -41,6 +41,10 @@ class List extends Base {
 
   toJSON () {
     return this.inner()
+  }
+
+  equals (other) {
+    return iterableEquals(this, other)
   }
 
   static fromArray (arr) {

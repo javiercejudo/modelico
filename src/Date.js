@@ -1,4 +1,4 @@
-import { isNothing, unsupported, emptyObject } from './U'
+import { isNothing, unsupported, emptyObject, haveDifferentTypes } from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -38,6 +38,18 @@ class ModelicoDate extends Base {
 
   toJSON () {
     return this.inner().toISOString()
+  }
+
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
+    return this.toJSON() === other.toJSON()
   }
 
   static of (date) {
