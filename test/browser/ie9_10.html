@@ -53,12 +53,13 @@
     }());
   </script>
 
-  <script src="../../dist/modelico.min.js"></script>
-  <script>ModelicoMin = Modelico</script>
   <script src="../../dist/modelico.js"></script>
+  <script src="../../dist/modelico.min.js"></script>
   <script src="../../dist/modelico-spec.js"></script>
 
   <script>
+    ModelicoMin = Modelico.noConflict()
+
     mocha.setup('bdd');
 
     describe('Modelico', function() {

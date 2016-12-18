@@ -62,7 +62,7 @@ const metadata = Object.freeze({
   set: ModelicoSet.metadata
 })
 
-export default Object.freeze({
+export default {
   about: Object.freeze({ version, author, homepage, license }),
   Any,
   Number: ModelicoNumber,
@@ -83,4 +83,4 @@ export default Object.freeze({
   proxyList: partial(proxyFactory, listNonMutators, listMutators),
   proxySet: partial(proxyFactory, setNonMutators, setMutators),
   proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)
-})
+}
