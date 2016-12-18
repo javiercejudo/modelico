@@ -1,60 +1,58 @@
-'use strict';
-
-import { isNothing, unsupported, emptyObject } from './U';
-import Base from './Base';
+import { isNothing, unsupported, emptyObject } from './U'
+import Base from './Base'
 
 const reviver = (k, v) => {
-  const date = (v === null) ?
-    null :
-    new Date(v);
+  const date = (v === null)
+    ? null
+    : new Date(v)
 
-  return new ModelicoDate(date);
-};
+  return new ModelicoDate(date)
+}
 
 class ModelicoDate extends Base {
-  constructor(dateOrig) {
-    super(ModelicoDate);
+  constructor (dateOrig) {
+    super(ModelicoDate)
 
     if (isNothing(dateOrig)) {
-      throw TypeError('missing date');
+      throw TypeError('missing date')
     }
 
-    const date = new Date(dateOrig.getTime());
+    const date = new Date(dateOrig.getTime())
 
-    this.inner = () => new Date(date.getTime());
+    this.inner = () => new Date(date.getTime())
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  set() {
-    unsupported('Date.set is not supported');
+  set () {
+    unsupported('Date.set is not supported')
   }
 
-  setPath(path, date) {
+  setPath (path, date) {
     if (path.length === 0) {
-      return ModelicoDate.of(date);
+      return ModelicoDate.of(date)
     }
 
-    unsupported('Date.setPath is not supported for non-empty paths');
+    unsupported('Date.setPath is not supported for non-empty paths')
   }
 
-  toJSON() {
-    return this.inner().toISOString();
+  toJSON () {
+    return this.inner().toISOString()
   }
 
-  static of(date) {
-    return new ModelicoDate(date);
+  static of (date) {
+    return new ModelicoDate(date)
   }
 
-  static metadata() {
-    return Object.freeze({type: ModelicoDate, reviver});
+  static metadata () {
+    return Object.freeze({type: ModelicoDate, reviver})
   }
 
-  static innerTypes() {
-    return emptyObject;
+  static innerTypes () {
+    return emptyObject
   }
 }
 
-ModelicoDate.displayName = 'ModelicoDate';
+ModelicoDate.displayName = 'ModelicoDate'
 
-export default Object.freeze(ModelicoDate);
+export default Object.freeze(ModelicoDate)

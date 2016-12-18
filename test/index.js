@@ -1,13 +1,15 @@
-'use strict';
+/* eslint-env mocha */
 
-var Should = require('should');
+'use strict'
 
-var modelicoSpec = require('../dist/modelico-spec.js');
+var Should = require('should')
 
-var Modelico = require('../dist/modelico.js');
-var ModelicoMin = require('../dist/modelico.min.js');
+var modelicoSpec = require('../dist/modelico-spec.js')
+
+var Modelico = require('../dist/modelico.js')
+var ModelicoMin = require('../dist/modelico.min.js')
 
 describe('Modelico', () => {
-  describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
-  describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
-});
+  describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico))
+  describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin))
+})

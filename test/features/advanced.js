@@ -1,42 +1,42 @@
-'use strict';
+/* eslint-env mocha */
 
 export default (should, M) => () => {
-  const { _, any, maybe, list, string } = M.metadata;
+  const { _, any, maybe, list, string } = M.metadata
 
   class Animal extends M.Base {
-    constructor(fields) {
-      super(Animal, fields);
+    constructor (fields) {
+      super(Animal, fields)
     }
 
-    speak() {
-      const name = this.name().getOrElse('');
-      return (name === '') ? `I don't have a name` : `My name is ${name}!`;
+    speak () {
+      const name = this.name().getOrElse('')
+      return (name === '') ? `I don't have a name` : `My name is ${name}!`
     }
 
-    static innerTypes() {
+    static innerTypes () {
       return Object.freeze({
         name: maybe(string())
-      });
+      })
     }
   }
 
   class Person extends M.Base {
-    constructor(fields) {
-      super(Person, fields);
+    constructor (fields) {
+      super(Person, fields)
     }
 
-    fullName() {
-      const fields = M.fields(this);
-      return [fields.givenName, fields.familyName].join(' ').trim();
+    fullName () {
+      const fields = M.fields(this)
+      return [fields.givenName, fields.familyName].join(' ').trim()
     }
 
-    static innerTypes() {
+    static innerTypes () {
       return Object.freeze({
         givenName: any(),
         middleName: maybe(any()),
         familyName: string(),
         pets: list(maybe(_(Animal)))
-      });
+      })
     }
   }
 
@@ -50,30 +50,30 @@ export default (should, M) => () => {
         },
         null
       ]
-    }`;
+    }`
 
-    const person1 = JSON.parse(personJson, _(Person).reviver);
+    const person1 = JSON.parse(personJson, _(Person).reviver)
 
-    person1.fullName().should.be.exactly('Javier Cejudo');
+    person1.fullName().should.be.exactly('Javier Cejudo')
 
-    const person2 = person1.set('givenName', 'Javi');
-    person2.fullName().should.be.exactly('Javi Cejudo');
-    person1.fullName().should.be.exactly('Javier Cejudo');
+    const person2 = person1.set('givenName', 'Javi')
+    person2.fullName().should.be.exactly('Javi Cejudo')
+    person1.fullName().should.be.exactly('Javier Cejudo')
 
-    const defaultAnimal = new Animal({});
-
-    person1.pets().inner().shift().getOrElse(defaultAnimal).speak()
-      .should.be.exactly('My name is Robbie!');
+    const defaultAnimal = new Animal({})
 
     person1.pets().inner().shift().getOrElse(defaultAnimal).speak()
-      .should.be.exactly('My name is Robbie!');
+      .should.be.exactly('My name is Robbie!')
 
-    const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
+    person1.pets().inner().shift().getOrElse(defaultAnimal).speak()
+      .should.be.exactly('My name is Robbie!')
+
+    const person3 = person1.setPath(['pets', 0, 'name'], 'Bane')
 
     person3.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('')
-      .should.be.exactly('Bane');
+      .should.be.exactly('Bane')
 
     person1.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('')
-      .should.be.exactly('Robbie');
-  });
-};
+      .should.be.exactly('Robbie')
+  })
+}

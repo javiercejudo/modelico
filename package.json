@@ -5,7 +5,7 @@
   "main": "dist/modelico.js",
   "jsnext:main": "dist/modelico.es2015.js",
   "scripts": {
-    "test": "flow && gulp test",
+    "test": "standard \"src/**/*.js\" \"test/**/*.js\" && flow && gulp test",
     "test-dev": "npm run build-dev && npm run build-browser-spec && gulp test",
     "test-browsers": "./scripts/browser_tester.sh",
     "send-coverage": "./scripts/coverage_reporter.sh",
@@ -59,10 +59,10 @@
     "rimraf": "^2.5.4",
     "rollup": "^0.37.0",
     "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-flow": "^1.0.1",
     "rollup-plugin-json": "^2.0.1",
     "rollup-plugin-node-resolve": "^2.0.0",
     "should": "^8.4.0",
+    "standard": "^8.6.0",
     "uglify-js": "^2.7.0"
   }
 }

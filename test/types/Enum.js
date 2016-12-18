@@ -1,14 +1,14 @@
-'use strict';
+/* eslint-env mocha */
 
-import PartOfDayFactory from './fixtures/PartOfDay';
+import PartOfDayFactory from './fixtures/PartOfDay'
 
 export default (should, M) => () => {
-  const PartOfDay = PartOfDayFactory(M);
+  const PartOfDay = PartOfDayFactory(M)
 
   describe('keys', () => {
     it('only enumerates the enumerators', () => {
       Object.keys(PartOfDay)
-        .should.eql(['ANY', 'MORNING', 'AFTERNOON', 'EVENING']);
-    });
-  });
-};
+        .should.eql(['ANY', 'MORNING', 'AFTERNOON', 'EVENING'])
+    })
+  })
+}

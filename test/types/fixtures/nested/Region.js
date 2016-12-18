@@ -1,26 +1,26 @@
-'use strict';
+/* eslint-env mocha */
 
 export default M => {
-  const { string } = M.metadata;
+  const { string } = M.metadata
 
   class Region extends M.Base {
-    constructor(fields) {
-      super(Region, fields);
+    constructor (fields) {
+      super(Region, fields)
 
-      return Object.freeze(this);
+      return Object.freeze(this)
     }
 
-    customMethod() {
-      return `${this.name()} (${this.code()})`;
+    customMethod () {
+      return `${this.name()} (${this.code()})`
     }
 
-    static innerTypes() {
+    static innerTypes () {
       return Object.freeze({
         name: string(),
         code: string()
-      });
+      })
     }
   }
 
-  return Object.freeze(Region);
-};
+  return Object.freeze(Region)
+}

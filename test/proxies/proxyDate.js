@@ -1,24 +1,24 @@
-'use strict';
+/* eslint-env mocha */
 
 export default (should, M) => () => {
-  const p = M.proxyDate;
+  const p = M.proxyDate
 
   it('getters / setters', () => {
-    const date1 = p(M.Date.of(new Date('1988-04-16T00:00:00.000Z')));
+    const date1 = p(M.Date.of(new Date('1988-04-16T00:00:00.000Z')))
 
-    const date2 = date1.setFullYear(2015);
-    const date3 = date2.setMinutes(55);
+    const date2 = date1.setFullYear(2015)
+    const date3 = date2.setMinutes(55)
 
     date2.getFullYear()
-      .should.be.exactly(2015);
+      .should.be.exactly(2015)
 
     date1.getFullYear()
-      .should.be.exactly(1988);
+      .should.be.exactly(1988)
 
     date1.getMinutes()
-      .should.be.exactly(0);
+      .should.be.exactly(0)
 
     date3.getMinutes()
-      .should.be.exactly(55);
-  });
-};
+      .should.be.exactly(55)
+  })
+}

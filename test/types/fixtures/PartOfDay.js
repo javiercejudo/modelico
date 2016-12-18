@@ -1,6 +1,6 @@
-'use strict';
+/* eslint-env mocha */
 
-const range = (minTime, maxTime) => ({minTime, maxTime});
+const range = (minTime, maxTime) => ({minTime, maxTime})
 
 export default M => {
   return M.Enum.fromObject({
@@ -8,5 +8,5 @@ export default M => {
     MORNING: range(0, 720),
     AFTERNOON: range(720, 1080),
     EVENING: range(1080, 1440)
-  });
-};
+  })
+}

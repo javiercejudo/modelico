@@ -1,25 +1,25 @@
-'use strict';
+/* eslint-env mocha */
 
-import CountryFactory from './Country';
+import CountryFactory from './Country'
 
 export default (M, Region) => {
-  const Country = CountryFactory(M, Region);
-  const { _, string } = M.metadata;
+  const Country = CountryFactory(M, Region)
+  const { _, string } = M.metadata
 
   class City extends M.Base {
-    constructor(fields) {
-      super(City, fields);
+    constructor (fields) {
+      super(City, fields)
 
-      return Object.freeze(this);
+      return Object.freeze(this)
     }
 
-    static innerTypes(depth) {
+    static innerTypes (depth) {
       return Object.freeze({
         name: string(),
         country: _(Country, depth)
-      });
+      })
     }
   }
 
-  return Object.freeze(City);
-};
+  return Object.freeze(City)
+}

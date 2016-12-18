@@ -1,7 +1,5 @@
-'use strict';
-
-import { asIsReviver } from './U';
-import Any from './Any';
+import { asIsReviver } from './U'
+import Any from './Any'
 
 export default (Type = Any) =>
-  Object.freeze({type: Type, reviver: asIsReviver(Type)});
+  Object.freeze({type: Type, reviver: asIsReviver(Type)})
