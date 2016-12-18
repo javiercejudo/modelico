@@ -58,7 +58,7 @@ Here is how `Animal` would look like:
 
 ```js
 const M = require('modelico');
-const { asIs } = M.metadata;
+const { string } = M.metadata;
 
 class Animal extends M.Base {
   constructor(fields) {
@@ -75,7 +75,7 @@ class Animal extends M.Base {
 
   static innerTypes() {
     return Object.freeze({
-      name: asIs(String)
+      name: string()
     });
   }
 }
@@ -119,7 +119,7 @@ class we have already defined.
 
 ```js
 const M = require('modelico');
-const { _, asIs, list } = M.metadata;
+const { _, string, list } = M.metadata;
 
 class Person extends M.Base {
   constructor(fields) {
@@ -132,8 +132,8 @@ class Person extends M.Base {
 
   static innerTypes() {
     return Object.freeze({
-      givenName: asIs(String),
-      familyName: asIs(String),
+      givenName: string(),
+      familyName: string(),
       pets: list(_(Animal))
     });
   }
@@ -186,7 +186,7 @@ as a `Maybe`:
 
 ```js
 const M = require('modelico');
-const { asIs, maybe } = M.metadata;
+const { string, maybe } = M.metadata;
 
 class Animal extends M.Base {
 
@@ -194,7 +194,7 @@ class Animal extends M.Base {
 
   static innerTypes() {
     return Object.freeze({
-      name: maybe(asIs(String))
+      name: maybe(string())
     });
   }
 }
@@ -255,6 +255,8 @@ with ES5-style classes. In the case of our `Animal` class:
 
 ```js
 (function(M) {
+  var m = M.metadata;
+
   function Animal(fields) {
     M.Base.factory(Animal, fields, this);
   }
@@ -272,7 +274,7 @@ with ES5-style classes. In the case of our `Animal` class:
 
   Animal.innerTypes = function() {
     return Object.freeze({
-      name: asIs(String)
+      name: m.string()
     });
   }
 }(window.Modelico));
