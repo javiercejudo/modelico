@@ -128,6 +128,12 @@ export default (should, M) => () => {
 
       modelicoNumber1.equals(modelicoNumber1).should.be.exactly(true)
       modelicoNumber1.equals(modelicoNumber2).should.be.exactly(true)
+      modelicoNumber1.equals(2).should.be.exactly(false)
+    })
+
+    it('should have Object.is semantics', () => {
+      M.Number.of(0).equals(M.Number.of(-0)).should.be.exactly(false)
+      M.Number.of(NaN).equals(M.Number.of(NaN)).should.be.exactly(true)
     })
   })
 }

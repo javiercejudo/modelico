@@ -197,6 +197,8 @@ export default (should, M) => () => {
 
       modelicoMaybe1.equals(modelicoMaybe1).should.be.exactly(true)
       modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(true)
+      modelicoMaybe1.equals(null).should.be.exactly(false)
+      modelicoMaybe1.equals().should.be.exactly(false)
     })
 
     it('handles nothing well', () => {
@@ -209,6 +211,11 @@ export default (should, M) => () => {
 
       modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(false)
       modelicoMaybe2.equals(modelicoMaybe3).should.be.exactly(true)
+    })
+
+    it('should have Object.is semantics', () => {
+      M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(false)
+      M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true)
     })
   })
 }

@@ -182,6 +182,7 @@ export default (should, M) => () => {
 
       modelicoList1.equals(modelicoList1).should.be.exactly(true)
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
+      modelicoList1.equals(() => 1).should.be.exactly(false)
     })
 
     it('should support non-primitive types', () => {
@@ -193,6 +194,13 @@ export default (should, M) => () => {
 
       modelicoList1.equals(modelicoList1).should.be.exactly(true)
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
+
+      M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false)
+    })
+
+    it('should have Object.is semantics', () => {
+      M.List.of(0).equals(M.List.of(-0)).should.be.exactly(false)
+      M.List.of(NaN).equals(M.List.of(NaN)).should.be.exactly(true)
     })
   })
 

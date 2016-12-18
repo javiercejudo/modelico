@@ -151,6 +151,14 @@ export default (should, M) => () => {
 
       modelicoMap.equals(modelicoMap).should.be.exactly(true)
       modelicoMap.equals(modelicoMap2).should.be.exactly(true)
+      modelicoMap.equals(2).should.be.exactly(false)
+    })
+
+    it('should have Object.is and Map key value semantics', () => {
+      M.Map.of('a', 0).equals(M.Map.of('a', -0)).should.be.exactly(false)
+      M.Map.of('a', NaN).equals(M.Map.of('a', NaN)).should.be.exactly(true)
+
+      M.Map.of(-0, 33).equals(M.Map.of(0, 33)).should.be.exactly(true)
     })
   })
 

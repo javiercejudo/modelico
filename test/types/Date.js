@@ -86,6 +86,7 @@ export default (should, M) => () => {
 
       modelicoDate1.equals(modelicoDate1).should.be.exactly(true)
       modelicoDate1.equals(modelicoDate2).should.be.exactly(true)
+      modelicoDate1.equals('abc').should.be.exactly(false)
     })
   })
 }

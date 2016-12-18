@@ -1,6 +1,6 @@
 import {
   always, defaultTo, isPlainObject, isSomething, getInnerTypes,
-  emptyObject
+  emptyObject, haveDifferentTypes
 } from './U'
 
 import { typeSymbol, fieldsSymbol } from './symbols'
@@ -56,6 +56,14 @@ class Base {
   }
 
   equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
     return (JSON.stringify(this) === JSON.stringify(other))
   }
 

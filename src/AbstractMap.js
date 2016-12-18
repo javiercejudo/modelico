@@ -1,4 +1,4 @@
-import { isNothing } from './U'
+import { isNothing, haveDifferentTypes } from './U'
 import { typeSymbol } from './symbols'
 import Base from './Base'
 
@@ -46,6 +46,10 @@ class AbstractMap extends Base {
       return true
     }
 
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
     const otherItems = [...other]
 
     return [...this].every((item, index) => {
@@ -56,7 +60,7 @@ class AbstractMap extends Base {
 
         return itemPart.equals
           ? itemPart.equals(otherItemPart)
-          : itemPart === otherItemPart
+          : Object.is(itemPart, otherItemPart)
       })
     })
   }

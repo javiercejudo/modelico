@@ -1,4 +1,4 @@
-import { isNothing, unsupported, emptyObject, always } from './U'
+import { isNothing, unsupported, emptyObject, always, haveDifferentTypes } from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -45,7 +45,11 @@ class ModelicoNumber extends Base {
       return true
     }
 
-    return this.inner() === other.inner()
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
+    return Object.is(this.inner(), other.inner())
   }
 
   static of (number) {

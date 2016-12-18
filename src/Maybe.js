@@ -1,4 +1,4 @@
-import { always, isNothing, emptyObject } from './U'
+import { always, isNothing, emptyObject, haveDifferentTypes } from './U'
 import Base from './Base'
 
 const reviverFactory = itemMetadata => (k, v) => {
@@ -103,6 +103,10 @@ class Maybe extends Base {
       return true
     }
 
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
     const inner = this.inner()
     const otherInner = other.inner()
 
@@ -115,7 +119,7 @@ class Maybe extends Base {
 
     return innerItem.equals
       ? innerItem.equals(otherInnerItem)
-      : innerItem === otherInnerItem
+      : Object.is(innerItem, otherInnerItem)
   }
 
   static of (v) {

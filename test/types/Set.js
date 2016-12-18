@@ -142,7 +142,14 @@ export default (should, M) => () => {
       modelicoSet1.should.not.be.exactly(modelicoSet2)
       modelicoSet1.should.not.equal(modelicoSet2)
 
+      modelicoSet1.equals(modelicoSet1).should.be.exactly(true)
       modelicoSet1.equals(modelicoSet2).should.be.exactly(true)
+      modelicoSet1.equals(/abc/).should.be.exactly(false)
+    })
+
+    it('should have Object.is and Set value semantics', () => {
+      M.Set.of(0).equals(M.Set.of(-0)).should.be.exactly(true)
+      M.Set.of(NaN).equals(M.Set.of(NaN)).should.be.exactly(true)
     })
   })
 
