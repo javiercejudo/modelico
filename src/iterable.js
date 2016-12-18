@@ -19,3 +19,19 @@ export const iterableMetadata = (IterableType, itemMetadata) => {
     reviver: iterableReviverFactory(IterableType, itemMetadata)
   })
 }
+
+export const iterableEquals = (thisArg, other) => {
+  if (thisArg === other) {
+    return true
+  }
+
+  const otherItems = [...other]
+
+  return [...thisArg].every((item, index) => {
+    const otherItem = otherItems[index]
+
+    return item.equals
+      ? item.equals(otherItem)
+      : item === otherItem
+  })
+}

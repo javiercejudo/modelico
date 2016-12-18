@@ -40,6 +40,14 @@ class ModelicoDate extends Base {
     return this.inner().toISOString()
   }
 
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    return this.toJSON() === other.toJSON()
+  }
+
   static of (date) {
     return new ModelicoDate(date)
   }

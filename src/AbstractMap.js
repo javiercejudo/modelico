@@ -40,6 +40,26 @@ class AbstractMap extends Base {
 
     return this.set(path[0], item.setPath(path.slice(1), value))
   }
+
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    const otherItems = [...other]
+
+    return [...this].every((item, index) => {
+      const otherItem = otherItems[index]
+
+      return item.every((itemPart, index) => {
+        const otherItemPart = otherItem[index]
+
+        return itemPart.equals
+          ? itemPart.equals(otherItemPart)
+          : itemPart === otherItemPart
+      })
+    })
+  }
 }
 
 export default Object.freeze(AbstractMap)

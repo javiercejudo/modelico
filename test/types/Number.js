@@ -117,4 +117,17 @@ export default (should, M) => () => {
       Object.is(myNumber.inner(), NaN).should.be.exactly(true)
     })
   })
+
+  describe('comparing', () => {
+    it('should identify equal instances', () => {
+      const modelicoNumber1 = M.Number.of(2)
+      const modelicoNumber2 = M.Number.of(2)
+
+      modelicoNumber1.should.not.be.exactly(modelicoNumber2)
+      modelicoNumber1.should.not.equal(modelicoNumber2)
+
+      modelicoNumber1.equals(modelicoNumber1).should.be.exactly(true)
+      modelicoNumber1.equals(modelicoNumber2).should.be.exactly(true)
+    })
+  })
 }

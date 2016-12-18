@@ -149,6 +149,7 @@ export default (should, M) => () => {
       modelicoMap.should.not.be.exactly(modelicoMap2)
       modelicoMap.should.not.equal(modelicoMap2)
 
+      modelicoMap.equals(modelicoMap).should.be.exactly(true)
       modelicoMap.equals(modelicoMap2).should.be.exactly(true)
     })
   })

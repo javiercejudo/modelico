@@ -40,6 +40,14 @@ class ModelicoNumber extends Base {
       : v
   }
 
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    return this.inner() === other.inner()
+  }
+
   static of (number) {
     return new ModelicoNumber(number)
   }

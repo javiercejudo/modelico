@@ -75,4 +75,17 @@ export default (should, M) => () => {
       )).should.throw()
     })
   })
+
+  describe('comparing', () => {
+    it('should identify equal instances', () => {
+      const modelicoDate1 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
+      const modelicoDate2 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
+
+      modelicoDate1.should.not.be.exactly(modelicoDate2)
+      modelicoDate1.should.not.equal(modelicoDate2)
+
+      modelicoDate1.equals(modelicoDate1).should.be.exactly(true)
+      modelicoDate1.equals(modelicoDate2).should.be.exactly(true)
+    })
+  })
 }

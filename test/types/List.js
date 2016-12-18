@@ -174,12 +174,24 @@ export default (should, M) => () => {
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
+      const modelicoList1 = M.List.of(1, 2, 3)
+      const modelicoList2 = M.List.of(1, 2, 3)
+
+      modelicoList1.should.not.be.exactly(modelicoList2)
+      modelicoList1.should.not.equal(modelicoList2)
+
+      modelicoList1.equals(modelicoList1).should.be.exactly(true)
+      modelicoList1.equals(modelicoList2).should.be.exactly(true)
+    })
+
+    it('should support non-primitive types', () => {
       const modelicoList1 = M.List.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')))
       const modelicoList2 = M.List.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')))
 
       modelicoList1.should.not.be.exactly(modelicoList2)
       modelicoList1.should.not.equal(modelicoList2)
 
+      modelicoList1.equals(modelicoList1).should.be.exactly(true)
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
     })
   })

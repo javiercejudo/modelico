@@ -98,6 +98,26 @@ class Maybe extends Base {
     return this.inner().toJSON()
   }
 
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    const inner = this.inner()
+    const otherInner = other.inner()
+
+    if (this.isEmpty() || other.isEmpty()) {
+      return inner === otherInner
+    }
+
+    const innerItem = inner.get()
+    const otherInnerItem = otherInner.get()
+
+    return innerItem.equals
+      ? innerItem.equals(otherInnerItem)
+      : innerItem === otherInnerItem
+  }
+
   static of (v) {
     return new Maybe(v)
   }
