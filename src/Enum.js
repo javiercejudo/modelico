@@ -1,33 +1,31 @@
-'use strict';
+import { always, isNothing, emptyObject } from './U'
+import Base from './Base'
 
-import { always, isNothing, emptyObject } from './U';
-import Base from './Base';
-
-const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
+const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } })
 
 const reviverFactory = enumerators => (k, v) => {
-  const enumerator = enumerators[v];
+  const enumerator = enumerators[v]
 
   if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator (${v})`);
+    throw TypeError(`missing enumerator (${v})`)
   }
 
-  return enumerator;
-};
+  return enumerator
+}
 
 class Enum extends Base {
-  constructor(input) {
-    const enumerators = Array.isArray(input) ?
-      input.reduce(enumeratorsReducer, {}) :
-      input;
+  constructor (input) {
+    const enumerators = Array.isArray(input)
+      ? input.reduce(enumeratorsReducer, {})
+      : input
 
-    super(Enum, {});
+    super(Enum)
 
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {
-        this[enumerator] = always(enumerators[enumerator]);
-        this[enumerator]().toJSON = always(enumerator)
-      });
+        this[enumerator] = always(enumerators[enumerator])
+        enumerators[enumerator].toJSON = always(enumerator)
+      })
 
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
@@ -35,16 +33,24 @@ class Enum extends Base {
         reviver: reviverFactory(enumerators)
       })),
       enumerable: false
-    });
+    })
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  static innerTypes() {
-    return emptyObject;
+  static fromObject (obj) {
+    return new Enum(obj)
+  }
+
+  static fromArray (arr) {
+    return new Enum(arr)
+  }
+
+  static innerTypes () {
+    return emptyObject
   }
 }
 
-Enum.displayName = 'Enum';
+Enum.displayName = 'Enum'
 
-export default Object.freeze(Enum);
+export default Object.freeze(Enum)

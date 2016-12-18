@@ -1,4 +1,4 @@
-import babel from 'rollup-plugin-babel';
+import babel from 'rollup-plugin-babel'
 
 export default {
   entry: './test/modelicoSpec.js',
@@ -6,4 +6,4 @@ export default {
   moduleName: 'modelicoSpec',
   plugins: [ babel() ],
   dest: './dist/modelico-spec.js'
-};
+}

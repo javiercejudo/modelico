@@ -1,9 +1,10 @@
-/*global modelicoSpec, Should, Modelico */
+/* global modelicoSpec, Should, Modelico */
+/* eslint-env mocha */
 
-'use strict';
+'use strict'
 
-var prototypeOfObject = Object.prototype;
-var toStr = Function.call.bind(prototypeOfObject.toString);
+var prototypeOfObject = Object.prototype
+var toStr = Function.call.bind(prototypeOfObject.toString)
 
 // https://github.com/es-shims/es5-shim/issues#issue/2
 // http://ejohn.org/blog/objectgetprototypeof/
@@ -12,28 +13,28 @@ var toStr = Function.call.bind(prototypeOfObject.toString);
 // sure, and webreflection says ^_^
 // ... this will nerever possibly return null
 // ... Opera Mini breaks here with infinite loops
-Object.getPrototypeOf = function getPrototypeOf(object) {
+Object.getPrototypeOf = function getPrototypeOf (object) {
   /* eslint-disable no-proto */
-  var proto = object.__proto__;
+  var proto = object.__proto__
   /* eslint-enable no-proto */
 
   if (proto || proto === null) {
-    return proto;
+    return proto
   }
 
   if (toStr(object.constructor) === '[object Function]') {
-    return object.constructor.prototype;
+    return object.constructor.prototype
   }
 
   if (object instanceof Object) {
-    return prototypeOfObject;
+    return prototypeOfObject
   }
 
   // Correctly return null for Objects created with `Object.create(null)`
   // (shammed or native) or `{ __proto__: null}`.  Also returns null for
   // cross-realm objects on browsers that lack `__proto__` support (like
   // IE <11), but that's the best we can do.
-  return null;
-};
+  return null
+}
 
-describe('Modelico', modelicoSpec({}, Should, Modelico));
+describe('Modelico', modelicoSpec({}, Should, Modelico))

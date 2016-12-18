@@ -1,10 +1,10 @@
-'use strict';
+/* eslint-env mocha */
 
-import PersonFactory from './fixtures/Person';
+import PersonFactory from './fixtures/Person'
 
 export default (should, M) => () => {
-  const Person = PersonFactory(M);
-  const { asIs, date, map } = M.metadata;
+  const Person = PersonFactory(M)
+  const { date, map, number, string } = M.metadata
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
@@ -12,181 +12,181 @@ export default (should, M) => () => {
         ['A', 'Good morning!'],
         ['B', 'Good afternoon!'],
         ['C', 'Good evening!']
-      ]);
+      ])
 
-      const map = M.Map.fromMap(input);
+      const map = M.Map.fromMap(input)
 
-      input.set('A', "g'day!");
+      input.set('A', "g'day!")
 
       map.inner().get('A')
-        .should.be.exactly('Good morning!');
-    });
-  });
+        .should.be.exactly('Good morning!')
+    })
+  })
 
   describe('setting', () => {
     it('should implement Symbol.iterator', () => {
       const map = M.Map.fromObject({a: 1, b: 2, c: 3});
 
       [...map]
-        .should.eql([['a', 1], ['b', 2], ['c', 3]]);
-    });
+        .should.eql([['a', 1], ['b', 2], ['c', 3]])
+    })
 
     it('should not support null (wrap with Maybe)', () => {
       (() => new M.Map(null))
-        .should.throw();
-    });
+        .should.throw()
+    })
 
     it('should set fields returning a new map', () => {
       const map = new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))],
-        ['b', new M.Date(new Date())]
-      ]);
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', M.Date.of(new Date())]
+      ])
 
-      const modelicoMap1 = M.Map.fromMap(map);
-      const modelicoMap2 = modelicoMap1.set('a', new M.Date(new Date('1989-04-16T00:00:00.000Z')));
+      const modelicoMap1 = M.Map.fromMap(map)
+      const modelicoMap2 = modelicoMap1.set('a', M.Date.of(new Date('1989-04-16T00:00:00.000Z')))
 
       should(modelicoMap2.inner().get('a').inner().getFullYear())
-        .be.exactly(1989);
+        .be.exactly(1989)
 
       // verify that modelicoMap1 was not mutated
       should(modelicoMap1.inner().get('a').inner().getFullYear())
-        .be.exactly(1988);
-    });
+        .be.exactly(1988)
+    })
 
     it('should set fields returning a new map when part of a path', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
-      const author1 = M.fromJSON(Person, authorJson);
-      const author2 = author1.setPath(['lifeEvents', 'wedding'], new Date('2010-03-28T00:00:00.000Z'));
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
+      const author1 = M.fromJSON(Person, authorJson)
+      const author2 = author1.setPath(['lifeEvents', 'wedding'], new Date('2010-03-28T00:00:00.000Z'))
 
       should(author2.lifeEvents().inner().get('wedding').inner().getFullYear())
-        .be.exactly(2010);
+        .be.exactly(2010)
 
       // verify that author1 was not mutated
       should(author1.lifeEvents().inner().get('wedding').inner().getFullYear())
-        .be.exactly(2013);
-    });
+        .be.exactly(2013)
+    })
 
     it('edge case when setPath is called with an empty path', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
-      const author = M.fromJSON(Person, authorJson);
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
+      const author = M.fromJSON(Person, authorJson)
 
-      const map = author.lifeEvents();
+      const map = author.lifeEvents()
 
       should(map.inner().get('wedding').inner().getFullYear())
-        .be.exactly(2013);
+        .be.exactly(2013)
 
       const customMap = new Map([
-        ['wedding', new M.Date(new Date('2010-03-28T00:00:00.000Z'))]
-      ]);
+        ['wedding', M.Date.of(new Date('2010-03-28T00:00:00.000Z'))]
+      ])
 
-      const map2 = map.setPath([], customMap);
+      const map2 = map.setPath([], customMap)
 
       should(map2.inner().get('wedding').inner().getFullYear())
-        .be.exactly(2010);
-    });
-  });
+        .be.exactly(2010)
+    })
+  })
 
   describe('stringifying', () => {
     it('should stringify the map correctly', () => {
       const map = new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))],
-        ['b', new M.Date(new Date('2012-12-25T00:00:00.000Z'))]
-      ]);
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', M.Date.of(new Date('2012-12-25T00:00:00.000Z'))]
+      ])
 
-      const modelicoMap = M.Map.fromMap(map);
+      const modelicoMap = M.Map.fromMap(map)
 
       JSON.stringify(modelicoMap)
-        .should.be.exactly('[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]');
-    });
-  });
+        .should.be.exactly('[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]')
+    })
+  })
 
   describe('parsing', () => {
     it('should parse the map correctly', () => {
       const modelicoMap = JSON.parse(
         '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]',
-        map(asIs(String), date()).reviver
-      );
+        map(string(), date()).reviver
+      )
 
       should(modelicoMap.inner().get('a').inner().getFullYear())
-        .be.exactly(1988);
+        .be.exactly(1988)
 
       should(modelicoMap.inner().get('b').inner().getMonth())
-        .be.exactly(11);
-    });
+        .be.exactly(11)
+    })
 
     it('should be parsed correctly when used within another class', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
-      const author = M.fromJSON(Person, authorJson);
+      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
+      const author = M.fromJSON(Person, authorJson)
 
-      should(author.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
-    });
+      should(author.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013)
+    })
 
     it('should be able to work with M.genericsFromJSON', () => {
-      const myMap = M.genericsFromJSON(M.Map, [asIs(Number), asIs(String)], '[[1, "10"], [2, "20"], [3, "30"]]');
+      const myMap = M.genericsFromJSON(M.Map, [number(), string()], '[[1, "10"], [2, "20"], [3, "30"]]')
 
       myMap.inner().get(2)
-        .should.be.exactly('20');
-    });
+        .should.be.exactly('20')
+    })
 
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',
-        map(asIs(String), date()).reviver
-      )).should.throw();
-    });
-  });
+        map(string(), date()).reviver
+      )).should.throw()
+    })
+  })
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
       const modelicoMap = M.Map.fromMap(new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]
-      ]));
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]
+      ]))
 
       const modelicoMap2 = M.Map.fromMap(new Map([
-        ['a', new M.Date(new Date('1988-04-16T00:00:00.000Z'))]
-      ]));
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]
+      ]))
 
-      modelicoMap.should.not.be.exactly(modelicoMap2);
-      modelicoMap.should.not.equal(modelicoMap2);
+      modelicoMap.should.not.be.exactly(modelicoMap2)
+      modelicoMap.should.not.equal(modelicoMap2)
 
-      modelicoMap.equals(modelicoMap2).should.be.exactly(true);
-    });
-  });
+      modelicoMap.equals(modelicoMap2).should.be.exactly(true)
+    })
+  })
 
   describe('EMPTY / of / fromArray / fromObject / fromMap', () => {
     it('should have a static property for the empty map', () => {
       should(M.Map.EMPTY.inner().size)
-        .be.exactly(0);
+        .be.exactly(0)
 
       M.Map.EMPTY.toJSON()
-        .should.eql([]);
-    });
+        .should.eql([])
+    })
 
     it('should be able to create a map from an even number of params', () => {
-      var map = M.Map.of('a', 1, 'b', 2, 'c', 3);
+      var map = M.Map.of('a', 1, 'b', 2, 'c', 3)
 
       should(map.inner().get('b')).be.exactly(2);
 
       (() => M.Map.of('a', 1, 'b', 2, 'c', 3, 'd'))
-        .should.throw();
-    });
+        .should.throw()
+    })
 
     it('should be able to create a map from an array', () => {
-      var map = M.Map.fromArray([['a', 1], ['b', 2], ['c', 3]]);
+      var map = M.Map.fromArray([['a', 1], ['b', 2], ['c', 3]])
 
-      should(map.inner().get('b')).be.exactly(2);
-    });
+      should(map.inner().get('b')).be.exactly(2)
+    })
 
     it('should be able to create a map from an object', () => {
-      var map = M.Map.fromObject({a: 1, b: 2, c: 3});
+      var map = M.Map.fromObject({a: 1, b: 2, c: 3})
 
-      should(map.inner().get('b')).be.exactly(2);
-    });
+      should(map.inner().get('b')).be.exactly(2)
+    })
 
     it('should be able to create a map from a native map', () => {
-      var map = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+      var map = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]))
 
-      should(map.inner().get('b')).be.exactly(2);
-    });
-  });
-};
+      should(map.inner().get('b')).be.exactly(2)
+    })
+  })
+}

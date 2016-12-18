@@ -1,7 +1,5 @@
-'use strict';
+import { identity } from './U'
 
-import { identity } from './U';
+const Any = x => identity(x)
 
-const Any = x => identity(x);
-
-export default Object.freeze(Any);
+export default Object.freeze(Any)

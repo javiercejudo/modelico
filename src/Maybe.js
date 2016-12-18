@@ -1,107 +1,121 @@
-'use strict';
-
-import { always, isNothing, emptyObject } from './U';
-import Base from './Base';
+import { always, isNothing, emptyObject } from './U'
+import Base from './Base'
 
 const reviverFactory = itemMetadata => (k, v) => {
   if (k !== '') {
-    return v;
+    return v
   }
 
-  const maybeValue = (v === null) ? null : itemMetadata.reviver(k, v);
+  const maybeValue = (v === null)
+    ? null
+    : itemMetadata.reviver(k, v)
 
-  return new Maybe(maybeValue);
-};
+  return new Maybe(maybeValue)
+}
 
 class Nothing {
-  toJSON() {
-    return null;
+  toJSON () {
+    return null
   }
 }
 
 export class Just {
-  constructor(v) {
-    this.get = always(v);
+  constructor (v) {
+    this.get = always(v)
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  toJSON() {
-    const v = this.get();
+  toJSON () {
+    const v = this.get()
 
-    return (v.toJSON) ? v.toJSON() : v;
+    return (v.toJSON)
+      ? v.toJSON()
+      : v
   }
 }
 
-export const nothing = new Nothing();
+export const nothing = new Nothing()
 
 class Maybe extends Base {
-  constructor(v) {
-    super(Maybe, {});
+  constructor (v, nothingCheck = true) {
+    super(Maybe)
 
-    const inner = (isNothing(v)) ? nothing : new Just(v);
-    this.inner = always(inner);
+    const inner = (nothingCheck && isNothing(v))
+      ? nothing
+      : new Just(v)
 
-    Object.freeze(this);
+    this.inner = always(inner)
+
+    Object.freeze(this)
   }
 
-  set(field, v) {
+  set (field, v) {
     if (this.isEmpty()) {
-      return new Maybe(null);
+      return this
     }
 
-    const item = this.inner().get();
+    const item = this.inner().get()
 
-    return new Maybe(item.set(field, v));
+    return new Maybe(item.set(field, v))
   }
 
-  setPath(path, v) {
+  setPath (path, v) {
     if (path.length === 0) {
-      return new Maybe(v);
+      return Maybe.of(v)
     }
 
     if (this.isEmpty()) {
-      return new Maybe(null);
+      return this
     }
 
-    const item = this.inner().get();
-    const inner = (item.setPath) ? item.setPath(path, v) : null;
+    const item = this.inner().get()
 
-    return new Maybe(inner);
+    const inner = (item.setPath)
+      ? item.setPath(path, v)
+      : null
+
+    return Maybe.of(inner)
   }
 
-  isEmpty() {
-    return (this.inner() === nothing);
+  isEmpty () {
+    return (this.inner() === nothing)
   }
 
-  getOrElse(v) {
-    return this.isEmpty() ? v : this.inner().get();
+  getOrElse (v) {
+    return this.isEmpty()
+      ? v
+      : this.inner().get()
   }
 
-  map(f) {
-    const v = this.isEmpty() ? null : f(this.inner().get());
-
-    return new Maybe(v);
+  map (f) {
+    return this.isEmpty()
+      ? this
+      : Maybe.ofAny(f(this.inner().get()))
   }
 
-  toJSON() {
-    return this.inner().toJSON();
+  toJSON () {
+    return this.inner().toJSON()
   }
 
-  static of(v) {
-    return new Maybe(v);
+  static of (v) {
+    return new Maybe(v)
   }
 
-  static metadata(itemMetadata) {
-    return Object.freeze({type: Maybe, reviver: reviverFactory(itemMetadata)});
+  static ofAny (v) {
+    return new Maybe(v, false)
   }
 
-  static innerTypes() {
-    return emptyObject;
+  static metadata (itemMetadata) {
+    return Object.freeze({type: Maybe, reviver: reviverFactory(itemMetadata)})
+  }
+
+  static innerTypes () {
+    return emptyObject
   }
 }
 
-Maybe.displayName = 'Maybe';
-Maybe.EMPTY = Maybe.of();
+Maybe.displayName = 'Maybe'
+Maybe.EMPTY = Maybe.of()
 
-export default Object.freeze(Maybe);
+export default Object.freeze(Maybe)

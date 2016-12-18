@@ -1,25 +1,25 @@
-'use strict';
+/* eslint-env mocha */
 
 export default M => {
-  const { _, asIs, maybe } = M.metadata;
+  const { _, string, maybe } = M.metadata
 
   class Friend extends M.Base {
-    constructor(fields) {
-      super(Friend, fields);
+    constructor (fields) {
+      super(Friend, fields)
     }
 
-    static innerTypes(depth) {
+    static innerTypes (depth) {
       return Object.freeze({
-        name: asIs(String),
+        name: string(),
         bestFriend: maybe(_(Friend, depth))
-      });
+      })
     }
   }
 
   Friend.EMPTY = new Friend({
     name: '',
     bestFriend: M.Maybe.EMPTY
-  });
+  })
 
-  return Object.freeze(Friend);
-};
+  return Object.freeze(Friend)
+}

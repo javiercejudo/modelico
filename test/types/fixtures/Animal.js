@@ -1,23 +1,23 @@
-'use strict';
+/* eslint-env mocha */
 
 export default M => {
-  const { asIs } = M.metadata;
+  const { string } = M.metadata
 
   class Animal extends M.Base {
-    constructor(fields) {
-      super(Animal, fields);
+    constructor (fields) {
+      super(Animal, fields)
     }
 
-    speak() {
-      return 'hello';
+    speak () {
+      return 'hello'
     }
 
-    static innerTypes() {
+    static innerTypes () {
       return Object.freeze({
-        name: asIs(String)
-      });
+        name: string()
+      })
     }
   }
 
-  return Object.freeze(Animal);
-};
+  return Object.freeze(Animal)
+}
