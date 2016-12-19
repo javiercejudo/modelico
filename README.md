@@ -205,8 +205,8 @@ Then, we can use it as follows:
 ```js
 const pet = M.fromJSON(Animal, '{"name": null}');
 
-pet.isEmpty(); //=> true
-pet.getOrElse('Bane'); //=> Bane
+pet.name().isEmpty(); //=> true
+pet.name().getOrElse('Bane'); //=> Bane
 ```
 
 ## ES2015 proxies
