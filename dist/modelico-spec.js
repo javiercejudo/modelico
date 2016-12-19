@@ -1658,14 +1658,11 @@ var ModelicoMaybe = (function (should, M) {
           return x === null ? 5 : 5 + x;
         };
 
-        var mdouble = function mdouble(x) {
-          return x.isEmpty() ? x : M.Maybe.of(double(x.inner().get()));
-        };
-        var mplus5 = function mplus5(x) {
-          return x.isEmpty() ? x : M.Maybe.of(plus5(x.inner().get()));
+        var doublePlus5 = function doublePlus5(x) {
+          return plus5(double(x));
         };
 
-        should(mplus5(mdouble(M.Maybe.of(10))).inner().get()).be.exactly(M.Maybe.of(10).map(double).map(plus5).inner().get()).and.exactly(25);
+        should(M.Maybe.of(10).map(doublePlus5).inner().get()).be.exactly(M.Maybe.of(10).map(double).map(plus5).inner().get()).and.exactly(25);
 
         should(M.Maybe.of(10).map(function (x) {
           return null;

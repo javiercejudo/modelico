@@ -1,4 +1,4 @@
-var version = "19.0.1";
+var version = "19.0.2";
 
 
 
@@ -273,7 +273,7 @@ class Maybe extends Base$1 {
     const innerItem = inner.get();
     const otherInnerItem = otherInner.get();
 
-    return innerItem.equals
+    return isSomething(innerItem) && innerItem.equals
       ? innerItem.equals(otherInnerItem)
       : Object.is(innerItem, otherInnerItem)
   }
@@ -415,7 +415,7 @@ class AbstractMap extends Base$1 {
       return item.every((itemPart, index) => {
         const otherItemPart = otherItem[index];
 
-        return itemPart.equals
+        return isSomething(itemPart) && itemPart.equals
           ? itemPart.equals(otherItemPart)
           : Object.is(itemPart, otherItemPart)
       })
@@ -760,7 +760,7 @@ const iterableEquals = (thisArg, other) => {
   return items.every((item, index) => {
     const otherItem = otherItems[index];
 
-    return item.equals
+    return isSomething(item) && item.equals
       ? item.equals(otherItem)
       : Object.is(item, otherItem)
   })

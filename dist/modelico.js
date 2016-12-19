@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "19.0.1";
+var version = "19.0.2";
 
 
 
@@ -531,7 +531,7 @@ var Maybe = function (_Base) {
       var innerItem = inner.get();
       var otherInnerItem = otherInner.get();
 
-      return innerItem.equals ? innerItem.equals(otherInnerItem) : Object.is(innerItem, otherInnerItem);
+      return isSomething(innerItem) && innerItem.equals ? innerItem.equals(otherInnerItem) : Object.is(innerItem, otherInnerItem);
     }
   }], [{
     key: 'of',
@@ -701,7 +701,7 @@ var AbstractMap = function (_Base) {
         return item.every(function (itemPart, index) {
           var otherItemPart = otherItem[index];
 
-          return itemPart.equals ? itemPart.equals(otherItemPart) : Object.is(itemPart, otherItemPart);
+          return isSomething(itemPart) && itemPart.equals ? itemPart.equals(otherItemPart) : Object.is(itemPart, otherItemPart);
         });
       });
     }
@@ -1107,7 +1107,7 @@ var iterableEquals = function iterableEquals(thisArg, other) {
   return items.every(function (item, index) {
     var otherItem = otherItems[index];
 
-    return item.equals ? item.equals(otherItem) : Object.is(item, otherItem);
+    return isSomething(item) && item.equals ? item.equals(otherItem) : Object.is(item, otherItem);
   });
 };
 
