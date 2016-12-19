@@ -151,7 +151,9 @@ export default (should, M) => () => {
 
       modelicoMap.equals(modelicoMap).should.be.exactly(true)
       modelicoMap.equals(modelicoMap2).should.be.exactly(true)
+
       modelicoMap.equals(2).should.be.exactly(false)
+      M.Map.EMPTY.equals(modelicoMap).should.be.exactly(false)
     })
 
     it('should have Object.is and Map key value semantics', () => {

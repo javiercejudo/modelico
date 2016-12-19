@@ -29,9 +29,14 @@ export const iterableEquals = (thisArg, other) => {
     return false
   }
 
+  const items = [...thisArg]
   const otherItems = [...other]
 
-  return [...thisArg].every((item, index) => {
+  if (items.length !== otherItems.length) {
+    return false
+  }
+
+  return items.every((item, index) => {
     const otherItem = otherItems[index]
 
     return item.equals
