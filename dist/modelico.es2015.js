@@ -1,4 +1,4 @@
-var version = "19.0.0";
+var version = "19.0.1";
 
 
 
@@ -402,9 +402,14 @@ class AbstractMap extends Base$1 {
       return false
     }
 
+    const items = [...this];
     const otherItems = [...other];
 
-    return [...this].every((item, index) => {
+    if (items.length !== otherItems.length) {
+      return false
+    }
+
+    return items.every((item, index) => {
       const otherItem = otherItems[index];
 
       return item.every((itemPart, index) => {
@@ -745,9 +750,14 @@ const iterableEquals = (thisArg, other) => {
     return false
   }
 
+  const items = [...thisArg];
   const otherItems = [...other];
 
-  return [...thisArg].every((item, index) => {
+  if (items.length !== otherItems.length) {
+    return false
+  }
+
+  return items.every((item, index) => {
     const otherItem = otherItems[index];
 
     return item.equals

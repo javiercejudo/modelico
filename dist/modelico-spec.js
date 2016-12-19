@@ -928,7 +928,9 @@ var ModelicoMap = (function (should, M) {
 
         modelicoMap.equals(modelicoMap).should.be.exactly(true);
         modelicoMap.equals(modelicoMap2).should.be.exactly(true);
+
         modelicoMap.equals(2).should.be.exactly(false);
+        M.Map.EMPTY.equals(modelicoMap).should.be.exactly(false);
       });
 
       it('should have Object.is and Map key value semantics', function () {
@@ -1262,9 +1264,11 @@ var ModelicoList = (function (should, M) {
 
         modelicoList1.equals(modelicoList1).should.be.exactly(true);
         modelicoList1.equals(modelicoList2).should.be.exactly(true);
+
         modelicoList1.equals(function () {
           return 1;
         }).should.be.exactly(false);
+        M.List.EMPTY.equals(modelicoList1).should.be.exactly(false);
       });
 
       it('should support non-primitive types', function () {
@@ -1441,7 +1445,9 @@ var ModelicoSet = (function (should, M) {
 
         modelicoSet1.equals(modelicoSet1).should.be.exactly(true);
         modelicoSet1.equals(modelicoSet2).should.be.exactly(true);
+
         modelicoSet1.equals(/abc/).should.be.exactly(false);
+        M.Set.EMPTY.equals(modelicoSet1).should.be.exactly(false);
       });
 
       it('should have Object.is and Set value semantics', function () {

@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "19.0.0";
+var version = "19.0.1";
 
 
 
@@ -688,9 +688,14 @@ var AbstractMap = function (_Base) {
         return false;
       }
 
+      var items = [].concat(toConsumableArray(this));
       var otherItems = [].concat(toConsumableArray(other));
 
-      return [].concat(toConsumableArray(this)).every(function (item, index) {
+      if (items.length !== otherItems.length) {
+        return false;
+      }
+
+      return items.every(function (item, index) {
         var otherItem = otherItems[index];
 
         return item.every(function (itemPart, index) {
@@ -1092,9 +1097,14 @@ var iterableEquals = function iterableEquals(thisArg, other) {
     return false;
   }
 
+  var items = [].concat(toConsumableArray(thisArg));
   var otherItems = [].concat(toConsumableArray(other));
 
-  return [].concat(toConsumableArray(thisArg)).every(function (item, index) {
+  if (items.length !== otherItems.length) {
+    return false;
+  }
+
+  return items.every(function (item, index) {
     var otherItem = otherItems[index];
 
     return item.equals ? item.equals(otherItem) : Object.is(item, otherItem);
