@@ -164,10 +164,9 @@ export default (should, M) => () => {
       const double = x => (x === null) ? 0 : 2 * x
       const plus5 = x => (x === null) ? 5 : 5 + x
 
-      const mdouble = x => x.isEmpty() ? x : M.Maybe.of(double(x.inner().get()))
-      const mplus5 = x => x.isEmpty() ? x : M.Maybe.of(plus5(x.inner().get()))
+      const doublePlus5 = x => plus5(double(x))
 
-      should(mplus5(mdouble(M.Maybe.of(10))).inner().get())
+      should(M.Maybe.of(10).map(doublePlus5).inner().get())
         .be.exactly(M.Maybe.of(10).map(double).map(plus5).inner().get())
         .and.exactly(25)
 
