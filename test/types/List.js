@@ -182,7 +182,9 @@ export default (should, M) => () => {
 
       modelicoList1.equals(modelicoList1).should.be.exactly(true)
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
+
       modelicoList1.equals(() => 1).should.be.exactly(false)
+      M.List.EMPTY.equals(modelicoList1).should.be.exactly(false)
     })
 
     it('should support non-primitive types', () => {

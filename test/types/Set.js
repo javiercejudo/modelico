@@ -144,7 +144,9 @@ export default (should, M) => () => {
 
       modelicoSet1.equals(modelicoSet1).should.be.exactly(true)
       modelicoSet1.equals(modelicoSet2).should.be.exactly(true)
+
       modelicoSet1.equals(/abc/).should.be.exactly(false)
+      M.Set.EMPTY.equals(modelicoSet1).should.be.exactly(false)
     })
 
     it('should have Object.is and Set value semantics', () => {

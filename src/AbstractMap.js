@@ -50,9 +50,14 @@ class AbstractMap extends Base {
       return false
     }
 
+    const items = [...this]
     const otherItems = [...other]
 
-    return [...this].every((item, index) => {
+    if (items.length !== otherItems.length) {
+      return false
+    }
+
+    return items.every((item, index) => {
       const otherItem = otherItems[index]
 
       return item.every((itemPart, index) => {
