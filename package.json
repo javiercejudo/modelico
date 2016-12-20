@@ -43,7 +43,7 @@
     "babel-polyfill": "^6.16.0",
     "babel-preset-es2015-rollup": "^1.1.1",
     "babili": "0.0.9",
-    "flow-bin": "^0.36.0",
+    "flow-bin": "^0.37.3",
     "foreman": "^2.0.0",
     "gulp": "^3.9.0",
     "gulp-codecov": "^2.0.2",
