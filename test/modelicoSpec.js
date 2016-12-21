@@ -49,7 +49,7 @@ import featuresSimple from './features/simple'
 import featuresAdvanced from './features/advanced'
 import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
-import Immutable from './Immutable.js/index'
+import ImmutableExamples from './Immutable.js/index'
 import ImmutableProxied from './Immutable.js/proxied'
 
 import proxyMap from './proxies/proxyMap'
@@ -81,7 +81,7 @@ export default (options, should, M) => () => {
   describe('Readme advanced features', featuresAdvanced(...deps))
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps))
   describe('Deep nesting features', featuresDeepNesting(...deps))
-  describe('Immutable.js examples', Immutable(...utilsAndDeps))
+  describe('Immutable.js examples', ImmutableExamples(...utilsAndDeps))
 
   U.skipDescribeIfNoProxies(
     'Immutable.js examples (proxied)',
