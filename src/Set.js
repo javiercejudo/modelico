@@ -1,4 +1,6 @@
-import { isNothing, unsupported, emptyObject } from './U'
+import Immutable from 'immutable'
+
+import { always, isNothing, unsupported, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
 import Base from './Base'
 
@@ -10,9 +12,9 @@ class ModelicoSet extends Base {
       throw TypeError('missing set')
     }
 
-    const innerSet = new Set(innerSetOrig)
+    const innerSet = Immutable.OrderedSet(innerSetOrig)
 
-    this.inner = () => new Set(innerSet)
+    this.inner = always(innerSet)
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
 
     Object.freeze(this)

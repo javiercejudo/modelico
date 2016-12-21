@@ -1,12 +1,18 @@
-import { isNothing, equals, haveDifferentTypes } from './U'
+import Immutable from 'immutable'
+
+import { always, isNothing, haveDifferentTypes } from './U'
 import { typeSymbol } from './symbols'
 import Base from './Base'
 
 export const set = (thisArg, Type, key, value) => {
-  const newMap = thisArg.inner()
-  newMap.set(key, value)
+  const immutableMap = thisArg.inner()
+  const newImmutableMap = immutableMap.set(key, value)
 
-  return Type.fromMap(newMap)
+  if (immutableMap === newImmutableMap) {
+    return thisArg
+  }
+
+  return Type.fromArray([...newImmutableMap])
 }
 
 export const of = (Type, args) => {
@@ -37,9 +43,9 @@ class AbstractMap extends Base {
       throw TypeError('missing map')
     }
 
-    const innerMap = new Map(innerMapOrig)
+    const innerMap = Immutable.OrderedMap(innerMapOrig)
 
-    this.inner = () => new Map(innerMap)
+    this.inner = always(innerMap)
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]()
   }
 
@@ -67,20 +73,7 @@ class AbstractMap extends Base {
       return false
     }
 
-    const items = [...this]
-    const otherItems = [...other]
-
-    if (items.length !== otherItems.length) {
-      return false
-    }
-
-    return items.every((item, index) => {
-      const otherItem = otherItems[index]
-
-      return item.every((itemPart, index) => {
-        return equals(itemPart, otherItem[index])
-      })
-    })
+    return this.inner().equals(other.inner())
   }
 }
 

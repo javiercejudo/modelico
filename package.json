@@ -1,5 +1,5 @@
 {
-  "name": "modelico",
+  "name": "modelico-immutable",
   "version": "19.0.3",
   "description": "Universal library for serialisable immutable models",
   "main": "dist/modelico.js",
@@ -50,6 +50,7 @@
     "gulp-istanbul": "^1.0.0",
     "gulp-mocha": "^3.0.0",
     "gulp-plumber": "^1.1.0",
+    "immutable": "^3.8.1",
     "karma": "^1.1.2",
     "karma-chrome-launcher": "^2.0.0",
     "karma-firefox-launcher": "^1.0.0",

@@ -158,19 +158,6 @@ person3.pets().inner()[0].name(); //=> 'Bane'
 person1.pets().inner()[0].name(); //=> 'Robbie'
 ```
 
-The same principle applies across all Modélico classes:
-
-```js
-// While person.pets().inner() is a plain array,
-// we can shift to grab the first item without
-// modifying the internal list, as we are really
-// getting a clone of it
-person1.pets().inner().shift().speak(); //=> 'My name is Robbie!'
-
-// When called again, the list is still intact
-person1.pets().inner().shift().speak(); //=> 'My name is Robbie!'
-```
-
 ## Optional / null values
 
 In the examples above, a pet with a `null` or missing `name` would cause a

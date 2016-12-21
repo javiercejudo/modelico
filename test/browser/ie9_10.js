@@ -1,4 +1,4 @@
-/* global modelicoSpec, Should, Modelico */
+/* global modelicoSpec, Should, Modelico, Immutable */
 /* eslint-env mocha */
 
 'use strict'
@@ -37,4 +37,4 @@ Object.getPrototypeOf = function getPrototypeOf (object) {
   return null
 }
 
-describe('Modelico', modelicoSpec({}, Should, Modelico))
+describe('Modelico', modelicoSpec({}, Should, Modelico, Immutable))

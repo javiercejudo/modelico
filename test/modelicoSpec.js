@@ -59,9 +59,9 @@ import proxyDate from './proxies/proxyDate'
 
 import cases from './cases/index'
 
-export default (options, should, M) => () => {
+export default (options, should, M, Immutable) => () => {
   const U = buildUtils(options)
-  const deps = [should, M]
+  const deps = [should, M, Immutable]
   const utilsAndDeps = [U].concat(deps)
 
   describe('Base', Base(...utilsAndDeps))

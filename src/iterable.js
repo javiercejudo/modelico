@@ -1,4 +1,4 @@
-import { partial, reviverOrAsIs, equals, haveDifferentTypes } from './U'
+import { partial, reviverOrAsIs, haveDifferentTypes } from './U'
 
 const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
   if (k !== '') {
@@ -29,14 +29,5 @@ export const iterableEquals = (thisArg, other) => {
     return false
   }
 
-  const items = [...thisArg]
-  const otherItems = [...other]
-
-  if (items.length !== otherItems.length) {
-    return false
-  }
-
-  return items.every((item, index) => {
-    return equals(item, otherItems[index])
-  })
+  return thisArg.inner().equals(other.inner())
 }

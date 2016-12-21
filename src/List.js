@@ -1,4 +1,6 @@
-import { isNothing, emptyObject } from './U'
+import Immutable from 'immutable'
+
+import { always, isNothing, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
 import Base from './Base'
 
@@ -10,17 +12,16 @@ class List extends Base {
       throw TypeError('missing list')
     }
 
-    const innerList = [...innerListOrig]
+    const innerList = Immutable.List(innerListOrig)
 
-    this.inner = () => [...innerList]
+    this.inner = always(innerList)
     this[Symbol.iterator] = () => innerList[Symbol.iterator]()
 
     Object.freeze(this)
   }
 
   set (index, value) {
-    const newList = this.inner()
-    newList[index] = value
+    const newList = [...this.inner().set(index, value)]
 
     return List.fromArray(newList)
   }
@@ -31,7 +32,7 @@ class List extends Base {
     }
 
     const [key, ...restPath] = path
-    const item = this.inner()[key]
+    const item = this.inner().get(key)
 
     if (!item.setPath) {
       return this.set(key, value)
@@ -41,7 +42,7 @@ class List extends Base {
   }
 
   toJSON () {
-    return this.inner()
+    return [...this.inner()]
   }
 
   equals (other) {

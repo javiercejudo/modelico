@@ -1,6 +1,6 @@
-/* global modelicoSpec, Should, Modelico */
+/* global modelicoSpec, Should, Modelico, Immutable */
 /* eslint-env mocha */
 
 'use strict'
 
-describe('Modelico', modelicoSpec({}, Should, Modelico))
+describe('Modelico', modelicoSpec({}, Should, Modelico, Immutable))

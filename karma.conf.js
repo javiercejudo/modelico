@@ -14,6 +14,7 @@ module.exports = function (config) {
     files: [
       'node_modules/should/should.min.js',
       'node_modules/babel-polyfill/dist/polyfill.min.js',
+      'node_modules/immutable/dist/immutable.min.js',
       'dist/modelico.js',
       'dist/modelico-spec.js',
       'test/browser/' + (process.env.ENTRY || 'index.js')

@@ -92,7 +92,7 @@ export default (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author1 = JSON.parse(authorJson, _(Person).reviver)
 
-      const newListArray = author1.importantDatesList().inner()
+      const newListArray = [...author1.importantDatesList().inner()]
       newListArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')))
 
       const author2 = author1.set(

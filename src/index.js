@@ -22,13 +22,13 @@ import asIs from './asIs'
 const internalNonMutators = ['set', 'setPath']
 
 const mapNonMutators = internalNonMutators
-const mapMutators = ['set', 'delete', 'clear']
+const mapMutators = []
 
 const setNonMutators = internalNonMutators
-const setMutators = ['add', 'delete', 'clear']
+const setMutators = []
 
 const listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter'])
-const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift']
+const listMutators = []
 
 const dateNonMutators = internalNonMutators
 const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds',

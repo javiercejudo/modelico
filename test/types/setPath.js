@@ -5,7 +5,7 @@ export default (should, M) => () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This')
     const array1 = M.List.of('totally', 'immutable', hammer)
 
-    array1.inner()[1] = 'I’m going to mutate you!'
+    array1.inner().set(1, 'I’m going to mutate you!')
     Array.from(array1)[1].should.be.exactly('immutable')
 
     array1.setPath([2, 'hammer'], 'hm, surely I can mutate this nested object...')
