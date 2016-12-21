@@ -1,7 +1,12 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global.modelicoSpec = factory());
+  (function() {
+  	var current = global.modelicoSpec;
+  	var exports = factory();
+  	global.modelicoSpec = exports;
+  	exports.noConflict = function() { global.modelicoSpec = current; return exports; };
+  })();
 }(this, (function () { 'use strict';
 
 /* eslint-env mocha */
@@ -55,30 +60,7 @@ var createClass = function () {
 
 
 
-var get = function get(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
 
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
 
 var inherits = function (subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
@@ -116,27 +98,7 @@ var possibleConstructorReturn = function (self, call) {
 
 
 
-var set = function set(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
 
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
 
 
 
@@ -1539,6 +1501,18 @@ var ModelicoMaybe = (function (should, M) {
         var maybe2 = maybe1.setPath(['a'], 200);
 
         maybe2.isEmpty().should.be.exactly(true);
+
+        M.Maybe.of(2).set('a', 3).isEmpty().should.be.exactly(true);
+      });
+
+      it('should support Maybe of null or undefined', function () {
+        should(M.Maybe.ofAny(null).setPath([], 2).toJSON()).be.exactly(2);
+
+        should(M.Maybe.ofAny().setPath(['a'], 2).toJSON()).be.exactly(null);
+
+        should(M.Maybe.ofAny(null).set('a', 2).inner().get()).be.exactly(null);
+
+        should(M.Maybe.ofAny().set('a', 2).inner().get()).be.exactly(undefined);
       });
     });
 
@@ -1559,6 +1533,12 @@ var ModelicoMaybe = (function (should, M) {
 
         var maybe2 = M.Maybe.of(null);
         JSON.stringify(maybe2).should.be.exactly('null');
+      });
+
+      it('should support Maybe of null or undefined', function () {
+        JSON.stringify(M.Maybe.ofAny(null)).should.be.exactly('null');
+
+        JSON.stringify(M.Maybe.ofAny()).should.be.exactly('null');
       });
     });
 

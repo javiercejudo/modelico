@@ -1,4 +1,4 @@
-var version = "19.0.2";
+var version = "19.0.3";
 
 
 
@@ -185,6 +185,10 @@ class Just {
   toJSON () {
     const v = this.get();
 
+    if (isNothing(v)) {
+      return null
+    }
+
     return (v.toJSON)
       ? v.toJSON()
       : v
@@ -213,7 +217,15 @@ class Maybe extends Base$1 {
 
     const item = this.inner().get();
 
-    return new Maybe(item.set(field, v))
+    if (isNothing(item)) {
+      return this
+    }
+
+    const newItem = (item.set)
+      ? item.set(field, v)
+      : null;
+
+    return new Maybe(newItem)
   }
 
   setPath (path, v) {
@@ -226,6 +238,10 @@ class Maybe extends Base$1 {
     }
 
     const item = this.inner().get();
+
+    if (isNothing(item)) {
+      return this
+    }
 
     const inner = (item.setPath)
       ? item.setPath(path, v)
@@ -273,7 +289,7 @@ class Maybe extends Base$1 {
     const innerItem = inner.get();
     const otherInnerItem = otherInner.get();
 
-    return isSomething(innerItem) && innerItem.equals
+    return (isSomething(innerItem) && innerItem.equals)
       ? innerItem.equals(otherInnerItem)
       : Object.is(innerItem, otherInnerItem)
   }
@@ -415,7 +431,7 @@ class AbstractMap extends Base$1 {
       return item.every((itemPart, index) => {
         const otherItemPart = otherItem[index];
 
-        return isSomething(itemPart) && itemPart.equals
+        return (isSomething(itemPart) && itemPart.equals)
           ? itemPart.equals(otherItemPart)
           : Object.is(itemPart, otherItemPart)
       })
@@ -760,7 +776,7 @@ const iterableEquals = (thisArg, other) => {
   return items.every((item, index) => {
     const otherItem = otherItems[index];
 
-    return isSomething(item) && item.equals
+    return (isSomething(item) && item.equals)
       ? item.equals(otherItem)
       : Object.is(item, otherItem)
   })
