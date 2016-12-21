@@ -63,7 +63,7 @@ class AbstractMap extends Base {
       return item.every((itemPart, index) => {
         const otherItemPart = otherItem[index]
 
-        return isSomething(itemPart) && itemPart.equals
+        return (isSomething(itemPart) && itemPart.equals)
           ? itemPart.equals(otherItemPart)
           : Object.is(itemPart, otherItemPart)
       })

@@ -29,6 +29,10 @@ export class Just {
   toJSON () {
     const v = this.get()
 
+    if (isNothing(v)) {
+      return null
+    }
+
     return (v.toJSON)
       ? v.toJSON()
       : v
@@ -57,7 +61,15 @@ class Maybe extends Base {
 
     const item = this.inner().get()
 
-    return new Maybe(item.set(field, v))
+    if (isNothing(item)) {
+      return this
+    }
+
+    const newItem = (item.set)
+      ? item.set(field, v)
+      : null
+
+    return new Maybe(newItem)
   }
 
   setPath (path, v) {
@@ -70,6 +82,10 @@ class Maybe extends Base {
     }
 
     const item = this.inner().get()
+
+    if (isNothing(item)) {
+      return this
+    }
 
     const inner = (item.setPath)
       ? item.setPath(path, v)
@@ -117,7 +133,7 @@ class Maybe extends Base {
     const innerItem = inner.get()
     const otherInnerItem = otherInner.get()
 
-    return isSomething(innerItem) && innerItem.equals
+    return (isSomething(innerItem) && innerItem.equals)
       ? innerItem.equals(otherInnerItem)
       : Object.is(innerItem, otherInnerItem)
   }

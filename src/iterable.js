@@ -39,7 +39,7 @@ export const iterableEquals = (thisArg, other) => {
   return items.every((item, index) => {
     const otherItem = otherItems[index]
 
-    return isSomething(item) && item.equals
+    return (isSomething(item) && item.equals)
       ? item.equals(otherItem)
       : Object.is(item, otherItem)
   })

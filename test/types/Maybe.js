@@ -54,6 +54,23 @@ export default (should, M) => () => {
 
       maybe2.isEmpty()
         .should.be.exactly(true)
+
+      M.Maybe.of(2).set('a', 3).isEmpty()
+        .should.be.exactly(true)
+    })
+
+    it('should support Maybe of null or undefined', () => {
+      should(M.Maybe.ofAny(null).setPath([], 2).toJSON())
+        .be.exactly(2)
+
+      should(M.Maybe.ofAny().setPath(['a'], 2).toJSON())
+        .be.exactly(null)
+
+      should(M.Maybe.ofAny(null).set('a', 2).inner().get())
+        .be.exactly(null)
+
+      should(M.Maybe.ofAny().set('a', 2).inner().get())
+        .be.exactly(undefined)
     })
   })
 
@@ -74,6 +91,14 @@ export default (should, M) => () => {
 
       const maybe2 = M.Maybe.of(null)
       JSON.stringify(maybe2).should.be.exactly('null')
+    })
+
+    it('should support Maybe of null or undefined', () => {
+      JSON.stringify(M.Maybe.ofAny(null))
+        .should.be.exactly('null')
+
+      JSON.stringify(M.Maybe.ofAny())
+        .should.be.exactly('null')
     })
   })
 

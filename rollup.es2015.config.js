@@ -5,6 +5,6 @@ export default {
   entry: './index.js',
   format: 'es',
   moduleName: 'Modelico',
-  plugins: [nodeResolve(), json() ],
+  plugins: [ nodeResolve(), json() ],
   dest: './dist/modelico.es2015.js'
 }
