@@ -46,13 +46,14 @@ class Base {
       return new (this[typeSymbol]())(value)
     }
 
-    const item = this[path[0]]()
+    const [key, ...restPath] = path
+    const item = this[key]()
 
     if (!item.setPath) {
-      return this.set(path[0], value)
+      return this.set(key, value)
     }
 
-    return this.set(path[0], item.setPath(path.slice(1), value))
+    return this.set(key, item.setPath(restPath, value))
   }
 
   equals (other) {
