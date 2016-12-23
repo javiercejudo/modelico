@@ -237,8 +237,8 @@ export default (should, M) => () => {
       modelicoMaybe2.equals(modelicoMaybe3).should.be.exactly(true)
     })
 
-    it('should have Object.is semantics', () => {
-      M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(false)
+    it('should have same-value-zero semantics', () => {
+      M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(true)
       M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true)
     })
   })

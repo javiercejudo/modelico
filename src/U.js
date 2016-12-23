@@ -17,6 +17,9 @@ export const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identit
 export const isPlainObject = (x/* : mixed */)/* : boolean */ => typeof x === 'object' && !!x
 export const emptyObject = Object.freeze({})
 
+export const haveSameValues = (a/* : any */, b/* : any */)/* : boolean */ =>
+  (a === b) || Object.is(a, b)
+
 export const haveSameType = (a/* : any */, b/* : any */)/* : boolean */ => (a == null || b == null)
   ? a === b
   : a.constructor === b.constructor

@@ -200,8 +200,8 @@ export default (should, M) => () => {
       M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false)
     })
 
-    it('should have Object.is semantics', () => {
-      M.List.of(0).equals(M.List.of(-0)).should.be.exactly(false)
+    it('should have same-value-zero semantics', () => {
+      M.List.of(0).equals(M.List.of(-0)).should.be.exactly(true)
       M.List.of(NaN).equals(M.List.of(NaN)).should.be.exactly(true)
     })
   })

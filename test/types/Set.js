@@ -149,7 +149,7 @@ export default (should, M) => () => {
       M.Set.EMPTY.equals(modelicoSet1).should.be.exactly(false)
     })
 
-    it('should have Object.is and Set value semantics', () => {
+    it('should have same-value-zero semantics', () => {
       M.Set.of(0).equals(M.Set.of(-0)).should.be.exactly(true)
       M.Set.of(NaN).equals(M.Set.of(NaN)).should.be.exactly(true)
     })
