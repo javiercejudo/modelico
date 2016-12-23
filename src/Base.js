@@ -72,6 +72,14 @@ class Base {
     return this[fieldsSymbol]()
   }
 
+  toJS () {
+    return JSON.parse(JSON.stringify(this))
+  }
+
+  stringify (n) {
+    return JSON.stringify(this, null, n)
+  }
+
   static factory (...args) {
     return new Base(...args)
   }

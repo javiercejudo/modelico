@@ -147,6 +147,32 @@ export default (U, should, M) => () => {
     })
   })
 
+  describe('toJS', () => {
+    it('should return as primitives or arrays or objects only', () => {
+      const author1 = new Person({
+        givenName: 'Javier',
+        familyName: 'Cejudo',
+        birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+        favouritePartOfDay: PartOfDay.EVENING(),
+        lifeEvents: M.Map.EMPTY,
+        importantDatesList: M.List.EMPTY,
+        importantDatesSet: M.Set.EMPTY,
+        sex: Sex.MALE()
+      })
+
+      author1.toJS().should.eql({
+        birthday: '1988-04-16T00:00:00.000Z',
+        familyName: 'Cejudo',
+        favouritePartOfDay: 'EVENING',
+        givenName: 'Javier',
+        importantDatesList: [],
+        importantDatesSet: [],
+        lifeEvents: [],
+        sex: 'MALE'
+      })
+    })
+  })
+
   describe('stringifying', () => {
     it('should stringify types correctly', () => {
       const author1 = new Person({
@@ -162,6 +188,7 @@ export default (U, should, M) => () => {
 
       JSON.stringify(author1)
         .should.be.exactly(author1Json)
+        .and.exactly(author1.stringify())
     })
   })
 
