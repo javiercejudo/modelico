@@ -1,4 +1,4 @@
-import { isNothing, isSomething, haveDifferentTypes } from './U'
+import { isNothing, isSomething, haveDifferentTypes, haveSameValues } from './U'
 import { typeSymbol } from './symbols'
 import Base from './Base'
 
@@ -66,7 +66,7 @@ class AbstractMap extends Base {
 
         return (isSomething(itemPart) && itemPart.equals)
           ? itemPart.equals(otherItemPart)
-          : Object.is(itemPart, otherItemPart)
+          : haveSameValues(itemPart, otherItemPart)
       })
     })
   }
