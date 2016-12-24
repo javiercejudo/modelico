@@ -128,9 +128,9 @@ export default (U, should, M) => () => {
       const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi')
       const listOfPeople3 = listOfPeople2.setPath([0], M.fields(author))
 
-      listOfPeople1.inner()[0].givenName().should.be.exactly('Javier')
-      listOfPeople2.inner()[0].givenName().should.be.exactly('Javi')
-      listOfPeople3.inner()[0].givenName().should.be.exactly('Javier')
+      Array.from(listOfPeople1)[0].givenName().should.be.exactly('Javier')
+      Array.from(listOfPeople2)[0].givenName().should.be.exactly('Javi')
+      Array.from(listOfPeople3)[0].givenName().should.be.exactly('Javier')
     })
 
     it('should not support null (wrap with Maybe)', () => {

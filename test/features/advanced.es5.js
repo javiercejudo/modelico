@@ -57,10 +57,10 @@ export default (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo')
     person1.fullName().should.be.exactly('Javier Cejudo')
 
-    person1.pets().inner().shift().speak()
+    Array.from(person1.pets()).shift().speak()
       .should.be.exactly('My name is Robbie!')
 
-    person1.pets().inner().shift().speak()
+    Array.from(person1.pets()).shift().speak()
       .should.be.exactly('My name is Robbie!')
   })
 }

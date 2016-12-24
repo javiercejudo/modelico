@@ -4,25 +4,25 @@ export default (should, M) => () => {
   const p = M.proxyList
 
   it('length', () => {
-    const list1 = p(M.List.of(1, 2, 2, 3));
+    const list1 = p(M.List.of(1, 2, 2, 3))
 
-    (list1.length).should.be.exactly(4)
+    ;(list1.length).should.be.exactly(4)
   })
 
   it('[n]', () => {
-    const list1 = p(M.List.of(1, 2, 2, 3));
+    const list1 = p(M.List.of(1, 2, 2, 3))
 
-    (list1[0]).should.be.exactly(1);
-    (list1[1]).should.be.exactly(2);
-    (list1[2]).should.be.exactly(2);
-    (list1[3]).should.be.exactly(3)
+    ;(list1[0]).should.be.exactly(1)
+    ;(list1[1]).should.be.exactly(2)
+    ;(list1[2]).should.be.exactly(2)
+    ;(list1[3]).should.be.exactly(3)
 
-    should(list1[4]).be.exactly(undefined);
+    should(list1[4]).be.exactly(undefined)
 
-    (list1['0']).should.be.exactly(1);
-    (list1['1']).should.be.exactly(2);
-    (list1['2']).should.be.exactly(2);
-    (list1['3']).should.be.exactly(3)
+    ;(list1['0']).should.be.exactly(1)
+    ;(list1['1']).should.be.exactly(2)
+    ;(list1['2']).should.be.exactly(2)
+    ;(list1['3']).should.be.exactly(3)
 
     should(list1['4']).be.exactly(undefined)
   })
@@ -137,21 +137,21 @@ export default (should, M) => () => {
     const list = p(M.List.of(1, 2, 2, 3))
 
     let sum = 0
-    list.forEach(x => { sum += x });
+    list.forEach(x => { sum += x })
 
-    (sum).should.be.exactly(8)
+    ;(sum).should.be.exactly(8)
   })
 
   it('keys() / entries() / [@@iterator]()', () => {
-    const list = p(M.List.of(1, 2, 2, 3));
+    const list = p(M.List.of(1, 2, 2, 3))
 
-    [...list.entries()]
-      .should.eql([[0, 1], [1, 2], [2, 2], [3, 3]]);
+    Array.from(list.entries())
+      .should.eql([[0, 1], [1, 2], [2, 2], [3, 3]])
 
-    [...list.keys()]
-      .should.eql([0, 1, 2, 3]);
+    Array.from(list.keys())
+      .should.eql([0, 1, 2, 3])
 
-    [...list[Symbol.iterator]()]
+    Array.from(list[Symbol.iterator]())
       .should.eql([1, 2, 2, 3])
   })
 
@@ -247,10 +247,10 @@ export default (should, M) => () => {
   it('sort()', () => {
     const list = p(M.List.of(1, 2, 5, 4, 3))
 
-    list.sort().toJSON()
+    Array.from(list.sort())
       .should.eql([1, 2, 3, 4, 5])
 
-    list.sort().toJSON()
+    Array.from(list.sort())
       .should.eql([1, 2, 3, 4, 5])
   })
 

@@ -26,13 +26,13 @@ export default (U, should, M) => () => {
 
     const list2 = list1.push(3, 4, 5)
     const list3 = list2.unshift(0)
-    const list4 = list1.concat([...list2], [...list3]);
+    const list4 = list1.concat([...list2], [...list3])
 
-    (list1.length === 2).should.be.exactly(true);
-    (list2.length === 5).should.be.exactly(true);
-    (list3.length === 6).should.be.exactly(true);
-    (list4.length === 13).should.be.exactly(true);
-    (list4[0] === 1).should.be.exactly(true)
+    ;(list1.length === 2).should.be.exactly(true)
+    ;(list2.length === 5).should.be.exactly(true)
+    ;(list3.length === 6).should.be.exactly(true)
+    ;(list4.length === 13).should.be.exactly(true)
+    ;(list4[0] === 1).should.be.exactly(true)
   })
 
   it('JavaScript-first API (2)', () => {
@@ -78,9 +78,9 @@ export default (U, should, M) => () => {
 
   it('Equality treats Collections as Data', () => {
     const map1 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}))
-    const map2 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}));
+    const map2 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}))
 
-    (map1 !== map2).should.be.exactly(true)   // two different instances
+    ;(map1 !== map2).should.be.exactly(true)   // two different instances
     map1.equals(map2).should.be.exactly(true) // have equivalent values
   })
 
@@ -91,9 +91,9 @@ export default (U, should, M) => () => {
     res.push(4)
     res.push(5)
     res.push(6)
-    const list2 = _l(M.List.fromArray(res));
+    const list2 = _l(M.List.fromArray(res))
 
-    (list1.length === 3).should.be.exactly(true);
-    (list2.length === 6).should.be.exactly(true)
+    ;(list1.length === 3).should.be.exactly(true)
+    ;(list2.length === 6).should.be.exactly(true)
   })
 }
