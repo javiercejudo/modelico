@@ -26,6 +26,11 @@ export const haveSameType = (a/* : any */, b/* : any */)/* : boolean */ => (a ==
 
 export const haveDifferentTypes = pipe2(haveSameType, not)
 
+export const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
+  (isSomething(a) && a.equals)
+    ? a.equals(b)
+    : haveSameValues(a, b)
+
 export const getInnerTypes = (depth/* : number */, Type/* : Function */) => {
   if (!Type.innerTypes) {
     throw Error(`missing static innerTypes for ${Type.displayName || Type.name}`)

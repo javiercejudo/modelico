@@ -1,5 +1,5 @@
 import { objToArr, reviverOrAsIs, emptyObject } from './U'
-import { default as AbstractMap, set, metadata } from './AbstractMap'
+import { default as AbstractMap, set, of, metadata } from './AbstractMap'
 
 const parseMapper = (keyMetadata, valueMetadata) => pair => {
   const reviveKey = reviverOrAsIs(keyMetadata)
@@ -46,20 +46,8 @@ class ModelicoMap extends AbstractMap {
     return ModelicoMap.fromMap(new Map(pairs))
   }
 
-  static of (...arr) {
-    const len = arr.length
-
-    if (len % 2 === 1) {
-      throw TypeError('Map.of requires an even number of arguments')
-    }
-
-    const pairs = []
-
-    for (let i = 0; i < len; i += 2) {
-      pairs.push([arr[i], arr[i + 1]])
-    }
-
-    return ModelicoMap.fromArray(pairs)
+  static of (...args) {
+    return of(ModelicoMap, args)
   }
 
   static fromObject (obj) {

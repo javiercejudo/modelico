@@ -1,5 +1,5 @@
 import { reviverOrAsIs, emptyObject } from './U'
-import { default as AbstractMap, set, metadata } from './AbstractMap'
+import { default as AbstractMap, set, of, metadata } from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1]
@@ -52,20 +52,8 @@ class EnumMap extends AbstractMap {
     return EnumMap.fromMap(new Map(pairs))
   }
 
-  static of (...arr) {
-    const len = arr.length
-
-    if (len % 2 === 1) {
-      throw TypeError('EnumMap.of requires an even number of arguments')
-    }
-
-    const pairs = []
-
-    for (let i = 0; i < len; i += 2) {
-      pairs.push([arr[i], arr[i + 1]])
-    }
-
-    return EnumMap.fromArray(pairs)
+  static of (...args) {
+    return of(EnumMap, args)
   }
 
   static metadata (keyMetadata, valueMetadata) {
