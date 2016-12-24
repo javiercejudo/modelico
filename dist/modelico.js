@@ -1,13 +1,15 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('immutable')) :
+	typeof define === 'function' && define.amd ? define(['immutable'], factory) :
 	(function() {
 		var current = global.Modelico;
-		var exports = factory();
+		var exports = factory(global.Immutable);
 		global.Modelico = exports;
 		exports.noConflict = function() { global.Modelico = current; return exports; };
 	})();
-}(this, (function () { 'use strict';
+}(this, (function (Immutable) { 'use strict';
+
+Immutable = 'default' in Immutable ? Immutable['default'] : Immutable;
 
 var version = "19.0.5";
 
@@ -224,10 +226,7 @@ var haveSameType = function haveSameType(a /* : any */, b /* : any */) {
 
 var haveDifferentTypes = pipe2(haveSameType, not);
 
-var equals$1 = function equals$1(a /* : any */, b /* : any */) {
-  return (/* : boolean */isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b)
-  );
-};
+
 
 var getInnerTypes = function getInnerTypes(depth /* : number */, Type /* : Function */) {
   if (!Type.innerTypes) {
@@ -626,10 +625,14 @@ Enum.displayName = 'Enum';
 var Enum$1 = Object.freeze(Enum);
 
 var set$2 = function set$2(thisArg, Type, key, value) {
-  var newMap = thisArg.inner();
-  newMap.set(key, value);
+  var immutableMap = thisArg.inner();
+  var newImmutableMap = immutableMap.set(key, value);
 
-  return Type.fromMap(newMap);
+  if (immutableMap === newImmutableMap) {
+    return thisArg;
+  }
+
+  return Type.fromArray([].concat(toConsumableArray(newImmutableMap)));
 };
 
 var of$1 = function of$1(Type, args) {
@@ -664,11 +667,9 @@ var AbstractMap = function (_Base) {
       throw TypeError('missing map');
     }
 
-    var innerMap = new Map(innerMapOrig);
+    var innerMap = Immutable.OrderedMap(innerMapOrig);
 
-    _this.inner = function () {
-      return new Map(innerMap);
-    };
+    _this.inner = always(innerMap);
     _this[Symbol.iterator] = function () {
       return innerMap[Symbol.iterator]();
     };
@@ -705,20 +706,7 @@ var AbstractMap = function (_Base) {
         return false;
       }
 
-      var items = [].concat(toConsumableArray(this));
-      var otherItems = [].concat(toConsumableArray(other));
-
-      if (items.length !== otherItems.length) {
-        return false;
-      }
-
-      return items.every(function (item, index) {
-        var otherItem = otherItems[index];
-
-        return item.every(function (itemPart, index) {
-          return equals$1(itemPart, otherItem[index]);
-        });
-      });
+      return this.inner().equals(other.inner());
     }
   }]);
   return AbstractMap;
@@ -1096,16 +1084,7 @@ var iterableEquals = function iterableEquals(thisArg, other) {
     return false;
   }
 
-  var items = [].concat(toConsumableArray(thisArg));
-  var otherItems = [].concat(toConsumableArray(other));
-
-  if (items.length !== otherItems.length) {
-    return false;
-  }
-
-  return items.every(function (item, index) {
-    return equals$1(item, otherItems[index]);
-  });
+  return thisArg.inner().equals(other.inner());
 };
 
 var List = function (_Base) {
@@ -1120,11 +1099,9 @@ var List = function (_Base) {
       throw TypeError('missing list');
     }
 
-    var innerList = [].concat(toConsumableArray(innerListOrig));
+    var innerList = Immutable.List(innerListOrig);
 
-    _this.inner = function () {
-      return [].concat(toConsumableArray(innerList));
-    };
+    _this.inner = always(innerList);
     _this[Symbol.iterator] = function () {
       return innerList[Symbol.iterator]();
     };
@@ -1136,8 +1113,7 @@ var List = function (_Base) {
   createClass(List, [{
     key: 'set',
     value: function set(index, value) {
-      var newList = this.inner();
-      newList[index] = value;
+      var newList = [].concat(toConsumableArray(this.inner().set(index, value)));
 
       return List.fromArray(newList);
     }
@@ -1152,7 +1128,7 @@ var List = function (_Base) {
           key = _path[0],
           restPath = _path.slice(1);
 
-      var item = this.inner()[key];
+      var item = this.inner().get(key);
 
       if (!item.setPath) {
         return this.set(key, value);
@@ -1163,7 +1139,7 @@ var List = function (_Base) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      return this.inner();
+      return [].concat(toConsumableArray(this.inner()));
     }
   }, {
     key: 'equals',
@@ -1215,11 +1191,9 @@ var ModelicoSet = function (_Base) {
       throw TypeError('missing set');
     }
 
-    var innerSet = new Set(innerSetOrig);
+    var innerSet = Immutable.OrderedSet(innerSetOrig);
 
-    _this.inner = function () {
-      return new Set(innerSet);
-    };
+    _this.inner = always(innerSet);
     _this[Symbol.iterator] = function () {
       return innerSet[Symbol.iterator]();
     };
@@ -1370,13 +1344,13 @@ var asIs = (function () {
 var internalNonMutators = ['set', 'setPath'];
 
 var mapNonMutators = internalNonMutators;
-var mapMutators = ['set', 'delete', 'clear'];
+var mapMutators = [];
 
 var setNonMutators = internalNonMutators;
-var setMutators = ['add', 'delete', 'clear'];
+var setMutators = [];
 
 var listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter']);
-var listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'];
+var listMutators = [];
 
 var dateNonMutators = internalNonMutators;
 var dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];

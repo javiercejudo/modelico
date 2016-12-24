@@ -1,3 +1,5 @@
+import Immutable from 'immutable';
+
 var version = "19.0.5";
 
 
@@ -40,10 +42,7 @@ const haveSameType = (a/* : any */, b/* : any */)/* : boolean */ => (a == null |
 
 const haveDifferentTypes = pipe2(haveSameType, not);
 
-const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
-  (isSomething(a) && a.equals)
-    ? a.equals(b)
-    : haveSameValues(a, b);
+
 
 const getInnerTypes = (depth/* : number */, Type/* : Function */) => {
   if (!Type.innerTypes) {
@@ -388,10 +387,14 @@ Enum.displayName = 'Enum';
 var Enum$1 = Object.freeze(Enum);
 
 const set = (thisArg, Type, key, value) => {
-  const newMap = thisArg.inner();
-  newMap.set(key, value);
+  const immutableMap = thisArg.inner();
+  const newImmutableMap = immutableMap.set(key, value);
 
-  return Type.fromMap(newMap)
+  if (immutableMap === newImmutableMap) {
+    return thisArg
+  }
+
+  return Type.fromArray([...newImmutableMap])
 };
 
 const of = (Type, args) => {
@@ -422,9 +425,9 @@ class AbstractMap extends Base$1 {
       throw TypeError('missing map')
     }
 
-    const innerMap = new Map(innerMapOrig);
+    const innerMap = Immutable.OrderedMap(innerMapOrig);
 
-    this.inner = () => new Map(innerMap);
+    this.inner = always(innerMap);
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
   }
 
@@ -452,20 +455,7 @@ class AbstractMap extends Base$1 {
       return false
     }
 
-    const items = [...this];
-    const otherItems = [...other];
-
-    if (items.length !== otherItems.length) {
-      return false
-    }
-
-    return items.every((item, index) => {
-      const otherItem = otherItems[index];
-
-      return item.every((itemPart, index) => {
-        return equals(itemPart, otherItem[index])
-      })
-    })
+    return this.inner().equals(other.inner())
   }
 }
 
@@ -772,16 +762,7 @@ const iterableEquals = (thisArg, other) => {
     return false
   }
 
-  const items = [...thisArg];
-  const otherItems = [...other];
-
-  if (items.length !== otherItems.length) {
-    return false
-  }
-
-  return items.every((item, index) => {
-    return equals(item, otherItems[index])
-  })
+  return thisArg.inner().equals(other.inner())
 };
 
 class List extends Base$1 {
@@ -792,17 +773,16 @@ class List extends Base$1 {
       throw TypeError('missing list')
     }
 
-    const innerList = [...innerListOrig];
+    const innerList = Immutable.List(innerListOrig);
 
-    this.inner = () => [...innerList];
+    this.inner = always(innerList);
     this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     Object.freeze(this);
   }
 
   set (index, value) {
-    const newList = this.inner();
-    newList[index] = value;
+    const newList = [...this.inner().set(index, value)];
 
     return List.fromArray(newList)
   }
@@ -813,7 +793,7 @@ class List extends Base$1 {
     }
 
     const [key, ...restPath] = path;
-    const item = this.inner()[key];
+    const item = this.inner().get(key);
 
     if (!item.setPath) {
       return this.set(key, value)
@@ -823,7 +803,7 @@ class List extends Base$1 {
   }
 
   toJSON () {
-    return this.inner()
+    return [...this.inner()]
   }
 
   equals (other) {
@@ -860,9 +840,9 @@ class ModelicoSet extends Base$1 {
       throw TypeError('missing set')
     }
 
-    const innerSet = new Set(innerSetOrig);
+    const innerSet = Immutable.OrderedSet(innerSetOrig);
 
-    this.inner = () => new Set(innerSet);
+    this.inner = always(innerSet);
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
     Object.freeze(this);
@@ -978,13 +958,13 @@ var asIs = (Type = Any$1) =>
 const internalNonMutators = ['set', 'setPath'];
 
 const mapNonMutators = internalNonMutators;
-const mapMutators = ['set', 'delete', 'clear'];
+const mapMutators = [];
 
 const setNonMutators = internalNonMutators;
-const setMutators = ['add', 'delete', 'clear'];
+const setMutators = [];
 
 const listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter']);
-const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'];
+const listMutators = [];
 
 const dateNonMutators = internalNonMutators;
 const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds',
