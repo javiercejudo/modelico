@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "19.0.4";
+var version = "19.0.5";
 
 
 
