@@ -1,6 +1,6 @@
 {
   "name": "modelico-immutable",
-  "version": "19.0.3",
+  "version": "19.0.4",
   "description": "Universal library for serialisable immutable models",
   "main": "dist/modelico.js",
   "jsnext:main": "dist/modelico.es2015.js",

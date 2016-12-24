@@ -391,9 +391,9 @@ var Base = (function (U, should, M) {
         var listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
         var listOfPeople3 = listOfPeople2.setPath([0], M.fields(author));
 
-        listOfPeople1.inner()[0].givenName().should.be.exactly('Javier');
-        listOfPeople2.inner()[0].givenName().should.be.exactly('Javi');
-        listOfPeople3.inner()[0].givenName().should.be.exactly('Javier');
+        Array.from(listOfPeople1)[0].givenName().should.be.exactly('Javier');
+        Array.from(listOfPeople2)[0].givenName().should.be.exactly('Javi');
+        Array.from(listOfPeople3)[0].givenName().should.be.exactly('Javier');
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -412,6 +412,32 @@ var Base = (function (U, should, M) {
       });
     });
 
+    describe('toJS', function () {
+      it('should return as primitives or arrays or objects only', function () {
+        var author1 = new Person({
+          givenName: 'Javier',
+          familyName: 'Cejudo',
+          birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: M.Map.EMPTY,
+          importantDatesList: M.List.EMPTY,
+          importantDatesSet: M.Set.EMPTY,
+          sex: Sex.MALE()
+        });
+
+        author1.toJS().should.eql({
+          birthday: '1988-04-16T00:00:00.000Z',
+          familyName: 'Cejudo',
+          favouritePartOfDay: 'EVENING',
+          givenName: 'Javier',
+          importantDatesList: [],
+          importantDatesSet: [],
+          lifeEvents: [],
+          sex: 'MALE'
+        });
+      });
+    });
+
     describe('stringifying', function () {
       it('should stringify types correctly', function () {
         var author1 = new Person({
@@ -425,7 +451,7 @@ var Base = (function (U, should, M) {
           sex: Sex.MALE()
         });
 
-        JSON.stringify(author1).should.be.exactly(author1Json);
+        JSON.stringify(author1).should.be.exactly(author1Json).and.exactly(author1.stringify());
       });
     });
 
@@ -659,8 +685,8 @@ var ModelicoNumber = (function (should, M) {
         modelicoNumber1.equals(2).should.be.exactly(false);
       });
 
-      it('should have Object.is semantics', function () {
-        M.Number.of(0).equals(M.Number.of(-0)).should.be.exactly(false);
+      it('should have same-value-zero semantics', function () {
+        M.Number.of(0).equals(M.Number.of(-0)).should.be.exactly(true);
         M.Number.of(NaN).equals(M.Number.of(NaN)).should.be.exactly(true);
       });
     });
@@ -895,8 +921,8 @@ var ModelicoMap = (function (should, M) {
         M.Map.EMPTY.equals(modelicoMap).should.be.exactly(false);
       });
 
-      it('should have Object.is and Map key value semantics', function () {
-        M.Map.of('a', 0).equals(M.Map.of('a', -0)).should.be.exactly(false);
+      it('should have same-value-zero semantics', function () {
+        M.Map.of('a', 0).equals(M.Map.of('a', -0)).should.be.exactly(true);
         M.Map.of('a', NaN).equals(M.Map.of('a', NaN)).should.be.exactly(true);
 
         M.Map.of(-0, 33).equals(M.Map.of(0, 33)).should.be.exactly(true);
@@ -1089,7 +1115,7 @@ var ModelicoList = (function (should, M) {
 
         input[1] = 'B';
 
-        list.inner()[1].should.be.exactly('b');
+        Array.from(list)[1].should.be.exactly('b');
       });
     });
 
@@ -1105,7 +1131,7 @@ var ModelicoList = (function (should, M) {
       it('should implement Symbol.iterator', function () {
         var list = M.List.fromArray([1, 2, 3, 4]);
 
-        [].concat(toConsumableArray(list)).should.eql([1, 2, 3, 4]);
+        Array.from(list).should.eql([1, 2, 3, 4]);
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -1120,10 +1146,10 @@ var ModelicoList = (function (should, M) {
         var modelicoList1 = M.List.fromArray(list);
         var modelicoList2 = modelicoList1.set(0, M.Date.of(new Date('1989-04-16T00:00:00.000Z')));
 
-        should(modelicoList2.inner()[0].inner().getFullYear()).be.exactly(1989);
+        should([].concat(toConsumableArray(modelicoList2))[0].inner().getFullYear()).be.exactly(1989);
 
         // verify that modelicoList1 was not mutated
-        should(modelicoList1.inner()[0].inner().getFullYear()).be.exactly(1988);
+        should([].concat(toConsumableArray(modelicoList1))[0].inner().getFullYear()).be.exactly(1988);
       });
 
       it('should set items in the list correctly when part of a path', function () {
@@ -1132,10 +1158,10 @@ var ModelicoList = (function (should, M) {
         var modelicoList1 = M.List.fromArray(list);
         var modelicoList2 = modelicoList1.setPath([0], new Date('1989-04-16T00:00:00.000Z'));
 
-        should(modelicoList2.inner()[0].inner().getFullYear()).be.exactly(1989);
+        should([].concat(toConsumableArray(modelicoList2))[0].inner().getFullYear()).be.exactly(1989);
 
         // verify that modelicoList1 was not mutated
-        should(modelicoList1.inner()[0].inner().getFullYear()).be.exactly(1988);
+        should([].concat(toConsumableArray(modelicoList1))[0].inner().getFullYear()).be.exactly(1988);
       });
 
       it('should set items in the list correctly when part of a path with a single element', function () {
@@ -1144,10 +1170,10 @@ var ModelicoList = (function (should, M) {
         var modelicoList1 = M.List.fromArray(list);
         var modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
 
-        should(modelicoList2.inner()[0].inner().getFullYear()).be.exactly(2000);
+        should([].concat(toConsumableArray(modelicoList2))[0].inner().getFullYear()).be.exactly(2000);
 
         // verify that modelicoList1 was not mutated
-        should(modelicoList1.inner()[0].inner().getFullYear()).be.exactly(1988);
+        should([].concat(toConsumableArray(modelicoList1))[0].inner().getFullYear()).be.exactly(1988);
       });
 
       it('should be able to set a whole list', function () {
@@ -1159,14 +1185,14 @@ var ModelicoList = (function (should, M) {
 
         var author2 = author1.set('importantDatesList', M.List.fromArray(newListArray));
 
-        should(author1.importantDatesList().inner().length).be.exactly(2);
-        should(author1.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
-        should(author1.importantDatesList().inner()[1].inner().getFullYear()).be.exactly(2012);
+        should([].concat(toConsumableArray(author1.importantDatesList())).length).be.exactly(2);
+        should([].concat(toConsumableArray(author1.importantDatesList()))[0].inner().getFullYear()).be.exactly(2013);
+        should([].concat(toConsumableArray(author1.importantDatesList()))[1].inner().getFullYear()).be.exactly(2012);
 
-        should(author2.importantDatesList().inner().length).be.exactly(3);
-        should(author2.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
-        should(author2.importantDatesList().inner()[1].inner().getFullYear()).be.exactly(2016);
-        should(author2.importantDatesList().inner()[2].inner().getFullYear()).be.exactly(2012);
+        should([].concat(toConsumableArray(author2.importantDatesList())).length).be.exactly(3);
+        should([].concat(toConsumableArray(author2.importantDatesList()))[0].inner().getFullYear()).be.exactly(2013);
+        should([].concat(toConsumableArray(author2.importantDatesList()))[1].inner().getFullYear()).be.exactly(2016);
+        should([].concat(toConsumableArray(author2.importantDatesList()))[2].inner().getFullYear()).be.exactly(2012);
       });
 
       it('edge case when List setPath is called with an empty path', function () {
@@ -1177,9 +1203,9 @@ var ModelicoList = (function (should, M) {
         var listOfListOfDates1 = M.List.of(modelicoDatesList1);
         var listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
 
-        should(listOfListOfDates1.inner()[0].inner()[0].inner().getFullYear()).be.exactly(1988);
+        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfListOfDates1))[0]))[0].inner().getFullYear()).be.exactly(1988);
 
-        should(listOfListOfDates2.inner()[0].inner()[0].inner().getFullYear()).be.exactly(2016);
+        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfListOfDates2))[0]))[0].inner().getFullYear()).be.exactly(2016);
       });
     });
 
@@ -1197,16 +1223,16 @@ var ModelicoList = (function (should, M) {
       it('should parse the list correctly', function () {
         var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', list(date()).reviver);
 
-        should(modelicoList.inner()[0].inner().getFullYear()).be.exactly(1988);
+        should([].concat(toConsumableArray(modelicoList))[0].inner().getFullYear()).be.exactly(1988);
 
-        should(modelicoList.inner()[1].inner().getMonth()).be.exactly(11);
+        should([].concat(toConsumableArray(modelicoList))[1].inner().getMonth()).be.exactly(11);
       });
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, _(Person).reviver);
 
-        should(author.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013);
+        should([].concat(toConsumableArray(author.importantDatesList()))[0].inner().getFullYear()).be.exactly(2013);
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -1246,15 +1272,15 @@ var ModelicoList = (function (should, M) {
         M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false);
       });
 
-      it('should have Object.is semantics', function () {
-        M.List.of(0).equals(M.List.of(-0)).should.be.exactly(false);
+      it('should have same-value-zero semantics', function () {
+        M.List.of(0).equals(M.List.of(-0)).should.be.exactly(true);
         M.List.of(NaN).equals(M.List.of(NaN)).should.be.exactly(true);
       });
     });
 
     describe('EMPTY / of / fromArray', function () {
       it('should have a static property for the empty list', function () {
-        should(M.List.EMPTY.inner().length).be.exactly(0);
+        should([].concat(toConsumableArray(M.List.EMPTY)).length).be.exactly(0);
 
         M.List.EMPTY.toJSON().should.eql([]);
       });
@@ -1262,7 +1288,7 @@ var ModelicoList = (function (should, M) {
       it('should be able to create a list from arbitrary parameters', function () {
         var modelicoList = M.List.of(0, 1, 1, 2, 3, 5, 8);
 
-        modelicoList.inner().should.eql([0, 1, 1, 2, 3, 5, 8]);
+        Array.from(modelicoList).should.eql([0, 1, 1, 2, 3, 5, 8]);
       });
 
       it('should be able to create a list from an array', function () {
@@ -1270,7 +1296,7 @@ var ModelicoList = (function (should, M) {
 
         var modelicoList = M.List.fromArray(fibArray);
 
-        modelicoList.inner().should.eql([0, 1, 1, 2, 3, 5, 8]);
+        Array.from(modelicoList).should.eql([0, 1, 1, 2, 3, 5, 8]);
       });
     });
   };
@@ -1412,7 +1438,7 @@ var ModelicoSet = (function (should, M) {
         M.Set.EMPTY.equals(modelicoSet1).should.be.exactly(false);
       });
 
-      it('should have Object.is and Set value semantics', function () {
+      it('should have same-value-zero semantics', function () {
         M.Set.of(0).equals(M.Set.of(-0)).should.be.exactly(true);
         M.Set.of(NaN).equals(M.Set.of(NaN)).should.be.exactly(true);
       });
@@ -1687,8 +1713,8 @@ var ModelicoMaybe = (function (should, M) {
         modelicoMaybe2.equals(modelicoMaybe3).should.be.exactly(true);
       });
 
-      it('should have Object.is semantics', function () {
-        M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(false);
+      it('should have same-value-zero semantics', function () {
+        M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(true);
         M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true);
       });
     });
@@ -1774,11 +1800,11 @@ var setPath = (function (should, M) {
       var array1 = M.List.of('totally', 'immutable', hammer);
 
       array1.inner()[1] = 'I’m going to mutate you!';
-      array1.inner()[1].should.be.exactly('immutable');
+      Array.from(array1)[1].should.be.exactly('immutable');
 
       array1.setPath([2, 'hammer'], 'hm, surely I can mutate this nested object...');
 
-      array1.inner()[2].inner().get('hammer').should.be.exactly('Can’t Touch This');
+      Array.from(array1)[2].inner().get('hammer').should.be.exactly('Can’t Touch This');
     });
 
     it('should work across types (2)', function () {
@@ -1790,7 +1816,7 @@ var setPath = (function (should, M) {
 
       hammer1.setPath(['list', 1], 'hm, surely I can mutate this nested object...');
 
-      hammer1.inner().get('list').inner()[1].should.be.exactly('immutable');
+      Array.from(hammer1.inner().get('list'))[1].should.be.exactly('immutable');
     });
   };
 });
@@ -1920,15 +1946,15 @@ var featuresAdvanced = (function (should, M) {
 
       var defaultAnimal = new Animal({});
 
-      person1.pets().inner().shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
+      Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
 
-      person1.pets().inner().shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
+      Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
 
       var person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
-      person3.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Bane');
+      Array.from(person3.pets())[0].getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Bane');
 
-      person1.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Robbie');
+      Array.from(person1.pets())[0].getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Robbie');
     });
   };
 });
@@ -1987,9 +2013,9 @@ var featuresAdvancedES5 = (function (should, M) {
       person2.fullName().should.be.exactly('Javi Cejudo');
       person1.fullName().should.be.exactly('Javier Cejudo');
 
-      person1.pets().inner().shift().speak().should.be.exactly('My name is Robbie!');
+      Array.from(person1.pets()).shift().speak().should.be.exactly('My name is Robbie!');
 
-      person1.pets().inner().shift().speak().should.be.exactly('My name is Robbie!');
+      Array.from(person1.pets()).shift().speak().should.be.exactly('My name is Robbie!');
     });
   };
 });
@@ -2205,7 +2231,7 @@ var featuresDeepNesting = (function (should, M) {
 
 /* eslint-env mocha */
 
-var Immutable = (function (U, should, M) {
+var ImmutableExamples = (function (U, should, M) {
   return function () {
     var objToArr = U.objToArr;
 
@@ -2227,26 +2253,20 @@ var Immutable = (function (U, should, M) {
     it('JavaScript-first API', function () {
       var list1 = M.List.of(1, 2);
 
-      var list2Array = list1.inner();
+      var list2Array = [].concat(toConsumableArray(list1));
       list2Array.push(3, 4, 5);
       var list2 = M.List.fromArray(list2Array);
 
-      var list3Array = list2.inner();
+      var list3Array = [].concat(toConsumableArray(list2));
       list3Array.unshift(0);
       var list3 = M.List.fromArray(list3Array);
 
-      var list4 = M.List.fromArray(list1.inner().concat(list2.inner(), list3.inner()));
-
-      (list1.inner().length === 2).should.be.exactly(true);
-      (list2.inner().length === 5).should.be.exactly(true);
-      (list3.inner().length === 6).should.be.exactly(true);
-      (list4.inner().length === 13).should.be.exactly(true);
-      (list4.inner()[0] === 1).should.be.exactly(true);
+      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));([].concat(toConsumableArray(list1)).length === 2).should.be.exactly(true);([].concat(toConsumableArray(list2)).length === 5).should.be.exactly(true);([].concat(toConsumableArray(list3)).length === 6).should.be.exactly(true);([].concat(toConsumableArray(list4)).length === 13).should.be.exactly(true);([].concat(toConsumableArray(list4))[0] === 1).should.be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
       var alpha = M.Map.fromObject({ a: 1, b: 2, c: 3, d: 4 });
-      [].concat(toConsumableArray(alpha.inner())).map(function (kv) {
+      [].concat(toConsumableArray(alpha)).map(function (kv) {
         return kv[0].toUpperCase();
       }).join().should.be.exactly('A,B,C,D');
     });
@@ -2257,7 +2277,7 @@ var Immutable = (function (U, should, M) {
 
       var obj = { d: 100, o: 200, g: 300 };
 
-      var map3 = M.Map.fromMap(new Map([].concat([].concat(toConsumableArray(map1.inner())), [].concat(toConsumableArray(map2.inner())), objToArr(obj))));
+      var map3 = M.Map.fromMap(new Map([].concat([].concat(toConsumableArray(map1)), [].concat(toConsumableArray(map2)), objToArr(obj))));
 
       map3.equals(M.Map.fromObject({ a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300 })).should.be.exactly(true);
     });
@@ -2284,20 +2304,15 @@ var Immutable = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
-      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
-
-      (map1 !== map2).should.be.exactly(true); // two different instances
+      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });(map1 !== map2).should.be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
     it('Batching Mutations', function () {
       var list1 = M.List.of(1, 2, 3);
-      var list2Array = list1.inner();
+      var list2Array = [].concat(toConsumableArray(list1));
       list2Array.push(4, 5, 6);
-      var list2 = M.List.fromArray(list2Array);
-
-      (list1.inner().length === 3).should.be.exactly(true);
-      (list2.inner().length === 6).should.be.exactly(true);
+      var list2 = M.List.fromArray(list2Array);([].concat(toConsumableArray(list1)).length === 3).should.be.exactly(true);([].concat(toConsumableArray(list2)).length === 6).should.be.exactly(true);
     });
   };
 });
@@ -2331,13 +2346,7 @@ var ImmutableProxied = (function (U, should, M) {
 
       var list2 = list1.push(3, 4, 5);
       var list3 = list2.unshift(0);
-      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));
-
-      (list1.length === 2).should.be.exactly(true);
-      (list2.length === 5).should.be.exactly(true);
-      (list3.length === 6).should.be.exactly(true);
-      (list4.length === 13).should.be.exactly(true);
-      (list4[0] === 1).should.be.exactly(true);
+      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.length === 2).should.be.exactly(true);(list2.length === 5).should.be.exactly(true);(list3.length === 6).should.be.exactly(true);(list4.length === 13).should.be.exactly(true);(list4[0] === 1).should.be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -2384,9 +2393,7 @@ var ImmutableProxied = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
-      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
-
-      (map1 !== map2).should.be.exactly(true); // two different instances
+      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));(map1 !== map2).should.be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
@@ -2397,10 +2404,7 @@ var ImmutableProxied = (function (U, should, M) {
       res.push(4);
       res.push(5);
       res.push(6);
-      var list2 = _l(M.List.fromArray(res));
-
-      (list1.length === 3).should.be.exactly(true);
-      (list2.length === 6).should.be.exactly(true);
+      var list2 = _l(M.List.fromArray(res));(list1.length === 3).should.be.exactly(true);(list2.length === 6).should.be.exactly(true);
     });
   };
 });
@@ -2476,9 +2480,7 @@ var proxyList = (function (should, M) {
     var p = M.proxyList;
 
     it('length', function () {
-      var list1 = p(M.List.of(1, 2, 2, 3));
-
-      list1.length.should.be.exactly(4);
+      var list1 = p(M.List.of(1, 2, 2, 3));list1.length.should.be.exactly(4);
     });
 
     it('[n]', function () {
@@ -2587,19 +2589,17 @@ var proxyList = (function (should, M) {
       var sum = 0;
       list.forEach(function (x) {
         sum += x;
-      });
-
-      sum.should.be.exactly(8);
+      });sum.should.be.exactly(8);
     });
 
     it('keys() / entries() / [@@iterator]()', function () {
       var list = p(M.List.of(1, 2, 2, 3));
 
-      [].concat(toConsumableArray(list.entries())).should.eql([[0, 1], [1, 2], [2, 2], [3, 3]]);
+      Array.from(list.entries()).should.eql([[0, 1], [1, 2], [2, 2], [3, 3]]);
 
-      [].concat(toConsumableArray(list.keys())).should.eql([0, 1, 2, 3]);
+      Array.from(list.keys()).should.eql([0, 1, 2, 3]);
 
-      [].concat(toConsumableArray(list[Symbol.iterator]())).should.eql([1, 2, 2, 3]);
+      Array.from(list[Symbol.iterator]()).should.eql([1, 2, 2, 3]);
     });
 
     it('every() / some()', function () {
@@ -2691,9 +2691,9 @@ var proxyList = (function (should, M) {
     it('sort()', function () {
       var list = p(M.List.of(1, 2, 5, 4, 3));
 
-      list.sort().toJSON().should.eql([1, 2, 3, 4, 5]);
+      Array.from(list.sort()).should.eql([1, 2, 3, 4, 5]);
 
-      list.sort().toJSON().should.eql([1, 2, 3, 4, 5]);
+      Array.from(list.sort()).should.eql([1, 2, 3, 4, 5]);
     });
 
     it('sort(fn)', function () {
@@ -2911,7 +2911,7 @@ var modelicoSpec = (function (options, should, M) {
     describe('Readme advanced features', featuresAdvanced.apply(undefined, deps));
     describe('Readme advanced features ES5', featuresAdvancedES5.apply(undefined, deps));
     describe('Deep nesting features', featuresDeepNesting.apply(undefined, deps));
-    describe('Immutable.js examples', Immutable.apply(undefined, toConsumableArray(utilsAndDeps)));
+    describe('Immutable.js examples', ImmutableExamples.apply(undefined, toConsumableArray(utilsAndDeps)));
 
     U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, toConsumableArray(utilsAndDeps)));
 

@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "19.0.3";
+var version = "19.0.4";
 
 
 
@@ -134,7 +134,9 @@ var possibleConstructorReturn = function (self, call) {
 
 
 
-
+var toArray = function (arr) {
+  return Array.isArray(arr) ? arr : Array.from(arr);
+};
 
 var toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
@@ -210,12 +212,22 @@ var isPlainObject = function isPlainObject(x /* : mixed */) {
 };
 var emptyObject = Object.freeze({});
 
+var haveSameValues = function haveSameValues(a /* : any */, b /* : any */) {
+  return (/* : boolean */a === b || Object.is(a, b)
+  );
+};
+
 var haveSameType = function haveSameType(a /* : any */, b /* : any */) {
   return (/* : boolean */a == null || b == null ? a === b : a.constructor === b.constructor
   );
 };
 
 var haveDifferentTypes = pipe2(haveSameType, not);
+
+var equals$1 = function equals$1(a /* : any */, b /* : any */) {
+  return (/* : boolean */isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b)
+  );
+};
 
 var getInnerTypes = function getInnerTypes(depth /* : number */, Type /* : Function */) {
   if (!Type.innerTypes) {
@@ -313,13 +325,17 @@ var Base = function () {
         return new (this[typeSymbol]())(value);
       }
 
-      var item = this[path[0]]();
+      var _path = toArray(path),
+          key = _path[0],
+          restPath = _path.slice(1);
+
+      var item = this[key]();
 
       if (!item.setPath) {
-        return this.set(path[0], value);
+        return this.set(key, value);
       }
 
-      return this.set(path[0], item.setPath(path.slice(1), value));
+      return this.set(key, item.setPath(restPath, value));
     }
   }, {
     key: 'equals',
@@ -338,6 +354,16 @@ var Base = function () {
     key: 'toJSON',
     value: function toJSON() {
       return this[fieldsSymbol]();
+    }
+  }, {
+    key: 'toJS',
+    value: function toJS() {
+      return JSON.parse(JSON.stringify(this));
+    }
+  }, {
+    key: 'stringify',
+    value: function stringify(n) {
+      return JSON.stringify(this, null, n);
     }
   }], [{
     key: 'factory',
@@ -502,7 +528,7 @@ var Maybe = function (_Base) {
       var innerItem = inner.get();
       var otherInnerItem = otherInner.get();
 
-      return isSomething(innerItem) && innerItem.equals ? innerItem.equals(otherInnerItem) : Object.is(innerItem, otherInnerItem);
+      return isSomething(innerItem) && innerItem.equals ? innerItem.equals(otherInnerItem) : haveSameValues(innerItem, otherInnerItem);
     }
   }], [{
     key: 'of',
@@ -606,6 +632,22 @@ var set$2 = function set$2(thisArg, Type, key, value) {
   return Type.fromMap(newMap);
 };
 
+var of$1 = function of$1(Type, args) {
+  var len = args.length;
+
+  if (len % 2 === 1) {
+    throw TypeError((Type.displayName || Type.name) + '.of requires an even number of arguments');
+  }
+
+  var pairs = [];
+
+  for (var i = 0; i < len; i += 2) {
+    pairs.push([args[i], args[i + 1]]);
+  }
+
+  return Type.fromArray(pairs);
+};
+
 var metadata$2 = function metadata$2(Type, reviver) {
   return Object.freeze({ type: Type, reviver: reviver });
 };
@@ -640,13 +682,17 @@ var AbstractMap = function (_Base) {
         return new (this[typeSymbol]())(value);
       }
 
-      var item = this.inner().get(path[0]);
+      var _path = toArray(path),
+          key = _path[0],
+          restPath = _path.slice(1);
+
+      var item = this.inner().get(key);
 
       if (!item.setPath) {
-        return this.set(path[0], value);
+        return this.set(key, value);
       }
 
-      return this.set(path[0], item.setPath(path.slice(1), value));
+      return this.set(key, item.setPath(restPath, value));
     }
   }, {
     key: 'equals',
@@ -670,9 +716,7 @@ var AbstractMap = function (_Base) {
         var otherItem = otherItems[index];
 
         return item.every(function (itemPart, index) {
-          var otherItemPart = otherItem[index];
-
-          return isSomething(itemPart) && itemPart.equals ? itemPart.equals(otherItemPart) : Object.is(itemPart, otherItemPart);
+          return equals$1(itemPart, otherItem[index]);
         });
       });
     }
@@ -741,19 +785,11 @@ var ModelicoMap = function (_AbstractMap) {
   }, {
     key: 'of',
     value: function of() {
-      var len = arguments.length;
-
-      if (len % 2 === 1) {
-        throw TypeError('Map.of requires an even number of arguments');
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
       }
 
-      var pairs = [];
-
-      for (var i = 0; i < len; i += 2) {
-        pairs.push([arguments.length <= i ? undefined : arguments[i], arguments.length <= i + 1 ? undefined : arguments[i + 1]]);
-      }
-
-      return ModelicoMap.fromArray(pairs);
+      return of$1(ModelicoMap, args);
     }
   }, {
     key: 'fromObject',
@@ -844,19 +880,11 @@ var EnumMap = function (_AbstractMap) {
   }, {
     key: 'of',
     value: function of() {
-      var len = arguments.length;
-
-      if (len % 2 === 1) {
-        throw TypeError('EnumMap.of requires an even number of arguments');
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
       }
 
-      var pairs = [];
-
-      for (var i = 0; i < len; i += 2) {
-        pairs.push([arguments.length <= i ? undefined : arguments[i], arguments.length <= i + 1 ? undefined : arguments[i + 1]]);
-      }
-
-      return EnumMap.fromArray(pairs);
+      return of$1(EnumMap, args);
     }
   }, {
     key: 'metadata',
@@ -918,7 +946,7 @@ var ModelicoNumber = function (_Base) {
     value: function toJSON() {
       var v = this.inner();
 
-      return Object.is(v, -0) ? '-0' : Object.is(v, Infinity) ? 'Infinity' : Object.is(v, -Infinity) ? '-Infinity' : Object.is(v, NaN) ? 'NaN' : v;
+      return Object.is(v, -0) ? '-0' : v === Infinity ? 'Infinity' : v === -Infinity ? '-Infinity' : Number.isNaN(v) ? 'NaN' : v;
     }
   }, {
     key: 'equals',
@@ -931,7 +959,7 @@ var ModelicoNumber = function (_Base) {
         return false;
       }
 
-      return Object.is(this.inner(), other.inner());
+      return haveSameValues(this.inner(), other.inner());
     }
   }], [{
     key: 'of',
@@ -1076,9 +1104,7 @@ var iterableEquals = function iterableEquals(thisArg, other) {
   }
 
   return items.every(function (item, index) {
-    var otherItem = otherItems[index];
-
-    return isSomething(item) && item.equals ? item.equals(otherItem) : Object.is(item, otherItem);
+    return equals$1(item, otherItems[index]);
   });
 };
 
@@ -1122,13 +1148,17 @@ var List = function (_Base) {
         return List.fromArray(value);
       }
 
-      var item = this.inner()[path[0]];
+      var _path = toArray(path),
+          key = _path[0],
+          restPath = _path.slice(1);
+
+      var item = this.inner()[key];
 
       if (!item.setPath) {
-        return this.set(path[0], value);
+        return this.set(key, value);
       }
 
-      return this.set(path[0], item.setPath(path.slice(1), value));
+      return this.set(key, item.setPath(restPath, value));
     }
   }, {
     key: 'toJSON',
