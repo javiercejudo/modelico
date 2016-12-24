@@ -62,18 +62,18 @@ export default (should, M) => () => {
 
     const defaultAnimal = new Animal({})
 
-    person1.pets().inner().shift().getOrElse(defaultAnimal).speak()
+    Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak()
       .should.be.exactly('My name is Robbie!')
 
-    person1.pets().inner().shift().getOrElse(defaultAnimal).speak()
+    Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak()
       .should.be.exactly('My name is Robbie!')
 
     const person3 = person1.setPath(['pets', 0, 'name'], 'Bane')
 
-    person3.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('')
+    Array.from(person3.pets())[0].getOrElse(defaultAnimal).name().getOrElse('')
       .should.be.exactly('Bane')
 
-    person1.pets().inner()[0].getOrElse(defaultAnimal).name().getOrElse('')
+    Array.from(person1.pets())[0].getOrElse(defaultAnimal).name().getOrElse('')
       .should.be.exactly('Robbie')
   })
 }

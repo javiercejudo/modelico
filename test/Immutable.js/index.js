@@ -21,26 +21,26 @@ export default (U, should, M) => () => {
   it('JavaScript-first API', () => {
     const list1 = M.List.of(1, 2)
 
-    const list2Array = list1.inner()
+    const list2Array = [...list1]
     list2Array.push(3, 4, 5)
     const list2 = M.List.fromArray(list2Array)
 
-    const list3Array = list2.inner()
+    const list3Array = [...list2]
     list3Array.unshift(0)
     const list3 = M.List.fromArray(list3Array)
 
-    const list4 = M.List.fromArray(list1.inner().concat(list2.inner(), list3.inner()));
+    const list4 = M.List.fromArray([...list1].concat([...list2], [...list3]))
 
-    (list1.inner().length === 2).should.be.exactly(true);
-    (list2.inner().length === 5).should.be.exactly(true);
-    (list3.inner().length === 6).should.be.exactly(true);
-    (list4.inner().length === 13).should.be.exactly(true);
-    (list4.inner()[0] === 1).should.be.exactly(true)
+    ;([...list1].length === 2).should.be.exactly(true)
+    ;([...list2].length === 5).should.be.exactly(true)
+    ;([...list3].length === 6).should.be.exactly(true)
+    ;([...list4].length === 13).should.be.exactly(true)
+    ;([...list4][0] === 1).should.be.exactly(true)
   })
 
   it('JavaScript-first API (2)', () => {
     const alpha = M.Map.fromObject({a: 1, b: 2, c: 3, d: 4});
-    [...alpha.inner()].map(kv => kv[0].toUpperCase()).join()
+    [...alpha].map(kv => kv[0].toUpperCase()).join()
       .should.be.exactly('A,B,C,D')
   })
 
@@ -51,7 +51,7 @@ export default (U, should, M) => () => {
     const obj = {d: 100, o: 200, g: 300}
 
     const map3 = M.Map.fromMap(
-      new Map([].concat([...map1.inner()], [...map2.inner()], objToArr(obj)))
+      new Map([].concat([...map1], [...map2], objToArr(obj)))
     )
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))
@@ -80,19 +80,19 @@ export default (U, should, M) => () => {
 
   it('Equality treats Collections as Data', () => {
     const map1 = M.Map.fromObject({a: 1, b: 1, c: 1})
-    const map2 = M.Map.fromObject({a: 1, b: 1, c: 1});
+    const map2 = M.Map.fromObject({a: 1, b: 1, c: 1})
 
-    (map1 !== map2).should.be.exactly(true) // two different instances
+    ;(map1 !== map2).should.be.exactly(true) // two different instances
     map1.equals(map2).should.be.exactly(true) // have equivalent values
   })
 
   it('Batching Mutations', () => {
     const list1 = M.List.of(1, 2, 3)
-    const list2Array = list1.inner()
+    const list2Array = [...list1]
     list2Array.push(4, 5, 6)
-    const list2 = M.List.fromArray(list2Array);
+    const list2 = M.List.fromArray(list2Array)
 
-    (list1.inner().length === 3).should.be.exactly(true);
-    (list2.inner().length === 6).should.be.exactly(true)
+    ;([...list1].length === 3).should.be.exactly(true)
+    ;([...list2].length === 6).should.be.exactly(true)
   })
 }

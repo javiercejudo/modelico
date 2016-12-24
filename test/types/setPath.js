@@ -5,12 +5,12 @@ export default (should, M) => () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This')
     const array1 = M.List.of('totally', 'immutable', hammer)
 
-    array1.inner()[1] = 'I’m going to mutate you!';
-    (array1.inner()[1]).should.be.exactly('immutable')
+    array1.inner()[1] = 'I’m going to mutate you!'
+    Array.from(array1)[1].should.be.exactly('immutable')
 
     array1.setPath([2, 'hammer'], 'hm, surely I can mutate this nested object...')
 
-    array1.inner()[2].inner().get('hammer')
+    Array.from(array1)[2].inner().get('hammer')
       .should.be.exactly('Can’t Touch This')
   })
 
@@ -21,9 +21,9 @@ export default (should, M) => () => {
     hammer1.inner().set('hammer', 'I’m going to mutate you!')
     hammer1.inner().get('hammer').should.be.exactly('Can’t Touch This')
 
-    hammer1.setPath(['list', 1], 'hm, surely I can mutate this nested object...');
+    hammer1.setPath(['list', 1], 'hm, surely I can mutate this nested object...')
 
-    (hammer1.inner().get('list').inner()[1])
+    Array.from(hammer1.inner().get('list'))[1]
       .should.be.exactly('immutable')
   })
 }

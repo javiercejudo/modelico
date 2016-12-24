@@ -13,7 +13,7 @@ export default (should, M) => () => {
 
       input[1] = 'B'
 
-      list.inner()[1]
+      Array.from(list)[1]
         .should.be.exactly('b')
     })
   })
@@ -26,9 +26,9 @@ export default (should, M) => () => {
 
   describe('setting', () => {
     it('should implement Symbol.iterator', () => {
-      const list = M.List.fromArray([1, 2, 3, 4]);
+      const list = M.List.fromArray([1, 2, 3, 4])
 
-      [...list]
+      Array.from(list)
         .should.eql([1, 2, 3, 4])
     })
 
@@ -46,11 +46,11 @@ export default (should, M) => () => {
       const modelicoList1 = M.List.fromArray(list)
       const modelicoList2 = modelicoList1.set(0, M.Date.of(new Date('1989-04-16T00:00:00.000Z')))
 
-      should(modelicoList2.inner()[0].inner().getFullYear())
+      should([...modelicoList2][0].inner().getFullYear())
         .be.exactly(1989)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.inner()[0].inner().getFullYear())
+      should([...modelicoList1][0].inner().getFullYear())
         .be.exactly(1988)
     })
 
@@ -63,11 +63,11 @@ export default (should, M) => () => {
       const modelicoList1 = M.List.fromArray(list)
       const modelicoList2 = modelicoList1.setPath([0], new Date('1989-04-16T00:00:00.000Z'))
 
-      should(modelicoList2.inner()[0].inner().getFullYear())
+      should([...modelicoList2][0].inner().getFullYear())
         .be.exactly(1989)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.inner()[0].inner().getFullYear())
+      should([...modelicoList1][0].inner().getFullYear())
         .be.exactly(1988)
     })
 
@@ -80,11 +80,11 @@ export default (should, M) => () => {
       const modelicoList1 = M.List.fromArray(list)
       const modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'))
 
-      should(modelicoList2.inner()[0].inner().getFullYear())
+      should([...modelicoList2][0].inner().getFullYear())
         .be.exactly(2000)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.inner()[0].inner().getFullYear())
+      should([...modelicoList1][0].inner().getFullYear())
         .be.exactly(1988)
     })
 
@@ -100,14 +100,14 @@ export default (should, M) => () => {
         M.List.fromArray(newListArray)
       )
 
-      should(author1.importantDatesList().inner().length).be.exactly(2)
-      should(author1.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013)
-      should(author1.importantDatesList().inner()[1].inner().getFullYear()).be.exactly(2012)
+      should([...author1.importantDatesList()].length).be.exactly(2)
+      should([...author1.importantDatesList()][0].inner().getFullYear()).be.exactly(2013)
+      should([...author1.importantDatesList()][1].inner().getFullYear()).be.exactly(2012)
 
-      should(author2.importantDatesList().inner().length).be.exactly(3)
-      should(author2.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013)
-      should(author2.importantDatesList().inner()[1].inner().getFullYear()).be.exactly(2016)
-      should(author2.importantDatesList().inner()[2].inner().getFullYear()).be.exactly(2012)
+      should([...author2.importantDatesList()].length).be.exactly(3)
+      should([...author2.importantDatesList()][0].inner().getFullYear()).be.exactly(2013)
+      should([...author2.importantDatesList()][1].inner().getFullYear()).be.exactly(2016)
+      should([...author2.importantDatesList()][2].inner().getFullYear()).be.exactly(2012)
     })
 
     it('edge case when List setPath is called with an empty path', () => {
@@ -123,10 +123,10 @@ export default (should, M) => () => {
       const listOfListOfDates1 = M.List.of(modelicoDatesList1)
       const listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2)
 
-      should(listOfListOfDates1.inner()[0].inner()[0].inner().getFullYear())
+      should([...[...listOfListOfDates1][0]][0].inner().getFullYear())
         .be.exactly(1988)
 
-      should(listOfListOfDates2.inner()[0].inner()[0].inner().getFullYear())
+      should([...[...listOfListOfDates2][0]][0].inner().getFullYear())
         .be.exactly(2016)
     })
   })
@@ -152,10 +152,10 @@ export default (should, M) => () => {
         list(date()).reviver
       )
 
-      should(modelicoList.inner()[0].inner().getFullYear())
+      should([...modelicoList][0].inner().getFullYear())
         .be.exactly(1988)
 
-      should(modelicoList.inner()[1].inner().getMonth())
+      should([...modelicoList][1].inner().getMonth())
         .be.exactly(11)
     })
 
@@ -163,7 +163,7 @@ export default (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author = JSON.parse(authorJson, _(Person).reviver)
 
-      should(author.importantDatesList().inner()[0].inner().getFullYear()).be.exactly(2013)
+      should([...author.importantDatesList()][0].inner().getFullYear()).be.exactly(2013)
     })
 
     it('should not support null (wrap with Maybe)', () => {
@@ -208,7 +208,7 @@ export default (should, M) => () => {
 
   describe('EMPTY / of / fromArray', () => {
     it('should have a static property for the empty list', () => {
-      should(M.List.EMPTY.inner().length)
+      should([...M.List.EMPTY].length)
         .be.exactly(0)
 
       M.List.EMPTY.toJSON()
@@ -218,7 +218,7 @@ export default (should, M) => () => {
     it('should be able to create a list from arbitrary parameters', () => {
       const modelicoList = M.List.of(0, 1, 1, 2, 3, 5, 8)
 
-      modelicoList.inner()
+      Array.from(modelicoList)
         .should.eql([0, 1, 1, 2, 3, 5, 8])
     })
 
@@ -227,7 +227,7 @@ export default (should, M) => () => {
 
       const modelicoList = M.List.fromArray(fibArray)
 
-      modelicoList.inner()
+      Array.from(modelicoList)
         .should.eql([0, 1, 1, 2, 3, 5, 8])
     })
   })
