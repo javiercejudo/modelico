@@ -1,11 +1,5 @@
 languages:
   JavaScript: true
-engines:
-  eslint:
-    enabled: true
-    checks:
-      no-eq-null:
-        enabled: false
 exclude_paths:
 - "test/**/*"
 - "dist/**/*"
