@@ -1,4 +1,4 @@
-import { isNothing, isSomething, haveDifferentTypes, haveSameValues } from './U'
+import { isNothing, equals, haveDifferentTypes } from './U'
 import { typeSymbol } from './symbols'
 import Base from './Base'
 
@@ -7,6 +7,22 @@ export const set = (thisArg, Type, key, value) => {
   newMap.set(key, value)
 
   return Type.fromMap(newMap)
+}
+
+export const of = (Type, args) => {
+  const len = args.length
+
+  if (len % 2 === 1) {
+    throw TypeError(`${Type.displayName || Type.name}.of requires an even number of arguments`)
+  }
+
+  const pairs = []
+
+  for (let i = 0; i < len; i += 2) {
+    pairs.push([args[i], args[i + 1]])
+  }
+
+  return Type.fromArray(pairs)
 }
 
 export const metadata = (Type, reviver) => {
@@ -62,11 +78,7 @@ class AbstractMap extends Base {
       const otherItem = otherItems[index]
 
       return item.every((itemPart, index) => {
-        const otherItemPart = otherItem[index]
-
-        return (isSomething(itemPart) && itemPart.equals)
-          ? itemPart.equals(otherItemPart)
-          : haveSameValues(itemPart, otherItemPart)
+        return equals(itemPart, otherItem[index])
       })
     })
   }
