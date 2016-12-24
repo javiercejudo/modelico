@@ -1,4 +1,4 @@
-var version = "19.0.3";
+var version = "19.0.4";
 
 
 
@@ -31,11 +31,19 @@ const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
 const isPlainObject = (x/* : mixed */)/* : boolean */ => typeof x === 'object' && !!x;
 const emptyObject = Object.freeze({});
 
+const haveSameValues = (a/* : any */, b/* : any */)/* : boolean */ =>
+  (a === b) || Object.is(a, b);
+
 const haveSameType = (a/* : any */, b/* : any */)/* : boolean */ => (a == null || b == null)
   ? a === b
   : a.constructor === b.constructor;
 
 const haveDifferentTypes = pipe2(haveSameType, not);
+
+const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
+  (isSomething(a) && a.equals)
+    ? a.equals(b)
+    : haveSameValues(a, b);
 
 const getInnerTypes = (depth/* : number */, Type/* : Function */) => {
   if (!Type.innerTypes) {
@@ -125,13 +133,14 @@ class Base {
       return new (this[typeSymbol]())(value)
     }
 
-    const item = this[path[0]]();
+    const [key, ...restPath] = path;
+    const item = this[key]();
 
     if (!item.setPath) {
-      return this.set(path[0], value)
+      return this.set(key, value)
     }
 
-    return this.set(path[0], item.setPath(path.slice(1), value))
+    return this.set(key, item.setPath(restPath, value))
   }
 
   equals (other) {
@@ -148,6 +157,14 @@ class Base {
 
   toJSON () {
     return this[fieldsSymbol]()
+  }
+
+  toJS () {
+    return JSON.parse(JSON.stringify(this))
+  }
+
+  stringify (n) {
+    return JSON.stringify(this, null, n)
   }
 
   static factory (...args) {
@@ -291,7 +308,7 @@ class Maybe extends Base$1 {
 
     return (isSomething(innerItem) && innerItem.equals)
       ? innerItem.equals(otherInnerItem)
-      : Object.is(innerItem, otherInnerItem)
+      : haveSameValues(innerItem, otherInnerItem)
   }
 
   static of (v) {
@@ -377,6 +394,22 @@ const set = (thisArg, Type, key, value) => {
   return Type.fromMap(newMap)
 };
 
+const of = (Type, args) => {
+  const len = args.length;
+
+  if (len % 2 === 1) {
+    throw TypeError(`${Type.displayName || Type.name}.of requires an even number of arguments`)
+  }
+
+  const pairs = [];
+
+  for (let i = 0; i < len; i += 2) {
+    pairs.push([args[i], args[i + 1]]);
+  }
+
+  return Type.fromArray(pairs)
+};
+
 const metadata$1 = (Type, reviver) => {
   return Object.freeze({type: Type, reviver})
 };
@@ -400,13 +433,14 @@ class AbstractMap extends Base$1 {
       return new (this[typeSymbol]())(value)
     }
 
-    const item = this.inner().get(path[0]);
+    const [key, ...restPath] = path;
+    const item = this.inner().get(key);
 
     if (!item.setPath) {
-      return this.set(path[0], value)
+      return this.set(key, value)
     }
 
-    return this.set(path[0], item.setPath(path.slice(1), value))
+    return this.set(key, item.setPath(restPath, value))
   }
 
   equals (other) {
@@ -429,11 +463,7 @@ class AbstractMap extends Base$1 {
       const otherItem = otherItems[index];
 
       return item.every((itemPart, index) => {
-        const otherItemPart = otherItem[index];
-
-        return (isSomething(itemPart) && itemPart.equals)
-          ? itemPart.equals(otherItemPart)
-          : Object.is(itemPart, otherItemPart)
+        return equals(itemPart, otherItem[index])
       })
     })
   }
@@ -486,20 +516,8 @@ class ModelicoMap extends AbstractMap$1 {
     return ModelicoMap.fromMap(new Map(pairs))
   }
 
-  static of (...arr) {
-    const len = arr.length;
-
-    if (len % 2 === 1) {
-      throw TypeError('Map.of requires an even number of arguments')
-    }
-
-    const pairs = [];
-
-    for (let i = 0; i < len; i += 2) {
-      pairs.push([arr[i], arr[i + 1]]);
-    }
-
-    return ModelicoMap.fromArray(pairs)
+  static of (...args) {
+    return of(ModelicoMap, args)
   }
 
   static fromObject (obj) {
@@ -571,20 +589,8 @@ class EnumMap extends AbstractMap$1 {
     return EnumMap.fromMap(new Map(pairs))
   }
 
-  static of (...arr) {
-    const len = arr.length;
-
-    if (len % 2 === 1) {
-      throw TypeError('EnumMap.of requires an even number of arguments')
-    }
-
-    const pairs = [];
-
-    for (let i = 0; i < len; i += 2) {
-      pairs.push([arr[i], arr[i + 1]]);
-    }
-
-    return EnumMap.fromArray(pairs)
+  static of (...args) {
+    return of(EnumMap, args)
   }
 
   static metadata (keyMetadata, valueMetadata) {
@@ -634,9 +640,9 @@ class ModelicoNumber extends Base$1 {
     const v = this.inner();
 
     return Object.is(v, -0) ? '-0'
-      : Object.is(v, Infinity) ? 'Infinity'
-      : Object.is(v, -Infinity) ? '-Infinity'
-      : Object.is(v, NaN) ? 'NaN'
+      : (v === Infinity) ? 'Infinity'
+      : (v === -Infinity) ? '-Infinity'
+      : Number.isNaN(v) ? 'NaN'
       : v
   }
 
@@ -649,7 +655,7 @@ class ModelicoNumber extends Base$1 {
       return false
     }
 
-    return Object.is(this.inner(), other.inner())
+    return haveSameValues(this.inner(), other.inner())
   }
 
   static of (number) {
@@ -774,11 +780,7 @@ const iterableEquals = (thisArg, other) => {
   }
 
   return items.every((item, index) => {
-    const otherItem = otherItems[index];
-
-    return (isSomething(item) && item.equals)
-      ? item.equals(otherItem)
-      : Object.is(item, otherItem)
+    return equals(item, otherItems[index])
   })
 };
 
@@ -810,13 +812,14 @@ class List extends Base$1 {
       return List.fromArray(value)
     }
 
-    const item = this.inner()[path[0]];
+    const [key, ...restPath] = path;
+    const item = this.inner()[key];
 
     if (!item.setPath) {
-      return this.set(path[0], value)
+      return this.set(key, value)
     }
 
-    return this.set(path[0], item.setPath(path.slice(1), value))
+    return this.set(key, item.setPath(restPath, value))
   }
 
   toJSON () {
