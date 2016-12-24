@@ -11,17 +11,23 @@ for browsers other than Chrome, Firefox and Edge. Additionally, IE 9 & 10 also r
 a `getPrototypeOf` polyfill as the one in [es5-sham](https://github.com/es-shims/es5-shim#shams).
 See [browser tests](test/browser) for more details.*
 
+## How is this different from Modélico?
+
+Modélico models are immutable, but are implemented with native structures, eg.
+the normal `M.Map` is implemented with JavaScript's native `Map`, while the `M.Map`
+is implemented with `Immutable.OrderedMap`. The same goes for `M.Set` and `M.List`.
+
 ## Installation
 
-    npm i modelico
+    npm i modelico-immutable
 
 To use it in the browser, grab the [minified](dist/modelico.min.js) or the
 [development](dist/modelico.js) files.
 
 Run the current tests directly on your target browsers to see what setup is right for you:
 
-- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html) with standard ES5 setup
-- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/ie9_10.html) with legacy ES3 setup
+- [Run](https://rawgit.com/javiercejudo/modelico/immutable-js/test/browser/index.html) with standard ES5 setup
+- [Run](https://rawgit.com/javiercejudo/modelico/immutable-js/test/browser/ie9_10.html) with legacy ES3 setup
 
 ## Quick intro
 

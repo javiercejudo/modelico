@@ -66,6 +66,7 @@ export default (should, M) => () => {
       .should.be.exactly('My name is Robbie!')
 
     Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak()
+      .should.be.exactly('My name is Robbie!')
 
     const person3 = person1.setPath(['pets', 0, 'name'], 'Bane')
 

@@ -38,7 +38,7 @@
   "bugs": {
     "url": "https://github.com/javiercejudo/modelico/issues"
   },
-  "homepage": "https://github.com/javiercejudo/modelico#readme",
+  "homepage": "https://github.com/javiercejudo/modelico/tree/immutable-js#readme",
   "devDependencies": {
     "babel-polyfill": "^6.16.0",
     "babel-preset-es2015-rollup": "^1.1.1",
