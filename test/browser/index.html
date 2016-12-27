@@ -20,15 +20,15 @@
   <script>
     ModelicoMin = Modelico.noConflict()
 
-    mocha.setup('bdd');
+    mocha.setup('bdd')
 
-    describe('Modelico', () => {
-      describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico));
-      describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin));
-    });
+    describe('Modelico', function () {
+      describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico))
+      describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin))
+    })
 
-    mocha.checkLeaks();
-    mocha.run();
+    mocha.checkLeaks()
+    mocha.run()
   </script>
 </body>
 </html>

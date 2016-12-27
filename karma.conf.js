@@ -15,6 +15,7 @@ module.exports = function (config) {
       'node_modules/should/should.min.js',
       'node_modules/babel-polyfill/dist/polyfill.min.js',
       'dist/modelico.js',
+      'dist/modelico.min.js',
       'dist/modelico-spec.js',
       'test/browser/' + (process.env.ENTRY || 'index.js')
     ],
@@ -130,8 +131,8 @@ function customLaunchers () {
       browserName: 'iphone',
       deviceName: 'iPhone Simulator',
       deviceOrientation: 'portrait',
-      platform: 'OS X 10.10',
-      version: '9.2'
+      platform: 'macOS 10.12',
+      version: '10.0'
     }
   }
 }

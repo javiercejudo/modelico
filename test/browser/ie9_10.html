@@ -60,15 +60,15 @@
   <script>
     ModelicoMin = Modelico.noConflict()
 
-    mocha.setup('bdd');
+    mocha.setup('bdd')
 
-    describe('Modelico', function() {
-      describe('Modelico Dev (ES3 setup)', modelicoSpec({}, Should, Modelico));
-      describe('Modelico Min (ES3 setup)', modelicoSpec({}, Should, ModelicoMin));
-    });
+    describe('Modelico', function () {
+      describe('Modelico Dev (ES3 setup)', modelicoSpec({}, Should, Modelico))
+      describe('Modelico Min (ES3 setup)', modelicoSpec({}, Should, ModelicoMin))
+    })
 
-    mocha.checkLeaks();
-    mocha.run();
+    mocha.checkLeaks()
+    mocha.run()
   </script>
 </body>
 </html>
