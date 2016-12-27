@@ -87,7 +87,7 @@ export default (U, should, M) => () => {
   it('Batching Mutations', () => {
     const list1 = _l(M.List.of(1, 2, 3))
 
-    const res = list1.inner()
+    const res = [...list1]
     res.push(4)
     res.push(5)
     res.push(6)

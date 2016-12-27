@@ -1,18 +1,18 @@
-import { isNothing, emptyObject } from './U'
+import { always, isNothing, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
 import Base from './Base'
 
 class List extends Base {
-  constructor (innerListOrig) {
+  constructor (innerList) {
     super(List)
 
-    if (isNothing(innerListOrig)) {
+    if (isNothing(innerList)) {
       throw TypeError('missing list')
     }
 
-    const innerList = [...innerListOrig]
+    Object.freeze(innerList)
 
-    this.inner = () => [...innerList]
+    this.inner = always(innerList)
     this.size = innerList.length
     this[Symbol.iterator] = () => innerList[Symbol.iterator]()
 
@@ -20,7 +20,7 @@ class List extends Base {
   }
 
   set (index, value) {
-    const newList = this.inner()
+    const newList = [...this]
     newList[index] = value
 
     return List.fromArray(newList)

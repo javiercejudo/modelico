@@ -1,11 +1,13 @@
 /* eslint-env mocha */
 
-export default (should, M) => () => {
-  it('should work across types', () => {
+export default (U, should, M) => () => {
+  U.skipIfNoObjectFreeze('should work across types', () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This')
     const array1 = M.List.of('totally', 'immutable', hammer)
 
-    array1.inner()[1] = 'I’m going to mutate you!'
+    ;(() => { array1.inner()[1] = 'I’m going to mutate you!' })
+      .should.throw()
+
     Array.from(array1)[1].should.be.exactly('immutable')
 
     array1.setPath([2, 'hammer'], 'hm, surely I can mutate this nested object...')
