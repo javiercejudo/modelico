@@ -36,6 +36,7 @@ import Base from './types/Base'
 import ModelicoNumber from './types/Number'
 import ModelicoDate from './types/Date'
 import ModelicoMap from './types/Map'
+import ModelicoStringMap from './types/StringMap'
 import ModelicoEnum from './types/Enum'
 import ModelicoEnumMap from './types/EnumMap'
 import ModelicoList from './types/List'
@@ -68,6 +69,7 @@ export default (options, should, M) => () => {
   describe('Number', ModelicoNumber(...deps))
   describe('Date', ModelicoDate(...deps))
   describe('Map', ModelicoMap(...deps))
+  describe('StringMap', ModelicoStringMap(...deps))
   describe('Enum', ModelicoEnum(...deps))
   describe('EnumMap', ModelicoEnumMap(...deps))
   describe('ModelicoList', ModelicoList(...deps))

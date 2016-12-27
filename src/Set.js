@@ -32,7 +32,7 @@ class ModelicoSet extends Base {
   }
 
   toJSON () {
-    return [...this.inner()]
+    return [...this]
   }
 
   equals (other) {
