@@ -9,6 +9,7 @@ import Maybe from './Maybe'
 import Enum from './Enum'
 
 import ModelicoMap from './Map'
+import StringMap from './StringMap'
 import EnumMap from './EnumMap'
 import ModelicoNumber from './Number'
 import ModelicoDate from './Date'
@@ -58,6 +59,7 @@ const metadata = Object.freeze({
   enumMap: EnumMap.metadata,
   list: List.metadata,
   map: ModelicoMap.metadata,
+  stringMap: StringMap.metadata,
   maybe: Maybe.metadata,
   set: ModelicoSet.metadata
 })
@@ -71,6 +73,7 @@ export default {
   EnumMap,
   List,
   Map: ModelicoMap,
+  StringMap,
   Maybe,
   Base,
   Set: ModelicoSet,

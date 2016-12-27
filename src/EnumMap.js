@@ -7,12 +7,9 @@ const stringifyReducer = (acc, pair) => {
   return acc
 }
 
-const parseMapper = (keyMetadata, valueMetadata, object) => enumerator => {
-  const reviveKey = reviverOrAsIs(keyMetadata)
-  const key = reviveKey('', enumerator)
-
-  const reviveVal = reviverOrAsIs(valueMetadata)
-  const val = reviveVal('', object[enumerator])
+const parseMapper = (keyReviver, valueReviver, obj) => enumerator => {
+  const key = keyReviver('', enumerator)
+  const val = valueReviver('', obj[enumerator])
 
   return [key, val]
 }
@@ -22,9 +19,12 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
     return v
   }
 
+  const keyReviver = reviverOrAsIs(keyMetadata)
+  const valueReviver = reviverOrAsIs(valueMetadata)
+
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).map(parseMapper(keyMetadata, valueMetadata, v)))
+    : new Map(Object.keys(v).map(parseMapper(keyReviver, valueReviver, v)))
 
   return new EnumMap(innerMap)
 }
@@ -41,7 +41,7 @@ class EnumMap extends AbstractMap {
   }
 
   toJSON () {
-    return [...this.inner()].reduce(stringifyReducer, {})
+    return [...this].reduce(stringifyReducer, {})
   }
 
   static fromMap (map) {

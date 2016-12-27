@@ -1,12 +1,9 @@
 import { objToArr, reviverOrAsIs, emptyObject } from './U'
 import { default as AbstractMap, set, of, metadata } from './AbstractMap'
 
-const parseMapper = (keyMetadata, valueMetadata) => pair => {
-  const reviveKey = reviverOrAsIs(keyMetadata)
-  const revivedKey = reviveKey('', pair[0])
-
-  const reviveVal = reviverOrAsIs(valueMetadata)
-  const revivedVal = reviveVal('', pair[1])
+const parseMapper = (keyReviver, valueReviver) => pair => {
+  const revivedKey = keyReviver('', pair[0])
+  const revivedVal = valueReviver('', pair[1])
 
   return [revivedKey, revivedVal]
 }
@@ -16,9 +13,12 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
     return v
   }
 
+  const keyReviver = reviverOrAsIs(keyMetadata)
+  const valueReviver = reviverOrAsIs(valueMetadata)
+
   const innerMap = (v === null)
     ? null
-    : new Map(v.map(parseMapper(keyMetadata, valueMetadata)))
+    : new Map(v.map(parseMapper(keyReviver, valueReviver)))
 
   return ModelicoMap.fromMap(innerMap)
 }
@@ -35,7 +35,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   toJSON () {
-    return [...this.inner()]
+    return [...this]
   }
 
   static fromMap (map) {
