@@ -198,6 +198,7 @@ export default (should, M) => () => {
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
 
       M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false)
+      M.List.of(2, 4).equals(M.List.of(4, 2)).should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {

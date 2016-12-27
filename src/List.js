@@ -13,6 +13,7 @@ class List extends Base {
     const innerList = [...innerListOrig]
 
     this.inner = () => [...innerList]
+    this.size = innerList.length
     this[Symbol.iterator] = () => innerList[Symbol.iterator]()
 
     Object.freeze(this)

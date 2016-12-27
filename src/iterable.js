@@ -29,14 +29,18 @@ export const iterableEquals = (thisArg, other) => {
     return false
   }
 
-  const items = [...thisArg]
-  const otherItems = [...other]
-
-  if (items.length !== otherItems.length) {
+  if (thisArg.size !== other.size) {
     return false
   }
 
-  return items.every((item, index) => {
-    return equals(item, otherItems[index])
-  })
+  const thisIter = thisArg[Symbol.iterator]()
+  const otherIter = other[Symbol.iterator]()
+
+  for (let i = 0; i < thisArg.size; i += 1) {
+    if (!equals(thisIter.next().value, otherIter.next().value)) {
+      return false
+    }
+  }
+
+  return true
 }
