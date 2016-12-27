@@ -13,6 +13,7 @@ class ModelicoSet extends Base {
     const innerSet = new Set(innerSetOrig)
 
     this.inner = () => new Set(innerSet)
+    this.size = innerSet.size
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
 
     Object.freeze(this)

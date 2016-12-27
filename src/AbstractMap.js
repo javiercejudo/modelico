@@ -40,6 +40,7 @@ class AbstractMap extends Base {
     const innerMap = new Map(innerMapOrig)
 
     this.inner = () => new Map(innerMap)
+    this.size = innerMap.size
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]()
   }
 
@@ -67,20 +68,25 @@ class AbstractMap extends Base {
       return false
     }
 
-    const items = [...this]
-    const otherItems = [...other]
-
-    if (items.length !== otherItems.length) {
+    if (this.size !== other.size) {
       return false
     }
 
-    return items.every((item, index) => {
-      const otherItem = otherItems[index]
+    const thisIter = this[Symbol.iterator]()
+    const otherIter = other[Symbol.iterator]()
 
-      return item.every((itemPart, index) => {
-        return equals(itemPart, otherItem[index])
-      })
-    })
+    for (let i = 0; i < this.size; i += 1) {
+      const item = thisIter.next().value
+      const otherItem = otherIter.next().value
+
+      const areEqual = item.every((itemPart, index) => equals(itemPart, otherItem[index]))
+
+      if (!areEqual) {
+        return false
+      }
+    }
+
+    return true
   }
 }
 
