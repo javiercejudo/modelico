@@ -2,6 +2,8 @@ import { always, isNothing, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
 import Base from './Base'
 
+let EMPTY_LIST
+
 class List extends Base {
   constructor (innerList) {
     super(List)
@@ -10,11 +12,19 @@ class List extends Base {
       throw TypeError('missing list')
     }
 
+    if (EMPTY_LIST && innerList.length === 0) {
+      return EMPTY_LIST
+    }
+
     Object.freeze(innerList)
 
     this.inner = always(innerList)
     this.size = innerList.length
     this[Symbol.iterator] = () => innerList[Symbol.iterator]()
+
+    if (!EMPTY_LIST && this.size === 0) {
+      EMPTY_LIST = this
+    }
 
     Object.freeze(this)
   }
@@ -64,9 +74,12 @@ class List extends Base {
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_LIST || (EMPTY_LIST = List.of())
+  }
 }
 
 List.displayName = 'List'
-List.EMPTY = List.of()
 
 export default Object.freeze(List)

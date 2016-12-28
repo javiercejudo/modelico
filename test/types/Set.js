@@ -146,7 +146,7 @@ export default (should, M) => () => {
       modelicoSet1.equals(modelicoSet2).should.be.exactly(true)
 
       modelicoSet1.equals(/abc/).should.be.exactly(false)
-      M.Set.EMPTY.equals(modelicoSet1).should.be.exactly(false)
+      M.Set.EMPTY().equals(modelicoSet1).should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {
@@ -157,10 +157,10 @@ export default (should, M) => () => {
 
   describe('EMPTY / of / fromArray / fromSet', () => {
     it('should have a static property for the empty set', () => {
-      should(M.Set.EMPTY.inner().size)
+      should(M.Set.EMPTY().inner().size)
         .be.exactly(0)
 
-      M.Set.EMPTY.toJSON()
+      M.Set.EMPTY().toJSON()
         .should.eql([])
     })
 

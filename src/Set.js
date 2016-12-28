@@ -2,6 +2,8 @@ import { isNothing, unsupported, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
 import Base from './Base'
 
+let EMPTY_SET
+
 class ModelicoSet extends Base {
   constructor (innerSetOrig) {
     super(ModelicoSet)
@@ -10,11 +12,19 @@ class ModelicoSet extends Base {
       throw TypeError('missing set')
     }
 
+    if (EMPTY_SET && innerSetOrig.size === 0) {
+      return EMPTY_SET
+    }
+
     const innerSet = new Set(innerSetOrig)
 
     this.inner = () => new Set(innerSet)
     this.size = innerSet.size
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
+
+    if (!EMPTY_SET && this.size === 0) {
+      EMPTY_SET = this
+    }
 
     Object.freeze(this)
   }
@@ -58,9 +68,12 @@ class ModelicoSet extends Base {
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_SET || ModelicoSet.of()
+  }
 }
 
 ModelicoSet.displayName = 'ModelicoSet'
-ModelicoSet.EMPTY = ModelicoSet.of()
 
 export default Object.freeze(ModelicoSet)

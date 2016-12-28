@@ -16,13 +16,13 @@ export const of = (Type, args) => {
     throw TypeError(`${Type.displayName || Type.name}.of requires an even number of arguments`)
   }
 
-  const pairs = []
+  const map = new Map()
 
   for (let i = 0; i < len; i += 2) {
-    pairs.push([args[i], args[i + 1]])
+    map.set(args[i], args[i + 1])
   }
 
-  return Type.fromArray(pairs)
+  return Type.fromMap(map)
 }
 
 export const metadata = (Type, reviver) => {
@@ -30,11 +30,15 @@ export const metadata = (Type, reviver) => {
 }
 
 class AbstractMap extends Base {
-  constructor (Type, innerMapOrig) {
+  constructor (Type, innerMapOrig, EMPTY) {
     super(Type)
 
     if (isNothing(innerMapOrig)) {
       throw TypeError('missing map')
+    }
+
+    if (EMPTY && innerMapOrig.size === 0) {
+      return EMPTY
     }
 
     const innerMap = new Map(innerMapOrig)

@@ -183,7 +183,7 @@ export default (U, should, M) => () => {
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
 
       modelicoList1.equals(() => 1).should.be.exactly(false)
-      M.List.EMPTY.equals(modelicoList1).should.be.exactly(false)
+      M.List.EMPTY().equals(modelicoList1).should.be.exactly(false)
     })
 
     it('should support non-primitive types', () => {
@@ -208,10 +208,10 @@ export default (U, should, M) => () => {
 
   describe('EMPTY / of / fromArray', () => {
     it('should have a static property for the empty list', () => {
-      should([...M.List.EMPTY].length)
+      should([...M.List.EMPTY()].length)
         .be.exactly(0)
 
-      M.List.EMPTY.toJSON()
+      M.List.EMPTY().toJSON()
         .should.eql([])
     })
 
