@@ -9,7 +9,7 @@ var version = "19.0.5";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 
-var homepage = "https://github.com/javiercejudo/modelico#readme";
+var homepage = "https://github.com/javiercejudo/modelico/tree/immutable-js#readme";
 
 const typeSymbol = Symbol('type');
 const fieldsSymbol = Symbol('fields');
@@ -42,7 +42,10 @@ const haveSameType = (a/* : any */, b/* : any */)/* : boolean */ => (a == null |
 
 const haveDifferentTypes = pipe2(haveSameType, not);
 
-
+const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
+  (isSomething(a) && a.equals)
+    ? a.equals(b)
+    : haveSameValues(a, b);
 
 const getInnerTypes = (depth/* : number */, Type/* : Function */) => {
   if (!Type.innerTypes) {
@@ -302,12 +305,7 @@ class Maybe extends Base$1 {
       return inner === otherInner
     }
 
-    const innerItem = inner.get();
-    const otherInnerItem = otherInner.get();
-
-    return (isSomething(innerItem) && innerItem.equals)
-      ? innerItem.equals(otherInnerItem)
-      : haveSameValues(innerItem, otherInnerItem)
+    return equals(inner.get(), otherInner.get())
   }
 
   static of (v) {
@@ -428,6 +426,7 @@ class AbstractMap extends Base$1 {
     const innerMap = Immutable.OrderedMap(innerMapOrig);
 
     this.inner = always(innerMap);
+    this.size = innerMap.size;
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
   }
 
@@ -461,12 +460,9 @@ class AbstractMap extends Base$1 {
 
 var AbstractMap$1 = Object.freeze(AbstractMap);
 
-const parseMapper = (keyMetadata, valueMetadata) => pair => {
-  const reviveKey = reviverOrAsIs(keyMetadata);
-  const revivedKey = reviveKey('', pair[0]);
-
-  const reviveVal = reviverOrAsIs(valueMetadata);
-  const revivedVal = reviveVal('', pair[1]);
+const parseMapper = (keyReviver, valueReviver) => pair => {
+  const revivedKey = keyReviver('', pair[0]);
+  const revivedVal = valueReviver('', pair[1]);
 
   return [revivedKey, revivedVal]
 };
@@ -476,9 +472,12 @@ const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v) => {
     return v
   }
 
+  const keyReviver = reviverOrAsIs(keyMetadata);
+  const valueReviver = reviverOrAsIs(valueMetadata);
+
   const innerMap = (v === null)
     ? null
-    : new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
+    : new Map(v.map(parseMapper(keyReviver, valueReviver)));
 
   return ModelicoMap.fromMap(innerMap)
 };
@@ -495,7 +494,7 @@ class ModelicoMap extends AbstractMap$1 {
   }
 
   toJSON () {
-    return [...this.inner()]
+    return [...this]
   }
 
   static fromMap (map) {
@@ -529,29 +528,97 @@ ModelicoMap.EMPTY = ModelicoMap.of();
 var ModelicoMap$1 = Object.freeze(ModelicoMap);
 
 const stringifyReducer = (acc, pair) => {
+  acc[pair[0]] = pair[1];
+
+  return acc
+};
+
+const parseReducer = (valueReviver, obj) => (acc, key) =>
+  [...acc, [key, valueReviver('', obj[key])]];
+
+const reviverFactory$5 = valueMetadata => (k, v) => {
+  if (k !== '') {
+    return v
+  }
+
+  const valueReviver = reviverOrAsIs(valueMetadata);
+
+  const innerMap = (v === null)
+    ? null
+    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v), []));
+
+  return StringMap.fromMap(innerMap)
+};
+
+class StringMap extends AbstractMap$1 {
+  constructor (innerMap) {
+    super(StringMap, innerMap);
+
+    Object.freeze(this);
+  }
+
+  set (key, value) {
+    return set(this, StringMap, key, value)
+  }
+
+  toJSON () {
+    return [...this].reduce(stringifyReducer, {})
+  }
+
+  static fromMap (map) {
+    return new StringMap(map)
+  }
+
+  static fromArray (pairs) {
+    return StringMap.fromMap(new Map(pairs))
+  }
+
+  static of (...args) {
+    return of(StringMap, args)
+  }
+
+  static fromObject (obj) {
+    return StringMap.fromArray(objToArr(obj))
+  }
+
+  static metadata (valueMetadata) {
+    return metadata$1(StringMap, reviverFactory$5(valueMetadata))
+  }
+
+  static innerTypes () {
+    return emptyObject
+  }
+}
+
+StringMap.displayName = 'StringMap';
+StringMap.EMPTY = StringMap.of();
+
+var StringMap$1 = Object.freeze(StringMap);
+
+const stringifyReducer$1 = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1];
 
   return acc
 };
 
-const parseMapper$1 = (keyMetadata, valueMetadata, object) => enumerator => {
-  const reviveKey = reviverOrAsIs(keyMetadata);
-  const key = reviveKey('', enumerator);
-
-  const reviveVal = reviverOrAsIs(valueMetadata);
-  const val = reviveVal('', object[enumerator]);
+const parseMapper$1 = (keyReviver, valueReviver, obj) => enumerator => {
+  const key = keyReviver('', enumerator);
+  const val = valueReviver('', obj[enumerator]);
 
   return [key, val]
 };
 
-const reviverFactory$5 = (keyMetadata, valueMetadata) => (k, v) => {
+const reviverFactory$6 = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v
   }
 
+  const keyReviver = reviverOrAsIs(keyMetadata);
+  const valueReviver = reviverOrAsIs(valueMetadata);
+
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).map(parseMapper$1(keyMetadata, valueMetadata, v)));
+    : new Map(Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v)));
 
   return new EnumMap(innerMap)
 };
@@ -568,7 +635,7 @@ class EnumMap extends AbstractMap$1 {
   }
 
   toJSON () {
-    return [...this.inner()].reduce(stringifyReducer, {})
+    return [...this].reduce(stringifyReducer$1, {})
   }
 
   static fromMap (map) {
@@ -584,7 +651,7 @@ class EnumMap extends AbstractMap$1 {
   }
 
   static metadata (keyMetadata, valueMetadata) {
-    return metadata$1(EnumMap, reviverFactory$5(keyMetadata, valueMetadata))
+    return metadata$1(EnumMap, reviverFactory$6(keyMetadata, valueMetadata))
   }
 
   static innerTypes () {
@@ -773,9 +840,11 @@ class List extends Base$1 {
       throw TypeError('missing list')
     }
 
+    Object.freeze(innerListOrig);
     const innerList = Immutable.List(innerListOrig);
 
     this.inner = always(innerList);
+    this.size = innerList.size;
     this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     Object.freeze(this);
@@ -843,6 +912,7 @@ class ModelicoSet extends Base$1 {
     const innerSet = Immutable.OrderedSet(innerSetOrig);
 
     this.inner = always(innerSet);
+    this.size = innerSet.size;
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
     Object.freeze(this);
@@ -861,7 +931,7 @@ class ModelicoSet extends Base$1 {
   }
 
   toJSON () {
-    return [...this.inner()]
+    return [...this]
   }
 
   equals (other) {
@@ -898,7 +968,7 @@ const Any = x => identity(x);
 
 var Any$1 = Object.freeze(Any);
 
-const proxyToSelf = (nonMutators, mutators, target, prop) => {
+const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   if (!nonMutators.includes(prop)) {
     return target[prop]
   }
@@ -906,16 +976,16 @@ const proxyToSelf = (nonMutators, mutators, target, prop) => {
   return (...args) => {
     const newObj = target[prop](...args);
 
-    return proxyFactory(nonMutators, mutators, newObj)
+    return proxyFactory(nonMutators, mutators, innerCloner, newObj)
   }
 };
 
-const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => {
+const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, target, prop) => {
   if (nonMutators.includes(prop)) {
     return (...args) => {
       const newObj = target.setPath([], candidate.apply(inner, args));
 
-      return proxyFactory(nonMutators, mutators, newObj)
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
   }
 
@@ -924,7 +994,7 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => 
       candidate.apply(inner, args);
       const newObj = target.setPath([], inner);
 
-      return proxyFactory(nonMutators, mutators, newObj)
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
   }
 
@@ -933,17 +1003,17 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => 
   }
 };
 
-const proxyFactory = (nonMutators, mutators, obj) => {
+const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
   const get = (target, prop) => {
     if (prop in target) {
-      return proxyToSelf(nonMutators, mutators, target, prop)
+      return proxyToSelf(nonMutators, mutators, innerCloner, target, prop)
     }
 
-    const inner = target.inner();
+    const inner = innerCloner(target.inner());
     const candidate = inner[prop];
 
     if (typeof candidate === 'function') {
-      return proxyToInner(inner, candidate, nonMutators, mutators, target, prop)
+      return proxyToInner(inner, candidate, nonMutators, mutators, innerCloner, target, prop)
     }
 
     return candidate
@@ -963,7 +1033,10 @@ const mapMutators = [];
 const setNonMutators = internalNonMutators;
 const setMutators = [];
 
-const listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter']);
+const listNonMutators = internalNonMutators.concat(['delete', 'insert', 'clear', 'push', 'pop', 'unshift', 'shift',
+  'update', 'merge', 'mergeWith', 'mergeDeep', 'mergeDeepWith', 'map', 'filter', 'filterNot', 'reverse', 'sort',
+  'sortBy', 'slice', 'rest', 'butLast', 'skip', 'skipLast', 'skipWhile', 'skipUntil', 'take', 'takeLast', 'takeWhile',
+  'takeUntil', 'concat']);
 const listMutators = [];
 
 const dateNonMutators = internalNonMutators;
@@ -994,6 +1067,7 @@ const metadata = Object.freeze({
   enumMap: EnumMap$1.metadata,
   list: List$1.metadata,
   map: ModelicoMap$1.metadata,
+  stringMap: StringMap$1.metadata,
   maybe: Maybe$1.metadata,
   set: ModelicoSet$1.metadata
 });
@@ -1007,6 +1081,7 @@ var M = {
   EnumMap: EnumMap$1,
   List: List$1,
   Map: ModelicoMap$1,
+  StringMap: StringMap$1,
   Maybe: Maybe$1,
   Base: Base$1,
   Set: ModelicoSet$1,
@@ -1014,11 +1089,11 @@ var M = {
   fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
   genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
   metadata,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyList: partial(proxyFactory, listNonMutators, listMutators),
-  proxySet: partial(proxyFactory, setNonMutators, setMutators),
-  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)
+  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  proxyList: partial(proxyFactory, listNonMutators, listMutators, identity),
+  proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
+  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)
 };
 
 export default M;

@@ -1,6 +1,6 @@
 import { version, author, homepage, license } from '../package.json'
 import { fieldsSymbol } from './symbols'
-import { partial, always } from './U'
+import { partial, always, identity } from './U'
 import reviverFactory from './reviverFactory'
 
 import Base from './Base'
@@ -9,6 +9,7 @@ import Maybe from './Maybe'
 import Enum from './Enum'
 
 import ModelicoMap from './Map'
+import StringMap from './StringMap'
 import EnumMap from './EnumMap'
 import ModelicoNumber from './Number'
 import ModelicoDate from './Date'
@@ -27,7 +28,10 @@ const mapMutators = []
 const setNonMutators = internalNonMutators
 const setMutators = []
 
-const listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter'])
+const listNonMutators = internalNonMutators.concat(['delete', 'insert', 'clear', 'push', 'pop', 'unshift', 'shift',
+  'update', 'merge', 'mergeWith', 'mergeDeep', 'mergeDeepWith', 'map', 'filter', 'filterNot', 'reverse', 'sort',
+  'sortBy', 'slice', 'rest', 'butLast', 'skip', 'skipLast', 'skipWhile', 'skipUntil', 'take', 'takeLast', 'takeWhile',
+  'takeUntil', 'concat'])
 const listMutators = []
 
 const dateNonMutators = internalNonMutators
@@ -58,6 +62,7 @@ const metadata = Object.freeze({
   enumMap: EnumMap.metadata,
   list: List.metadata,
   map: ModelicoMap.metadata,
+  stringMap: StringMap.metadata,
   maybe: Maybe.metadata,
   set: ModelicoSet.metadata
 })
@@ -71,6 +76,7 @@ export default {
   EnumMap,
   List,
   Map: ModelicoMap,
+  StringMap,
   Maybe,
   Base,
   Set: ModelicoSet,
@@ -78,9 +84,9 @@ export default {
   fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
   genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
   metadata,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyList: partial(proxyFactory, listNonMutators, listMutators),
-  proxySet: partial(proxyFactory, setNonMutators, setMutators),
-  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)
+  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  proxyList: partial(proxyFactory, listNonMutators, listMutators, identity),
+  proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
+  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)
 }

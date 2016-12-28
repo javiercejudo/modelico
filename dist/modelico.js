@@ -20,7 +20,7 @@ var version = "19.0.5";
 var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
 var license = "MIT";
 
-var homepage = "https://github.com/javiercejudo/modelico#readme";
+var homepage = "https://github.com/javiercejudo/modelico/tree/immutable-js#readme";
 
 var typeSymbol = Symbol('type');
 var fieldsSymbol = Symbol('fields');
@@ -226,7 +226,10 @@ var haveSameType = function haveSameType(a /* : any */, b /* : any */) {
 
 var haveDifferentTypes = pipe2(haveSameType, not);
 
-
+var equals$1 = function equals$1(a /* : any */, b /* : any */) {
+  return (/* : boolean */isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b)
+  );
+};
 
 var getInnerTypes = function getInnerTypes(depth /* : number */, Type /* : Function */) {
   if (!Type.innerTypes) {
@@ -524,10 +527,7 @@ var Maybe = function (_Base) {
         return inner === otherInner;
       }
 
-      var innerItem = inner.get();
-      var otherInnerItem = otherInner.get();
-
-      return isSomething(innerItem) && innerItem.equals ? innerItem.equals(otherInnerItem) : haveSameValues(innerItem, otherInnerItem);
+      return equals$1(inner.get(), otherInner.get());
     }
   }], [{
     key: 'of',
@@ -670,6 +670,7 @@ var AbstractMap = function (_Base) {
     var innerMap = Immutable.OrderedMap(innerMapOrig);
 
     _this.inner = always(innerMap);
+    _this.size = innerMap.size;
     _this[Symbol.iterator] = function () {
       return innerMap[Symbol.iterator]();
     };
@@ -714,13 +715,10 @@ var AbstractMap = function (_Base) {
 
 var AbstractMap$1 = Object.freeze(AbstractMap);
 
-var parseMapper = function parseMapper(keyMetadata, valueMetadata) {
+var parseMapper = function parseMapper(keyReviver, valueReviver) {
   return function (pair) {
-    var reviveKey = reviverOrAsIs(keyMetadata);
-    var revivedKey = reviveKey('', pair[0]);
-
-    var reviveVal = reviverOrAsIs(valueMetadata);
-    var revivedVal = reviveVal('', pair[1]);
+    var revivedKey = keyReviver('', pair[0]);
+    var revivedVal = valueReviver('', pair[1]);
 
     return [revivedKey, revivedVal];
   };
@@ -732,7 +730,10 @@ var reviverFactory$4 = function reviverFactory$4(keyMetadata, valueMetadata) {
       return v;
     }
 
-    var innerMap = v === null ? null : new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
+    var keyReviver = reviverOrAsIs(keyMetadata);
+    var valueReviver = reviverOrAsIs(valueMetadata);
+
+    var innerMap = v === null ? null : new Map(v.map(parseMapper(keyReviver, valueReviver)));
 
     return ModelicoMap.fromMap(innerMap);
   };
@@ -758,7 +759,7 @@ var ModelicoMap = function (_AbstractMap) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      return [].concat(toConsumableArray(this.inner()));
+      return [].concat(toConsumableArray(this));
     }
   }], [{
     key: 'fromMap',
@@ -804,30 +805,121 @@ ModelicoMap.EMPTY = ModelicoMap.of();
 var ModelicoMap$1 = Object.freeze(ModelicoMap);
 
 var stringifyReducer = function stringifyReducer(acc, pair) {
-  acc[pair[0].toJSON()] = pair[1];
+  acc[pair[0]] = pair[1];
 
   return acc;
 };
 
-var parseMapper$1 = function parseMapper$1(keyMetadata, valueMetadata, object) {
-  return function (enumerator) {
-    var reviveKey = reviverOrAsIs(keyMetadata);
-    var key = reviveKey('', enumerator);
-
-    var reviveVal = reviverOrAsIs(valueMetadata);
-    var val = reviveVal('', object[enumerator]);
-
-    return [key, val];
+var parseReducer = function parseReducer(valueReviver, obj) {
+  return function (acc, key) {
+    return [].concat(toConsumableArray(acc), [[key, valueReviver('', obj[key])]]);
   };
 };
 
-var reviverFactory$5 = function reviverFactory$5(keyMetadata, valueMetadata) {
+var reviverFactory$5 = function reviverFactory$5(valueMetadata) {
   return function (k, v) {
     if (k !== '') {
       return v;
     }
 
-    var innerMap = v === null ? null : new Map(Object.keys(v).map(parseMapper$1(keyMetadata, valueMetadata, v)));
+    var valueReviver = reviverOrAsIs(valueMetadata);
+
+    var innerMap = v === null ? null : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v), []));
+
+    return StringMap.fromMap(innerMap);
+  };
+};
+
+var StringMap = function (_AbstractMap) {
+  inherits(StringMap, _AbstractMap);
+
+  function StringMap(innerMap) {
+    classCallCheck(this, StringMap);
+
+    var _this = possibleConstructorReturn(this, (StringMap.__proto__ || Object.getPrototypeOf(StringMap)).call(this, StringMap, innerMap));
+
+    Object.freeze(_this);
+    return _this;
+  }
+
+  createClass(StringMap, [{
+    key: 'set',
+    value: function set(key, value) {
+      return set$2(this, StringMap, key, value);
+    }
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      return [].concat(toConsumableArray(this)).reduce(stringifyReducer, {});
+    }
+  }], [{
+    key: 'fromMap',
+    value: function fromMap(map) {
+      return new StringMap(map);
+    }
+  }, {
+    key: 'fromArray',
+    value: function fromArray(pairs) {
+      return StringMap.fromMap(new Map(pairs));
+    }
+  }, {
+    key: 'of',
+    value: function of() {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return of$1(StringMap, args);
+    }
+  }, {
+    key: 'fromObject',
+    value: function fromObject(obj) {
+      return StringMap.fromArray(objToArr(obj));
+    }
+  }, {
+    key: 'metadata',
+    value: function metadata(valueMetadata) {
+      return metadata$2(StringMap, reviverFactory$5(valueMetadata));
+    }
+  }, {
+    key: 'innerTypes',
+    value: function innerTypes() {
+      return emptyObject;
+    }
+  }]);
+  return StringMap;
+}(AbstractMap$1);
+
+StringMap.displayName = 'StringMap';
+StringMap.EMPTY = StringMap.of();
+
+var StringMap$1 = Object.freeze(StringMap);
+
+var stringifyReducer$1 = function stringifyReducer$1(acc, pair) {
+  acc[pair[0].toJSON()] = pair[1];
+
+  return acc;
+};
+
+var parseMapper$1 = function parseMapper$1(keyReviver, valueReviver, obj) {
+  return function (enumerator) {
+    var key = keyReviver('', enumerator);
+    var val = valueReviver('', obj[enumerator]);
+
+    return [key, val];
+  };
+};
+
+var reviverFactory$6 = function reviverFactory$6(keyMetadata, valueMetadata) {
+  return function (k, v) {
+    if (k !== '') {
+      return v;
+    }
+
+    var keyReviver = reviverOrAsIs(keyMetadata);
+    var valueReviver = reviverOrAsIs(valueMetadata);
+
+    var innerMap = v === null ? null : new Map(Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v)));
 
     return new EnumMap(innerMap);
   };
@@ -853,7 +945,7 @@ var EnumMap = function (_AbstractMap) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      return [].concat(toConsumableArray(this.inner())).reduce(stringifyReducer, {});
+      return [].concat(toConsumableArray(this)).reduce(stringifyReducer$1, {});
     }
   }], [{
     key: 'fromMap',
@@ -877,7 +969,7 @@ var EnumMap = function (_AbstractMap) {
   }, {
     key: 'metadata',
     value: function metadata(keyMetadata, valueMetadata) {
-      return metadata$2(EnumMap, reviverFactory$5(keyMetadata, valueMetadata));
+      return metadata$2(EnumMap, reviverFactory$6(keyMetadata, valueMetadata));
     }
   }, {
     key: 'innerTypes',
@@ -1099,9 +1191,11 @@ var List = function (_Base) {
       throw TypeError('missing list');
     }
 
+    Object.freeze(innerListOrig);
     var innerList = Immutable.List(innerListOrig);
 
     _this.inner = always(innerList);
+    _this.size = innerList.size;
     _this[Symbol.iterator] = function () {
       return innerList[Symbol.iterator]();
     };
@@ -1194,6 +1288,7 @@ var ModelicoSet = function (_Base) {
     var innerSet = Immutable.OrderedSet(innerSetOrig);
 
     _this.inner = always(innerSet);
+    _this.size = innerSet.size;
     _this[Symbol.iterator] = function () {
       return innerSet[Symbol.iterator]();
     };
@@ -1219,7 +1314,7 @@ var ModelicoSet = function (_Base) {
   }, {
     key: 'toJSON',
     value: function toJSON() {
-      return [].concat(toConsumableArray(this.inner()));
+      return [].concat(toConsumableArray(this));
     }
   }, {
     key: 'equals',
@@ -1270,7 +1365,7 @@ var Any = function Any(x) {
 
 var Any$1 = Object.freeze(Any);
 
-var proxyToSelf = function proxyToSelf(nonMutators, mutators, target, prop) {
+var proxyToSelf = function proxyToSelf(nonMutators, mutators, innerCloner, target, prop) {
   if (!nonMutators.includes(prop)) {
     return target[prop];
   }
@@ -1278,11 +1373,11 @@ var proxyToSelf = function proxyToSelf(nonMutators, mutators, target, prop) {
   return function () {
     var newObj = target[prop].apply(target, arguments);
 
-    return proxyFactory(nonMutators, mutators, newObj);
+    return proxyFactory(nonMutators, mutators, innerCloner, newObj);
   };
 };
 
-var proxyToInner = function proxyToInner(inner, candidate, nonMutators, mutators, target, prop) {
+var proxyToInner = function proxyToInner(inner, candidate, nonMutators, mutators, innerCloner, target, prop) {
   if (nonMutators.includes(prop)) {
     return function () {
       for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -1291,7 +1386,7 @@ var proxyToInner = function proxyToInner(inner, candidate, nonMutators, mutators
 
       var newObj = target.setPath([], candidate.apply(inner, args));
 
-      return proxyFactory(nonMutators, mutators, newObj);
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj);
     };
   }
 
@@ -1304,7 +1399,7 @@ var proxyToInner = function proxyToInner(inner, candidate, nonMutators, mutators
       candidate.apply(inner, args);
       var newObj = target.setPath([], inner);
 
-      return proxyFactory(nonMutators, mutators, newObj);
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj);
     };
   }
 
@@ -1317,17 +1412,17 @@ var proxyToInner = function proxyToInner(inner, candidate, nonMutators, mutators
   };
 };
 
-var proxyFactory = function proxyFactory(nonMutators, mutators, obj) {
+var proxyFactory = function proxyFactory(nonMutators, mutators, innerCloner, obj) {
   var get = function get(target, prop) {
     if (prop in target) {
-      return proxyToSelf(nonMutators, mutators, target, prop);
+      return proxyToSelf(nonMutators, mutators, innerCloner, target, prop);
     }
 
-    var inner = target.inner();
+    var inner = innerCloner(target.inner());
     var candidate = inner[prop];
 
     if (typeof candidate === 'function') {
-      return proxyToInner(inner, candidate, nonMutators, mutators, target, prop);
+      return proxyToInner(inner, candidate, nonMutators, mutators, innerCloner, target, prop);
     }
 
     return candidate;
@@ -1349,7 +1444,7 @@ var mapMutators = [];
 var setNonMutators = internalNonMutators;
 var setMutators = [];
 
-var listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter']);
+var listNonMutators = internalNonMutators.concat(['delete', 'insert', 'clear', 'push', 'pop', 'unshift', 'shift', 'update', 'merge', 'mergeWith', 'mergeDeep', 'mergeDeepWith', 'map', 'filter', 'filterNot', 'reverse', 'sort', 'sortBy', 'slice', 'rest', 'butLast', 'skip', 'skipLast', 'skipWhile', 'skipUntil', 'take', 'takeLast', 'takeWhile', 'takeUntil', 'concat']);
 var listMutators = [];
 
 var dateNonMutators = internalNonMutators;
@@ -1387,6 +1482,7 @@ var metadata$1 = Object.freeze({
   enumMap: EnumMap$1.metadata,
   list: List$1.metadata,
   map: ModelicoMap$1.metadata,
+  stringMap: StringMap$1.metadata,
   maybe: Maybe$1.metadata,
   set: ModelicoSet$1.metadata
 });
@@ -1400,6 +1496,7 @@ var M = {
   EnumMap: EnumMap$1,
   List: List$1,
   Map: ModelicoMap$1,
+  StringMap: StringMap$1,
   Maybe: Maybe$1,
   Base: Base$1,
   Set: ModelicoSet$1,
@@ -1413,11 +1510,11 @@ var M = {
     return JSON.parse(json, _(Type, 0, innerMetadata).reviver);
   },
   metadata: metadata$1,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyList: partial(proxyFactory, listNonMutators, listMutators),
-  proxySet: partial(proxyFactory, setNonMutators, setMutators),
-  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)
+  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  proxyList: partial(proxyFactory, listNonMutators, listMutators, identity),
+  proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
+  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)
 };
 
 return M;

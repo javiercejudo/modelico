@@ -2,19 +2,18 @@
 
 import PersonFactory from './fixtures/Person'
 
-export default (should, M) => () => {
+export default (U, should, M) => () => {
   const Person = PersonFactory(M)
   const { _, list, date } = M.metadata
 
   describe('immutability', () => {
-    it('must not reflect changes in the wrapped input', () => {
+    U.skipIfNoObjectFreeze('must freeze the input', () => {
       const input = ['a', 'b', 'c']
-      const list = M.List.fromArray(input)
 
-      input[1] = 'B'
+      M.List.fromArray(input)
 
-      Array.from(list)[1]
-        .should.be.exactly('b')
+      ;(() => { input[1] = 'B' })
+        .should.throw()
     })
   })
 
@@ -92,7 +91,7 @@ export default (should, M) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author1 = JSON.parse(authorJson, _(Person).reviver)
 
-      const newListArray = [...author1.importantDatesList().inner()]
+      const newListArray = [...author1.importantDatesList()]
       newListArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')))
 
       const author2 = author1.set(
@@ -198,6 +197,7 @@ export default (should, M) => () => {
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
 
       M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false)
+      M.List.of(2, 4).equals(M.List.of(4, 2)).should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {

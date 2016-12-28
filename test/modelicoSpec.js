@@ -36,6 +36,7 @@ import Base from './types/Base'
 import ModelicoNumber from './types/Number'
 import ModelicoDate from './types/Date'
 import ModelicoMap from './types/Map'
+import ModelicoStringMap from './types/StringMap'
 import ModelicoEnum from './types/Enum'
 import ModelicoEnumMap from './types/EnumMap'
 import ModelicoList from './types/List'
@@ -62,30 +63,30 @@ import cases from './cases/index'
 export default (options, should, M, Immutable) => () => {
   const U = buildUtils(options)
   const deps = [should, M, Immutable]
-  const utilsAndDeps = [U].concat(deps)
 
-  describe('Base', Base(...utilsAndDeps))
+  describe('Base', Base(U, ...deps))
   describe('Number', ModelicoNumber(...deps))
   describe('Date', ModelicoDate(...deps))
   describe('Map', ModelicoMap(...deps))
+  describe('StringMap', ModelicoStringMap(...deps))
   describe('Enum', ModelicoEnum(...deps))
   describe('EnumMap', ModelicoEnumMap(...deps))
-  describe('ModelicoList', ModelicoList(...deps))
+  describe('ModelicoList', ModelicoList(U, ...deps))
   describe('ModelicoSet', ModelicoSet(...deps))
   describe('ModelicoMaybe', ModelicoMaybe(...deps))
 
-  describe('asIs', asIs(...utilsAndDeps))
-  describe('setPath', setPath(...deps))
+  describe('asIs', asIs(U, ...deps))
+  describe('setPath', setPath(U, ...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps))
   describe('Deep nesting features', featuresDeepNesting(...deps))
-  describe('Immutable.js examples', ImmutableExamples(...utilsAndDeps))
+  describe('Immutable.js examples', ImmutableExamples(U, ...deps))
 
   U.skipDescribeIfNoProxies(
     'Immutable.js examples (proxied)',
-    ImmutableProxied(...utilsAndDeps)
+    ImmutableProxied(U, ...deps)
   )
 
   U.skipDescribeIfNoProxies('Proxies', () => {

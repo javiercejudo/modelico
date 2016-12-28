@@ -277,4 +277,10 @@ export default (should, M) => () => {
     ;[...list.map(x => x + 10)]
       .should.eql([11, 12, 13])
   })
+
+  it('non-existent member', () => {
+    const list = p(M.List.of(1, 2, 3))
+
+    should(list.javi).be.exactly(undefined)
+  })
 }

@@ -969,6 +969,154 @@ var ModelicoMap = (function (should, M) {
 
 /* eslint-env mocha */
 
+var ModelicoStringMap = (function (should, M) {
+  return function () {
+    var Person = PersonFactory(M);
+    var _M$metadata = M.metadata,
+        date = _M$metadata.date,
+        number = _M$metadata.number,
+        stringMap = _M$metadata.stringMap;
+
+
+    describe('immutability', function () {
+      it('must not reflect changes in the wrapped input', function () {
+        var input = new Map([['A', 'Good morning!'], ['B', 'Good afternoon!'], ['C', 'Good evening!']]);
+
+        var map = M.StringMap.fromMap(input);
+
+        input.set('A', "g'day!");
+
+        map.inner().get('A').should.be.exactly('Good morning!');
+      });
+    });
+
+    describe('setting', function () {
+      it('should implement Symbol.iterator', function () {
+        var map = M.StringMap.fromObject({ a: 1, b: 2, c: 3 });
+
+        map.toJSON().should.eql({ a: 1, b: 2, c: 3 });
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new M.StringMap(null);
+        }).should.throw();
+      });
+
+      it('should set fields returning a new map', function () {
+        var map = new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))], ['b', M.Date.of(new Date())]]);
+
+        var modelicoMap1 = M.StringMap.fromMap(map);
+        var modelicoMap2 = modelicoMap1.set('a', M.Date.of(new Date('1989-04-16T00:00:00.000Z')));
+
+        should(modelicoMap2.inner().get('a').inner().getFullYear()).be.exactly(1989);
+
+        // verify that modelicoMap1 was not mutated
+        should(modelicoMap1.inner().get('a').inner().getFullYear()).be.exactly(1988);
+      });
+    });
+
+    describe('stringifying', function () {
+      it('should stringify the map correctly', function () {
+        var map = new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))], ['b', M.Date.of(new Date('2012-12-25T00:00:00.000Z'))]]);
+
+        var modelicoMap = M.StringMap.fromMap(map);
+
+        JSON.stringify(modelicoMap).should.be.exactly('{"a":"1988-04-16T00:00:00.000Z","b":"2012-12-25T00:00:00.000Z"}');
+      });
+    });
+
+    describe('parsing', function () {
+      it('should parse the map correctly', function () {
+        var modelicoMap = JSON.parse('{"a":"1988-04-16T00:00:00.000Z","b":"2012-12-25T00:00:00.000Z"}', stringMap(date()).reviver);
+
+        should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(1988);
+
+        should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11);
+      });
+
+      it('should be parsed correctly when used within another class', function () {
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
+        var author = M.fromJSON(Person, authorJson);
+
+        should(author.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
+      });
+
+      it('should be able to work with M.genericsFromJSON', function () {
+        var myMap = M.genericsFromJSON(M.StringMap, [number()], '{"1":10,"2":20,"3":30}');
+
+        should(myMap.inner().get('2')).be.exactly(20);
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return JSON.parse('null', stringMap(date()).reviver);
+        }).should.throw();
+      });
+    });
+
+    describe('comparing', function () {
+      it('should identify equal instances', function () {
+        var modelicoMap = M.StringMap.fromMap(new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]]));
+
+        var modelicoMap2 = M.StringMap.fromMap(new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]]));
+
+        modelicoMap.should.not.be.exactly(modelicoMap2);
+        modelicoMap.should.not.equal(modelicoMap2);
+
+        modelicoMap.equals(modelicoMap).should.be.exactly(true);
+        modelicoMap.equals(modelicoMap2).should.be.exactly(true);
+
+        modelicoMap.equals(2).should.be.exactly(false);
+        M.StringMap.EMPTY.equals(modelicoMap).should.be.exactly(false);
+      });
+
+      it('should have same-value-zero semantics', function () {
+        M.StringMap.of('a', 0).equals(M.StringMap.of('a', -0)).should.be.exactly(true);
+        M.StringMap.of('a', NaN).equals(M.StringMap.of('a', NaN)).should.be.exactly(true);
+      });
+    });
+
+    describe('EMPTY / of / fromArray / fromObject / fromMap', function () {
+      it('should have a static property for the empty map', function () {
+        should(M.StringMap.EMPTY.inner().size).be.exactly(0);
+
+        M.StringMap.EMPTY.toJSON().should.eql({});
+      });
+
+      it('should be able to create a map from an even number of params', function () {
+        var map = M.StringMap.of('a', 1, 'b', 2, 'c', 3);
+
+        should(map.inner().get('b')).be.exactly(2);
+
+        (function () {
+          return M.StringMap.of('a', 1, 'b', 2, 'c', 3, 'd');
+        }).should.throw();
+      });
+
+      it('should be able to create a map from an array', function () {
+        var map = M.StringMap.fromArray([['a', 1], ['b', 2], ['c', 3]]);
+
+        should(map.inner().get('b')).be.exactly(2);
+      });
+
+      it('should be able to create a map from an object', function () {
+        var map = M.StringMap.fromObject({ a: 1, b: 2, c: 3 });
+
+        should(map.inner().get('b')).be.exactly(2);
+      });
+
+      it('should be able to create a map from a native map', function () {
+        var map = M.StringMap.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+
+        should(map.inner().get('b')).be.exactly(2);
+      });
+    });
+  };
+});
+
+/* eslint-env mocha */
+
 var ModelicoEnum = (function (should, M) {
   return function () {
     var PartOfDay = PartOfDayFactory(M);
@@ -1099,7 +1247,7 @@ var ModelicoEnumMap = (function (should, M) {
 
 /* eslint-env mocha */
 
-var ModelicoList = (function (should, M) {
+var ModelicoList = (function (U, should, M) {
   return function () {
     var Person = PersonFactory(M);
     var _M$metadata = M.metadata,
@@ -1109,13 +1257,12 @@ var ModelicoList = (function (should, M) {
 
 
     describe('immutability', function () {
-      it('must not reflect changes in the wrapped input', function () {
+      U.skipIfNoObjectFreeze('must freeze the input', function () {
         var input = ['a', 'b', 'c'];
-        var list = M.List.fromArray(input);
 
-        input[1] = 'B';
-
-        Array.from(list)[1].should.be.exactly('b');
+        M.List.fromArray(input);(function () {
+          input[1] = 'B';
+        }).should.throw();
       });
     });
 
@@ -1180,7 +1327,7 @@ var ModelicoList = (function (should, M) {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author1 = JSON.parse(authorJson, _(Person).reviver);
 
-        var newListArray = [].concat(toConsumableArray(author1.importantDatesList().inner()));
+        var newListArray = [].concat(toConsumableArray(author1.importantDatesList()));
         newListArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')));
 
         var author2 = author1.set('importantDatesList', M.List.fromArray(newListArray));
@@ -1270,6 +1417,7 @@ var ModelicoList = (function (should, M) {
         modelicoList1.equals(modelicoList2).should.be.exactly(true);
 
         M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false);
+        M.List.of(2, 4).equals(M.List.of(4, 2)).should.be.exactly(false);
       });
 
       it('should have same-value-zero semantics', function () {
@@ -1793,7 +1941,7 @@ var asIs = (function (U, should, M) {
 
 /* eslint-env mocha */
 
-var setPath = (function (should, M) {
+var setPath = (function (U, should, M) {
   return function () {
     it('should work across types', function () {
       var hammer = M.Map.of('hammer', 'Can’t Touch This');
@@ -1948,7 +2096,7 @@ var featuresAdvanced = (function (should, M) {
 
       Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
 
-      Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak();
+      Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
 
       var person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
 
@@ -2346,7 +2494,7 @@ var ImmutableProxied = (function (U, should, M) {
 
       var list2 = list1.push(3, 4, 5);
       var list3 = list2.unshift(0);
-      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.size === 2).should.be.exactly(true, 1);(list2.size === 5).should.be.exactly(true, 2);(list3.size === 6).should.be.exactly(true, 3);(list4.size === 13).should.be.exactly(true, 4);(list4.get(0) === 1).should.be.exactly(true, 5);
+      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -2400,7 +2548,7 @@ var ImmutableProxied = (function (U, should, M) {
     it('Batching Mutations', function () {
       var list1 = _l(M.List.of(1, 2, 3));
 
-      var res = [].concat(toConsumableArray(list1.inner()));
+      var res = [].concat(toConsumableArray(list1));
       res.push(4);
       res.push(5);
       res.push(6);
@@ -2728,6 +2876,12 @@ var proxyList = (function (should, M) {
         return x + 10;
       }))).should.eql([11, 12, 13]);
     });
+
+    it('non-existent member', function () {
+      var list = p(M.List.of(1, 2, 3));
+
+      should(list.javi).be.exactly(undefined);
+    });
   };
 });
 
@@ -2899,28 +3053,28 @@ var modelicoSpec = (function (options, should, M, Immutable) {
   return function () {
     var U = buildUtils(options);
     var deps = [should, M, Immutable];
-    var utilsAndDeps = [U].concat(deps);
 
-    describe('Base', Base.apply(undefined, toConsumableArray(utilsAndDeps)));
+    describe('Base', Base.apply(undefined, [U].concat(deps)));
     describe('Number', ModelicoNumber.apply(undefined, deps));
     describe('Date', ModelicoDate.apply(undefined, deps));
     describe('Map', ModelicoMap.apply(undefined, deps));
+    describe('StringMap', ModelicoStringMap.apply(undefined, deps));
     describe('Enum', ModelicoEnum.apply(undefined, deps));
     describe('EnumMap', ModelicoEnumMap.apply(undefined, deps));
-    describe('ModelicoList', ModelicoList.apply(undefined, deps));
+    describe('ModelicoList', ModelicoList.apply(undefined, [U].concat(deps)));
     describe('ModelicoSet', ModelicoSet.apply(undefined, deps));
     describe('ModelicoMaybe', ModelicoMaybe.apply(undefined, deps));
 
-    describe('asIs', asIs.apply(undefined, toConsumableArray(utilsAndDeps)));
-    describe('setPath', setPath.apply(undefined, deps));
+    describe('asIs', asIs.apply(undefined, [U].concat(deps)));
+    describe('setPath', setPath.apply(undefined, [U].concat(deps)));
 
     describe('Readme simple features', featuresSimple.apply(undefined, deps));
     describe('Readme advanced features', featuresAdvanced.apply(undefined, deps));
     describe('Readme advanced features ES5', featuresAdvancedES5.apply(undefined, deps));
     describe('Deep nesting features', featuresDeepNesting.apply(undefined, deps));
-    describe('Immutable.js examples', ImmutableExamples.apply(undefined, toConsumableArray(utilsAndDeps)));
+    describe('Immutable.js examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
 
-    U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, toConsumableArray(utilsAndDeps)));
+    U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 
     U.skipDescribeIfNoProxies('Proxies', function () {
       describe('Map', proxyMap.apply(undefined, deps));

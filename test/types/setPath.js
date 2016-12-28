@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M) => () => {
+export default (U, should, M) => () => {
   it('should work across types', () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This')
     const array1 = M.List.of('totally', 'immutable', hammer)

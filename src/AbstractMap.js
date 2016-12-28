@@ -46,6 +46,7 @@ class AbstractMap extends Base {
     const innerMap = Immutable.OrderedMap(innerMapOrig)
 
     this.inner = always(innerMap)
+    this.size = innerMap.size
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]()
   }
 

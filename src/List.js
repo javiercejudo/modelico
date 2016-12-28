@@ -12,9 +12,11 @@ class List extends Base {
       throw TypeError('missing list')
     }
 
+    Object.freeze(innerListOrig)
     const innerList = Immutable.List(innerListOrig)
 
     this.inner = always(innerList)
+    this.size = innerList.size
     this[Symbol.iterator] = () => innerList[Symbol.iterator]()
 
     Object.freeze(this)

@@ -15,6 +15,7 @@ class ModelicoSet extends Base {
     const innerSet = Immutable.OrderedSet(innerSetOrig)
 
     this.inner = always(innerSet)
+    this.size = innerSet.size
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
 
     Object.freeze(this)
@@ -33,7 +34,7 @@ class ModelicoSet extends Base {
   }
 
   toJSON () {
-    return [...this.inner()]
+    return [...this]
   }
 
   equals (other) {

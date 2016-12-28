@@ -1,4 +1,4 @@
-const proxyToSelf = (nonMutators, mutators, target, prop) => {
+const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   if (!nonMutators.includes(prop)) {
     return target[prop]
   }
@@ -6,16 +6,16 @@ const proxyToSelf = (nonMutators, mutators, target, prop) => {
   return (...args) => {
     const newObj = target[prop](...args)
 
-    return proxyFactory(nonMutators, mutators, newObj)
+    return proxyFactory(nonMutators, mutators, innerCloner, newObj)
   }
 }
 
-const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => {
+const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, target, prop) => {
   if (nonMutators.includes(prop)) {
     return (...args) => {
       const newObj = target.setPath([], candidate.apply(inner, args))
 
-      return proxyFactory(nonMutators, mutators, newObj)
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
   }
 
@@ -24,7 +24,7 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => 
       candidate.apply(inner, args)
       const newObj = target.setPath([], inner)
 
-      return proxyFactory(nonMutators, mutators, newObj)
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
   }
 
@@ -33,17 +33,17 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => 
   }
 }
 
-const proxyFactory = (nonMutators, mutators, obj) => {
+const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
   const get = (target, prop) => {
     if (prop in target) {
-      return proxyToSelf(nonMutators, mutators, target, prop)
+      return proxyToSelf(nonMutators, mutators, innerCloner, target, prop)
     }
 
-    const inner = target.inner()
+    const inner = innerCloner(target.inner())
     const candidate = inner[prop]
 
     if (typeof candidate === 'function') {
-      return proxyToInner(inner, candidate, nonMutators, mutators, target, prop)
+      return proxyToInner(inner, candidate, nonMutators, mutators, innerCloner, target, prop)
     }
 
     return candidate
