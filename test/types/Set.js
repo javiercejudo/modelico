@@ -162,6 +162,8 @@ export default (should, M) => () => {
 
       M.Set.EMPTY().toJSON()
         .should.eql([])
+
+      M.Set.of().should.be.exactly(M.Set.EMPTY())
     })
 
     it('should be able to create a set from arbitrary parameters', () => {
