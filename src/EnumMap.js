@@ -29,9 +29,15 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   return new EnumMap(innerMap)
 }
 
+let EMPTY_ENUM_MAP
+
 class EnumMap extends AbstractMap {
   constructor (innerMap) {
-    super(EnumMap, innerMap)
+    super(EnumMap, innerMap, EMPTY_ENUM_MAP)
+
+    if (!EMPTY_ENUM_MAP && this.size === 0) {
+      EMPTY_ENUM_MAP = this
+    }
 
     Object.freeze(this)
   }
@@ -63,9 +69,12 @@ class EnumMap extends AbstractMap {
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_ENUM_MAP || EnumMap.of()
+  }
 }
 
 EnumMap.displayName = 'EnumMap'
-EnumMap.EMPTY = EnumMap.of()
 
 export default Object.freeze(EnumMap)

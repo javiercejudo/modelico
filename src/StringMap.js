@@ -24,9 +24,15 @@ const reviverFactory = valueMetadata => (k, v) => {
   return StringMap.fromMap(innerMap)
 }
 
+let EMPTY_STRING_MAP
+
 class StringMap extends AbstractMap {
   constructor (innerMap) {
-    super(StringMap, innerMap)
+    super(StringMap, innerMap, EMPTY_STRING_MAP)
+
+    if (!EMPTY_STRING_MAP && this.size === 0) {
+      EMPTY_STRING_MAP = this
+    }
 
     Object.freeze(this)
   }
@@ -62,9 +68,12 @@ class StringMap extends AbstractMap {
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_STRING_MAP || StringMap.of()
+  }
 }
 
 StringMap.displayName = 'StringMap'
-StringMap.EMPTY = StringMap.of()
 
 export default Object.freeze(StringMap)

@@ -153,7 +153,7 @@ export default (should, M) => () => {
       modelicoMap.equals(modelicoMap2).should.be.exactly(true)
 
       modelicoMap.equals(2).should.be.exactly(false)
-      M.Map.EMPTY.equals(modelicoMap).should.be.exactly(false)
+      M.Map.EMPTY().equals(modelicoMap).should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {
@@ -166,10 +166,10 @@ export default (should, M) => () => {
 
   describe('EMPTY / of / fromArray / fromObject / fromMap', () => {
     it('should have a static property for the empty map', () => {
-      should(M.Map.EMPTY.inner().size)
+      should(M.Map.EMPTY().inner().size)
         .be.exactly(0)
 
-      M.Map.EMPTY.toJSON()
+      M.Map.EMPTY().toJSON()
         .should.eql([])
     })
 
