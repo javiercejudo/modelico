@@ -4,8 +4,6 @@ export default (U, should, M) => () => {
   const _m = M.proxyMap
   const _l = M.proxyList
 
-  const objToArr = U.objToArr
-
   it('Getting started (proxied)', () => {
     const map1 = _m(M.Map.fromObject({a: 1, b: 2, c: 3}))
     const map2 = map1.set('b', 50)
@@ -26,7 +24,7 @@ export default (U, should, M) => () => {
 
     const list2 = list1.push(3, 4, 5)
     const list3 = list2.unshift(0)
-    const list4 = list1.concat([...list2], [...list3])
+    const list4 = list1.concat(list2, list3)
 
     ;(list1.size === 2).should.be.exactly(true)
     ;(list2.size === 5).should.be.exactly(true)
@@ -38,9 +36,8 @@ export default (U, should, M) => () => {
   it('JavaScript-first API (2)', () => {
     const alpha = _m(M.Map.fromObject({a: 1, b: 2, c: 3, d: 4}))
 
-    const res = []
-    alpha.forEach((v, k) => res.push(k.toUpperCase()))
-    res.join().should.be.exactly('A,B,C,D')
+    alpha.map((v, k) => k.toUpperCase()).join()
+      .should.be.exactly('A,B,C,D')
   })
 
   it('Accepts raw JavaScript objects.', () => {
@@ -49,20 +46,17 @@ export default (U, should, M) => () => {
 
     const obj = {d: 100, o: 200, g: 300}
 
-    const map3 = M.Map.fromMap(
-      new Map([].concat([...map1.entries()], [...map2.entries()], objToArr(obj)))
-    )
+    const map3 = map1.merge(map2, obj)
 
     map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))
       .should.be.exactly(true)
   })
 
   it('Accepts raw JavaScript objects. (2)', () => {
-    const map = _m(M.Map.fromObject({a: 1, b: 2, c: 3}))
+    const map = _m(M.StringMap.fromObject({a: 1, b: 2, c: 3}))
 
-    const res = {}
-    map.forEach((v, k) => { res[k] = v * v })
-    res.should.eql({a: 1, b: 4, c: 9})
+    map.map(x => x * x).toJS()
+      .should.eql({a: 1, b: 4, c: 9})
   })
 
   it('Accepts raw JavaScript objects. (3)', () => {
@@ -87,11 +81,9 @@ export default (U, should, M) => () => {
   it('Batching Mutations', () => {
     const list1 = _l(M.List.of(1, 2, 3))
 
-    const res = [...list1]
-    res.push(4)
-    res.push(5)
-    res.push(6)
-    const list2 = _l(M.List.fromArray(res))
+    const list2 = list1.withMutations(function (list) {
+      list.push(4).push(5).push(6)
+    })
 
     ;(list1.size === 3).should.be.exactly(true)
     ;(list2.size === 6).should.be.exactly(true)
