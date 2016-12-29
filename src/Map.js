@@ -23,9 +23,15 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   return ModelicoMap.fromMap(innerMap)
 }
 
+let EMPTY_MAP
+
 class ModelicoMap extends AbstractMap {
   constructor (innerMap) {
-    super(ModelicoMap, innerMap)
+    super(ModelicoMap, innerMap, EMPTY_MAP)
+
+    if (!EMPTY_MAP && this.size === 0) {
+      EMPTY_MAP = this
+    }
 
     Object.freeze(this)
   }
@@ -61,9 +67,12 @@ class ModelicoMap extends AbstractMap {
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_MAP || ModelicoMap.of()
+  }
 }
 
 ModelicoMap.displayName = 'ModelicoMap'
-ModelicoMap.EMPTY = ModelicoMap.of()
 
 export default Object.freeze(ModelicoMap)

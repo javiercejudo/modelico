@@ -26,9 +26,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       }
 
@@ -70,9 +70,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })
 
@@ -103,9 +103,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })
 
@@ -139,9 +139,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: null,
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })).should.throw()
     })
@@ -154,9 +154,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })
 
@@ -180,9 +180,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })
 
@@ -229,9 +229,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })
 
@@ -240,9 +240,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })
 
@@ -251,9 +251,9 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo Goñi',
         birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        lifeEvents: M.Map.EMPTY,
-        importantDatesList: M.List.EMPTY,
-        importantDatesSet: M.Set.EMPTY,
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
         sex: Sex.MALE()
       })
 

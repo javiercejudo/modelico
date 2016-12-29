@@ -120,12 +120,12 @@ export default (should, M) => () => {
     })
   })
 
-  describe('EMPTY /  of /fromMap', () => {
+  describe('EMPTY / of / fromArray / fromMap', () => {
     it('should have a static property for the empty map', () => {
-      should(M.EnumMap.EMPTY.inner().size)
+      should(M.EnumMap.EMPTY().inner().size)
         .be.exactly(0)
 
-      M.EnumMap.EMPTY.toJSON()
+      M.EnumMap.EMPTY().toJSON()
         .should.eql({})
     })
 
@@ -140,6 +140,12 @@ export default (should, M) => () => {
 
       (() => M.EnumMap.of(PartOfDay.MORNING(), 1, PartOfDay.AFTERNOON()))
         .should.throw()
+    })
+
+    it('should be able to create an enum map from an array', () => {
+      var enumMap = M.EnumMap.fromArray([[PartOfDay.MORNING(), 1], [PartOfDay.AFTERNOON(), 2]])
+
+      should(enumMap.inner().get(PartOfDay.MORNING())).be.exactly(1)
     })
 
     it('should be able to create an enum map from a native map', () => {
