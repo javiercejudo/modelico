@@ -255,15 +255,15 @@ export default (U, should, M) => () => {
         familyName: 'Cejudo',
         birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
+        sex: M.Maybe.of(Sex.MALE()),
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
-        importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        importantDatesSet: M.Set.EMPTY()
       })
 
       const author2 = new Person({
-        givenName: 'Javier',
         familyName: 'Cejudo',
+        givenName: 'Javier',
         birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
         lifeEvents: M.Map.EMPTY(),
@@ -283,9 +283,32 @@ export default (U, should, M) => () => {
         sex: M.Maybe.of(Sex.MALE())
       })
 
+      const author4 = new Person({
+        givenName: 'Javier',
+        familyName: 'Cejudo',
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        favouritePartOfDay: PartOfDay.EVENING(),
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY()
+      })
+
+      const author5 = new Person({
+        givenName: 'Javier',
+        familyName: 'Cejudo',
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        favouritePartOfDay: PartOfDay.EVENING(),
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
+        extra: 1
+      })
+
       author1.equals(author1).should.be.exactly(true)
       author1.equals(author2).should.be.exactly(true)
       author1.equals(author3).should.be.exactly(false)
+      author1.equals(author4).should.be.exactly(false)
+      author1.equals(author5).should.be.exactly(false)
       author1.equals(2).should.be.exactly(false)
 
       author1.should.not.be.exactly(author2)

@@ -1,6 +1,6 @@
 import {
   always, defaultTo, isPlainObject, isSomething, getInnerTypes,
-  emptyObject, haveDifferentTypes
+  emptyObject, haveDifferentTypes, equals
 } from './U'
 
 import { typeSymbol, fieldsSymbol } from './symbols'
@@ -65,7 +65,17 @@ class Base {
       return false
     }
 
-    return (JSON.stringify(this) === JSON.stringify(other))
+    const thisFields = this[fieldsSymbol]()
+    const otherFields = other[fieldsSymbol]()
+
+    const thisKeys = Object.keys(thisFields)
+    const otherKeys = Object.keys(otherFields)
+
+    if (thisKeys.length !== otherKeys.length) {
+      return false
+    }
+
+    return thisKeys.every(key => equals(thisFields[key], otherFields[key]))
   }
 
   toJSON () {
