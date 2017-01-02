@@ -128,6 +128,13 @@ export default (should, M) => () => {
         .should.be.exactly('20')
     })
 
+    it('should be able to work with M.genericsFromJS', () => {
+      const myMap = M.genericsFromJS(M.Map, [number(), string()], [[1, '10'], [2, '20'], [3, '30']])
+
+      myMap.inner().get(2)
+        .should.be.exactly('20')
+    })
+
     it('should not support null (wrap with Maybe)', () => {
       (() => JSON.parse(
         'null',

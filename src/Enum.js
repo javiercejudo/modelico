@@ -25,6 +25,7 @@ class Enum extends Base {
       .forEach(enumerator => {
         this[enumerator] = always(enumerators[enumerator])
         enumerators[enumerator].toJSON = always(enumerator)
+        enumerators[enumerator].equals = other => enumerator === other.toJSON()
       })
 
     Object.defineProperty(this, 'metadata', {
