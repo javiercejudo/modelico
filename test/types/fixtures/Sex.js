@@ -1,5 +1,13 @@
 /* eslint-env mocha */
 
 export default M => {
-  return M.Enum.fromArray(['FEMALE', 'MALE', 'OTHER'])
+  class Sex extends M.Enum {
+    static innerTypes () {
+      return M.Enum.innerTypes()
+    }
+  }
+
+  return M.Enum.fromArray([
+    'FEMALE', 'MALE', 'OTHER'
+  ], Sex, 'Sex')
 }

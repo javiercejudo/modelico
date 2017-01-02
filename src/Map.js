@@ -61,7 +61,7 @@ class ModelicoMap extends AbstractMap {
   }
 
   static metadata (keyMetadata, valueMetadata) {
-    return metadata(ModelicoMap, reviverFactory(keyMetadata, valueMetadata))
+    return metadata(ModelicoMap, reviverFactory, keyMetadata, valueMetadata)
   }
 
   static innerTypes () {
