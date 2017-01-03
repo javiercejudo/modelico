@@ -16,6 +16,7 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
 export const iterableMetadata = (IterableType, itemMetadata) => {
   return Object.freeze({
     type: IterableType,
+    subtypes: Object.freeze([itemMetadata]),
     reviver: iterableReviverFactory(IterableType, itemMetadata)
   })
 }

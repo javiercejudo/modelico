@@ -76,7 +76,7 @@ class List extends Base {
   }
 
   static EMPTY () {
-    return EMPTY_LIST || (EMPTY_LIST = List.of())
+    return EMPTY_LIST || List.of()
   }
 }
 

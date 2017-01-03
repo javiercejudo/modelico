@@ -25,8 +25,12 @@ export const of = (Type, args) => {
   return Type.fromMap(map)
 }
 
-export const metadata = (Type, reviver) => {
-  return Object.freeze({type: Type, reviver})
+export const metadata = (Type, reviverFactory, keyMetadata, valueMetadata) => {
+  return Object.freeze({
+    type: Type,
+    subtypes: Object.freeze([keyMetadata, valueMetadata]),
+    reviver: reviverFactory(keyMetadata, valueMetadata)
+  })
 }
 
 class AbstractMap extends Base {

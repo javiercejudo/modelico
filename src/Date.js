@@ -57,7 +57,10 @@ class ModelicoDate extends Base {
   }
 
   static metadata () {
-    return Object.freeze({type: ModelicoDate, reviver})
+    return Object.freeze({
+      type: ModelicoDate,
+      reviver
+    })
   }
 
   static innerTypes () {

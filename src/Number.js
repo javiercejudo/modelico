@@ -57,7 +57,10 @@ class ModelicoNumber extends Base {
   }
 
   static metadata () {
-    return Object.freeze({type: ModelicoNumber, reviver})
+    return Object.freeze({
+      type: ModelicoNumber,
+      reviver
+    })
   }
 
   static innerTypes () {
