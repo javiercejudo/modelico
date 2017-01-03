@@ -12,8 +12,8 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'node_modules/should/should.min.js',
-      'node_modules/babel-polyfill/dist/polyfill.min.js',
+      'node_modules/should/should.js',
+      'node_modules/babel-polyfill/dist/polyfill.js',
       'dist/modelico.js',
       'dist/modelico.min.js',
       'dist/modelico-spec.js',
