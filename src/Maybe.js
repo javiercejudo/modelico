@@ -142,7 +142,11 @@ class Maybe extends Base {
   }
 
   static metadata (itemMetadata) {
-    return Object.freeze({type: Maybe, reviver: reviverFactory(itemMetadata)})
+    return Object.freeze({
+      type: Maybe,
+      subtypes: [itemMetadata],
+      reviver: reviverFactory(itemMetadata)
+    })
   }
 
   static innerTypes () {

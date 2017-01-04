@@ -32,6 +32,10 @@ class List extends Base {
     Object.freeze(this)
   }
 
+  get (index) {
+    return this.inner().get(index)
+  }
+
   set (index, value) {
     const newList = [...this.inner().set(index, value)]
 
@@ -78,7 +82,7 @@ class List extends Base {
   }
 
   static EMPTY () {
-    return EMPTY_LIST || (EMPTY_LIST = List.of())
+    return EMPTY_LIST || List.of()
   }
 }
 

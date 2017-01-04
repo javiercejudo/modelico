@@ -14,36 +14,39 @@ const reviverFactory = enumerators => (k, v) => {
 }
 
 class Enum extends Base {
-  constructor (input) {
+  constructor (input, Ctor = Enum, displayName = Enum.displayName) {
     const enumerators = Array.isArray(input)
       ? input.reduce(enumeratorsReducer, {})
       : input
 
-    super(Enum)
+    if (Ctor !== Enum) {
+      Ctor.displayName = displayName
+      Object.freeze(Ctor)
+    }
+
+    super(Ctor)
 
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {
         this[enumerator] = always(enumerators[enumerator])
         enumerators[enumerator].toJSON = always(enumerator)
+        enumerators[enumerator].equals = other => enumerator === other.toJSON()
       })
 
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
-        type: Enum,
+        type: Ctor,
         reviver: reviverFactory(enumerators)
-      })),
-      enumerable: false
+      }))
     })
-
-    Object.freeze(this)
   }
 
-  static fromObject (obj) {
-    return new Enum(obj)
+  static fromObject (...args) {
+    return new Enum(...args)
   }
 
-  static fromArray (arr) {
-    return new Enum(arr)
+  static fromArray (...args) {
+    return new Enum(...args)
   }
 
   static innerTypes () {
@@ -51,6 +54,9 @@ class Enum extends Base {
   }
 }
 
-Enum.displayName = 'Enum'
+Object.defineProperty(Enum, 'displayName', {
+  value: 'Enum',
+  writable: true
+})
 
-export default Object.freeze(Enum)
+export default Enum
