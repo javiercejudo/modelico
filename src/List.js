@@ -29,6 +29,10 @@ class List extends Base {
     Object.freeze(this)
   }
 
+  get (index) {
+    return this.inner()[index]
+  }
+
   set (index, value) {
     const newList = [...this]
     newList[index] = value
