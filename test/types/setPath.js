@@ -8,11 +8,11 @@ export default (U, should, M) => () => {
     ;(() => { array1.inner()[1] = 'I’m going to mutate you!' })
       .should.throw()
 
-    Array.from(array1)[1].should.be.exactly('immutable')
+    array1.get(1).should.be.exactly('immutable')
 
     array1.setPath([2, 'hammer'], 'hm, surely I can mutate this nested object...')
 
-    Array.from(array1)[2].inner().get('hammer')
+    array1.get(2).inner().get('hammer')
       .should.be.exactly('Can’t Touch This')
   })
 
@@ -25,7 +25,7 @@ export default (U, should, M) => () => {
 
     hammer1.setPath(['list', 1], 'hm, surely I can mutate this nested object...')
 
-    Array.from(hammer1.inner().get('list'))[1]
+    hammer1.inner().get('list').get(1)
       .should.be.exactly('immutable')
   })
 }

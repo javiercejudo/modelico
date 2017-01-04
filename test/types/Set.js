@@ -32,26 +32,21 @@ export default (should, M, { Person }) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}'
       const author1 = JSON.parse(authorJson, _(Person).reviver)
 
-      const newSetArray = [...author1.importantDatesSet().inner()]
-      newSetArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')))
+      const date = M.Date.of(new Date('2016-05-03T00:00:00.000Z'))
 
       const author2 = author1.set(
         'importantDatesSet',
-        M.Set.fromArray(newSetArray)
+        M.Set.of(date)
       )
 
       const author1InnerSet = author1.importantDatesSet().inner()
 
       should(author1InnerSet.size).be.exactly(2)
-      should([...author1InnerSet][0].inner().getFullYear()).be.exactly(2013)
-      should([...author1InnerSet][1].inner().getFullYear()).be.exactly(2012)
 
       const author2InnerSet = author2.importantDatesSet().inner()
 
-      should(author2InnerSet.size).be.exactly(3)
-      should([...author2InnerSet][0].inner().getFullYear()).be.exactly(2013)
-      should([...author2InnerSet][1].inner().getFullYear()).be.exactly(2016)
-      should([...author2InnerSet][2].inner().getFullYear()).be.exactly(2012)
+      should(author2InnerSet.size).be.exactly(1)
+      author2InnerSet.has(date).should.be.exactly(true)
     })
 
     it('edge case when Set setPath is called with an empty path', () => {

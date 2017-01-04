@@ -12,12 +12,23 @@ export default (should, M) => () => {
   it('[n]', () => {
     const list1 = p(M.List.of(1, 2, 2, 3))
 
+    list1.get(0).should.be.exactly(1)
+    list1.get(1).should.be.exactly(2)
+    list1.get(2).should.be.exactly(2)
+    list1.get(3).should.be.exactly(3)
+
     list1[0].should.be.exactly(1)
     list1[1].should.be.exactly(2)
     list1[2].should.be.exactly(2)
     list1[3].should.be.exactly(3)
 
     should(list1[4]).be.exactly(undefined)
+    should(list1.get(4)).be.exactly(undefined)
+
+    list1.get('0').should.be.exactly(1)
+    list1.get('1').should.be.exactly(2)
+    list1.get('2').should.be.exactly(2)
+    list1.get('3').should.be.exactly(3)
 
     list1['0'].should.be.exactly(1)
     list1['1'].should.be.exactly(2)
@@ -25,6 +36,7 @@ export default (should, M) => () => {
     list1['3'].should.be.exactly(3)
 
     should(list1['4']).be.exactly(undefined)
+    should(list1.get('4')).be.exactly(undefined)
   })
 
   it('includes()', () => {
