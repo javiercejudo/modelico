@@ -28,11 +28,11 @@ export default (U, should, M) => () => {
     const list3 = list2.unshift(0)
     const list4 = list1.concat([...list2], [...list3])
 
-    ;(list1.length === 2).should.be.exactly(true)
-    ;(list2.length === 5).should.be.exactly(true)
-    ;(list3.length === 6).should.be.exactly(true)
-    ;(list4.length === 13).should.be.exactly(true)
-    ;(list4[0] === 1).should.be.exactly(true)
+    ;(list1.size === 2).should.be.exactly(true)
+    ;(list2.size === 5).should.be.exactly(true)
+    ;(list3.size === 6).should.be.exactly(true)
+    ;(list4.size === 13).should.be.exactly(true)
+    ;(list4.get(0) === 1).should.be.exactly(true)
   })
 
   it('JavaScript-first API (2)', () => {
