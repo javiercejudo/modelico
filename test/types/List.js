@@ -23,6 +23,13 @@ export default (U, should, M) => () => {
     })
   })
 
+  describe('get', () => {
+    it('should return the nth item', () => {
+      M.List.of('a', 'b', 'c').get(1)
+        .should.be.exactly('b')
+    })
+  })
+
   describe('setting', () => {
     it('should implement Symbol.iterator', () => {
       const list = M.List.fromArray([1, 2, 3, 4])
