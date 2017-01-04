@@ -5,7 +5,8 @@
   "main": "dist/modelico.js",
   "jsnext:main": "dist/modelico.es2015.js",
   "scripts": {
-    "test": "npm run standard && flow && gulp test",
+    "t": "gulp test",
+    "test": "npm run standard && flow && npm run t",
     "test-dev": "npm run build-dev && npm run build-browser-spec && gulp test",
     "test-browsers": "./scripts/browser_tester.sh",
     "send-coverage": "./scripts/coverage_reporter.sh",
