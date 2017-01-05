@@ -174,7 +174,7 @@ export default (U, should, M) => () => {
   })
 
   describe('fromJS', () => {
-    it('should return as primitives or arrays or objects only', () => {
+    it('should parse from primitives, arrays or objects only', () => {
       const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',

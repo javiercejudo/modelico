@@ -72,11 +72,7 @@ class AbstractMap extends Base {
       return true
     }
 
-    if (haveDifferentTypes(this, other)) {
-      return false
-    }
-
-    if (this.size !== other.size) {
+    if (haveDifferentTypes(this, other) || this.size !== other.size) {
       return false
     }
 

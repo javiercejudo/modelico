@@ -1,6 +1,8 @@
 /* eslint-env mocha */
 
-export default M => {
+import memoise from '../memoise'
+
+export default memoise(M => {
   const { _, number, string } = M.metadata
 
   class Code extends M.Base {
@@ -38,4 +40,4 @@ export default M => {
   }
 
   return Object.freeze(Region)
-}
+})

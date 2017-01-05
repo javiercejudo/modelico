@@ -1,9 +1,11 @@
 /* eslint-env mocha */
 
+import memoise from './memoise'
+
 import PartOfDayFactory from './PartOfDay'
 import SexFactory from './Sex'
 
-export default M => {
+export default memoise(M => {
   const PartOfDay = PartOfDayFactory(M)
   const Sex = SexFactory(M)
 
@@ -43,4 +45,4 @@ export default M => {
   }
 
   return Object.freeze(Person)
-}
+})

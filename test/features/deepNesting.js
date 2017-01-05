@@ -8,7 +8,8 @@ export default (should, M) => () => {
   const { _ } = M.metadata
 
   it('should revive deeply nested JSON', () => {
-    const City = CityFactory(M, RegionFactory(M))
+    const Region = RegionFactory(M)
+    const City = CityFactory(Region)(M)
     const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":"EU"}}}`
 
     const city = JSON.parse(cityJson, _(City).reviver)
@@ -20,7 +21,8 @@ export default (should, M) => () => {
   })
 
   it('should support nested keys with different types', () => {
-    const City = CityFactory(M, RegionIncompatibleNameKeyFactory(M))
+    const Region = RegionIncompatibleNameKeyFactory(M)
+    const City = CityFactory(Region)(M)
     const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"id": 1,"value":"EU"}}}}`
 
     const city = JSON.parse(cityJson, _(City).reviver)

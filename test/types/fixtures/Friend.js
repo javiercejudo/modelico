@@ -1,6 +1,8 @@
 /* eslint-env mocha */
 
-export default M => {
+import memoise from './memoise'
+
+export default memoise(M => {
   const { _, string, maybe } = M.metadata
 
   class Friend extends M.Base {
@@ -22,4 +24,4 @@ export default M => {
   })
 
   return Object.freeze(Friend)
-}
+})

@@ -26,11 +26,7 @@ export const iterableEquals = (thisArg, other) => {
     return true
   }
 
-  if (haveDifferentTypes(thisArg, other)) {
-    return false
-  }
-
-  if (thisArg.size !== other.size) {
+  if (haveDifferentTypes(thisArg, other) || thisArg.size !== other.size) {
     return false
   }
 
