@@ -6,5 +6,6 @@ export default {
   format: 'es',
   moduleName: 'Modelico',
   plugins: [ nodeResolve({skip: 'immutable'}), json() ],
+  external: ['immutable'],
   dest: './dist/modelico.es2015.js'
 }

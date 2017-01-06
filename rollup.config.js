@@ -7,6 +7,10 @@ export default {
   format: 'umd',
   moduleName: 'Modelico',
   noConflict: true,
-  plugins: [ nodeResolve({skip: 'immutable'}), json(), babel() ],
+  plugins: [ nodeResolve(), json(), babel() ],
+  external: ['immutable'],
+  globals: {
+    immutable: 'Immutable'
+  },
   dest: './dist/modelico.js'
 }
