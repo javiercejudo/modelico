@@ -1,9 +1,7 @@
 /* eslint-env mocha */
 
-import CountryFactory from './Country'
-
-export default (M, Region) => {
-  const Country = CountryFactory(M, Region)
+export default (M, Region, countryFactory) => {
+  const Country = countryFactory(M, Region)
   const { _, string } = M.metadata
 
   class City extends M.Base {

@@ -1,11 +1,6 @@
 /* eslint-env mocha */
 
-import PersonFactory from './fixtures/Person'
-import PartOfDayFactory from './fixtures/PartOfDay'
-
-export default (should, M) => () => {
-  const PartOfDay = PartOfDayFactory(M)
-  const Person = PersonFactory(M)
+export default (should, M, { Person, PartOfDay }) => () => {
   const { _, number, maybe } = M.metadata
 
   const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}'

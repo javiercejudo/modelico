@@ -1,19 +1,15 @@
 /* eslint-env mocha */
 
-import PersonFactory from './fixtures/Person'
-import PartOfDayFactory from './fixtures/PartOfDay'
-import SexFactory from './fixtures/Sex'
-import AnimalFactory from './fixtures/Animal'
-import FriendFactory from './fixtures/Friend'
+export default (U, should, M, fixtures) => () => {
+  const {
+    Person,
+    PartOfDay,
+    Sex,
+    Animal,
+    Friend
+  } = fixtures
 
-export default (U, should, M) => () => {
-  const Person = PersonFactory(M)
-  const PartOfDay = PartOfDayFactory(M)
-  const Sex = SexFactory(M)
-  const Animal = AnimalFactory(M)
-  const Friend = FriendFactory(M)
   const { _ } = M.metadata
-
   const ModelicoDate = M.Date
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
@@ -32,9 +28,9 @@ export default (U, should, M) => () => {
         sex: M.Maybe.of(Sex.MALE())
       }
 
-      const author = new Person(authorFields);
+      const author = new Person(authorFields)
 
-      (() => { authorFields.givenName = 'Javi' })
+      ;(() => { authorFields.givenName = 'Javi' })
         .should.throw()
 
       author.givenName()
@@ -174,7 +170,7 @@ export default (U, should, M) => () => {
   })
 
   describe('fromJS', () => {
-    it('should return as primitives or arrays or objects only', () => {
+    it('should parse from primitives, arrays or objects only', () => {
       const author1 = new Person({
         givenName: 'Javier',
         familyName: 'Cejudo',
