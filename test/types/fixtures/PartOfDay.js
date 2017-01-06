@@ -1,10 +1,8 @@
 /* eslint-env mocha */
 
-import memoise from './memoise'
-
 const range = (minTime, maxTime) => ({minTime, maxTime})
 
-export default memoise(M => {
+export default M => {
   class PartOfDay extends M.Enum {
     static innerTypes () {
       return M.Enum.innerTypes()
@@ -17,4 +15,4 @@ export default memoise(M => {
     AFTERNOON: range(720, 1080),
     EVENING: range(1080, 1440)
   }, PartOfDay, 'PartOfDay')
-})
+}

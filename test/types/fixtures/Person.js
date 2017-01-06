@@ -1,14 +1,6 @@
 /* eslint-env mocha */
 
-import memoise from './memoise'
-
-import PartOfDayFactory from './PartOfDay'
-import SexFactory from './Sex'
-
-export default memoise(M => {
-  const PartOfDay = PartOfDayFactory(M)
-  const Sex = SexFactory(M)
-
+export default (M, PartOfDay, Sex) => {
   const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ')
 
   const { _, string, date, map, list, set, maybe } = M.metadata
@@ -45,4 +37,4 @@ export default memoise(M => {
   }
 
   return Object.freeze(Person)
-})
+}

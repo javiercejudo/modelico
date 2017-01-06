@@ -1,10 +1,6 @@
 /* eslint-env mocha */
 
-import PartOfDayFactory from './fixtures/PartOfDay'
-
-export default (should, M) => () => {
-  const PartOfDay = PartOfDayFactory(M)
-
+export default (should, M, { PartOfDay }) => () => {
   describe('keys', () => {
     it('only enumerates the enumerators', () => {
       Object.keys(PartOfDay)

@@ -1,8 +1,6 @@
 /* eslint-env mocha */
 
-import memoise from '../memoise'
-
-export default Region => memoise(M => {
+export default (M, Region) => {
   const { _, string } = M.metadata
 
   class Country extends M.Base {
@@ -22,4 +20,4 @@ export default Region => memoise(M => {
   }
 
   return Object.freeze(Country)
-})
+}

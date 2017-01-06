@@ -25,7 +25,7 @@ const hasProxies = (() => {
   return false
 })()
 
-const buildUtils = (options) => Object.freeze({
+const buildUtils = options => Object.freeze({
   skipIfNoProxies: hasProxies ? it : it.skip,
   skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
   skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
@@ -60,9 +60,36 @@ import proxyDate from './proxies/proxyDate'
 
 import cases from './cases/index'
 
+import personFactory from './types/fixtures/Person'
+import partOfDayFactory from './types/fixtures/PartOfDay'
+import sexFactory from './types/fixtures/Sex'
+import animalFactory from './types/fixtures/Animal'
+import friendFactory from './types/fixtures/Friend'
+
+import cityFactory from './types/fixtures/nested/City'
+import countryFactory from './types/fixtures/nested/Country'
+import regionFactory from './types/fixtures/nested/Region'
+import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
+
 export default (options, should, M) => () => {
   const U = buildUtils(options)
-  const deps = [should, M]
+
+  const PartOfDay = partOfDayFactory(M)
+  const Sex = sexFactory(M)
+
+  const fixtures = Object.freeze({
+    cityFactory,
+    countryFactory,
+    PartOfDay,
+    Sex,
+    Person: personFactory(M, PartOfDay, Sex),
+    Animal: animalFactory(M),
+    Friend: friendFactory(M),
+    Region: regionFactory(M),
+    RegionIncompatibleNameKey: regionIncompatibleNameKeyFactory(M)
+  })
+
+  const deps = [should, M, fixtures]
 
   describe('Base', Base(U, ...deps))
   describe('Number', ModelicoNumber(...deps))

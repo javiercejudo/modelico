@@ -1,9 +1,6 @@
 /* eslint-env mocha */
 
-import PersonFactory from './fixtures/Person'
-
-export default (U, should, M) => () => {
-  const Person = PersonFactory(M)
+export default (U, should, M, { Person }) => () => {
   const { _, list, date } = M.metadata
 
   describe('immutability', () => {

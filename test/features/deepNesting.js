@@ -1,15 +1,11 @@
 /* eslint-env mocha */
 
-import CityFactory from '../types/fixtures/nested/City'
-import RegionFactory from '../types/fixtures/nested/Region'
-import RegionIncompatibleNameKeyFactory from '../types/fixtures/nested/RegionIncompatibleNameKey'
-
-export default (should, M) => () => {
+export default (should, M, fixtures) => () => {
   const { _ } = M.metadata
 
   it('should revive deeply nested JSON', () => {
-    const Region = RegionFactory(M)
-    const City = CityFactory(Region)(M)
+    const { Region, countryFactory } = fixtures
+    const City = fixtures.cityFactory(M, Region, countryFactory)
     const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":"EU"}}}`
 
     const city = JSON.parse(cityJson, _(City).reviver)
@@ -21,8 +17,8 @@ export default (should, M) => () => {
   })
 
   it('should support nested keys with different types', () => {
-    const Region = RegionIncompatibleNameKeyFactory(M)
-    const City = CityFactory(Region)(M)
+    const { RegionIncompatibleNameKey: Region, countryFactory } = fixtures
+    const City = fixtures.cityFactory(M, Region, countryFactory)
     const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"id": 1,"value":"EU"}}}}`
 
     const city = JSON.parse(cityJson, _(City).reviver)

@@ -1,8 +1,6 @@
 /* eslint-env mocha */
 
-import memoise from './memoise'
-
-export default memoise(M => {
+export default M => {
   class Sex extends M.Enum {
     static innerTypes () {
       return M.Enum.innerTypes()
@@ -12,4 +10,4 @@ export default memoise(M => {
   return M.Enum.fromArray([
     'FEMALE', 'MALE', 'OTHER'
   ], Sex, 'Sex')
-})
+}
