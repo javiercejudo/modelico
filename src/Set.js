@@ -1,8 +1,11 @@
-import { isNothing, unsupported, emptyObject } from './U'
+import { always, isNothing, unsupported, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
+import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 let EMPTY_SET
+
+const copy = set => new Set(set)
 
 class ModelicoSet extends Base {
   constructor (innerSetOrig) {
@@ -16,9 +19,10 @@ class ModelicoSet extends Base {
       return EMPTY_SET
     }
 
-    const innerSet = new Set(innerSetOrig)
+    const innerSet = copy(innerSetOrig)
 
-    this.inner = () => new Set(innerSet)
+    this[innerOrigSymbol] = always(innerSet)
+    this.inner = () => copy(innerSet)
     this.size = innerSet.size
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
 
@@ -27,6 +31,10 @@ class ModelicoSet extends Base {
     }
 
     Object.freeze(this)
+  }
+
+  has (key) {
+    return this[innerOrigSymbol]().has(key)
   }
 
   set () {

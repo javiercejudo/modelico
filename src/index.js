@@ -23,7 +23,7 @@ import asIs from './asIs'
 const internalNonMutators = ['set', 'setPath']
 
 const mapNonMutators = internalNonMutators
-const mapMutators = ['set', 'delete', 'clear']
+const mapMutators = ['delete', 'clear']
 
 const setNonMutators = internalNonMutators
 const setMutators = ['add', 'delete', 'clear']
