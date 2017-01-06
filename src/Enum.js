@@ -14,7 +14,7 @@ const reviverFactory = enumerators => (k, v) => {
 }
 
 class Enum extends Base {
-  constructor (input, Ctor = Enum, displayName = Enum.displayName) {
+  constructor (input, Ctor = Enum, displayName = Ctor.displayName) {
     const enumerators = Array.isArray(input)
       ? input.reduce(enumeratorsReducer, {})
       : input
@@ -30,7 +30,7 @@ class Enum extends Base {
       .forEach(enumerator => {
         this[enumerator] = always(enumerators[enumerator])
         enumerators[enumerator].toJSON = always(enumerator)
-        enumerators[enumerator].equals = other => enumerator === other.toJSON()
+        enumerators[enumerator].equals = other => (enumerators[enumerator] === other)
       })
 
     Object.defineProperty(this, 'metadata', {
