@@ -10,7 +10,7 @@ export default (should, M, { Person }) => () => {
 
       input.delete('a')
 
-      set.inner().has('a')
+      set.has('a')
         .should.be.exactly(true)
     })
   })

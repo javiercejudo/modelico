@@ -1,5 +1,5 @@
-import { isNothing, equals, haveDifferentTypes } from './U'
-import { typeSymbol } from './symbols'
+import { always, isNothing, equals, haveDifferentTypes } from './U'
+import { typeSymbol, innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 export const set = (thisArg, Type, key, value) => {
@@ -33,6 +33,8 @@ export const metadata = (Type, reviverFactory, keyMetadata, valueMetadata) => {
   })
 }
 
+const copy = map => new Map(map)
+
 class AbstractMap extends Base {
   constructor (Type, innerMapOrig, EMPTY) {
     super(Type)
@@ -45,11 +47,20 @@ class AbstractMap extends Base {
       return EMPTY
     }
 
-    const innerMap = new Map(innerMapOrig)
+    const innerMap = copy(innerMapOrig)
 
-    this.inner = () => new Map(innerMap)
+    this[innerOrigSymbol] = always(innerMap)
+    this.inner = () => copy(innerMap)
     this.size = innerMap.size
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]()
+  }
+
+  has (key) {
+    return this[innerOrigSymbol]().has(key)
+  }
+
+  get (key) {
+    return this[innerOrigSymbol]().get(key)
   }
 
   setPath (path, value) {
@@ -58,7 +69,7 @@ class AbstractMap extends Base {
     }
 
     const [key, ...restPath] = path
-    const item = this.inner().get(key)
+    const item = this[innerOrigSymbol]().get(key)
 
     if (!item.setPath) {
       return this.set(key, value)

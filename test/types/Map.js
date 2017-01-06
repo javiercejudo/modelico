@@ -15,7 +15,7 @@ export default (should, M, { Person }) => () => {
 
       input.set('A', "g'day!")
 
-      map.inner().get('A')
+      map.get('A')
         .should.be.exactly('Good morning!')
     })
   })
