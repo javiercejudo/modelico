@@ -1,7 +1,7 @@
 import Immutable from 'immutable'
 
 import { always, isNothing, haveDifferentTypes } from './U'
-import { typeSymbol } from './symbols'
+import { typeSymbol, innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 export const set = (thisArg, Type, key, value) => {
@@ -53,9 +53,18 @@ class AbstractMap extends Base {
 
     const innerMap = Immutable.OrderedMap(innerMapOrig)
 
+    this[innerOrigSymbol] = always(innerMap)
     this.inner = always(innerMap)
     this.size = innerMap.size
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]()
+  }
+
+  has (key) {
+    return this[innerOrigSymbol]().has(key)
+  }
+
+  get (key) {
+    return this[innerOrigSymbol]().get(key)
   }
 
   setPath (path, value) {
@@ -64,7 +73,7 @@ class AbstractMap extends Base {
     }
 
     const [key, ...restPath] = path
-    const item = this.inner().get(key)
+    const item = this[innerOrigSymbol]().get(key)
 
     if (!item.setPath) {
       return this.set(key, value)

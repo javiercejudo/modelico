@@ -74,9 +74,9 @@ class Animal extends M.Base {
   speak() {
     const name = this.name();
 
-    return (name === '') ?
-      `I don't have a name` :
-      `My name is ${name}!`;
+    return (name === '')
+      ? `I don't have a name`
+      : `My name is ${name}!`;
   }
 
   static innerTypes() {
@@ -205,9 +205,9 @@ pet.name().getOrElse('Bane'); //=> Bane
 ## ES2015 proxies
 
 Most built-in types in Modélico (List, Set, Map, EnumMap and Date)
-are wrappers around native structures. By default, it is necessary to
-retrieve those structures to access their properties and methods
-(eg. `list.inner().length`).
+are wrappers around native structures. Except for a few built-in basic
+methods, it is necessary to retrieve those structures to access their
+properties and methods (eg. `list.inner().reduce`).
 
 However, if your environment
 [supports ES2015 proxies](https://kangax.github.io/compat-table/es6/#test-Proxy),
@@ -221,12 +221,10 @@ const defaultMap = M.Map.fromObject({a: 1, b: 2, c: 3});
 const proxiedMap = p(defaultMap);
 
 // without proxies
-defaultMap.inner().get('b'); //=> 2
-defaultMap.inner().size; //=> 3
+defaultMap.inner().keys().next(); //=> { value: "a", done: false }
 
 // with proxies
-proxiedMap.get('b'); //=> 2
-proxiedMap.size; //=> 3
+proxiedMap.keys().next(); //=> { value: "a", done: false }
 ```
 
 Please note that native methods that modify the structure in place will
@@ -260,9 +258,9 @@ with ES5-style classes. In the case of our `Animal` class:
   Animal.prototype.speak = function() {
     var name = this.name();
 
-    return (name === '') ?
-      "I don't have a name" :
-      'My name is ' + name + '!';
+    return (name === '')
+      ? "I don't have a name"
+      : 'My name is ' + name + '!';
   };
 
   Animal.innerTypes = function() {

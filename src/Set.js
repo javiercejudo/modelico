@@ -2,6 +2,7 @@ import Immutable from 'immutable'
 
 import { always, isNothing, unsupported, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
+import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 let EMPTY_SET
@@ -20,6 +21,7 @@ class ModelicoSet extends Base {
 
     const innerSet = Immutable.OrderedSet(innerSetOrig)
 
+    this[innerOrigSymbol] = always(innerSet)
     this.inner = always(innerSet)
     this.size = innerSet.size
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
@@ -29,6 +31,10 @@ class ModelicoSet extends Base {
     }
 
     Object.freeze(this)
+  }
+
+  has (key) {
+    return this[innerOrigSymbol]().has(key)
   }
 
   set () {

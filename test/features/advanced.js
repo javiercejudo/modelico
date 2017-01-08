@@ -70,10 +70,10 @@ export default (should, M) => () => {
 
     const person3 = person1.setPath(['pets', 0, 'name'], 'Bane')
 
-    Array.from(person3.pets())[0].getOrElse(defaultAnimal).name().getOrElse('')
+    person3.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('')
       .should.be.exactly('Bane')
 
-    Array.from(person1.pets())[0].getOrElse(defaultAnimal).name().getOrElse('')
+    person1.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('')
       .should.be.exactly('Robbie')
   })
 }
