@@ -166,6 +166,17 @@ export default (should, M, { Person }) => () => {
 
       M.Map.of(-0, 33).equals(M.Map.of(0, 33)).should.be.exactly(true)
     })
+
+    it('should support simple unordered checks', () => {
+      M.Map.of('a', 1, 'b', 2).equals(M.Map.of('b', 2, 'a', 1))
+        .should.be.exactly(false)
+
+      M.Map.of('a', 1, 'b', 2).equals(M.Map.of('b', 2, 'a', 1), true)
+        .should.be.exactly(true)
+
+      M.Map.of('a', 1, 'b', 2, 'c', undefined).equals(M.Map.of('b', 2, 'a', 1, 'd', 4), true)
+        .should.be.exactly(false)
+    })
   })
 
   describe('EMPTY / of / fromArray / fromObject / fromMap', () => {

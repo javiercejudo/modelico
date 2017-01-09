@@ -21,7 +21,7 @@ export const iterableMetadata = (IterableType, itemMetadata) => {
   })
 }
 
-export const iterableEquals = (thisArg, other) => {
+export const iterableEquals = (thisArg, other, asUnordered = false) => {
   if (thisArg === other) {
     return true
   }
@@ -34,7 +34,13 @@ export const iterableEquals = (thisArg, other) => {
   const otherIter = other[Symbol.iterator]()
 
   for (let i = 0; i < thisArg.size; i += 1) {
-    if (!equals(thisIter.next().value, otherIter.next().value)) {
+    const item = thisIter.next().value
+
+    if (asUnordered) {
+      if (!other.has(item)) {
+        return false
+      }
+    } else if (!equals(item, otherIter.next().value)) {
       return false
     }
   }
