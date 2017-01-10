@@ -1,6 +1,6 @@
 import Immutable from 'immutable'
 
-import { always, isNothing, haveDifferentTypes } from './U'
+import { always, isNothing, haveDifferentTypes, identity } from './U'
 import { typeSymbol, innerOrigSymbol } from './symbols'
 import Base from './Base'
 
@@ -19,7 +19,7 @@ export const of = (Type, args) => {
   const len = args.length
 
   if (len % 2 === 1) {
-    throw TypeError(`${Type.displayName || Type.name}.of requires an even number of arguments`)
+    throw TypeError(`${Type.displayName}.of requires an even number of arguments`)
   }
 
   const map = new Map()
@@ -82,7 +82,7 @@ class AbstractMap extends Base {
     return this.set(key, item.setPath(restPath, value))
   }
 
-  equals (other) {
+  equals (other, asUnordered = false) {
     if (this === other) {
       return true
     }
@@ -91,7 +91,9 @@ class AbstractMap extends Base {
       return false
     }
 
-    return this.inner().equals(other.inner())
+    const transform = asUnordered ? Immutable.Map : identity
+
+    return transform(this.inner()).equals(transform(other.inner()))
   }
 }
 

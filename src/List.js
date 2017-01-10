@@ -32,6 +32,10 @@ class List extends Base {
     Object.freeze(this)
   }
 
+  includes (...args) {
+    return this.inner().includes(...args)
+  }
+
   get (index) {
     return this.inner().get(index)
   }

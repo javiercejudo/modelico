@@ -1,4 +1,6 @@
-import { partial, reviverOrAsIs, haveDifferentTypes } from './U'
+import Immutable from 'immutable'
+
+import { partial, reviverOrAsIs, haveDifferentTypes, identity } from './U'
 
 const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
   if (k !== '') {
@@ -21,7 +23,7 @@ export const iterableMetadata = (IterableType, itemMetadata) => {
   })
 }
 
-export const iterableEquals = (thisArg, other) => {
+export const iterableEquals = (thisArg, other, asUnordered = false) => {
   if (thisArg === other) {
     return true
   }
@@ -30,5 +32,10 @@ export const iterableEquals = (thisArg, other) => {
     return false
   }
 
-  return thisArg.inner().equals(other.inner())
+  const thisInner = thisArg.inner()
+  const transform = (asUnordered && Immutable.OrderedSet.isOrderedSet(thisInner))
+    ? Immutable.Set
+    : identity
+
+  return transform(thisInner).equals(transform(other.inner()))
 }

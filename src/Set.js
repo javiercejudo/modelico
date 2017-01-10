@@ -53,8 +53,8 @@ class ModelicoSet extends Base {
     return [...this]
   }
 
-  equals (other) {
-    return iterableEquals(this, other)
+  equals (...args) {
+    return iterableEquals(this, ...args)
   }
 
   static fromSet (set) {
