@@ -145,6 +145,17 @@ export default (should, M, { Person }) => () => {
       M.Set.of(0).equals(M.Set.of(-0)).should.be.exactly(true)
       M.Set.of(NaN).equals(M.Set.of(NaN)).should.be.exactly(true)
     })
+
+    it('should support simple unordered checks', () => {
+      M.Set.of(1, 2, 3).equals(M.Set.of(1, 3, 2))
+        .should.be.exactly(false)
+
+      M.Set.of(1, 2, 3).equals(M.Set.of(1, 3, 2), true)
+        .should.be.exactly(true)
+
+      M.Set.of(1, 2, 3).equals(M.Set.of(1, 4, 2), true)
+        .should.be.exactly(false)
+    })
   })
 
   describe('EMPTY / of / fromArray / fromSet', () => {

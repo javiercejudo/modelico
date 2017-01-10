@@ -13,7 +13,7 @@ export const of = (Type, args) => {
   const len = args.length
 
   if (len % 2 === 1) {
-    throw TypeError(`${Type.displayName || Type.name}.of requires an even number of arguments`)
+    throw TypeError(`${Type.displayName}.of requires an even number of arguments`)
   }
 
   const map = new Map()
@@ -32,6 +32,9 @@ export const metadata = (Type, reviverFactory, keyMetadata, valueMetadata) => {
     reviver: reviverFactory(keyMetadata, valueMetadata)
   })
 }
+
+const equalPairs = (pairA, pairB) =>
+  pairA.every((pairPart, index) => equals(pairPart, pairB[index]))
 
 const copy = map => new Map(map)
 
@@ -78,7 +81,7 @@ class AbstractMap extends Base {
     return this.set(key, item.setPath(restPath, value))
   }
 
-  equals (other) {
+  equals (other, asUnordered = false) {
     if (this === other) {
       return true
     }
@@ -91,10 +94,11 @@ class AbstractMap extends Base {
     const otherIter = other[Symbol.iterator]()
 
     for (let i = 0; i < this.size; i += 1) {
-      const item = thisIter.next().value
-      const otherItem = otherIter.next().value
+      const pair = thisIter.next().value
 
-      const areEqual = item.every((itemPart, index) => equals(itemPart, otherItem[index]))
+      const areEqual = asUnordered
+        ? other.has(pair[0]) && equals(pair[1], other.get(pair[0]))
+        : equalPairs(pair, otherIter.next().value)
 
       if (!areEqual) {
         return false
