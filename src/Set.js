@@ -8,7 +8,7 @@ import Base from './Base'
 let EMPTY_SET
 
 class ModelicoSet extends Base {
-  constructor (innerSetOrig) {
+  constructor (innerSetOrig, asUnordered = false) {
     super(ModelicoSet)
 
     if (isNothing(innerSetOrig)) {
@@ -19,7 +19,8 @@ class ModelicoSet extends Base {
       return EMPTY_SET
     }
 
-    const innerSet = Immutable.OrderedSet(innerSetOrig)
+    const SetImpl = asUnordered ? Immutable.Set : Immutable.OrderedSet
+    const innerSet = SetImpl(innerSetOrig)
 
     this[innerOrigSymbol] = always(innerSet)
     this.inner = always(innerSet)

@@ -32,8 +32,8 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
 let EMPTY_ENUM_MAP
 
 class EnumMap extends AbstractMap {
-  constructor (innerMap) {
-    super(EnumMap, innerMap, EMPTY_ENUM_MAP)
+  constructor (innerMap, asUnordered = false) {
+    super(EnumMap, innerMap, asUnordered, EMPTY_ENUM_MAP)
 
     if (!EMPTY_ENUM_MAP && this.size === 0) {
       EMPTY_ENUM_MAP = this
