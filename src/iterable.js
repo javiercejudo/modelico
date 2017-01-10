@@ -32,10 +32,7 @@ export const iterableEquals = (thisArg, other, asUnordered = false) => {
     return false
   }
 
-  const thisInner = thisArg.inner()
-  const transform = (asUnordered && Immutable.OrderedSet.isOrderedSet(thisInner))
-    ? Immutable.Set
-    : identity
+  const transform = asUnordered ? Immutable.Set : identity
 
-  return transform(thisInner).equals(transform(other.inner()))
+  return transform(thisArg.inner()).equals(transform(other.inner()))
 }
