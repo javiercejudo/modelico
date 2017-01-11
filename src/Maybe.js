@@ -54,6 +54,16 @@ class Maybe extends Base {
     Object.freeze(this)
   }
 
+  get (fieldOrFallbackPair) {
+    const fallback = fieldOrFallbackPair[0]
+    const field = fieldOrFallbackPair[1]
+    const item = this.getOrElse(fallback)
+
+    return item.get
+      ? item.get(field)
+      : item
+  }
+
   set (field, v) {
     if (this.isEmpty()) {
       return this

@@ -10,7 +10,7 @@ const reviver = (k, v) => {
 }
 
 class ModelicoDate extends Base {
-  constructor (dateOrig) {
+  constructor (dateOrig = new Date()) {
     super(ModelicoDate)
 
     if (isNothing(dateOrig)) {

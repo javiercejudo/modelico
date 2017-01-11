@@ -186,6 +186,9 @@ export default (should, M, { Person }) => () => {
 
       M.Map.EMPTY().toJSON()
         .should.eql([])
+
+      new M.Map()
+        .should.be.exactly(M.Map.EMPTY())
     })
 
     it('should be able to create a map from an even number of params', () => {

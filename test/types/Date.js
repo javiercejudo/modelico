@@ -16,8 +16,22 @@ export default (should, M) => () => {
   })
 
   describe('instantiation', () => {
+    it('uses the current date by default', () => {
+      const mDate = new M.Date()
+      const nativeDate = new Date()
+
+      mDate.inner().getFullYear()
+        .should.be.exactly(nativeDate.getFullYear())
+
+      mDate.inner().getMonth()
+        .should.be.exactly(nativeDate.getMonth())
+
+      mDate.inner().getDate()
+        .should.be.exactly(nativeDate.getDate())
+    })
+
     it('must be instantiated with new', () => {
-      (() => M.Date(new Date())).should.throw()
+      (() => M.Date()).should.throw()
     })
   })
 

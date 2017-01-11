@@ -5,7 +5,7 @@ import Base from './Base'
 let EMPTY_LIST
 
 class List extends Base {
-  constructor (innerList) {
+  constructor (innerList = []) {
     super(List)
 
     if (isNothing(innerList)) {

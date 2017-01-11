@@ -6,7 +6,7 @@ const reviver = (k, v) => {
 }
 
 class ModelicoNumber extends Base {
-  constructor (number) {
+  constructor (number = 0) {
     super(ModelicoNumber)
 
     if (!Number.isNaN(number) && isNothing(number)) {

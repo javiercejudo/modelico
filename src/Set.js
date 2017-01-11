@@ -8,7 +8,7 @@ let EMPTY_SET
 const copy = set => new Set(set)
 
 class ModelicoSet extends Base {
-  constructor (innerSetOrig) {
+  constructor (innerSetOrig = new Set()) {
     super(ModelicoSet)
 
     if (isNothing(innerSetOrig)) {

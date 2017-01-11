@@ -16,7 +16,7 @@ export default (U, should, M, { Person }) => () => {
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
-      (() => M.List([])).should.throw()
+      (() => M.List()).should.throw()
     })
   })
 
@@ -217,6 +217,9 @@ export default (U, should, M, { Person }) => () => {
 
       M.List.EMPTY().toJSON()
         .should.eql([])
+
+      new M.List()
+        .should.be.exactly(M.List.EMPTY())
     })
 
     it('should be able to create a list from arbitrary parameters', () => {

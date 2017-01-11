@@ -9,6 +9,7 @@ export default (should, M) => () => {
     })
 
     it('should cast using Number', () => {
+      should(new M.Number().inner()).be.exactly(0)
       should(new M.Number(2).inner()).be.exactly(2)
       should(new M.Number('2').inner()).be.exactly(2)
       should(new M.Number('-Infinity').inner()).be.exactly(-Infinity)

@@ -39,7 +39,7 @@ const equalPairs = (pairA, pairB) =>
 const copy = map => new Map(map)
 
 class AbstractMap extends Base {
-  constructor (Type, innerMapOrig, EMPTY) {
+  constructor (Type, innerMapOrig = new Map(), EMPTY) {
     super(Type)
 
     if (isNothing(innerMapOrig)) {
