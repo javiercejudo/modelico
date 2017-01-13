@@ -26,8 +26,8 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
 let EMPTY_MAP
 
 class ModelicoMap extends AbstractMap {
-  constructor (innerMap) {
-    super(ModelicoMap, innerMap, EMPTY_MAP)
+  constructor (innerMap, asUnordered = false) {
+    super(ModelicoMap, innerMap, asUnordered, EMPTY_MAP)
 
     if (!EMPTY_MAP && this.size === 0) {
       EMPTY_MAP = this

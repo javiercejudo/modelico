@@ -27,8 +27,8 @@ const reviverFactory = valueMetadata => (k, v) => {
 let EMPTY_STRING_MAP
 
 class StringMap extends AbstractMap {
-  constructor (innerMap) {
-    super(StringMap, innerMap, EMPTY_STRING_MAP)
+  constructor (innerMap, asUnordered = false) {
+    super(StringMap, innerMap, asUnordered, EMPTY_STRING_MAP)
 
     if (!EMPTY_STRING_MAP && this.size === 0) {
       EMPTY_STRING_MAP = this

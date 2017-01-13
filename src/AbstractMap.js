@@ -40,7 +40,7 @@ export const metadata = (Type, reviverFactory, keyMetadata, valueMetadata) => {
 }
 
 class AbstractMap extends Base {
-  constructor (Type, innerMapOrig, EMPTY) {
+  constructor (Type, innerMapOrig, asUnordered, EMPTY) {
     super(Type)
 
     if (isNothing(innerMapOrig)) {
@@ -51,7 +51,8 @@ class AbstractMap extends Base {
       return EMPTY
     }
 
-    const innerMap = Immutable.OrderedMap(innerMapOrig)
+    const MapImpl = asUnordered ? Immutable.Map : Immutable.OrderedMap
+    const innerMap = MapImpl(innerMapOrig)
 
     this[innerOrigSymbol] = always(innerMap)
     this.inner = always(innerMap)
