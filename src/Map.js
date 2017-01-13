@@ -1,12 +1,10 @@
 import { objToArr, reviverOrAsIs, emptyObject } from './U'
 import { default as AbstractMap, set, of, metadata } from './AbstractMap'
 
-const parseMapper = (keyReviver, valueReviver) => pair => {
-  const revivedKey = keyReviver('', pair[0])
-  const revivedVal = valueReviver('', pair[1])
-
-  return [revivedKey, revivedVal]
-}
+const parseMapper = (keyReviver, valueReviver) => pair => [
+  keyReviver('', pair[0]),
+  valueReviver('', pair[1])
+]
 
 const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
