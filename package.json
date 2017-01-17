@@ -44,7 +44,7 @@
   "devDependencies": {
     "babel-polyfill": "^6.20.0",
     "babel-preset-es2015-rollup": "^3.0.0",
-    "babili": "0.0.9",
+    "babili": "0.0.10",
     "flow-bin": "^0.37.4",
     "foreman": "^2.0.0",
     "gulp": "^3.9.0",
