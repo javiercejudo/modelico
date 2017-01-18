@@ -22,12 +22,12 @@ class ModelicoNumber extends Base {
     unsupported('Number.set is not supported')
   }
 
-  setPath (path, number) {
+  setIn (path, number) {
     if (path.length === 0) {
       return ModelicoNumber.of(number)
     }
 
-    unsupported('ModelicoNumber.setPath is not supported for non-empty paths')
+    unsupported('ModelicoNumber.setIn is not supported for non-empty paths')
   }
 
   toJSON () {

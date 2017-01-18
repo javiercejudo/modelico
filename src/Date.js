@@ -28,12 +28,12 @@ class ModelicoDate extends Base {
     unsupported('Date.set is not supported')
   }
 
-  setPath (path, date) {
+  setIn (path, date) {
     if (path.length === 0) {
       return ModelicoDate.of(date)
     }
 
-    unsupported('Date.setPath is not supported for non-empty paths')
+    unsupported('Date.setIn is not supported for non-empty paths')
   }
 
   toJSON () {

@@ -69,7 +69,7 @@ export default (should, M) => () => {
     Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak()
       .should.be.exactly('My name is Robbie!')
 
-    const person3 = person1.setIn(['pets', 0, 'name'], 'Bane')
+    const person3 = person1.setIn(['pets', 0, [defaultAnimal, 'name']], 'Bane')
 
     person3.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('')
       .should.be.exactly('Bane')
@@ -85,5 +85,13 @@ export default (should, M) => () => {
 
     person1.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('Unknown')
       .should.be.exactly('Robbie')
+
+    const person4 = person1.setIn(['pets', 1, [defaultAnimal, 'name']], 'Robbie')
+
+    person4.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']])
+      .should.be.exactly('Robbie')
+
+    person3.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']])
+      .should.be.exactly('Unknown')
   })
 }

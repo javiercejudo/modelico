@@ -50,7 +50,7 @@ export default (should, M, { PartOfDay }) => () => {
       ])
 
       const greetings1 = M.EnumMap.fromMap(map)
-      const greetings2 = greetings1.setPath([PartOfDay.EVENING()], new Date('2013-04-16T00:00:00.000Z'))
+      const greetings2 = greetings1.setIn([PartOfDay.EVENING()], new Date('2013-04-16T00:00:00.000Z'))
 
       should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear())
         .be.exactly(2013)
@@ -59,7 +59,7 @@ export default (should, M, { PartOfDay }) => () => {
         .be.exactly(2012)
     })
 
-    it('edge case when setPath is called with an empty path', () => {
+    it('edge case when setIn is called with an empty path', () => {
       const map1 = new Map([
         [PartOfDay.MORNING(), M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
         [PartOfDay.AFTERNOON(), M.Date.of(new Date('2000-04-16T00:00:00.000Z'))],
@@ -73,7 +73,7 @@ export default (should, M, { PartOfDay }) => () => {
       ])
 
       const greetings1 = M.EnumMap.fromMap(map1)
-      const greetings2 = greetings1.setPath([], map2)
+      const greetings2 = greetings1.setIn([], map2)
 
       should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear())
         .be.exactly(2013)

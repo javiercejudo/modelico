@@ -82,23 +82,21 @@ class Maybe extends Base {
     return new Maybe(newItem)
   }
 
-  setPath (path, v) {
+  setIn (path, v) {
     if (path.length === 0) {
       return Maybe.of(v)
     }
 
-    if (this.isEmpty()) {
-      return this
-    }
+    const [fallbackOrFieldPair, ...restPath] = path
+    const fallback = fallbackOrFieldPair[0]
+    const field = fallbackOrFieldPair[1]
 
-    const item = this.inner().get()
+    const item = this.isEmpty()
+      ? fallback
+      : this.inner().get()
 
-    if (isNothing(item)) {
-      return this
-    }
-
-    const inner = (item.setPath)
-      ? item.setPath(path, v)
+    const inner = (item.setIn)
+      ? item.setIn([field, ...restPath], v)
       : null
 
     return Maybe.of(inner)

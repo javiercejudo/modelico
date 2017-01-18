@@ -53,7 +53,7 @@ export default (should, M, { Person }) => () => {
     it('should set fields returning a new map when part of a path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
       const author1 = M.fromJSON(Person, authorJson)
-      const author2 = author1.setPath(['lifeEvents', 'wedding'], new Date('2010-03-28T00:00:00.000Z'))
+      const author2 = author1.setIn(['lifeEvents', 'wedding'], new Date('2010-03-28T00:00:00.000Z'))
 
       should(author2.lifeEvents().inner().get('wedding').inner().getFullYear())
         .be.exactly(2010)
@@ -63,7 +63,7 @@ export default (should, M, { Person }) => () => {
         .be.exactly(2013)
     })
 
-    it('edge case when setPath is called with an empty path', () => {
+    it('edge case when setIn is called with an empty path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
       const author = M.fromJSON(Person, authorJson)
 
@@ -76,7 +76,7 @@ export default (should, M, { Person }) => () => {
         ['wedding', M.Date.of(new Date('2010-03-28T00:00:00.000Z'))]
       ])
 
-      const map2 = map.setPath([], customMap)
+      const map2 = map.setIn([], customMap)
 
       should(map2.inner().get('wedding').inner().getFullYear())
         .be.exactly(2010)

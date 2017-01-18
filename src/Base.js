@@ -52,10 +52,6 @@ class Base {
   }
 
   setIn (path, value) {
-    return this.setPath(path, value)
-  }
-
-  setPath (path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
@@ -63,11 +59,11 @@ class Base {
     const [key, ...restPath] = path
     const item = this[key]()
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
   equals (other) {

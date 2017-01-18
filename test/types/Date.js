@@ -20,14 +20,14 @@ export default (should, M) => () => {
       const mDate = new M.Date()
       const nativeDate = new Date()
 
-      mDate.inner().getFullYear()
-        .should.be.exactly(nativeDate.getFullYear())
+      should(mDate.inner().getFullYear())
+        .be.exactly(nativeDate.getFullYear())
 
-      mDate.inner().getMonth()
-        .should.be.exactly(nativeDate.getMonth())
+      should(mDate.inner().getMonth())
+        .be.exactly(nativeDate.getMonth())
 
-      mDate.inner().getDate()
-        .should.be.exactly(nativeDate.getDate())
+      should(mDate.inner().getDate())
+        .be.exactly(nativeDate.getDate())
     })
 
     it('must be instantiated with new', () => {
@@ -43,7 +43,7 @@ export default (should, M) => () => {
 
     it('should set dates correctly', () => {
       const date1 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
-      const date2 = date1.setPath([], new Date('1989-04-16T00:00:00.000Z'))
+      const date2 = date1.setIn([], new Date('1989-04-16T00:00:00.000Z'))
 
       should(date2.inner().getFullYear())
         .be.exactly(1989)
@@ -59,10 +59,10 @@ export default (should, M) => () => {
         .should.throw()
     })
 
-    it('should not support the setPath operation with non-empty paths', () => {
+    it('should not support the setIn operation with non-empty paths', () => {
       const myDate = M.Date.of(new Date());
 
-      (() => myDate.setPath([0], new Date()))
+      (() => myDate.setIn([0], new Date()))
         .should.throw()
     })
   })

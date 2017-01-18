@@ -64,7 +64,7 @@ export default (U, should, M, { Person }) => () => {
       ]
 
       const modelicoList1 = M.List.fromArray(list)
-      const modelicoList2 = modelicoList1.setPath([0], new Date('1989-04-16T00:00:00.000Z'))
+      const modelicoList2 = modelicoList1.setIn([0], new Date('1989-04-16T00:00:00.000Z'))
 
       should(modelicoList2.get(0).inner().getFullYear())
         .be.exactly(1989)
@@ -81,7 +81,7 @@ export default (U, should, M, { Person }) => () => {
       ]
 
       const modelicoList1 = M.List.fromArray(list)
-      const modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'))
+      const modelicoList2 = modelicoList1.setIn([0], new Date('2000-04-16T00:00:00.000Z'))
 
       should(modelicoList2.get(0).inner().getFullYear())
         .be.exactly(2000)
@@ -113,7 +113,7 @@ export default (U, should, M, { Person }) => () => {
       should(author2.importantDatesList().get(2).inner().getFullYear()).be.exactly(2012)
     })
 
-    it('edge case when List setPath is called with an empty path', () => {
+    it('edge case when List setIn is called with an empty path', () => {
       const modelicoDatesList1 = M.List.of(
         M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         M.Date.of(new Date())
@@ -124,7 +124,7 @@ export default (U, should, M, { Person }) => () => {
       ]
 
       const listOfListOfDates1 = M.List.of(modelicoDatesList1)
-      const listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2)
+      const listOfListOfDates2 = listOfListOfDates1.setIn([0], modelicoDatesList2)
 
       should(listOfListOfDates1.get(0).get(0).inner().getFullYear())
         .be.exactly(1988)

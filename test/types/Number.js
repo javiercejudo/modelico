@@ -24,7 +24,7 @@ export default (should, M) => () => {
 
     it('should set numbers correctly', () => {
       const numberA = M.Number.of(2)
-      const numberB = numberA.setPath([], 5)
+      const numberB = numberA.setIn([], 5)
 
       should(numberA.inner())
         .be.exactly(2)
@@ -40,10 +40,10 @@ export default (should, M) => () => {
         .should.throw()
     })
 
-    it('should not support the setPath operation with non-empty paths', () => {
+    it('should not support the setIn operation with non-empty paths', () => {
       const myNumber = M.Number.of(5);
 
-      (() => myNumber.setPath([0], 7))
+      (() => myNumber.setIn([0], 7))
         .should.throw()
     })
   })
