@@ -17,11 +17,11 @@ class Base {
 
     Object.freeze(fields)
 
+    const emptyMaybes = {}
     const innerTypes = getInnerTypes(0, Type)
 
     thisArg = defaultTo(this)(thisArg)
     thisArg[typeSymbol] = always(Type)
-    thisArg[fieldsSymbol] = always(fields)
 
     Object.keys(innerTypes).forEach(key => {
       const valueCandidate = fields[key]
@@ -31,10 +31,14 @@ class Base {
         value = valueCandidate
       } else if (innerTypes[key].type !== M.Maybe) {
         throw TypeError(`no value for key "${key}"`)
+      } else {
+        emptyMaybes[key] = value
       }
 
       thisArg[key] = always(value)
     })
+
+    thisArg[fieldsSymbol] = always(Object.assign(emptyMaybes, fields))
   }
 
   get (field) {

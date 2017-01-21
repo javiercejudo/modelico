@@ -153,7 +153,7 @@ const person2 = person1.set('givenName', 'Javi');
 person2.fullName(); //=> 'Javi Cejudo'
 person1.fullName(); //=> 'Javier Cejudo'
 
-const person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
+const person3 = person1.setIn(['pets', 0, 'name'], 'Bane');
 
 person3.pets().inner()[0].name(); //=> 'Bane'
 person1.pets().inner()[0].name(); //=> 'Robbie'
@@ -208,6 +208,90 @@ const pet = M.fromJSON(Animal, '{"name": null}');
 
 pet.name().isEmpty(); //=> true
 pet.name().getOrElse('Bane'); //=> Bane
+```
+
+## getIn / setIn
+
+Modélico objects support deeply getting values given a path, and
+deeply setting values given a path and a value.
+
+Using the `Person` and `Animal` classes
+
+```js
+const { _, string, maybe, list } = M.metadata;
+
+class Person extends M.Base {
+
+  // ... same as before
+
+  static innerTypes() {
+    return Object.freeze({
+      givenName: string(),
+      familyName: string(),
+      pets: list(maybe(_(Animal)))
+    });
+  }
+}
+
+class Animal extends M.Base {
+
+  // ... same as before
+
+  static innerTypes() {
+    return Object.freeze({
+      name: maybe(string())
+    });
+  }
+}
+```
+
+Notice that the path items are strings for regular fields
+and numbers for `M.List`. `M.Maybe` has its own dedicated
+way to account for the case where the value is not present,
+consisting of an array with two items: the default value,
+and the path item that applies for the inner type.
+
+Getting:
+
+```js
+const defaultAnimal = new Animal();
+
+const ownerOfUnnamedPet = new Person({
+  givenName: 'Javier',
+  familyName: 'Cejudo',
+  pets: M.List.of(M.Maybe.of(defaultAnimal))
+});
+
+ownerOfUnnamedPet.getIn([
+  'pets',
+  0,
+  [defaultAnimal, 'name'],
+  ['Unknown']
+]); // => Unknown
+
+// the above is equivalent to:
+ownerOfUnnamedPet
+  .pets()
+  .get(0)
+  .getOrElse(defaultAnimal).name()
+  .getOrElse('Unknown')
+```
+
+Setting:
+
+```js
+const ownerOfBane = ownerOfUnnamedPet.setIn([
+  'pets',
+  0,
+  [defaultAnimal, 'name']
+], 'Bane');
+
+ownerOfBane.getIn([
+  'pets',
+  0,
+  [defaultAnimal, 'name'],
+  ['Unknown']
+]); // => Bane
 ```
 
 ## ES2015 proxies
