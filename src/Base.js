@@ -7,6 +7,8 @@ import { typeSymbol, fieldsSymbol } from './symbols'
 
 import M from './'
 
+const getPathReducer = (result, part) => result.get(part)
+
 class Base {
   constructor (Type, fields = emptyObject, thisArg) {
     if (!isPlainObject(fields)) {
@@ -35,13 +37,21 @@ class Base {
     })
   }
 
+  get (field) {
+    return this[field]()
+  }
+
+  getIn (path) {
+    return path.reduce(getPathReducer, this)
+  }
+
   set (field, value) {
     const newFields = Object.assign({}, this[fieldsSymbol](), {[field]: value})
 
     return new (this[typeSymbol]())(newFields)
   }
 
-  setPath (path, value) {
+  setIn (path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
@@ -49,11 +59,11 @@ class Base {
     const [key, ...restPath] = path
     const item = this[key]()
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
   equals (other) {

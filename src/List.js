@@ -5,7 +5,7 @@ import Base from './Base'
 let EMPTY_LIST
 
 class List extends Base {
-  constructor (innerList) {
+  constructor (innerList = []) {
     super(List)
 
     if (isNothing(innerList)) {
@@ -44,7 +44,7 @@ class List extends Base {
     return List.fromArray(newList)
   }
 
-  setPath (path, value) {
+  setIn (path, value) {
     if (path.length === 0) {
       return List.fromArray(value)
     }
@@ -52,11 +52,11 @@ class List extends Base {
     const [key, ...restPath] = path
     const item = this.inner()[key]
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
   toJSON () {

@@ -44,7 +44,7 @@ import ModelicoSet from './types/Set'
 import ModelicoMaybe from './types/Maybe'
 
 import asIs from './asIs'
-import setPath from './types/setPath'
+import setIn from './types/setIn'
 
 import featuresSimple from './features/simple'
 import featuresAdvanced from './features/advanced'
@@ -103,7 +103,7 @@ export default (options, should, M) => () => {
   describe('ModelicoMaybe', ModelicoMaybe(...deps))
 
   describe('asIs', asIs(U, ...deps))
-  describe('setPath', setPath(U, ...deps))
+  describe('setIn', setIn(U, ...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))

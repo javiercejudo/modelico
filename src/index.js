@@ -20,7 +20,7 @@ import proxyFactory from './proxyFactory'
 
 import asIs from './asIs'
 
-const internalNonMutators = ['set', 'setPath']
+const internalNonMutators = ['set', 'setIn']
 
 const mapNonMutators = internalNonMutators
 const mapMutators = ['delete', 'clear']

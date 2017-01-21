@@ -6,7 +6,7 @@ const reviver = (k, v) => {
 }
 
 class ModelicoNumber extends Base {
-  constructor (number) {
+  constructor (number = 0) {
     super(ModelicoNumber)
 
     if (!Number.isNaN(number) && isNothing(number)) {
@@ -22,12 +22,12 @@ class ModelicoNumber extends Base {
     unsupported('Number.set is not supported')
   }
 
-  setPath (path, number) {
+  setIn (path, number) {
     if (path.length === 0) {
       return ModelicoNumber.of(number)
     }
 
-    unsupported('ModelicoNumber.setPath is not supported for non-empty paths')
+    unsupported('ModelicoNumber.setIn is not supported for non-empty paths')
   }
 
   toJSON () {

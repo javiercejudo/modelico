@@ -54,6 +54,16 @@ class Maybe extends Base {
     Object.freeze(this)
   }
 
+  get (fieldOrFallbackPair) {
+    const fallback = fieldOrFallbackPair[0]
+    const field = fieldOrFallbackPair[1]
+    const item = this.getOrElse(fallback)
+
+    return item.get
+      ? item.get(field)
+      : item
+  }
+
   set (field, v) {
     if (this.isEmpty()) {
       return this
@@ -72,23 +82,21 @@ class Maybe extends Base {
     return new Maybe(newItem)
   }
 
-  setPath (path, v) {
+  setIn (path, v) {
     if (path.length === 0) {
       return Maybe.of(v)
     }
 
-    if (this.isEmpty()) {
-      return this
-    }
+    const [fallbackOrFieldPair, ...restPath] = path
+    const fallback = fallbackOrFieldPair[0]
+    const field = fallbackOrFieldPair[1]
 
-    const item = this.inner().get()
+    const item = this.isEmpty()
+      ? fallback
+      : this.inner().get()
 
-    if (isNothing(item)) {
-      return this
-    }
-
-    const inner = (item.setPath)
-      ? item.setPath(path, v)
+    const inner = (item.setIn)
+      ? item.setIn([field, ...restPath], v)
       : null
 
     return Maybe.of(inner)

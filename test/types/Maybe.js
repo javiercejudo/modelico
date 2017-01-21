@@ -19,18 +19,15 @@ export default (should, M, { Person, PartOfDay }) => () => {
 
       maybe.set('givenName', 'Javier').isEmpty()
         .should.be.exactly(true)
-
-      maybe.setPath(['lifeEvents', 'wedding'], new Date()).isEmpty()
-        .should.be.exactly(true)
     })
 
     it('should return a new maybe with a value when the path is empty', () => {
       const maybe1 = M.Maybe.of(21)
       const maybe2 = M.Maybe.of(null)
 
-      const maybe3 = maybe1.setPath([], 22)
-      const maybe4 = maybe2.setPath([], 10)
-      const maybe5 = maybe2.setPath([], null)
+      const maybe3 = maybe1.setIn([], 22)
+      const maybe4 = maybe2.setIn([], 10)
+      const maybe5 = maybe2.setIn([], null)
 
       should(maybe3.getOrElse(0))
         .be.exactly(22)
@@ -45,7 +42,7 @@ export default (should, M, { Person, PartOfDay }) => () => {
     it('should return an empty Maybe when setting a path beyond Modelico boundaries', () => {
       const maybe1 = M.Maybe.of({a: 2})
 
-      const maybe2 = maybe1.setPath(['a'], 200)
+      const maybe2 = maybe1.setIn([[{a: 1}, 'a']], 200)
 
       maybe2.isEmpty()
         .should.be.exactly(true)
@@ -55,11 +52,8 @@ export default (should, M, { Person, PartOfDay }) => () => {
     })
 
     it('should support Maybe of null or undefined', () => {
-      should(M.Maybe.ofAny(null).setPath([], 2).toJSON())
+      should(M.Maybe.ofAny(null).setIn([], 2).toJSON())
         .be.exactly(2)
-
-      should(M.Maybe.ofAny().setPath(['a'], 2).toJSON())
-        .be.exactly(null)
 
       should(M.Maybe.ofAny(null).set('a', 2).inner().get())
         .be.exactly(null)

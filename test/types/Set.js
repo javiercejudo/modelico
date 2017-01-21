@@ -49,7 +49,7 @@ export default (should, M, { Person }) => () => {
       author2InnerSet.has(date).should.be.exactly(true)
     })
 
-    it('edge case when Set setPath is called with an empty path', () => {
+    it('edge case when Set setIn is called with an empty path', () => {
       const modelicoDatesSet1 = M.Set.of(
         M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         M.Date.of(new Date())
@@ -60,7 +60,7 @@ export default (should, M, { Person }) => () => {
       ])
 
       const listOfSetsOfDates1 = M.List.of(modelicoDatesSet1)
-      const listOfSetsOfDates2 = listOfSetsOfDates1.setPath([0], modelicoDatesSet2)
+      const listOfSetsOfDates2 = listOfSetsOfDates1.setIn([0], modelicoDatesSet2)
 
       should([...[...listOfSetsOfDates1.inner()][0].inner()][0].inner().getFullYear())
         .be.exactly(1988)
@@ -76,10 +76,10 @@ export default (should, M, { Person }) => () => {
         .should.throw()
     })
 
-    it('should not support the setPath operation with non-empty paths', () => {
+    it('should not support the setIn operation with non-empty paths', () => {
       const mySet = M.Set.of(1, 2);
 
-      (() => mySet.setPath([0], 3))
+      (() => mySet.setIn([0], 3))
         .should.throw()
     })
   })
@@ -166,7 +166,9 @@ export default (should, M, { Person }) => () => {
       M.Set.EMPTY().toJSON()
         .should.eql([])
 
-      M.Set.of().should.be.exactly(M.Set.EMPTY())
+      new M.Set()
+        .should.be.exactly(M.Set.of())
+        .and.exactly(M.Set.EMPTY())
     })
 
     it('should be able to create a set from arbitrary parameters', () => {

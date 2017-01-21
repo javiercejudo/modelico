@@ -11,13 +11,16 @@ export default (should, M) => () => {
   Animal.prototype = Object.create(M.Base.prototype)
 
   Animal.prototype.speak = function () {
-    var name = this.name()
-    return (name === '') ? "I don't have a name" : 'My name is ' + name + '!'
+    var name = this.name().getOrElse('')
+
+    return (name === '')
+      ? "I don't have a name"
+      : 'My name is ' + name + '!'
   }
 
   Animal.innerTypes = function () {
     return Object.freeze({
-      name: m.string()
+      name: m.maybe(m.string())
     })
   }
 
@@ -35,7 +38,7 @@ export default (should, M) => () => {
     return Object.freeze({
       givenName: m.string(),
       familyName: m.string(),
-      pets: m.list(m._(Animal))
+      pets: m.list(m.maybe(m._(Animal)))
     })
   }
 
@@ -44,9 +47,12 @@ export default (should, M) => () => {
     const personJson = `{
       "givenName": "Javier",
       "familyName": "Cejudo",
-      "pets": [{
-        "name": "Robbie"
-      }]
+      "pets": [
+        {
+          "name": "Robbie"
+        },
+        null
+      ]
     }`
 
     const person1 = JSON.parse(personJson, m._(Person).reviver)
@@ -57,10 +63,37 @@ export default (should, M) => () => {
     person2.fullName().should.be.exactly('Javi Cejudo')
     person1.fullName().should.be.exactly('Javier Cejudo')
 
-    Array.from(person1.pets()).shift().speak()
+    const defaultAnimal = new Animal()
+
+    Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak()
       .should.be.exactly('My name is Robbie!')
 
-    Array.from(person1.pets()).shift().speak()
+    Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak()
       .should.be.exactly('My name is Robbie!')
+
+    const person3 = person1.setIn(['pets', 0, [defaultAnimal, 'name']], 'Bane')
+
+    person3.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('')
+      .should.be.exactly('Bane')
+
+    person3.pets().get(1).getOrElse(defaultAnimal).name().getOrElse('Unknown')
+      .should.be.exactly('Unknown')
+
+    person3.getIn(['pets', 0, [defaultAnimal, 'name'], ['Unknown']])
+      .should.be.exactly('Bane')
+
+    person3.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']])
+      .should.be.exactly('Unknown')
+
+    person1.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('Unknown')
+      .should.be.exactly('Robbie')
+
+    const person4 = person1.setIn(['pets', 1, [defaultAnimal, 'name']], 'Robbie')
+
+    person4.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']])
+      .should.be.exactly('Robbie')
+
+    person3.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']])
+      .should.be.exactly('Unknown')
   })
 }

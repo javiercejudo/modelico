@@ -8,7 +8,7 @@ let EMPTY_SET
 const copy = set => new Set(set)
 
 class ModelicoSet extends Base {
-  constructor (innerSetOrig) {
+  constructor (innerSetOrig = new Set()) {
     super(ModelicoSet)
 
     if (isNothing(innerSetOrig)) {
@@ -41,12 +41,12 @@ class ModelicoSet extends Base {
     unsupported('Set.set is not supported')
   }
 
-  setPath (path, set) {
+  setIn (path, set) {
     if (path.length === 0) {
       return new ModelicoSet(set)
     }
 
-    unsupported('Set.setPath is not supported for non-empty paths')
+    unsupported('Set.setIn is not supported for non-empty paths')
   }
 
   toJSON () {
