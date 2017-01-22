@@ -141,6 +141,46 @@ class Person extends M.Base {
 }
 ```
 
+## Types
+
+Here is a list of the built-in immutable types:
+
+- `Enum`: simple enumerated values with optional associated data.
+- `Map`: ordered map with arbitrary keys and values.
+- `EnumMap`: ordered map with enum keys and arbitrary values.
+- `StringMap`: ordered map with string keys and arbitrary values.
+- `List`: ordered indexed collection, implemented with plain arrays, but immutable.
+- `Set`: ordered collection with no repeated values.
+- `Date`: much like a JavaScript date, but immutable.
+- `Number`: a number wrapper to support serialisation of `-0` and ±`Infinity` (rarely needed).
+- `Maybe`: it helps with optional/nullable fields.
+
+Each of the types above has an associated metadata
+function in `M.metadata`, with some useful additions:
+
+```js
+{
+  _,      // to retrieve the metadata of arbitrary types, eg. _(Animal)
+  asIs,   // useful for custom deserialisation, eg: asIs(x => 2 * x) to double numbers in JSON
+  any,    // to leave JSON input untouched
+  number, // for native numbers, but optionally wraps to support -0 and ±Infinity
+          // eg. number({wrap: true})
+
+  string, // remember they are all functions, eg. string(), list(date())
+  boolean,
+  regExp,
+  fn,
+
+  map,
+  enumMap,
+  stringMap,
+  list,
+  set,
+  date,
+  maybe
+} = M.metadata;
+```
+
 ## A note on immutability
 
 Following the examples above:

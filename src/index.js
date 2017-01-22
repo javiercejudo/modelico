@@ -15,7 +15,6 @@ import ModelicoNumber from './Number'
 import ModelicoDate from './Date'
 import List from './List'
 import ModelicoSet from './Set'
-import Any from './Any'
 import proxyFactory from './proxyFactory'
 
 import asIs from './asIs'
@@ -47,7 +46,7 @@ const _ = function (Type, depth = 0, innerMetadata = []) {
 const metadata = Object.freeze({
   _,
   asIs,
-  any: always(asIs(Any)),
+  any: always(asIs(identity)),
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber.metadata() : asIs(Number),
 
   string: always(asIs(String)),
@@ -64,9 +63,10 @@ const metadata = Object.freeze({
   set: ModelicoSet.metadata
 })
 
+const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
+
 export default {
   about: Object.freeze({ version, author, homepage, license }),
-  Any,
   Number: ModelicoNumber,
   Date: ModelicoDate,
   Enum,
@@ -83,8 +83,9 @@ export default {
   genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
   genericsFromJS: (Type, innerMetadata, js) => _(Type, 0, innerMetadata).reviver('', js),
   metadata,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
-  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  proxyMap,
+  proxyEnumMap: proxyMap,
+  proxyStringMap: proxyMap,
   proxyList: partial(proxyFactory, listNonMutators, listMutators, x => [...x]),
   proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
   proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)

@@ -1,5 +1,4 @@
-import { asIsReviver } from './U'
-import Any from './Any'
+import { asIsReviver, identity } from './U'
 
-export default (Type = Any) =>
+export default (Type = identity) =>
   Object.freeze({type: Type, reviver: asIsReviver(Type)})
