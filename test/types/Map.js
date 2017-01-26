@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (should, M, { Person }) => () => {
-  const { date, map, number, string } = M.metadata
+  const { date, map, number, string } = M.metadata()
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {

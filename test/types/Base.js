@@ -9,7 +9,7 @@ export default (U, should, M, fixtures) => () => {
     Friend
   } = fixtures
 
-  const { _ } = M.metadata
+  const { _ } = M.metadata()
   const ModelicoDate = M.Date
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'

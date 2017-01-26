@@ -71,7 +71,9 @@ import countryFactory from './types/fixtures/nested/Country'
 import regionFactory from './types/fixtures/nested/Region'
 import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
 
-export default (options, should, M) => () => {
+import ajvMetadata from './metadata/ajv'
+
+export default (options, should, M, extensions) => () => {
   const U = buildUtils(options)
 
   const PartOfDay = partOfDayFactory(M)
@@ -89,7 +91,7 @@ export default (options, should, M) => () => {
     RegionIncompatibleNameKey: regionIncompatibleNameKeyFactory(M)
   })
 
-  const deps = [should, M, fixtures]
+  const deps = [should, M, fixtures, extensions]
 
   describe('Base', Base(U, ...deps))
   describe('Number', ModelicoNumber(...deps))
@@ -104,6 +106,7 @@ export default (options, should, M) => () => {
 
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
+  describe('ajvMetadata', ajvMetadata(...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))

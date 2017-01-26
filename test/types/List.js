@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M, { Person }) => () => {
-  const { _, list, date } = M.metadata
+  const { _, list, date } = M.metadata()
 
   describe('immutability', () => {
     U.skipIfNoObjectFreeze('must freeze the input', () => {

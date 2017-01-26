@@ -3,7 +3,7 @@
 export default (M, PartOfDay, Sex) => {
   const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ')
 
-  const { _, string, date, map, list, set, maybe } = M.metadata
+  const { _, string, date, map, list, set, maybe } = M.metadata()
   const partOfDay = PartOfDay.metadata
   const sex = Sex.metadata
 

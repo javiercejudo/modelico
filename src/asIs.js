@@ -1,4 +1,4 @@
 import { asIsReviver, identity } from './U'
 
-export default (Type = identity) =>
-  Object.freeze({type: Type, reviver: asIsReviver(Type)})
+export default (tranformer = identity) =>
+  Object.freeze({ type: tranformer, reviver: asIsReviver(tranformer) })

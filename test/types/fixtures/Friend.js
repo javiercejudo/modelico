@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default M => {
-  const { _, string, maybe } = M.metadata
+  const { _, string, maybe } = M.metadata()
 
   class Friend extends M.Base {
     constructor (fields) {

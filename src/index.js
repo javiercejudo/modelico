@@ -1,5 +1,5 @@
 import { version, author, homepage, license } from '../package.json'
-import { fieldsSymbol } from './symbols'
+import * as symbols from './symbols'
 import { partial, always, identity } from './U'
 import reviverFactory from './reviverFactory'
 
@@ -16,6 +16,7 @@ import ModelicoDate from './Date'
 import List from './List'
 import ModelicoSet from './Set'
 import proxyFactory from './proxyFactory'
+import ajvMetadata from './ajvMetadata'
 
 import asIs from './asIs'
 
@@ -43,7 +44,7 @@ const _ = function (Type, depth = 0, innerMetadata = []) {
   return Object.freeze({type: Type, reviver: reviverFactory(depth, Type)})
 }
 
-const metadata = Object.freeze({
+const metadata = () => Object.freeze({
   _,
   asIs,
   any: always(asIs(identity)),
@@ -51,8 +52,6 @@ const metadata = Object.freeze({
 
   string: always(asIs(String)),
   boolean: always(asIs(Boolean)),
-  regExp: always(asIs(RegExp)),
-  fn: always(asIs(Function)),
 
   date: ModelicoDate.metadata,
   enumMap: EnumMap.metadata,
@@ -77,12 +76,14 @@ export default {
   Maybe,
   Base,
   Set: ModelicoSet,
-  fields: x => x[fieldsSymbol](),
+  fields: x => x[symbols.fieldsSymbol](),
+  symbols,
   fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
   fromJS: (Type, js) => _(Type).reviver('', js),
   genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
   genericsFromJS: (Type, innerMetadata, js) => _(Type, 0, innerMetadata).reviver('', js),
   metadata,
+  ajvMetadata,
   proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,
