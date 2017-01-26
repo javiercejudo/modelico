@@ -38,7 +38,7 @@ class Base {
       thisArg[key] = always(value)
     })
 
-    thisArg[fieldsSymbol] = always(Object.assign(emptyMaybes, fields))
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)))
   }
 
   get (field) {

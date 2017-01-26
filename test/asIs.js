@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  const { asIs, any, fn, regExp, string } = M.metadata
+  const { asIs, any, string } = M.metadata()
 
   describe('toJSON', () => {
     it('should stringify the valfnue as is', () => {
@@ -17,20 +17,6 @@ export default (U, should, M) => () => {
       const asIsObject = JSON.parse('{"two":2}', any().reviver)
 
       should(asIsObject.two).be.exactly(2)
-    })
-
-    it('should support non-trivial native constructors: Function', () => {
-      const asIsObject = JSON.parse('"return (function(x) { return x * 4 })(arguments[0])"', fn().reviver)
-
-      should(asIsObject(5)).be.exactly(20)
-    })
-
-    it('should support non-trivial native constructors: RegExp', () => {
-      const asIsObject = JSON.parse('"^[a-z]+$"', regExp().reviver)
-
-      asIsObject.test('abc').should.be.exactly(true)
-      asIsObject.test('abc1').should.be.exactly(false)
-      asIsObject.test('Abc').should.be.exactly(false)
     })
 
     it('should support any function', () => {

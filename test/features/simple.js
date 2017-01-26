@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (should, M) => () => {
-  const { _, string } = M.metadata
+  const { _, string } = M.metadata()
 
   class Animal extends M.Base {
     constructor (fields) {

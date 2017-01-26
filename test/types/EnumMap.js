@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (should, M, { PartOfDay }) => () => {
-  const { _, any, enumMap, string } = M.metadata
+  const { _, any, enumMap, string } = M.metadata()
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {

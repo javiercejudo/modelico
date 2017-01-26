@@ -2,7 +2,7 @@
 
 export default (should, M) => () => {
   // use ES5 below
-  var m = M.metadata
+  var m = M.metadata()
 
   function Animal (fields) {
     M.Base.factory(Animal, fields, this)

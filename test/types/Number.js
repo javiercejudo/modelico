@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (should, M) => () => {
-  const { number } = M.metadata
+  const { number } = M.metadata()
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {

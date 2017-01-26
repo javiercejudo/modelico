@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (M, Region) => {
-  const { _, string } = M.metadata
+  const { _, string } = M.metadata()
 
   class Country extends M.Base {
     constructor (fields) {
