@@ -153,16 +153,6 @@ person3.pets().get(0).name(); //=> 'Bane'
 person1.pets().get(0).name(); //=> 'Robbie'
 ```
 
-The same principle applies across all Modélico classes. In the case of
-`M.List`, the inner array is frozen. At the time of writing, there is no
-canonical way of freezing the other inner structures, so a copy is returned
-each time `.inner()` is called.
-
-```js
-person1.pets().inner().shift().speak();
-//=> TypeError: Cannot add/remove sealed array elements
-```
-
 ## Learn more
 
 - [Nested types example](docs/nested_types_example.md)
