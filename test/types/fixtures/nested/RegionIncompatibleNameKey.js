@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default M => {
-  const { _, number, string } = M.metadata
+  const { _, number, string } = M.metadata()
 
   class Code extends M.Base {
     constructor (fields) {

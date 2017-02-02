@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/should.js/11.1.2/should.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.20.0/polyfill.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.1/immutable.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/4.11.2/ajv.bundle.js"></script>
 
   <script src="../../dist/modelico.js"></script>
   <script src="../../dist/modelico.min.js"></script>
@@ -24,8 +25,8 @@
     mocha.setup('bdd')
 
     describe('Modelico', function () {
-      describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico, Immutable))
-      describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin, Immutable))
+      describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico, Immutable, { Ajv: Ajv }))
+      describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin, Immutable, { Ajv: Ajv }))
     })
 
     mocha.checkLeaks()

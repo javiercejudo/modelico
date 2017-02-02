@@ -44,7 +44,7 @@ import ModelicoSet from './types/Set'
 import ModelicoMaybe from './types/Maybe'
 
 import asIs from './asIs'
-import setPath from './types/setPath'
+import setIn from './types/setIn'
 
 import featuresSimple from './features/simple'
 import featuresAdvanced from './features/advanced'
@@ -71,7 +71,9 @@ import countryFactory from './types/fixtures/nested/Country'
 import regionFactory from './types/fixtures/nested/Region'
 import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
 
-export default (options, should, M, Immutable) => () => {
+import ajvMetadata from './metadata/ajv'
+
+export default (options, should, M, Immutable, extensions) => () => {
   const U = buildUtils(options)
 
   const PartOfDay = partOfDayFactory(M)
@@ -89,7 +91,7 @@ export default (options, should, M, Immutable) => () => {
     RegionIncompatibleNameKey: regionIncompatibleNameKeyFactory(M)
   })
 
-  const deps = [should, M, fixtures, Immutable]
+  const deps = [should, M, fixtures, Immutable, extensions]
 
   describe('Base', Base(U, ...deps))
   describe('Number', ModelicoNumber(...deps))
@@ -103,7 +105,8 @@ export default (options, should, M, Immutable) => () => {
   describe('ModelicoMaybe', ModelicoMaybe(...deps))
 
   describe('asIs', asIs(U, ...deps))
-  describe('setPath', setPath(U, ...deps))
+  describe('setIn', setIn(U, ...deps))
+  describe('ajvMetadata', ajvMetadata(...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))

@@ -40,7 +40,7 @@ export const metadata = (Type, reviverFactory, keyMetadata, valueMetadata) => {
 }
 
 class AbstractMap extends Base {
-  constructor (Type, innerMapOrig, EMPTY) {
+  constructor (Type, innerMapOrig = new Map(), EMPTY) {
     super(Type)
 
     if (isNothing(innerMapOrig)) {
@@ -67,7 +67,7 @@ class AbstractMap extends Base {
     return this[innerOrigSymbol]().get(key)
   }
 
-  setPath (path, value) {
+  setIn (path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
@@ -75,11 +75,11 @@ class AbstractMap extends Base {
     const [key, ...restPath] = path
     const item = this[innerOrigSymbol]().get(key)
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
   equals (other, asUnordered = false) {

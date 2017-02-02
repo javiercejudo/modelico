@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (should, M, fixtures) => () => {
-  const { _ } = M.metadata
+  const { _ } = M.metadata()
 
   it('should revive deeply nested JSON', () => {
     const { Region, countryFactory } = fixtures

@@ -9,7 +9,7 @@ export default (U, should, M, fixtures) => () => {
     Friend
   } = fixtures
 
-  const { _ } = M.metadata
+  const { _ } = M.metadata()
   const ModelicoDate = M.Date
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
@@ -105,8 +105,8 @@ export default (U, should, M, fixtures) => () => {
         sex: M.Maybe.of(Sex.MALE())
       })
 
-      const author2 = author1.setPath(['givenName'], 'Javi')
-        .setPath(['birthday'], new Date('1989-04-16T00:00:00.000Z'))
+      const author2 = author1.setIn(['givenName'], 'Javi')
+        .setIn(['birthday'], new Date('1989-04-16T00:00:00.000Z'))
 
       should(author2.birthday().inner().getFullYear())
         .be.exactly(1989)
@@ -116,13 +116,13 @@ export default (U, should, M, fixtures) => () => {
         .be.exactly(1988)
     })
 
-    it('edge case when Modelico setPath is called with an empty path', () => {
+    it('edge case when Modelico setIn is called with an empty path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author = JSON.parse(authorJson, _(Person).reviver)
       const listOfPeople1 = M.List.of(author)
 
-      const listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi')
-      const listOfPeople3 = listOfPeople2.setPath([0], M.fields(author))
+      const listOfPeople2 = listOfPeople1.setIn([0, 'givenName'], 'Javi')
+      const listOfPeople3 = listOfPeople2.setIn([0], M.fields(author))
 
       listOfPeople1.get(0).givenName().should.be.exactly('Javier')
       listOfPeople2.get(0).givenName().should.be.exactly('Javi')

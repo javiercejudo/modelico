@@ -1,5 +1,5 @@
 import { version, author, homepage, license } from '../package.json'
-import { fieldsSymbol } from './symbols'
+import * as symbols from './symbols'
 import { partial, always, identity } from './U'
 import reviverFactory from './reviverFactory'
 
@@ -15,12 +15,12 @@ import ModelicoNumber from './Number'
 import ModelicoDate from './Date'
 import List from './List'
 import ModelicoSet from './Set'
-import Any from './Any'
 import proxyFactory from './proxyFactory'
+import ajvMetadata from './ajvMetadata'
 
 import asIs from './asIs'
 
-const internalNonMutators = ['set', 'setPath']
+const internalNonMutators = ['set', 'setIn']
 
 const mapNonMutators = internalNonMutators.concat(['delete', 'clear', 'update', 'merge', 'mergeWith', 'mergeDeep',
   'mergeDeepWith', 'map', 'filter', 'filterNot', 'reverse', 'sort', 'sortBy', 'slice', 'rest', 'butLast', 'skip',
@@ -50,16 +50,14 @@ const _ = function (Type, depth = 0, innerMetadata = []) {
   return Object.freeze({type: Type, reviver: reviverFactory(depth, Type)})
 }
 
-const metadata = Object.freeze({
+const metadata = () => Object.freeze({
   _,
   asIs,
-  any: always(asIs(Any)),
+  any: always(asIs(identity)),
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber.metadata() : asIs(Number),
 
   string: always(asIs(String)),
   boolean: always(asIs(Boolean)),
-  regExp: always(asIs(RegExp)),
-  fn: always(asIs(Function)),
 
   date: ModelicoDate.metadata,
   enumMap: EnumMap.metadata,
@@ -70,9 +68,10 @@ const metadata = Object.freeze({
   set: ModelicoSet.metadata
 })
 
+const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
+
 export default {
   about: Object.freeze({ version, author, homepage, license }),
-  Any,
   Number: ModelicoNumber,
   Date: ModelicoDate,
   Enum,
@@ -83,14 +82,17 @@ export default {
   Maybe,
   Base,
   Set: ModelicoSet,
-  fields: x => x[fieldsSymbol](),
+  fields: x => x[symbols.fieldsSymbol](),
+  symbols,
   fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
   fromJS: (Type, js) => _(Type).reviver('', js),
   genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
   genericsFromJS: (Type, innerMetadata, js) => _(Type, 0, innerMetadata).reviver('', js),
   metadata,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
-  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators, identity),
+  ajvMetadata,
+  proxyMap,
+  proxyEnumMap: proxyMap,
+  proxyStringMap: proxyMap,
   proxyList: partial(proxyFactory, listNonMutators, listMutators, identity),
   proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
   proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)

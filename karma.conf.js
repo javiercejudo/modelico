@@ -15,6 +15,7 @@ module.exports = function (config) {
       'node_modules/should/should.js',
       'node_modules/babel-polyfill/dist/polyfill.js',
       'node_modules/immutable/dist/immutable.min.js',
+      'node_modules/ajv/dist/ajv.bundle.js',
       'dist/modelico.js',
       'dist/modelico.min.js',
       'dist/modelico-spec.js',
@@ -62,6 +63,9 @@ module.exports = function (config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     // browsers: ['Chrome', 'Firefox'],
     browsers: Object.keys(customLaunchers()),
+
+    // how many browsers Karma launches in parallel
+    concurrency: 2,
 
     // timeout for capturing a browser (in ms)
     captureTimeout: 0,

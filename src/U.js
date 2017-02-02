@@ -4,10 +4,11 @@ const get = (field/* : string */) => (obj/* : Object */) => obj[field]
 const pipe2 = (fn1/* : Function */, fn2/* : Function */) => (...args/* : Array<mixed> */) => fn2(fn1(...args))
 const not = (x/* : boolean */)/* : boolean */ => !x
 
+export const T = () => true
 export const identity = /* :: <T> */(x/* : T */)/* : T */ => x
 export const pipe = (...fns/* : Array<Function> */) => fns.reduce(pipe2, identity)
 export const partial = (fn/* : Function */, ...args/* : Array<mixed> */) => fn.bind(undefined, ...args)
-export const asIsReviver = (Type/* : Function */) => (k/* : string */, v/* : mixed */) => Type(v)
+export const asIsReviver = (transform/* : Function */) => (k/* : string */, v/* : mixed */) => transform(v)
 export const always = /* :: <T> */(x/* : T */) => ()/* : T */ => x
 export const isNothing = (v/* : mixed */)/* : boolean */ => v == null || Number.isNaN(v)
 export const isSomething = pipe2(isNothing, not)

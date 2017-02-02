@@ -7,6 +7,8 @@ import { typeSymbol, fieldsSymbol } from './symbols'
 
 import M from './'
 
+const getPathReducer = (result, part) => result.get(part)
+
 class Base {
   constructor (Type, fields = emptyObject, thisArg) {
     if (!isPlainObject(fields)) {
@@ -15,11 +17,11 @@ class Base {
 
     Object.freeze(fields)
 
+    const emptyMaybes = {}
     const innerTypes = getInnerTypes(0, Type)
 
     thisArg = defaultTo(this)(thisArg)
     thisArg[typeSymbol] = always(Type)
-    thisArg[fieldsSymbol] = always(fields)
 
     Object.keys(innerTypes).forEach(key => {
       const valueCandidate = fields[key]
@@ -29,10 +31,22 @@ class Base {
         value = valueCandidate
       } else if (innerTypes[key].type !== M.Maybe) {
         throw TypeError(`no value for key "${key}"`)
+      } else {
+        emptyMaybes[key] = value
       }
 
       thisArg[key] = always(value)
     })
+
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)))
+  }
+
+  get (field) {
+    return this[field]()
+  }
+
+  getIn (path) {
+    return path.reduce(getPathReducer, this)
   }
 
   set (field, value) {
@@ -41,7 +55,7 @@ class Base {
     return new (this[typeSymbol]())(newFields)
   }
 
-  setPath (path, value) {
+  setIn (path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
@@ -49,11 +63,11 @@ class Base {
     const [key, ...restPath] = path
     const item = this[key]()
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
   equals (other) {
