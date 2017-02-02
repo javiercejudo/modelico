@@ -1,4 +1,4 @@
-var version = "19.0.5";
+var version = "20.0.0";
 
 
 
@@ -11,6 +11,14 @@ var homepage = "https://github.com/javiercejudo/modelico#readme";
 
 const typeSymbol = Symbol('type');
 const fieldsSymbol = Symbol('fields');
+const innerOrigSymbol = Symbol('innerOrigSymbol');
+
+
+var symbols = Object.freeze({
+	typeSymbol: typeSymbol,
+	fieldsSymbol: fieldsSymbol,
+	innerOrigSymbol: innerOrigSymbol
+});
 
 // @flow
 
@@ -18,10 +26,11 @@ const get = (field/* : string */) => (obj/* : Object */) => obj[field];
 const pipe2 = (fn1/* : Function */, fn2/* : Function */) => (...args/* : Array<mixed> */) => fn2(fn1(...args));
 const not = (x/* : boolean */)/* : boolean */ => !x;
 
+const T = () => true;
 const identity = /* :: <T> */(x/* : T */)/* : T */ => x;
 
 const partial = (fn/* : Function */, ...args/* : Array<mixed> */) => fn.bind(undefined, ...args);
-const asIsReviver = (Type/* : Function */) => (k/* : string */, v/* : mixed */) => Type(v);
+const asIsReviver = (transform/* : Function */) => (k/* : string */, v/* : mixed */) => transform(v);
 const always = /* :: <T> */(x/* : T */) => ()/* : T */ => x;
 const isNothing = (v/* : mixed */)/* : boolean */ => v == null || Number.isNaN(v);
 const isSomething = pipe2(isNothing, not);
@@ -94,6 +103,8 @@ const reviverFactory = (depth, Type) => (k, v) => {
   return new Type(fields)
 };
 
+const getPathReducer = (result, part) => result.get(part);
+
 class Base {
   constructor (Type, fields = emptyObject, thisArg) {
     if (!isPlainObject(fields)) {
@@ -102,11 +113,11 @@ class Base {
 
     Object.freeze(fields);
 
+    const emptyMaybes = {};
     const innerTypes = getInnerTypes(0, Type);
 
     thisArg = defaultTo(this)(thisArg);
     thisArg[typeSymbol] = always(Type);
-    thisArg[fieldsSymbol] = always(fields);
 
     Object.keys(innerTypes).forEach(key => {
       const valueCandidate = fields[key];
@@ -116,10 +127,22 @@ class Base {
         value = valueCandidate;
       } else if (innerTypes[key].type !== M.Maybe) {
         throw TypeError(`no value for key "${key}"`)
+      } else {
+        emptyMaybes[key] = value;
       }
 
       thisArg[key] = always(value);
     });
+
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)));
+  }
+
+  get (field) {
+    return this[field]()
+  }
+
+  getIn (path) {
+    return path.reduce(getPathReducer, this)
   }
 
   set (field, value) {
@@ -128,7 +151,7 @@ class Base {
     return new (this[typeSymbol]())(newFields)
   }
 
-  setPath (path, value) {
+  setIn (path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
@@ -136,11 +159,11 @@ class Base {
     const [key, ...restPath] = path;
     const item = this[key]();
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
   equals (other) {
@@ -152,7 +175,17 @@ class Base {
       return false
     }
 
-    return (JSON.stringify(this) === JSON.stringify(other))
+    const thisFields = this[fieldsSymbol]();
+    const otherFields = other[fieldsSymbol]();
+
+    const thisKeys = Object.keys(thisFields);
+    const otherKeys = Object.keys(otherFields);
+
+    if (thisKeys.length !== otherKeys.length) {
+      return false
+    }
+
+    return thisKeys.every(key => equals(thisFields[key], otherFields[key]))
   }
 
   toJSON () {
@@ -227,6 +260,16 @@ class Maybe extends Base$1 {
     Object.freeze(this);
   }
 
+  get (fieldOrFallbackPair) {
+    const fallback = fieldOrFallbackPair[0];
+    const field = fieldOrFallbackPair[1];
+    const item = this.getOrElse(fallback);
+
+    return item.get
+      ? item.get(field)
+      : item
+  }
+
   set (field, v) {
     if (this.isEmpty()) {
       return this
@@ -245,23 +288,21 @@ class Maybe extends Base$1 {
     return new Maybe(newItem)
   }
 
-  setPath (path, v) {
+  setIn (path, v) {
     if (path.length === 0) {
       return Maybe.of(v)
     }
 
-    if (this.isEmpty()) {
-      return this
-    }
+    const [fallbackOrFieldPair, ...restPath] = path;
+    const fallback = fallbackOrFieldPair[0];
+    const field = fallbackOrFieldPair[1];
 
-    const item = this.inner().get();
+    const item = this.isEmpty()
+      ? fallback
+      : this.inner().get();
 
-    if (isNothing(item)) {
-      return this
-    }
-
-    const inner = (item.setPath)
-      ? item.setPath(path, v)
+    const inner = (item.setIn)
+      ? item.setIn([field, ...restPath], v)
       : null;
 
     return Maybe.of(inner)
@@ -303,12 +344,7 @@ class Maybe extends Base$1 {
       return inner === otherInner
     }
 
-    const innerItem = inner.get();
-    const otherInnerItem = otherInner.get();
-
-    return (isSomething(innerItem) && innerItem.equals)
-      ? innerItem.equals(otherInnerItem)
-      : haveSameValues(innerItem, otherInnerItem)
+    return equals(inner.get(), otherInner.get())
   }
 
   static of (v) {
@@ -320,7 +356,11 @@ class Maybe extends Base$1 {
   }
 
   static metadata (itemMetadata) {
-    return Object.freeze({type: Maybe, reviver: reviverFactory$2(itemMetadata)})
+    return Object.freeze({
+      type: Maybe,
+      subtypes: [itemMetadata],
+      reviver: reviverFactory$2(itemMetadata)
+    })
   }
 
   static innerTypes () {
@@ -346,36 +386,39 @@ const reviverFactory$3 = enumerators => (k, v) => {
 };
 
 class Enum extends Base$1 {
-  constructor (input) {
+  constructor (input, Ctor = Enum, displayName = Ctor.displayName) {
     const enumerators = Array.isArray(input)
       ? input.reduce(enumeratorsReducer, {})
       : input;
 
-    super(Enum);
+    if (Ctor !== Enum) {
+      Ctor.displayName = displayName;
+      Object.freeze(Ctor);
+    }
+
+    super(Ctor);
 
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {
         this[enumerator] = always(enumerators[enumerator]);
         enumerators[enumerator].toJSON = always(enumerator);
+        enumerators[enumerator].equals = other => (enumerators[enumerator] === other);
       });
 
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
-        type: Enum,
+        type: Ctor,
         reviver: reviverFactory$3(enumerators)
-      })),
-      enumerable: false
+      }))
     });
-
-    Object.freeze(this);
   }
 
-  static fromObject (obj) {
-    return new Enum(obj)
+  static fromObject (...args) {
+    return new Enum(...args)
   }
 
-  static fromArray (arr) {
-    return new Enum(arr)
+  static fromArray (...args) {
+    return new Enum(...args)
   }
 
   static innerTypes () {
@@ -383,9 +426,10 @@ class Enum extends Base$1 {
   }
 }
 
-Enum.displayName = 'Enum';
-
-var Enum$1 = Object.freeze(Enum);
+Object.defineProperty(Enum, 'displayName', {
+  value: 'Enum',
+  writable: true
+});
 
 const set = (thisArg, Type, key, value) => {
   const newMap = thisArg.inner();
@@ -398,104 +442,133 @@ const of = (Type, args) => {
   const len = args.length;
 
   if (len % 2 === 1) {
-    throw TypeError(`${Type.displayName || Type.name}.of requires an even number of arguments`)
+    throw TypeError(`${Type.displayName}.of requires an even number of arguments`)
   }
 
-  const pairs = [];
+  const map = new Map();
 
   for (let i = 0; i < len; i += 2) {
-    pairs.push([args[i], args[i + 1]]);
+    map.set(args[i], args[i + 1]);
   }
 
-  return Type.fromArray(pairs)
+  return Type.fromMap(map)
 };
 
-const metadata$1 = (Type, reviver) => {
-  return Object.freeze({type: Type, reviver})
+const metadata$1 = (Type, reviverFactory, keyMetadata, valueMetadata) => {
+  return Object.freeze({
+    type: Type,
+    subtypes: Object.freeze([keyMetadata, valueMetadata]),
+    reviver: reviverFactory(keyMetadata, valueMetadata)
+  })
 };
+
+const equalPairs = (pairA, pairB) =>
+  pairA.every((pairPart, index) => equals(pairPart, pairB[index]));
+
+const copy = map => new Map(map);
 
 class AbstractMap extends Base$1 {
-  constructor (Type, innerMapOrig) {
+  constructor (Type, innerMapOrig = new Map(), EMPTY) {
     super(Type);
 
     if (isNothing(innerMapOrig)) {
       throw TypeError('missing map')
     }
 
-    const innerMap = new Map(innerMapOrig);
+    if (EMPTY && innerMapOrig.size === 0) {
+      return EMPTY
+    }
 
-    this.inner = () => new Map(innerMap);
+    const innerMap = copy(innerMapOrig);
+
+    this[innerOrigSymbol] = always(innerMap);
+    this.inner = () => copy(innerMap);
+    this.size = innerMap.size;
     this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
   }
 
-  setPath (path, value) {
+  has (key) {
+    return this[innerOrigSymbol]().has(key)
+  }
+
+  get (key) {
+    return this[innerOrigSymbol]().get(key)
+  }
+
+  setIn (path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
 
     const [key, ...restPath] = path;
-    const item = this.inner().get(key);
+    const item = this[innerOrigSymbol]().get(key);
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
-  equals (other) {
+  equals (other, asUnordered = false) {
     if (this === other) {
       return true
     }
 
-    if (haveDifferentTypes(this, other)) {
+    if (haveDifferentTypes(this, other) || this.size !== other.size) {
       return false
     }
 
-    const items = [...this];
-    const otherItems = [...other];
+    const thisIter = this[Symbol.iterator]();
+    const otherIter = other[Symbol.iterator]();
 
-    if (items.length !== otherItems.length) {
-      return false
+    for (let i = 0; i < this.size; i += 1) {
+      const pair = thisIter.next().value;
+
+      const areEqual = asUnordered
+        ? other.has(pair[0]) && equals(pair[1], other.get(pair[0]))
+        : equalPairs(pair, otherIter.next().value);
+
+      if (!areEqual) {
+        return false
+      }
     }
 
-    return items.every((item, index) => {
-      const otherItem = otherItems[index];
-
-      return item.every((itemPart, index) => {
-        return equals(itemPart, otherItem[index])
-      })
-    })
+    return true
   }
 }
 
 var AbstractMap$1 = Object.freeze(AbstractMap);
 
-const parseMapper = (keyMetadata, valueMetadata) => pair => {
-  const reviveKey = reviverOrAsIs(keyMetadata);
-  const revivedKey = reviveKey('', pair[0]);
-
-  const reviveVal = reviverOrAsIs(valueMetadata);
-  const revivedVal = reviveVal('', pair[1]);
-
-  return [revivedKey, revivedVal]
-};
+const parseMapper = (keyReviver, valueReviver) => pair => [
+  keyReviver('', pair[0]),
+  valueReviver('', pair[1])
+];
 
 const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v
   }
 
+  const keyReviver = reviverOrAsIs(keyMetadata);
+  const valueReviver = reviverOrAsIs(valueMetadata);
+
   const innerMap = (v === null)
     ? null
-    : new Map(v.map(parseMapper(keyMetadata, valueMetadata)));
+    : new Map(v.map(parseMapper(keyReviver, valueReviver)));
 
   return ModelicoMap.fromMap(innerMap)
 };
 
+let EMPTY_MAP;
+
 class ModelicoMap extends AbstractMap$1 {
   constructor (innerMap) {
-    super(ModelicoMap, innerMap);
+    super(ModelicoMap, innerMap, EMPTY_MAP);
+
+    if (!EMPTY_MAP && this.size === 0) {
+      EMPTY_MAP = this;
+    }
 
     Object.freeze(this);
   }
@@ -505,7 +578,7 @@ class ModelicoMap extends AbstractMap$1 {
   }
 
   toJSON () {
-    return [...this.inner()]
+    return [...this]
   }
 
   static fromMap (map) {
@@ -525,50 +598,136 @@ class ModelicoMap extends AbstractMap$1 {
   }
 
   static metadata (keyMetadata, valueMetadata) {
-    return metadata$1(ModelicoMap, reviverFactory$4(keyMetadata, valueMetadata))
+    return metadata$1(ModelicoMap, reviverFactory$4, keyMetadata, valueMetadata)
   }
 
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_MAP || ModelicoMap.of()
+  }
 }
 
 ModelicoMap.displayName = 'ModelicoMap';
-ModelicoMap.EMPTY = ModelicoMap.of();
 
 var ModelicoMap$1 = Object.freeze(ModelicoMap);
 
 const stringifyReducer = (acc, pair) => {
+  acc[pair[0]] = pair[1];
+
+  return acc
+};
+
+const parseReducer = (valueReviver, obj) => (acc, key) =>
+  [...acc, [key, valueReviver('', obj[key])]];
+
+const reviverFactory$5 = valueMetadata => (k, v) => {
+  if (k !== '') {
+    return v
+  }
+
+  const valueReviver = reviverOrAsIs(valueMetadata);
+
+  const innerMap = (v === null)
+    ? null
+    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v), []));
+
+  return StringMap.fromMap(innerMap)
+};
+
+let EMPTY_STRING_MAP;
+
+class StringMap extends AbstractMap$1 {
+  constructor (innerMap) {
+    super(StringMap, innerMap, EMPTY_STRING_MAP);
+
+    if (!EMPTY_STRING_MAP && this.size === 0) {
+      EMPTY_STRING_MAP = this;
+    }
+
+    Object.freeze(this);
+  }
+
+  set (key, value) {
+    return set(this, StringMap, key, value)
+  }
+
+  toJSON () {
+    return [...this].reduce(stringifyReducer, {})
+  }
+
+  static fromMap (map) {
+    return new StringMap(map)
+  }
+
+  static fromArray (pairs) {
+    return StringMap.fromMap(new Map(pairs))
+  }
+
+  static of (...args) {
+    return of(StringMap, args)
+  }
+
+  static fromObject (obj) {
+    return StringMap.fromArray(objToArr(obj))
+  }
+
+  static metadata (valueMetadata) {
+    return metadata$1(StringMap, reviverFactory$5, valueMetadata)
+  }
+
+  static innerTypes () {
+    return emptyObject
+  }
+
+  static EMPTY () {
+    return EMPTY_STRING_MAP || StringMap.of()
+  }
+}
+
+StringMap.displayName = 'StringMap';
+
+var StringMap$1 = Object.freeze(StringMap);
+
+const stringifyReducer$1 = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1];
 
   return acc
 };
 
-const parseMapper$1 = (keyMetadata, valueMetadata, object) => enumerator => {
-  const reviveKey = reviverOrAsIs(keyMetadata);
-  const key = reviveKey('', enumerator);
-
-  const reviveVal = reviverOrAsIs(valueMetadata);
-  const val = reviveVal('', object[enumerator]);
+const parseMapper$1 = (keyReviver, valueReviver, obj) => enumerator => {
+  const key = keyReviver('', enumerator);
+  const val = valueReviver('', obj[enumerator]);
 
   return [key, val]
 };
 
-const reviverFactory$5 = (keyMetadata, valueMetadata) => (k, v) => {
+const reviverFactory$6 = (keyMetadata, valueMetadata) => (k, v) => {
   if (k !== '') {
     return v
   }
 
+  const keyReviver = reviverOrAsIs(keyMetadata);
+  const valueReviver = reviverOrAsIs(valueMetadata);
+
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).map(parseMapper$1(keyMetadata, valueMetadata, v)));
+    : new Map(Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v)));
 
   return new EnumMap(innerMap)
 };
 
+let EMPTY_ENUM_MAP;
+
 class EnumMap extends AbstractMap$1 {
   constructor (innerMap) {
-    super(EnumMap, innerMap);
+    super(EnumMap, innerMap, EMPTY_ENUM_MAP);
+
+    if (!EMPTY_ENUM_MAP && this.size === 0) {
+      EMPTY_ENUM_MAP = this;
+    }
 
     Object.freeze(this);
   }
@@ -578,7 +737,7 @@ class EnumMap extends AbstractMap$1 {
   }
 
   toJSON () {
-    return [...this.inner()].reduce(stringifyReducer, {})
+    return [...this].reduce(stringifyReducer$1, {})
   }
 
   static fromMap (map) {
@@ -594,16 +753,19 @@ class EnumMap extends AbstractMap$1 {
   }
 
   static metadata (keyMetadata, valueMetadata) {
-    return metadata$1(EnumMap, reviverFactory$5(keyMetadata, valueMetadata))
+    return metadata$1(EnumMap, reviverFactory$6, keyMetadata, valueMetadata)
   }
 
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_ENUM_MAP || EnumMap.of()
+  }
 }
 
 EnumMap.displayName = 'EnumMap';
-EnumMap.EMPTY = EnumMap.of();
 
 var EnumMap$1 = Object.freeze(EnumMap);
 
@@ -612,7 +774,7 @@ const reviver = (k, v) => {
 };
 
 class ModelicoNumber extends Base$1 {
-  constructor (number) {
+  constructor (number = 0) {
     super(ModelicoNumber);
 
     if (!Number.isNaN(number) && isNothing(number)) {
@@ -628,12 +790,12 @@ class ModelicoNumber extends Base$1 {
     unsupported('Number.set is not supported');
   }
 
-  setPath (path, number) {
+  setIn (path, number) {
     if (path.length === 0) {
       return ModelicoNumber.of(number)
     }
 
-    unsupported('ModelicoNumber.setPath is not supported for non-empty paths');
+    unsupported('ModelicoNumber.setIn is not supported for non-empty paths');
   }
 
   toJSON () {
@@ -663,7 +825,10 @@ class ModelicoNumber extends Base$1 {
   }
 
   static metadata () {
-    return Object.freeze({type: ModelicoNumber, reviver})
+    return Object.freeze({
+      type: ModelicoNumber,
+      reviver
+    })
   }
 
   static innerTypes () {
@@ -684,7 +849,7 @@ const reviver$1 = (k, v) => {
 };
 
 class ModelicoDate extends Base$1 {
-  constructor (dateOrig) {
+  constructor (dateOrig = new Date()) {
     super(ModelicoDate);
 
     if (isNothing(dateOrig)) {
@@ -702,12 +867,12 @@ class ModelicoDate extends Base$1 {
     unsupported('Date.set is not supported');
   }
 
-  setPath (path, date) {
+  setIn (path, date) {
     if (path.length === 0) {
       return ModelicoDate.of(date)
     }
 
-    unsupported('Date.setPath is not supported for non-empty paths');
+    unsupported('Date.setIn is not supported for non-empty paths');
   }
 
   toJSON () {
@@ -731,7 +896,10 @@ class ModelicoDate extends Base$1 {
   }
 
   static metadata () {
-    return Object.freeze({type: ModelicoDate, reviver: reviver$1})
+    return Object.freeze({
+      type: ModelicoDate,
+      reviver: reviver$1
+    })
   }
 
   static innerTypes () {
@@ -759,55 +927,81 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
 const iterableMetadata = (IterableType, itemMetadata) => {
   return Object.freeze({
     type: IterableType,
+    subtypes: Object.freeze([itemMetadata]),
     reviver: iterableReviverFactory(IterableType, itemMetadata)
   })
 };
 
-const iterableEquals = (thisArg, other) => {
+const iterableEquals = (thisArg, other, asUnordered = false) => {
   if (thisArg === other) {
     return true
   }
 
-  if (haveDifferentTypes(thisArg, other)) {
+  if (haveDifferentTypes(thisArg, other) || thisArg.size !== other.size) {
     return false
   }
 
-  const items = [...thisArg];
-  const otherItems = [...other];
+  const thisIter = thisArg[Symbol.iterator]();
+  const otherIter = other[Symbol.iterator]();
 
-  if (items.length !== otherItems.length) {
-    return false
+  for (let i = 0; i < thisArg.size; i += 1) {
+    const item = thisIter.next().value;
+
+    if (asUnordered) {
+      if (!other.has(item)) {
+        return false
+      }
+    } else if (!equals(item, otherIter.next().value)) {
+      return false
+    }
   }
 
-  return items.every((item, index) => {
-    return equals(item, otherItems[index])
-  })
+  return true
 };
 
+let EMPTY_LIST;
+
 class List extends Base$1 {
-  constructor (innerListOrig) {
+  constructor (innerList = []) {
     super(List);
 
-    if (isNothing(innerListOrig)) {
+    if (isNothing(innerList)) {
       throw TypeError('missing list')
     }
 
-    const innerList = [...innerListOrig];
+    if (EMPTY_LIST && innerList.length === 0) {
+      return EMPTY_LIST
+    }
 
-    this.inner = () => [...innerList];
+    Object.freeze(innerList);
+
+    this.inner = always(innerList);
+    this.size = innerList.length;
     this[Symbol.iterator] = () => innerList[Symbol.iterator]();
+
+    if (!EMPTY_LIST && this.size === 0) {
+      EMPTY_LIST = this;
+    }
 
     Object.freeze(this);
   }
 
+  includes (...args) {
+    return this.inner().includes(...args)
+  }
+
+  get (index) {
+    return this.inner()[index]
+  }
+
   set (index, value) {
-    const newList = this.inner();
+    const newList = [...this];
     newList[index] = value;
 
     return List.fromArray(newList)
   }
 
-  setPath (path, value) {
+  setIn (path, value) {
     if (path.length === 0) {
       return List.fromArray(value)
     }
@@ -815,11 +1009,11 @@ class List extends Base$1 {
     const [key, ...restPath] = path;
     const item = this.inner()[key];
 
-    if (!item.setPath) {
+    if (!item.setIn) {
       return this.set(key, value)
     }
 
-    return this.set(key, item.setPath(restPath, value))
+    return this.set(key, item.setIn(restPath, value))
   }
 
   toJSON () {
@@ -845,47 +1039,68 @@ class List extends Base$1 {
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_LIST || List.of()
+  }
 }
 
 List.displayName = 'List';
-List.EMPTY = List.of();
 
 var List$1 = Object.freeze(List);
 
+let EMPTY_SET;
+
+const copy$1 = set => new Set(set);
+
 class ModelicoSet extends Base$1 {
-  constructor (innerSetOrig) {
+  constructor (innerSetOrig = new Set()) {
     super(ModelicoSet);
 
     if (isNothing(innerSetOrig)) {
       throw TypeError('missing set')
     }
 
-    const innerSet = new Set(innerSetOrig);
+    if (EMPTY_SET && innerSetOrig.size === 0) {
+      return EMPTY_SET
+    }
 
-    this.inner = () => new Set(innerSet);
+    const innerSet = copy$1(innerSetOrig);
+
+    this[innerOrigSymbol] = always(innerSet);
+    this.inner = () => copy$1(innerSet);
+    this.size = innerSet.size;
     this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
+    if (!EMPTY_SET && this.size === 0) {
+      EMPTY_SET = this;
+    }
+
     Object.freeze(this);
+  }
+
+  has (key) {
+    return this[innerOrigSymbol]().has(key)
   }
 
   set () {
     unsupported('Set.set is not supported');
   }
 
-  setPath (path, set) {
+  setIn (path, set) {
     if (path.length === 0) {
       return new ModelicoSet(set)
     }
 
-    unsupported('Set.setPath is not supported for non-empty paths');
+    unsupported('Set.setIn is not supported for non-empty paths');
   }
 
   toJSON () {
-    return [...this.inner()]
+    return [...this]
   }
 
-  equals (other) {
-    return iterableEquals(this, other)
+  equals (...args) {
+    return iterableEquals(this, ...args)
   }
 
   static fromSet (set) {
@@ -907,18 +1122,17 @@ class ModelicoSet extends Base$1 {
   static innerTypes () {
     return emptyObject
   }
+
+  static EMPTY () {
+    return EMPTY_SET || ModelicoSet.of()
+  }
 }
 
 ModelicoSet.displayName = 'ModelicoSet';
-ModelicoSet.EMPTY = ModelicoSet.of();
 
 var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
-const Any = x => identity(x);
-
-var Any$1 = Object.freeze(Any);
-
-const proxyToSelf = (nonMutators, mutators, target, prop) => {
+const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   if (!nonMutators.includes(prop)) {
     return target[prop]
   }
@@ -926,25 +1140,25 @@ const proxyToSelf = (nonMutators, mutators, target, prop) => {
   return (...args) => {
     const newObj = target[prop](...args);
 
-    return proxyFactory(nonMutators, mutators, newObj)
+    return proxyFactory(nonMutators, mutators, innerCloner, newObj)
   }
 };
 
-const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => {
+const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, target, prop) => {
   if (nonMutators.includes(prop)) {
     return (...args) => {
-      const newObj = target.setPath([], candidate.apply(inner, args));
+      const newObj = target.setIn([], candidate.apply(inner, args));
 
-      return proxyFactory(nonMutators, mutators, newObj)
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
   }
 
   if (mutators.includes(prop)) {
     return (...args) => {
       candidate.apply(inner, args);
-      const newObj = target.setPath([], inner);
+      const newObj = target.setIn([], inner);
 
-      return proxyFactory(nonMutators, mutators, newObj)
+      return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
   }
 
@@ -953,17 +1167,17 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, target, prop) => 
   }
 };
 
-const proxyFactory = (nonMutators, mutators, obj) => {
+const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
   const get = (target, prop) => {
     if (prop in target) {
-      return proxyToSelf(nonMutators, mutators, target, prop)
+      return proxyToSelf(nonMutators, mutators, innerCloner, target, prop)
     }
 
-    const inner = target.inner();
+    const inner = innerCloner(target.inner());
     const candidate = inner[prop];
 
     if (typeof candidate === 'function') {
-      return proxyToInner(inner, candidate, nonMutators, mutators, target, prop)
+      return proxyToInner(inner, candidate, nonMutators, mutators, innerCloner, target, prop)
     }
 
     return candidate
@@ -972,13 +1186,146 @@ const proxyFactory = (nonMutators, mutators, obj) => {
   return new Proxy(obj, {get})
 };
 
-var asIs = (Type = Any$1) =>
-  Object.freeze({type: Type, reviver: asIsReviver(Type)});
+const formatError = (ajv, schema, value) => [
+  'Invalid JSON: according to the schema' + '\n',
+  JSON.stringify(schema, null, 2) + '\n',
+  'the value\n',
+  JSON.stringify(value, null, 2) + '\n',
+  ajv.errors[0].message
+].join('\n');
 
-const internalNonMutators = ['set', 'setPath'];
+var ajvMetadata = (ajv = { validate: T }) => {
+  const {
+    _,
+    asIs,
+    any,
+    string,
+    number,
+    boolean,
+    date,
+    enumMap,
+    list,
+    map,
+    stringMap,
+    set,
+    maybe
+  } = M.metadata();
+
+  const ensure = (metadata, schema, valueTransformer = identity) => (k, value) => {
+    if (k !== '') {
+      return value
+    }
+
+    const valid = ajv.validate(schema, valueTransformer(value));
+
+    if (!valid) {
+      throw TypeError(formatError(ajv, schema, value))
+    }
+
+    return metadata.reviver('', value)
+  };
+
+  const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
+    if (k !== '') {
+      return value
+    }
+
+    const unwrappedValue = ensure(metadata, schema1)(k, value);
+
+    return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
+  };
+
+  const ajvMeta = (meta, baseSchema, mainSchema = {}) => {
+    const schema = Object.assign({}, baseSchema, mainSchema);
+    const reviver = ensure(meta, schema);
+
+    return Object.assign({}, meta, { reviver })
+  };
+
+  const ajv_ = (Type, schema) =>
+    ajvMeta(_(Type), schema);
+
+  const ajvAsIs = (schema, transformer = identity) =>
+    ajvMeta(asIs(transformer), schema);
+
+  const ajvAny = schema => ajvAsIs(schema);
+
+  const ajvNumber = (schema, options = {}) => {
+    const { wrap = false } = options;
+    const meta = number(options);
+
+    if (!wrap) {
+      return ajvMeta(meta, { type: 'number' }, schema)
+    }
+
+    const reviver = ensureWrapped(meta, {
+      anyOf: [
+        { type: 'number' },
+        { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
+      ]
+    }, Object.assign({}, { type: 'number' }, schema));
+
+    return Object.assign({}, meta, { reviver })
+  };
+
+  const ajvString = schema =>
+    ajvMeta(string(), { type: 'string' }, schema);
+
+  const ajvBoolean = schema =>
+    ajvMeta(boolean(), { type: 'boolean' }, schema);
+
+  const ajvDate = schema =>
+    ajvMeta(date(), { type: 'string', format: 'date-time' }, schema);
+
+  const ajvEnumMap = (schema, keyMetadata, valueMetadata) =>
+    ajvMeta(enumMap(keyMetadata, valueMetadata), {
+      type: 'object',
+      maxProperties: Object.keys(keyMetadata).length
+    }, schema);
+
+  const ajvList = (schema, itemMetadata) =>
+    ajvMeta(list(itemMetadata), { type: 'array' }, schema);
+
+  const ajvMap = (schema, keyMetadata, valueMetadata) =>
+    ajvMeta(map(keyMetadata, valueMetadata), {
+      type: 'array',
+      items: {
+        type: 'array',
+        minItems: 2,
+        maxItems: 2
+      }
+    }, schema);
+
+  const ajvStringMap = (schema, valueMetadata) =>
+    ajvMeta(stringMap(valueMetadata), { type: 'object' }, schema);
+
+  const ajvSet = (schema, itemMetadata) =>
+    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema);
+
+  return Object.freeze({
+    _: ajv_,
+    asIs: ajvAsIs,
+    any: ajvAny,
+    number: ajvNumber,
+    string: ajvString,
+    boolean: ajvBoolean,
+    date: ajvDate,
+    enumMap: ajvEnumMap,
+    list: ajvList,
+    map: ajvMap,
+    stringMap: ajvStringMap,
+    set: ajvSet,
+    maybe
+  })
+};
+
+var asIs = (tranformer = identity) =>
+  Object.freeze({ type: tranformer, reviver: asIsReviver(tranformer) });
+
+const internalNonMutators = ['set', 'setIn'];
 
 const mapNonMutators = internalNonMutators;
-const mapMutators = ['set', 'delete', 'clear'];
+const mapMutators = ['delete', 'clear'];
 
 const setNonMutators = internalNonMutators;
 const setMutators = ['add', 'delete', 'clear'];
@@ -999,46 +1346,52 @@ const _ = function (Type, depth = 0, innerMetadata = []) {
   return Object.freeze({type: Type, reviver: reviverFactory(depth, Type)})
 };
 
-const metadata = Object.freeze({
+const metadata = () => Object.freeze({
   _,
   asIs,
-  any: always(asIs(Any$1)),
+  any: always(asIs(identity)),
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber$1.metadata() : asIs(Number),
 
   string: always(asIs(String)),
   boolean: always(asIs(Boolean)),
-  regExp: always(asIs(RegExp)),
-  fn: always(asIs(Function)),
 
   date: ModelicoDate$1.metadata,
   enumMap: EnumMap$1.metadata,
   list: List$1.metadata,
   map: ModelicoMap$1.metadata,
+  stringMap: StringMap$1.metadata,
   maybe: Maybe$1.metadata,
   set: ModelicoSet$1.metadata
 });
 
+const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity);
+
 var M = {
   about: Object.freeze({ version, author, homepage, license }),
-  Any: Any$1,
   Number: ModelicoNumber$1,
   Date: ModelicoDate$1,
-  Enum: Enum$1,
+  Enum,
   EnumMap: EnumMap$1,
   List: List$1,
   Map: ModelicoMap$1,
+  StringMap: StringMap$1,
   Maybe: Maybe$1,
   Base: Base$1,
   Set: ModelicoSet$1,
   fields: x => x[fieldsSymbol](),
+  symbols,
   fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
+  fromJS: (Type, js) => _(Type).reviver('', js),
   genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
+  genericsFromJS: (Type, innerMetadata, js) => _(Type, 0, innerMetadata).reviver('', js),
   metadata,
-  proxyMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyEnumMap: partial(proxyFactory, mapNonMutators, mapMutators),
-  proxyList: partial(proxyFactory, listNonMutators, listMutators),
-  proxySet: partial(proxyFactory, setNonMutators, setMutators),
-  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators)
+  ajvMetadata,
+  proxyMap,
+  proxyEnumMap: proxyMap,
+  proxyStringMap: proxyMap,
+  proxyList: partial(proxyFactory, listNonMutators, listMutators, x => [...x]),
+  proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
+  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)
 };
 
 export default M;

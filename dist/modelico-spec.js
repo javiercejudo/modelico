@@ -1,34 +1,13 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (function() {
-  	var current = global.modelicoSpec;
-  	var exports = factory();
-  	global.modelicoSpec = exports;
-  	exports.noConflict = function() { global.modelicoSpec = current; return exports; };
-  })();
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(function() {
+		var current = global.modelicoSpec;
+		var exports = factory();
+		global.modelicoSpec = exports;
+		exports.noConflict = function() { global.modelicoSpec = current; return exports; };
+	})();
 }(this, (function () { 'use strict';
-
-/* eslint-env mocha */
-
-var range = function range(minTime, maxTime) {
-  return { minTime: minTime, maxTime: maxTime };
-};
-
-var PartOfDayFactory = (function (M) {
-  return M.Enum.fromObject({
-    ANY: range(0, 1440),
-    MORNING: range(0, 720),
-    AFTERNOON: range(720, 1080),
-    EVENING: range(1080, 1440)
-  });
-});
-
-/* eslint-env mocha */
-
-var SexFactory = (function (M) {
-  return M.Enum.fromArray(['FEMALE', 'MALE', 'OTHER']);
-});
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -126,153 +105,16 @@ var toConsumableArray = function (arr) {
 
 /* eslint-env mocha */
 
-var PersonFactory = (function (M) {
-  var PartOfDay = PartOfDayFactory(M);
-  var Sex = SexFactory(M);
-
-  var joinWithSpace = function joinWithSpace() {
-    for (var _len = arguments.length, parts = Array(_len), _key = 0; _key < _len; _key++) {
-      parts[_key] = arguments[_key];
-    }
-
-    return parts.filter(function (x) {
-      return x !== null && x !== undefined;
-    }).join(' ');
-  };
-
-  var _M$metadata = M.metadata,
-      _ = _M$metadata._,
-      string = _M$metadata.string,
-      date = _M$metadata.date,
-      map = _M$metadata.map,
-      list = _M$metadata.list,
-      set$$1 = _M$metadata.set,
-      maybe = _M$metadata.maybe;
-
-  var partOfDay = PartOfDay.metadata;
-  var sex = Sex.metadata;
-
-  var Person = function (_M$Base) {
-    inherits(Person, _M$Base);
-
-    function Person(fields) {
-      classCallCheck(this, Person);
-
-      var _this = possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, fields));
-
-      Object.freeze(_this);
-      return _this;
-    }
-
-    createClass(Person, [{
-      key: 'fullName',
-      value: function fullName() {
-        return joinWithSpace(this.givenName(), this.familyName());
-      }
-    }], [{
-      key: 'innerTypes',
-      value: function innerTypes() {
-        return Object.freeze({
-          givenName: string(),
-          familyName: string(),
-
-          birthday: _(M.Date),
-          // alternative (leaving the above for testing purposes)
-          // birthday: date(),
-
-          favouritePartOfDay: partOfDay(),
-          lifeEvents: map(string(), date()),
-          importantDatesList: list(date()),
-          importantDatesSet: set$$1(date()),
-          sex: maybe(sex())
-        });
-      }
-    }]);
-    return Person;
-  }(M.Base);
-
-  return Object.freeze(Person);
-});
-
-/* eslint-env mocha */
-
-var AnimalFactory = (function (M) {
-  var string = M.metadata.string;
-
-  var Animal = function (_M$Base) {
-    inherits(Animal, _M$Base);
-
-    function Animal(fields) {
-      classCallCheck(this, Animal);
-      return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
-    }
-
-    createClass(Animal, [{
-      key: 'speak',
-      value: function speak() {
-        return 'hello';
-      }
-    }], [{
-      key: 'innerTypes',
-      value: function innerTypes() {
-        return Object.freeze({
-          name: string()
-        });
-      }
-    }]);
-    return Animal;
-  }(M.Base);
-
-  return Object.freeze(Animal);
-});
-
-/* eslint-env mocha */
-
-var FriendFactory = (function (M) {
-  var _M$metadata = M.metadata,
-      _ = _M$metadata._,
-      string = _M$metadata.string,
-      maybe = _M$metadata.maybe;
-
-  var Friend = function (_M$Base) {
-    inherits(Friend, _M$Base);
-
-    function Friend(fields) {
-      classCallCheck(this, Friend);
-      return possibleConstructorReturn(this, (Friend.__proto__ || Object.getPrototypeOf(Friend)).call(this, Friend, fields));
-    }
-
-    createClass(Friend, null, [{
-      key: 'innerTypes',
-      value: function innerTypes(depth) {
-        return Object.freeze({
-          name: string(),
-          bestFriend: maybe(_(Friend, depth))
-        });
-      }
-    }]);
-    return Friend;
-  }(M.Base);
-
-  Friend.EMPTY = new Friend({
-    name: '',
-    bestFriend: M.Maybe.EMPTY
-  });
-
-  return Object.freeze(Friend);
-});
-
-/* eslint-env mocha */
-
-var Base = (function (U, should, M) {
+var Base = (function (U, should, M, fixtures) {
   return function () {
-    var Person = PersonFactory(M);
-    var PartOfDay = PartOfDayFactory(M);
-    var Sex = SexFactory(M);
-    var Animal = AnimalFactory(M);
-    var Friend = FriendFactory(M);
-    var _ = M.metadata._;
+    var Person = fixtures.Person,
+        PartOfDay = fixtures.PartOfDay,
+        Sex = fixtures.Sex,
+        Animal = fixtures.Animal,
+        Friend = fixtures.Friend;
 
+    var _M$metadata = M.metadata(),
+        _ = _M$metadata._;
 
     var ModelicoDate = M.Date;
 
@@ -286,15 +128,13 @@ var Base = (function (U, should, M) {
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
         };
 
-        var author = new Person(authorFields);
-
-        (function () {
+        var author = new Person(authorFields);(function () {
           authorFields.givenName = 'Javi';
         }).should.throw();
 
@@ -338,10 +178,10 @@ var Base = (function (U, should, M) {
           familyName: 'Cejudo',
           birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
         });
 
         // sanity check
@@ -369,13 +209,13 @@ var Base = (function (U, should, M) {
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
         });
 
-        var author2 = author1.setPath(['givenName'], 'Javi').setPath(['birthday'], new Date('1989-04-16T00:00:00.000Z'));
+        var author2 = author1.setIn(['givenName'], 'Javi').setIn(['birthday'], new Date('1989-04-16T00:00:00.000Z'));
 
         should(author2.birthday().inner().getFullYear()).be.exactly(1989);
 
@@ -383,17 +223,17 @@ var Base = (function (U, should, M) {
         should(author1.birthday().inner().getFullYear()).be.exactly(1988);
       });
 
-      it('edge case when Modelico setPath is called with an empty path', function () {
+      it('edge case when Modelico setIn is called with an empty path', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, _(Person).reviver);
         var listOfPeople1 = M.List.of(author);
 
-        var listOfPeople2 = listOfPeople1.setPath([0, 'givenName'], 'Javi');
-        var listOfPeople3 = listOfPeople2.setPath([0], M.fields(author));
+        var listOfPeople2 = listOfPeople1.setIn([0, 'givenName'], 'Javi');
+        var listOfPeople3 = listOfPeople2.setIn([0], M.fields(author));
 
-        Array.from(listOfPeople1)[0].givenName().should.be.exactly('Javier');
-        Array.from(listOfPeople2)[0].givenName().should.be.exactly('Javi');
-        Array.from(listOfPeople3)[0].givenName().should.be.exactly('Javier');
+        listOfPeople1.get(0).givenName().should.be.exactly('Javier');
+        listOfPeople2.get(0).givenName().should.be.exactly('Javi');
+        listOfPeople3.get(0).givenName().should.be.exactly('Javier');
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -403,10 +243,10 @@ var Base = (function (U, should, M) {
             familyName: 'Cejudo',
             birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
             favouritePartOfDay: null,
-            lifeEvents: M.Map.EMPTY,
-            importantDatesList: M.List.EMPTY,
-            importantDatesSet: M.Set.EMPTY,
-            sex: Sex.MALE()
+            lifeEvents: M.Map.EMPTY(),
+            importantDatesList: M.List.EMPTY(),
+            importantDatesSet: M.Set.EMPTY(),
+            sex: M.Maybe.of(Sex.MALE())
           });
         }).should.throw();
       });
@@ -419,10 +259,10 @@ var Base = (function (U, should, M) {
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
         });
 
         author1.toJS().should.eql({
@@ -438,6 +278,32 @@ var Base = (function (U, should, M) {
       });
     });
 
+    describe('fromJS', function () {
+      it('should parse from primitives, arrays or objects only', function () {
+        var author1 = new Person({
+          givenName: 'Javier',
+          familyName: 'Cejudo',
+          birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
+        });
+
+        M.fromJS(Person, {
+          givenName: 'Javier',
+          familyName: 'Cejudo',
+          birthday: '1988-04-16T00:00:00.000Z',
+          favouritePartOfDay: 'EVENING',
+          lifeEvents: [],
+          importantDatesList: [],
+          importantDatesSet: [],
+          sex: 'MALE'
+        }).equals(author1).should.be.exactly(true);
+      });
+    });
+
     describe('stringifying', function () {
       it('should stringify types correctly', function () {
         var author1 = new Person({
@@ -445,10 +311,10 @@ var Base = (function (U, should, M) {
           familyName: 'Cejudo',
           birthday: new ModelicoDate(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
         });
 
         JSON.stringify(author1).should.be.exactly(author1Json).and.exactly(author1.stringify());
@@ -484,21 +350,21 @@ var Base = (function (U, should, M) {
           familyName: 'Cejudo',
           birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          sex: M.Maybe.of(Sex.MALE()),
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY()
         });
 
         var author2 = new Person({
-          givenName: 'Javier',
           familyName: 'Cejudo',
+          givenName: 'Javier',
           birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
         });
 
         var author3 = new Person({
@@ -506,15 +372,38 @@ var Base = (function (U, should, M) {
           familyName: 'Cejudo Goñi',
           birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          lifeEvents: M.Map.EMPTY,
-          importantDatesList: M.List.EMPTY,
-          importantDatesSet: M.Set.EMPTY,
-          sex: Sex.MALE()
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          sex: M.Maybe.of(Sex.MALE())
+        });
+
+        var author4 = new Person({
+          givenName: 'Javier',
+          familyName: 'Cejudo',
+          birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY()
+        });
+
+        var author5 = new Person({
+          givenName: 'Javier',
+          familyName: 'Cejudo',
+          birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+          favouritePartOfDay: PartOfDay.EVENING(),
+          lifeEvents: M.Map.EMPTY(),
+          importantDatesList: M.List.EMPTY(),
+          importantDatesSet: M.Set.EMPTY(),
+          extra: 1
         });
 
         author1.equals(author1).should.be.exactly(true);
         author1.equals(author2).should.be.exactly(true);
         author1.equals(author3).should.be.exactly(false);
+        author1.equals(author4).should.be.exactly(false);
+        author1.equals(author5).should.be.exactly(false);
         author1.equals(2).should.be.exactly(false);
 
         author1.should.not.be.exactly(author2);
@@ -552,8 +441,8 @@ var Base = (function (U, should, M) {
 
 var ModelicoNumber = (function (should, M) {
   return function () {
-    var number = M.metadata.number;
-
+    var _M$metadata = M.metadata(),
+        number = _M$metadata.number;
 
     describe('instantiation', function () {
       it('must be instantiated with new', function () {
@@ -563,6 +452,7 @@ var ModelicoNumber = (function (should, M) {
       });
 
       it('should cast using Number', function () {
+        should(new M.Number().inner()).be.exactly(0);
         should(new M.Number(2).inner()).be.exactly(2);
         should(new M.Number('2').inner()).be.exactly(2);
         should(new M.Number('-Infinity').inner()).be.exactly(-Infinity);
@@ -578,7 +468,7 @@ var ModelicoNumber = (function (should, M) {
 
       it('should set numbers correctly', function () {
         var numberA = M.Number.of(2);
-        var numberB = numberA.setPath([], 5);
+        var numberB = numberA.setIn([], 5);
 
         should(numberA.inner()).be.exactly(2);
 
@@ -593,11 +483,11 @@ var ModelicoNumber = (function (should, M) {
         }).should.throw();
       });
 
-      it('should not support the setPath operation with non-empty paths', function () {
+      it('should not support the setIn operation with non-empty paths', function () {
         var myNumber = M.Number.of(5);
 
         (function () {
-          return myNumber.setPath([0], 7);
+          return myNumber.setIn([0], 7);
         }).should.throw();
       });
     });
@@ -697,8 +587,8 @@ var ModelicoNumber = (function (should, M) {
 
 var ModelicoDate = (function (should, M) {
   return function () {
-    var date = M.metadata.date;
-
+    var _M$metadata = M.metadata(),
+        date = _M$metadata.date;
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -712,9 +602,20 @@ var ModelicoDate = (function (should, M) {
     });
 
     describe('instantiation', function () {
+      it('uses the current date by default', function () {
+        var mDate = new M.Date();
+        var nativeDate = new Date();
+
+        should(mDate.inner().getFullYear()).be.exactly(nativeDate.getFullYear());
+
+        should(mDate.inner().getMonth()).be.exactly(nativeDate.getMonth());
+
+        should(mDate.inner().getDate()).be.exactly(nativeDate.getDate());
+      });
+
       it('must be instantiated with new', function () {
         (function () {
-          return M.Date(new Date());
+          return M.Date();
         }).should.throw();
       });
     });
@@ -728,7 +629,7 @@ var ModelicoDate = (function (should, M) {
 
       it('should set dates correctly', function () {
         var date1 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'));
-        var date2 = date1.setPath([], new Date('1989-04-16T00:00:00.000Z'));
+        var date2 = date1.setIn([], new Date('1989-04-16T00:00:00.000Z'));
 
         should(date2.inner().getFullYear()).be.exactly(1989);
 
@@ -743,11 +644,11 @@ var ModelicoDate = (function (should, M) {
         }).should.throw();
       });
 
-      it('should not support the setPath operation with non-empty paths', function () {
+      it('should not support the setIn operation with non-empty paths', function () {
         var myDate = M.Date.of(new Date());
 
         (function () {
-          return myDate.setPath([0], new Date());
+          return myDate.setIn([0], new Date());
         }).should.throw();
       });
     });
@@ -792,15 +693,14 @@ var ModelicoDate = (function (should, M) {
 
 /* eslint-env mocha */
 
-var ModelicoMap = (function (should, M) {
+var ModelicoMap = (function (should, M, _ref) {
+  var Person = _ref.Person;
   return function () {
-    var Person = PersonFactory(M);
-    var _M$metadata = M.metadata,
+    var _M$metadata = M.metadata(),
         date = _M$metadata.date,
         map = _M$metadata.map,
         number = _M$metadata.number,
         string = _M$metadata.string;
-
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -810,7 +710,7 @@ var ModelicoMap = (function (should, M) {
 
         input.set('A', "g'day!");
 
-        map.inner().get('A').should.be.exactly('Good morning!');
+        map.get('A').should.be.exactly('Good morning!');
       });
     });
 
@@ -842,7 +742,7 @@ var ModelicoMap = (function (should, M) {
       it('should set fields returning a new map when part of a path', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
         var author1 = M.fromJSON(Person, authorJson);
-        var author2 = author1.setPath(['lifeEvents', 'wedding'], new Date('2010-03-28T00:00:00.000Z'));
+        var author2 = author1.setIn(['lifeEvents', 'wedding'], new Date('2010-03-28T00:00:00.000Z'));
 
         should(author2.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2010);
 
@@ -850,7 +750,7 @@ var ModelicoMap = (function (should, M) {
         should(author1.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
       });
 
-      it('edge case when setPath is called with an empty path', function () {
+      it('edge case when setIn is called with an empty path', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
         var author = M.fromJSON(Person, authorJson);
 
@@ -860,7 +760,7 @@ var ModelicoMap = (function (should, M) {
 
         var customMap = new Map([['wedding', M.Date.of(new Date('2010-03-28T00:00:00.000Z'))]]);
 
-        var map2 = map.setPath([], customMap);
+        var map2 = map.setIn([], customMap);
 
         should(map2.inner().get('wedding').inner().getFullYear()).be.exactly(2010);
       });
@@ -898,6 +798,12 @@ var ModelicoMap = (function (should, M) {
         myMap.inner().get(2).should.be.exactly('20');
       });
 
+      it('should be able to work with M.genericsFromJS', function () {
+        var myMap = M.genericsFromJS(M.Map, [number(), string()], [[1, '10'], [2, '20'], [3, '30']]);
+
+        myMap.inner().get(2).should.be.exactly('20');
+      });
+
       it('should not support null (wrap with Maybe)', function () {
         (function () {
           return JSON.parse('null', map(string(), date()).reviver);
@@ -918,7 +824,7 @@ var ModelicoMap = (function (should, M) {
         modelicoMap.equals(modelicoMap2).should.be.exactly(true);
 
         modelicoMap.equals(2).should.be.exactly(false);
-        M.Map.EMPTY.equals(modelicoMap).should.be.exactly(false);
+        M.Map.EMPTY().equals(modelicoMap).should.be.exactly(false);
       });
 
       it('should have same-value-zero semantics', function () {
@@ -927,13 +833,23 @@ var ModelicoMap = (function (should, M) {
 
         M.Map.of(-0, 33).equals(M.Map.of(0, 33)).should.be.exactly(true);
       });
+
+      it('should support simple unordered checks', function () {
+        M.Map.of('a', 1, 'b', 2).equals(M.Map.of('b', 2, 'a', 1)).should.be.exactly(false);
+
+        M.Map.of('a', 1, 'b', 2).equals(M.Map.of('b', 2, 'a', 1), true).should.be.exactly(true);
+
+        M.Map.of('a', 1, 'b', 2, 'c', undefined).equals(M.Map.of('b', 2, 'a', 1, 'd', 4), true).should.be.exactly(false);
+      });
     });
 
     describe('EMPTY / of / fromArray / fromObject / fromMap', function () {
       it('should have a static property for the empty map', function () {
-        should(M.Map.EMPTY.inner().size).be.exactly(0);
+        should(M.Map.EMPTY().inner().size).be.exactly(0);
 
-        M.Map.EMPTY.toJSON().should.eql([]);
+        M.Map.EMPTY().toJSON().should.eql([]);
+
+        new M.Map().should.be.exactly(M.Map.EMPTY());
       });
 
       it('should be able to create a map from an even number of params', function () {
@@ -969,13 +885,146 @@ var ModelicoMap = (function (should, M) {
 
 /* eslint-env mocha */
 
-var ModelicoEnum = (function (should, M) {
+var ModelicoStringMap = (function (should, M, _ref) {
+  var Person = _ref.Person;
   return function () {
-    var PartOfDay = PartOfDayFactory(M);
+    var _M$metadata = M.metadata(),
+        date = _M$metadata.date,
+        number = _M$metadata.number,
+        stringMap = _M$metadata.stringMap;
 
-    describe('keys', function () {
-      it('only enumerates the enumerators', function () {
-        Object.keys(PartOfDay).should.eql(['ANY', 'MORNING', 'AFTERNOON', 'EVENING']);
+    describe('immutability', function () {
+      it('must not reflect changes in the wrapped input', function () {
+        var input = new Map([['A', 'Good morning!'], ['B', 'Good afternoon!'], ['C', 'Good evening!']]);
+
+        var map = M.StringMap.fromMap(input);
+
+        input.set('A', "g'day!");
+
+        map.inner().get('A').should.be.exactly('Good morning!');
+      });
+    });
+
+    describe('setting', function () {
+      it('should implement Symbol.iterator', function () {
+        var map = M.StringMap.fromObject({ a: 1, b: 2, c: 3 });
+
+        map.toJSON().should.eql({ a: 1, b: 2, c: 3 });
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return new M.StringMap(null);
+        }).should.throw();
+      });
+
+      it('should set fields returning a new map', function () {
+        var map = new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))], ['b', M.Date.of(new Date())]]);
+
+        var modelicoMap1 = M.StringMap.fromMap(map);
+        var modelicoMap2 = modelicoMap1.set('a', M.Date.of(new Date('1989-04-16T00:00:00.000Z')));
+
+        should(modelicoMap2.inner().get('a').inner().getFullYear()).be.exactly(1989);
+
+        // verify that modelicoMap1 was not mutated
+        should(modelicoMap1.inner().get('a').inner().getFullYear()).be.exactly(1988);
+      });
+    });
+
+    describe('stringifying', function () {
+      it('should stringify the map correctly', function () {
+        var map = new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))], ['b', M.Date.of(new Date('2012-12-25T00:00:00.000Z'))]]);
+
+        var modelicoMap = M.StringMap.fromMap(map);
+
+        JSON.stringify(modelicoMap).should.be.exactly('{"a":"1988-04-16T00:00:00.000Z","b":"2012-12-25T00:00:00.000Z"}');
+      });
+    });
+
+    describe('parsing', function () {
+      it('should parse the map correctly', function () {
+        var modelicoMap = JSON.parse('{"a":"1988-04-16T00:00:00.000Z","b":"2012-12-25T00:00:00.000Z"}', stringMap(date()).reviver);
+
+        should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(1988);
+
+        should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11);
+      });
+
+      it('should be parsed correctly when used within another class', function () {
+        var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
+        var author = M.fromJSON(Person, authorJson);
+
+        should(author.lifeEvents().inner().get('wedding').inner().getFullYear()).be.exactly(2013);
+      });
+
+      it('should be able to work with M.genericsFromJSON', function () {
+        var myMap = M.genericsFromJSON(M.StringMap, [number()], '{"1":10,"2":20,"3":30}');
+
+        should(myMap.inner().get('2')).be.exactly(20);
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        (function () {
+          return JSON.parse('null', stringMap(date()).reviver);
+        }).should.throw();
+      });
+    });
+
+    describe('comparing', function () {
+      it('should identify equal instances', function () {
+        var modelicoMap = M.StringMap.fromMap(new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]]));
+
+        var modelicoMap2 = M.StringMap.fromMap(new Map([['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))]]));
+
+        modelicoMap.should.not.be.exactly(modelicoMap2);
+        modelicoMap.should.not.equal(modelicoMap2);
+
+        modelicoMap.equals(modelicoMap).should.be.exactly(true);
+        modelicoMap.equals(modelicoMap2).should.be.exactly(true);
+
+        modelicoMap.equals(2).should.be.exactly(false);
+        M.StringMap.EMPTY().equals(modelicoMap).should.be.exactly(false);
+      });
+
+      it('should have same-value-zero semantics', function () {
+        M.StringMap.of('a', 0).equals(M.StringMap.of('a', -0)).should.be.exactly(true);
+        M.StringMap.of('a', NaN).equals(M.StringMap.of('a', NaN)).should.be.exactly(true);
+      });
+    });
+
+    describe('EMPTY / of / fromArray / fromObject / fromMap', function () {
+      it('should have a static property for the empty map', function () {
+        should(M.StringMap.EMPTY().inner().size).be.exactly(0);
+
+        M.StringMap.EMPTY().toJSON().should.eql({});
+      });
+
+      it('should be able to create a map from an even number of params', function () {
+        var map = M.StringMap.of('a', 1, 'b', 2, 'c', 3);
+
+        should(map.inner().get('b')).be.exactly(2);
+
+        (function () {
+          return M.StringMap.of('a', 1, 'b', 2, 'c', 3, 'd');
+        }).should.throw();
+      });
+
+      it('should be able to create a map from an array', function () {
+        var map = M.StringMap.fromArray([['a', 1], ['b', 2], ['c', 3]]);
+
+        should(map.inner().get('b')).be.exactly(2);
+      });
+
+      it('should be able to create a map from an object', function () {
+        var map = M.StringMap.fromObject({ a: 1, b: 2, c: 3 });
+
+        should(map.inner().get('b')).be.exactly(2);
+      });
+
+      it('should be able to create a map from a native map', function () {
+        var map = M.StringMap.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
+
+        should(map.inner().get('b')).be.exactly(2);
       });
     });
   };
@@ -983,15 +1032,37 @@ var ModelicoEnum = (function (should, M) {
 
 /* eslint-env mocha */
 
-var ModelicoEnumMap = (function (should, M) {
+var ModelicoEnum = (function (should, M, _ref) {
+  var PartOfDay = _ref.PartOfDay;
   return function () {
-    var PartOfDay = PartOfDayFactory(M);
-    var _M$metadata = M.metadata,
+    describe('keys', function () {
+      it('only enumerates the enumerators', function () {
+        Object.keys(PartOfDay).should.eql(['ANY', 'MORNING', 'AFTERNOON', 'EVENING']);
+      });
+    });
+
+    describe('equals', function () {
+      it('should identify equal instances', function () {
+        should(PartOfDay.MORNING() === PartOfDay.MORNING()).be.exactly(true);
+
+        PartOfDay.MORNING().equals(PartOfDay.MORNING()).should.be.exactly(true);
+
+        PartOfDay.MORNING().equals(PartOfDay.EVENING()).should.be.exactly(false);
+      });
+    });
+  };
+});
+
+/* eslint-env mocha */
+
+var ModelicoEnumMap = (function (should, M, _ref) {
+  var PartOfDay = _ref.PartOfDay;
+  return function () {
+    var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         any = _M$metadata.any,
         enumMap = _M$metadata.enumMap,
         string = _M$metadata.string;
-
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -1026,20 +1097,20 @@ var ModelicoEnumMap = (function (should, M) {
         var map = new Map([[PartOfDay.MORNING(), M.Date.of(new Date('1988-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), M.Date.of(new Date('2000-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), M.Date.of(new Date('2012-04-16T00:00:00.000Z'))]]);
 
         var greetings1 = M.EnumMap.fromMap(map);
-        var greetings2 = greetings1.setPath([PartOfDay.EVENING()], new Date('2013-04-16T00:00:00.000Z'));
+        var greetings2 = greetings1.setIn([PartOfDay.EVENING()], new Date('2013-04-16T00:00:00.000Z'));
 
         should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear()).be.exactly(2013);
 
         should(greetings1.inner().get(PartOfDay.EVENING()).inner().getFullYear()).be.exactly(2012);
       });
 
-      it('edge case when setPath is called with an empty path', function () {
+      it('edge case when setIn is called with an empty path', function () {
         var map1 = new Map([[PartOfDay.MORNING(), M.Date.of(new Date('1988-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), M.Date.of(new Date('2000-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), M.Date.of(new Date('2012-04-16T00:00:00.000Z'))]]);
 
         var map2 = new Map([[PartOfDay.MORNING(), M.Date.of(new Date('1989-04-16T00:00:00.000Z'))], [PartOfDay.AFTERNOON(), M.Date.of(new Date('2001-04-16T00:00:00.000Z'))], [PartOfDay.EVENING(), M.Date.of(new Date('2013-04-16T00:00:00.000Z'))]]);
 
         var greetings1 = M.EnumMap.fromMap(map1);
-        var greetings2 = greetings1.setPath([], map2);
+        var greetings2 = greetings1.setIn([], map2);
 
         should(greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear()).be.exactly(2013);
 
@@ -1071,11 +1142,11 @@ var ModelicoEnumMap = (function (should, M) {
       });
     });
 
-    describe('EMPTY /  of /fromMap', function () {
+    describe('EMPTY / of / fromArray / fromMap', function () {
       it('should have a static property for the empty map', function () {
-        should(M.EnumMap.EMPTY.inner().size).be.exactly(0);
+        should(M.EnumMap.EMPTY().inner().size).be.exactly(0);
 
-        M.EnumMap.EMPTY.toJSON().should.eql({});
+        M.EnumMap.EMPTY().toJSON().should.eql({});
       });
 
       it('should be able to create an enum map from an even number of params', function () {
@@ -1086,6 +1157,12 @@ var ModelicoEnumMap = (function (should, M) {
         (function () {
           return M.EnumMap.of(PartOfDay.MORNING(), 1, PartOfDay.AFTERNOON());
         }).should.throw();
+      });
+
+      it('should be able to create an enum map from an array', function () {
+        var enumMap = M.EnumMap.fromArray([[PartOfDay.MORNING(), 1], [PartOfDay.AFTERNOON(), 2]]);
+
+        should(enumMap.inner().get(PartOfDay.MORNING())).be.exactly(1);
       });
 
       it('should be able to create an enum map from a native map', function () {
@@ -1099,31 +1176,35 @@ var ModelicoEnumMap = (function (should, M) {
 
 /* eslint-env mocha */
 
-var ModelicoList = (function (should, M) {
+var ModelicoList = (function (U, should, M, _ref) {
+  var Person = _ref.Person;
   return function () {
-    var Person = PersonFactory(M);
-    var _M$metadata = M.metadata,
+    var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         list = _M$metadata.list,
         date = _M$metadata.date;
 
-
     describe('immutability', function () {
-      it('must not reflect changes in the wrapped input', function () {
+      U.skipIfNoObjectFreeze('must freeze the input', function () {
         var input = ['a', 'b', 'c'];
-        var list = M.List.fromArray(input);
 
-        input[1] = 'B';
-
-        Array.from(list)[1].should.be.exactly('b');
+        M.List.fromArray(input);(function () {
+          input[1] = 'B';
+        }).should.throw();
       });
     });
 
     describe('instantiation', function () {
       it('must be instantiated with new', function () {
         (function () {
-          return M.List([]);
+          return M.List();
         }).should.throw();
+      });
+    });
+
+    describe('get', function () {
+      it('should return the nth item', function () {
+        M.List.of('a', 'b', 'c').get(1).should.be.exactly('b');
       });
     });
 
@@ -1146,66 +1227,66 @@ var ModelicoList = (function (should, M) {
         var modelicoList1 = M.List.fromArray(list);
         var modelicoList2 = modelicoList1.set(0, M.Date.of(new Date('1989-04-16T00:00:00.000Z')));
 
-        should([].concat(toConsumableArray(modelicoList2))[0].inner().getFullYear()).be.exactly(1989);
+        should(modelicoList2.get(0).inner().getFullYear()).be.exactly(1989);
 
         // verify that modelicoList1 was not mutated
-        should([].concat(toConsumableArray(modelicoList1))[0].inner().getFullYear()).be.exactly(1988);
+        should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988);
       });
 
       it('should set items in the list correctly when part of a path', function () {
         var list = [M.Date.of(new Date('1988-04-16T00:00:00.000Z')), M.Date.of(new Date())];
 
         var modelicoList1 = M.List.fromArray(list);
-        var modelicoList2 = modelicoList1.setPath([0], new Date('1989-04-16T00:00:00.000Z'));
+        var modelicoList2 = modelicoList1.setIn([0], new Date('1989-04-16T00:00:00.000Z'));
 
-        should([].concat(toConsumableArray(modelicoList2))[0].inner().getFullYear()).be.exactly(1989);
+        should(modelicoList2.get(0).inner().getFullYear()).be.exactly(1989);
 
         // verify that modelicoList1 was not mutated
-        should([].concat(toConsumableArray(modelicoList1))[0].inner().getFullYear()).be.exactly(1988);
+        should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988);
       });
 
       it('should set items in the list correctly when part of a path with a single element', function () {
         var list = [M.Date.of(new Date('1988-04-16T00:00:00.000Z')), M.Date.of(new Date())];
 
         var modelicoList1 = M.List.fromArray(list);
-        var modelicoList2 = modelicoList1.setPath([0], new Date('2000-04-16T00:00:00.000Z'));
+        var modelicoList2 = modelicoList1.setIn([0], new Date('2000-04-16T00:00:00.000Z'));
 
-        should([].concat(toConsumableArray(modelicoList2))[0].inner().getFullYear()).be.exactly(2000);
+        should(modelicoList2.get(0).inner().getFullYear()).be.exactly(2000);
 
         // verify that modelicoList1 was not mutated
-        should([].concat(toConsumableArray(modelicoList1))[0].inner().getFullYear()).be.exactly(1988);
+        should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988);
       });
 
       it('should be able to set a whole list', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author1 = JSON.parse(authorJson, _(Person).reviver);
 
-        var newListArray = author1.importantDatesList().inner();
+        var newListArray = [].concat(toConsumableArray(author1.importantDatesList()));
         newListArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')));
 
         var author2 = author1.set('importantDatesList', M.List.fromArray(newListArray));
 
-        should([].concat(toConsumableArray(author1.importantDatesList())).length).be.exactly(2);
-        should([].concat(toConsumableArray(author1.importantDatesList()))[0].inner().getFullYear()).be.exactly(2013);
-        should([].concat(toConsumableArray(author1.importantDatesList()))[1].inner().getFullYear()).be.exactly(2012);
+        should(author1.importantDatesList().size).be.exactly(2);
+        should(author1.importantDatesList().get(0).inner().getFullYear()).be.exactly(2013);
+        should(author1.importantDatesList().get(1).inner().getFullYear()).be.exactly(2012);
 
         should([].concat(toConsumableArray(author2.importantDatesList())).length).be.exactly(3);
-        should([].concat(toConsumableArray(author2.importantDatesList()))[0].inner().getFullYear()).be.exactly(2013);
-        should([].concat(toConsumableArray(author2.importantDatesList()))[1].inner().getFullYear()).be.exactly(2016);
-        should([].concat(toConsumableArray(author2.importantDatesList()))[2].inner().getFullYear()).be.exactly(2012);
+        should(author2.importantDatesList().get(0).inner().getFullYear()).be.exactly(2013);
+        should(author2.importantDatesList().get(1).inner().getFullYear()).be.exactly(2016);
+        should(author2.importantDatesList().get(2).inner().getFullYear()).be.exactly(2012);
       });
 
-      it('edge case when List setPath is called with an empty path', function () {
+      it('edge case when List setIn is called with an empty path', function () {
         var modelicoDatesList1 = M.List.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')), M.Date.of(new Date()));
 
         var modelicoDatesList2 = [M.Date.of(new Date('2016-04-16T00:00:00.000Z'))];
 
         var listOfListOfDates1 = M.List.of(modelicoDatesList1);
-        var listOfListOfDates2 = listOfListOfDates1.setPath([0], modelicoDatesList2);
+        var listOfListOfDates2 = listOfListOfDates1.setIn([0], modelicoDatesList2);
 
-        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfListOfDates1))[0]))[0].inner().getFullYear()).be.exactly(1988);
+        should(listOfListOfDates1.get(0).get(0).inner().getFullYear()).be.exactly(1988);
 
-        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfListOfDates2))[0]))[0].inner().getFullYear()).be.exactly(2016);
+        should(listOfListOfDates2.get(0).get(0).inner().getFullYear()).be.exactly(2016);
       });
     });
 
@@ -1223,16 +1304,16 @@ var ModelicoList = (function (should, M) {
       it('should parse the list correctly', function () {
         var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', list(date()).reviver);
 
-        should([].concat(toConsumableArray(modelicoList))[0].inner().getFullYear()).be.exactly(1988);
+        should(modelicoList.get(0).inner().getFullYear()).be.exactly(1988);
 
-        should([].concat(toConsumableArray(modelicoList))[1].inner().getMonth()).be.exactly(11);
+        should(modelicoList.get(1).inner().getMonth()).be.exactly(11);
       });
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, _(Person).reviver);
 
-        should([].concat(toConsumableArray(author.importantDatesList()))[0].inner().getFullYear()).be.exactly(2013);
+        should(author.importantDatesList().get(0).inner().getFullYear()).be.exactly(2013);
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -1256,7 +1337,7 @@ var ModelicoList = (function (should, M) {
         modelicoList1.equals(function () {
           return 1;
         }).should.be.exactly(false);
-        M.List.EMPTY.equals(modelicoList1).should.be.exactly(false);
+        M.List.EMPTY().equals(modelicoList1).should.be.exactly(false);
       });
 
       it('should support non-primitive types', function () {
@@ -1270,6 +1351,7 @@ var ModelicoList = (function (should, M) {
         modelicoList1.equals(modelicoList2).should.be.exactly(true);
 
         M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false);
+        M.List.of(2, 4).equals(M.List.of(4, 2)).should.be.exactly(false);
       });
 
       it('should have same-value-zero semantics', function () {
@@ -1280,9 +1362,11 @@ var ModelicoList = (function (should, M) {
 
     describe('EMPTY / of / fromArray', function () {
       it('should have a static property for the empty list', function () {
-        should([].concat(toConsumableArray(M.List.EMPTY)).length).be.exactly(0);
+        should([].concat(toConsumableArray(M.List.EMPTY())).length).be.exactly(0);
 
-        M.List.EMPTY.toJSON().should.eql([]);
+        M.List.EMPTY().toJSON().should.eql([]);
+
+        new M.List().should.be.exactly(M.List.EMPTY());
       });
 
       it('should be able to create a list from arbitrary parameters', function () {
@@ -1304,14 +1388,13 @@ var ModelicoList = (function (should, M) {
 
 /* eslint-env mocha */
 
-var ModelicoSet = (function (should, M) {
+var ModelicoSet = (function (should, M, _ref) {
+  var Person = _ref.Person;
   return function () {
-    var Person = PersonFactory(M);
-    var _M$metadata = M.metadata,
+    var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         date = _M$metadata.date,
         set$$1 = _M$metadata.set;
-
 
     describe('immutability', function () {
       it('must not reflect changes in the wrapped input', function () {
@@ -1320,7 +1403,7 @@ var ModelicoSet = (function (should, M) {
 
         input.delete('a');
 
-        set$$1.inner().has('a').should.be.exactly(true);
+        set$$1.has('a').should.be.exactly(true);
       });
     });
 
@@ -1341,32 +1424,27 @@ var ModelicoSet = (function (should, M) {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
         var author1 = JSON.parse(authorJson, _(Person).reviver);
 
-        var newSetArray = [].concat(toConsumableArray(author1.importantDatesSet().inner()));
-        newSetArray.splice(1, 0, M.Date.of(new Date('2016-05-03T00:00:00.000Z')));
+        var date = M.Date.of(new Date('2016-05-03T00:00:00.000Z'));
 
-        var author2 = author1.set('importantDatesSet', M.Set.fromArray(newSetArray));
+        var author2 = author1.set('importantDatesSet', M.Set.of(date));
 
         var author1InnerSet = author1.importantDatesSet().inner();
 
         should(author1InnerSet.size).be.exactly(2);
-        should([].concat(toConsumableArray(author1InnerSet))[0].inner().getFullYear()).be.exactly(2013);
-        should([].concat(toConsumableArray(author1InnerSet))[1].inner().getFullYear()).be.exactly(2012);
 
         var author2InnerSet = author2.importantDatesSet().inner();
 
-        should(author2InnerSet.size).be.exactly(3);
-        should([].concat(toConsumableArray(author2InnerSet))[0].inner().getFullYear()).be.exactly(2013);
-        should([].concat(toConsumableArray(author2InnerSet))[1].inner().getFullYear()).be.exactly(2016);
-        should([].concat(toConsumableArray(author2InnerSet))[2].inner().getFullYear()).be.exactly(2012);
+        should(author2InnerSet.size).be.exactly(1);
+        author2InnerSet.has(date).should.be.exactly(true);
       });
 
-      it('edge case when Set setPath is called with an empty path', function () {
+      it('edge case when Set setIn is called with an empty path', function () {
         var modelicoDatesSet1 = M.Set.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')), M.Date.of(new Date()));
 
         var modelicoDatesSet2 = new Set([M.Date.of(new Date('2016-04-16T00:00:00.000Z'))]);
 
         var listOfSetsOfDates1 = M.List.of(modelicoDatesSet1);
-        var listOfSetsOfDates2 = listOfSetsOfDates1.setPath([0], modelicoDatesSet2);
+        var listOfSetsOfDates2 = listOfSetsOfDates1.setIn([0], modelicoDatesSet2);
 
         should([].concat(toConsumableArray([].concat(toConsumableArray(listOfSetsOfDates1.inner()))[0].inner()))[0].inner().getFullYear()).be.exactly(1988);
 
@@ -1381,11 +1459,11 @@ var ModelicoSet = (function (should, M) {
         }).should.throw();
       });
 
-      it('should not support the setPath operation with non-empty paths', function () {
+      it('should not support the setIn operation with non-empty paths', function () {
         var mySet = M.Set.of(1, 2);
 
         (function () {
-          return mySet.setPath([0], 3);
+          return mySet.setIn([0], 3);
         }).should.throw();
       });
     });
@@ -1435,20 +1513,30 @@ var ModelicoSet = (function (should, M) {
         modelicoSet1.equals(modelicoSet2).should.be.exactly(true);
 
         modelicoSet1.equals(/abc/).should.be.exactly(false);
-        M.Set.EMPTY.equals(modelicoSet1).should.be.exactly(false);
+        M.Set.EMPTY().equals(modelicoSet1).should.be.exactly(false);
       });
 
       it('should have same-value-zero semantics', function () {
         M.Set.of(0).equals(M.Set.of(-0)).should.be.exactly(true);
         M.Set.of(NaN).equals(M.Set.of(NaN)).should.be.exactly(true);
       });
+
+      it('should support simple unordered checks', function () {
+        M.Set.of(1, 2, 3).equals(M.Set.of(1, 3, 2)).should.be.exactly(false);
+
+        M.Set.of(1, 2, 3).equals(M.Set.of(1, 3, 2), true).should.be.exactly(true);
+
+        M.Set.of(1, 2, 3).equals(M.Set.of(1, 4, 2), true).should.be.exactly(false);
+      });
     });
 
     describe('EMPTY / of / fromArray / fromSet', function () {
       it('should have a static property for the empty set', function () {
-        should(M.Set.EMPTY.inner().size).be.exactly(0);
+        should(M.Set.EMPTY().inner().size).be.exactly(0);
 
-        M.Set.EMPTY.toJSON().should.eql([]);
+        M.Set.EMPTY().toJSON().should.eql([]);
+
+        new M.Set().should.be.exactly(M.Set.of()).and.exactly(M.Set.EMPTY());
       });
 
       it('should be able to create a set from arbitrary parameters', function () {
@@ -1478,15 +1566,14 @@ var ModelicoSet = (function (should, M) {
 
 /* eslint-env mocha */
 
-var ModelicoMaybe = (function (should, M) {
+var ModelicoMaybe = (function (should, M, _ref) {
+  var Person = _ref.Person,
+      PartOfDay = _ref.PartOfDay;
   return function () {
-    var PartOfDay = PartOfDayFactory(M);
-    var Person = PersonFactory(M);
-    var _M$metadata = M.metadata,
+    var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         number = _M$metadata.number,
         maybe = _M$metadata.maybe;
-
 
     var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
 
@@ -1502,17 +1589,15 @@ var ModelicoMaybe = (function (should, M) {
         var maybe = M.Maybe.of(null);
 
         maybe.set('givenName', 'Javier').isEmpty().should.be.exactly(true);
-
-        maybe.setPath(['lifeEvents', 'wedding'], new Date()).isEmpty().should.be.exactly(true);
       });
 
       it('should return a new maybe with a value when the path is empty', function () {
         var maybe1 = M.Maybe.of(21);
         var maybe2 = M.Maybe.of(null);
 
-        var maybe3 = maybe1.setPath([], 22);
-        var maybe4 = maybe2.setPath([], 10);
-        var maybe5 = maybe2.setPath([], null);
+        var maybe3 = maybe1.setIn([], 22);
+        var maybe4 = maybe2.setIn([], 10);
+        var maybe5 = maybe2.setIn([], null);
 
         should(maybe3.getOrElse(0)).be.exactly(22);
 
@@ -1524,7 +1609,7 @@ var ModelicoMaybe = (function (should, M) {
       it('should return an empty Maybe when setting a path beyond Modelico boundaries', function () {
         var maybe1 = M.Maybe.of({ a: 2 });
 
-        var maybe2 = maybe1.setPath(['a'], 200);
+        var maybe2 = maybe1.setIn([[{ a: 1 }, 'a']], 200);
 
         maybe2.isEmpty().should.be.exactly(true);
 
@@ -1532,9 +1617,7 @@ var ModelicoMaybe = (function (should, M) {
       });
 
       it('should support Maybe of null or undefined', function () {
-        should(M.Maybe.ofAny(null).setPath([], 2).toJSON()).be.exactly(2);
-
-        should(M.Maybe.ofAny().setPath(['a'], 2).toJSON()).be.exactly(null);
+        should(M.Maybe.ofAny(null).setIn([], 2).toJSON()).be.exactly(2);
 
         should(M.Maybe.ofAny(null).set('a', 2).inner().get()).be.exactly(null);
 
@@ -1725,13 +1808,10 @@ var ModelicoMaybe = (function (should, M) {
 
 var asIs = (function (U, should, M) {
   return function () {
-    var _M$metadata = M.metadata,
+    var _M$metadata = M.metadata(),
         asIs = _M$metadata.asIs,
         any = _M$metadata.any,
-        fn = _M$metadata.fn,
-        regExp = _M$metadata.regExp,
         string = _M$metadata.string;
-
 
     describe('toJSON', function () {
       it('should stringify the valfnue as is', function () {
@@ -1746,20 +1826,6 @@ var asIs = (function (U, should, M) {
         var asIsObject = JSON.parse('{"two":2}', any().reviver);
 
         should(asIsObject.two).be.exactly(2);
-      });
-
-      it('should support non-trivial native constructors: Function', function () {
-        var asIsObject = JSON.parse('"return (function(x) { return x * 4 })(arguments[0])"', fn().reviver);
-
-        should(asIsObject(5)).be.exactly(20);
-      });
-
-      it('should support non-trivial native constructors: RegExp', function () {
-        var asIsObject = JSON.parse('"^[a-z]+$"', regExp().reviver);
-
-        asIsObject.test('abc').should.be.exactly(true);
-        asIsObject.test('abc1').should.be.exactly(false);
-        asIsObject.test('Abc').should.be.exactly(false);
       });
 
       it('should support any function', function () {
@@ -1793,18 +1859,19 @@ var asIs = (function (U, should, M) {
 
 /* eslint-env mocha */
 
-var setPath = (function (should, M) {
+var setIn = (function (U, should, M) {
   return function () {
-    it('should work across types', function () {
+    U.skipIfNoObjectFreeze('should work across types', function () {
       var hammer = M.Map.of('hammer', 'Can’t Touch This');
-      var array1 = M.List.of('totally', 'immutable', hammer);
+      var array1 = M.List.of('totally', 'immutable', hammer);(function () {
+        array1.inner()[1] = 'I’m going to mutate you!';
+      }).should.throw();
 
-      array1.inner()[1] = 'I’m going to mutate you!';
-      Array.from(array1)[1].should.be.exactly('immutable');
+      array1.get(1).should.be.exactly('immutable');
 
-      array1.setPath([2, 'hammer'], 'hm, surely I can mutate this nested object...');
+      array1.setIn([2, 'hammer'], 'hm, surely I can mutate this nested object...');
 
-      Array.from(array1)[2].inner().get('hammer').should.be.exactly('Can’t Touch This');
+      array1.get(2).inner().get('hammer').should.be.exactly('Can’t Touch This');
     });
 
     it('should work across types (2)', function () {
@@ -1814,9 +1881,9 @@ var setPath = (function (should, M) {
       hammer1.inner().set('hammer', 'I’m going to mutate you!');
       hammer1.inner().get('hammer').should.be.exactly('Can’t Touch This');
 
-      hammer1.setPath(['list', 1], 'hm, surely I can mutate this nested object...');
+      hammer1.setIn(['list', 1], 'hm, surely I can mutate this nested object...');
 
-      Array.from(hammer1.inner().get('list'))[1].should.be.exactly('immutable');
+      hammer1.inner().get('list').get(1).should.be.exactly('immutable');
     });
   };
 });
@@ -1825,7 +1892,7 @@ var setPath = (function (should, M) {
 
 var featuresSimple = (function (should, M) {
   return function () {
-    var _M$metadata = M.metadata,
+    var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         string = _M$metadata.string;
 
@@ -1873,7 +1940,7 @@ var featuresSimple = (function (should, M) {
 
 var featuresAdvanced = (function (should, M) {
   return function () {
-    var _M$metadata = M.metadata,
+    var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         any = _M$metadata.any,
         maybe = _M$metadata.maybe,
@@ -1883,7 +1950,8 @@ var featuresAdvanced = (function (should, M) {
     var Animal = function (_M$Base) {
       inherits(Animal, _M$Base);
 
-      function Animal(fields) {
+      function Animal() {
+        var fields = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         classCallCheck(this, Animal);
         return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
       }
@@ -1892,6 +1960,7 @@ var featuresAdvanced = (function (should, M) {
         key: 'speak',
         value: function speak() {
           var name = this.name().getOrElse('');
+
           return name === '' ? 'I don\'t have a name' : 'My name is ' + name + '!';
         }
       }], [{
@@ -1916,15 +1985,13 @@ var featuresAdvanced = (function (should, M) {
       createClass(Person, [{
         key: 'fullName',
         value: function fullName() {
-          var fields = M.fields(this);
-          return [fields.givenName, fields.familyName].join(' ').trim();
+          return [this.givenName(), this.familyName()].join(' ').trim();
         }
       }], [{
         key: 'innerTypes',
         value: function innerTypes() {
           return Object.freeze({
             givenName: any(),
-            middleName: maybe(any()),
             familyName: string(),
             pets: list(maybe(_(Animal)))
           });
@@ -1944,17 +2011,29 @@ var featuresAdvanced = (function (should, M) {
       person2.fullName().should.be.exactly('Javi Cejudo');
       person1.fullName().should.be.exactly('Javier Cejudo');
 
-      var defaultAnimal = new Animal({});
+      var defaultAnimal = new Animal();
 
       Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
 
       Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
 
-      var person3 = person1.setPath(['pets', 0, 'name'], 'Bane');
+      var person3 = person1.setIn(['pets', 0, [defaultAnimal, 'name']], 'Bane');
 
-      Array.from(person3.pets())[0].getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Bane');
+      person3.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Bane');
 
-      Array.from(person1.pets())[0].getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Robbie');
+      person3.pets().get(1).getOrElse(defaultAnimal).name().getOrElse('Unknown').should.be.exactly('Unknown');
+
+      person3.getIn(['pets', 0, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Bane');
+
+      person3.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Unknown');
+
+      person1.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('Unknown').should.be.exactly('Robbie');
+
+      var person4 = person1.setIn(['pets', 1, [defaultAnimal, 'name']], 'Robbie');
+
+      person4.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Robbie');
+
+      person3.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Unknown');
     });
   };
 });
@@ -1964,7 +2043,7 @@ var featuresAdvanced = (function (should, M) {
 var featuresAdvancedES5 = (function (should, M) {
   return function () {
     // use ES5 below
-    var m = M.metadata;
+    var m = M.metadata();
 
     function Animal(fields) {
       M.Base.factory(Animal, fields, this);
@@ -1973,13 +2052,14 @@ var featuresAdvancedES5 = (function (should, M) {
     Animal.prototype = Object.create(M.Base.prototype);
 
     Animal.prototype.speak = function () {
-      var name = this.name();
+      var name = this.name().getOrElse('');
+
       return name === '' ? "I don't have a name" : 'My name is ' + name + '!';
     };
 
     Animal.innerTypes = function () {
       return Object.freeze({
-        name: m.string()
+        name: m.maybe(m.string())
       });
     };
 
@@ -1997,13 +2077,13 @@ var featuresAdvancedES5 = (function (should, M) {
       return Object.freeze({
         givenName: m.string(),
         familyName: m.string(),
-        pets: m.list(m._(Animal))
+        pets: m.list(m.maybe(m._(Animal)))
       });
     };
 
     // use > ES5 below
     it('should showcase the main features', function () {
-      var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [{\n        "name": "Robbie"\n      }]\n    }';
+      var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [\n        {\n          "name": "Robbie"\n        },\n        null\n      ]\n    }';
 
       var person1 = JSON.parse(personJson, m._(Person).reviver);
 
@@ -2013,198 +2093,45 @@ var featuresAdvancedES5 = (function (should, M) {
       person2.fullName().should.be.exactly('Javi Cejudo');
       person1.fullName().should.be.exactly('Javier Cejudo');
 
-      Array.from(person1.pets()).shift().speak().should.be.exactly('My name is Robbie!');
+      var defaultAnimal = new Animal();
 
-      Array.from(person1.pets()).shift().speak().should.be.exactly('My name is Robbie!');
+      Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
+
+      Array.from(person1.pets()).shift().getOrElse(defaultAnimal).speak().should.be.exactly('My name is Robbie!');
+
+      var person3 = person1.setIn(['pets', 0, [defaultAnimal, 'name']], 'Bane');
+
+      person3.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('').should.be.exactly('Bane');
+
+      person3.pets().get(1).getOrElse(defaultAnimal).name().getOrElse('Unknown').should.be.exactly('Unknown');
+
+      person3.getIn(['pets', 0, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Bane');
+
+      person3.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Unknown');
+
+      person1.pets().get(0).getOrElse(defaultAnimal).name().getOrElse('Unknown').should.be.exactly('Robbie');
+
+      var person4 = person1.setIn(['pets', 1, [defaultAnimal, 'name']], 'Robbie');
+
+      person4.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Robbie');
+
+      person3.getIn(['pets', 1, [defaultAnimal, 'name'], ['Unknown']]).should.be.exactly('Unknown');
     });
   };
 });
 
 /* eslint-env mocha */
 
-var CountryFactory = (function (M, Region) {
-  var _M$metadata = M.metadata,
-      _ = _M$metadata._,
-      string = _M$metadata.string;
-
-  var Country = function (_M$Base) {
-    inherits(Country, _M$Base);
-
-    function Country(fields) {
-      var _ret;
-
-      classCallCheck(this, Country);
-
-      var _this = possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, fields));
-
-      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
-    }
-
-    createClass(Country, null, [{
-      key: "innerTypes",
-      value: function innerTypes(depth) {
-        return Object.freeze({
-          name: string(),
-          code: string(),
-          region: _(Region, depth)
-        });
-      }
-    }]);
-    return Country;
-  }(M.Base);
-
-  return Object.freeze(Country);
-});
-
-/* eslint-env mocha */
-
-var CityFactory = (function (M, Region) {
-  var Country = CountryFactory(M, Region);
-  var _M$metadata = M.metadata,
-      _ = _M$metadata._,
-      string = _M$metadata.string;
-
-  var City = function (_M$Base) {
-    inherits(City, _M$Base);
-
-    function City(fields) {
-      var _ret;
-
-      classCallCheck(this, City);
-
-      var _this = possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, City, fields));
-
-      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
-    }
-
-    createClass(City, null, [{
-      key: 'innerTypes',
-      value: function innerTypes(depth) {
-        return Object.freeze({
-          name: string(),
-          country: _(Country, depth)
-        });
-      }
-    }]);
-    return City;
-  }(M.Base);
-
-  return Object.freeze(City);
-});
-
-/* eslint-env mocha */
-
-var RegionFactory = (function (M) {
-  var string = M.metadata.string;
-
-  var Region = function (_M$Base) {
-    inherits(Region, _M$Base);
-
-    function Region(fields) {
-      var _ret;
-
-      classCallCheck(this, Region);
-
-      var _this = possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, fields));
-
-      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
-    }
-
-    createClass(Region, [{
-      key: "customMethod",
-      value: function customMethod() {
-        return this.name() + " (" + this.code() + ")";
-      }
-    }], [{
-      key: "innerTypes",
-      value: function innerTypes() {
-        return Object.freeze({
-          name: string(),
-          code: string()
-        });
-      }
-    }]);
-    return Region;
-  }(M.Base);
-
-  return Object.freeze(Region);
-});
-
-/* eslint-env mocha */
-
-var RegionIncompatibleNameKeyFactory = (function (M) {
-  var _M$metadata = M.metadata,
-      _ = _M$metadata._,
-      number = _M$metadata.number,
-      string = _M$metadata.string;
-
-  var Code = function (_M$Base) {
-    inherits(Code, _M$Base);
-
-    function Code(fields) {
-      var _ret;
-
-      classCallCheck(this, Code);
-
-      var _this = possibleConstructorReturn(this, (Code.__proto__ || Object.getPrototypeOf(Code)).call(this, Code, fields));
-
-      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
-    }
-
-    createClass(Code, null, [{
-      key: "innerTypes",
-      value: function innerTypes() {
-        return Object.freeze({
-          id: number(),
-          value: string()
-        });
-      }
-    }]);
-    return Code;
-  }(M.Base);
-
-  var Region = function (_M$Base2) {
-    inherits(Region, _M$Base2);
-
-    function Region(fields) {
-      var _ret2;
-
-      classCallCheck(this, Region);
-
-      var _this2 = possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, fields));
-
-      return _ret2 = Object.freeze(_this2), possibleConstructorReturn(_this2, _ret2);
-    }
-
-    createClass(Region, [{
-      key: "customMethod",
-      value: function customMethod() {
-        return this.name() + " (" + this.code().value() + ")";
-      }
-    }], [{
-      key: "innerTypes",
-      value: function innerTypes() {
-        return Object.freeze({
-          name: string(),
-          code: _(Code)
-        });
-      }
-    }]);
-    return Region;
-  }(M.Base);
-
-  return Object.freeze(Region);
-});
-
-/* eslint-env mocha */
-
-var featuresDeepNesting = (function (should, M) {
+var featuresDeepNesting = (function (should, M, fixtures) {
   return function () {
-    var _ = M.metadata._;
-
+    var _M$metadata = M.metadata(),
+        _ = _M$metadata._;
 
     it('should revive deeply nested JSON', function () {
-      var City = CityFactory(M, RegionFactory(M));
+      var Region = fixtures.Region,
+          countryFactory = fixtures.countryFactory;
+
+      var City = fixtures.cityFactory(M, Region, countryFactory);
       var cityJson = '{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":"EU"}}}';
 
       var city = JSON.parse(cityJson, _(City).reviver);
@@ -2216,7 +2143,10 @@ var featuresDeepNesting = (function (should, M) {
     });
 
     it('should support nested keys with different types', function () {
-      var City = CityFactory(M, RegionIncompatibleNameKeyFactory(M));
+      var Region = fixtures.RegionIncompatibleNameKey,
+          countryFactory = fixtures.countryFactory;
+
+      var City = fixtures.cityFactory(M, Region, countryFactory);
       var cityJson = '{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"id": 1,"value":"EU"}}}}';
 
       var city = JSON.parse(cityJson, _(City).reviver);
@@ -2261,7 +2191,7 @@ var ImmutableExamples = (function (U, should, M) {
       list3Array.unshift(0);
       var list3 = M.List.fromArray(list3Array);
 
-      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));([].concat(toConsumableArray(list1)).length === 2).should.be.exactly(true);([].concat(toConsumableArray(list2)).length === 5).should.be.exactly(true);([].concat(toConsumableArray(list3)).length === 6).should.be.exactly(true);([].concat(toConsumableArray(list4)).length === 13).should.be.exactly(true);([].concat(toConsumableArray(list4))[0] === 1).should.be.exactly(true);
+      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -2346,7 +2276,7 @@ var ImmutableProxied = (function (U, should, M) {
 
       var list2 = list1.push(3, 4, 5);
       var list3 = list2.unshift(0);
-      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.length === 2).should.be.exactly(true);(list2.length === 5).should.be.exactly(true);(list3.length === 6).should.be.exactly(true);(list4.length === 13).should.be.exactly(true);(list4[0] === 1).should.be.exactly(true);
+      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -2400,7 +2330,7 @@ var ImmutableProxied = (function (U, should, M) {
     it('Batching Mutations', function () {
       var list1 = _l(M.List.of(1, 2, 3));
 
-      var res = list1.inner();
+      var res = [].concat(toConsumableArray(list1));
       res.push(4);
       res.push(5);
       res.push(6);
@@ -2486,12 +2416,23 @@ var proxyList = (function (should, M) {
     it('[n]', function () {
       var list1 = p(M.List.of(1, 2, 2, 3));
 
+      list1.get(0).should.be.exactly(1);
+      list1.get(1).should.be.exactly(2);
+      list1.get(2).should.be.exactly(2);
+      list1.get(3).should.be.exactly(3);
+
       list1[0].should.be.exactly(1);
       list1[1].should.be.exactly(2);
       list1[2].should.be.exactly(2);
       list1[3].should.be.exactly(3);
 
       should(list1[4]).be.exactly(undefined);
+      should(list1.get(4)).be.exactly(undefined);
+
+      list1.get('0').should.be.exactly(1);
+      list1.get('1').should.be.exactly(2);
+      list1.get('2').should.be.exactly(2);
+      list1.get('3').should.be.exactly(3);
 
       list1['0'].should.be.exactly(1);
       list1['1'].should.be.exactly(2);
@@ -2499,6 +2440,7 @@ var proxyList = (function (should, M) {
       list1['3'].should.be.exactly(3);
 
       should(list1['4']).be.exactly(undefined);
+      should(list1.get('4')).be.exactly(undefined);
     });
 
     it('includes()', function () {
@@ -2813,7 +2755,8 @@ var proxyDate = (function (should, M) {
 
 var c51 = (function (should, M) {
   return function () {
-    var string = M.metadata.string;
+    var _M$metadata = M.metadata(),
+        string = _M$metadata.string;
 
     var Country = function (_M$Base) {
       inherits(Country, _M$Base);
@@ -2845,6 +2788,769 @@ var c51 = (function (should, M) {
 var cases = (function (should, M) {
   return function () {
     describe('51: root elements', c51(should, M));
+  };
+});
+
+/* eslint-env mocha */
+
+var personFactory = (function (M, PartOfDay, Sex) {
+  var joinWithSpace = function joinWithSpace() {
+    for (var _len = arguments.length, parts = Array(_len), _key = 0; _key < _len; _key++) {
+      parts[_key] = arguments[_key];
+    }
+
+    return parts.filter(function (x) {
+      return x !== null && x !== undefined;
+    }).join(' ');
+  };
+
+  var _M$metadata = M.metadata(),
+      _ = _M$metadata._,
+      string = _M$metadata.string,
+      date = _M$metadata.date,
+      map = _M$metadata.map,
+      list = _M$metadata.list,
+      set$$1 = _M$metadata.set,
+      maybe = _M$metadata.maybe;
+
+  var partOfDay = PartOfDay.metadata;
+  var sex = Sex.metadata;
+
+  var Person = function (_M$Base) {
+    inherits(Person, _M$Base);
+
+    function Person(fields) {
+      classCallCheck(this, Person);
+
+      var _this = possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, fields));
+
+      Object.freeze(_this);
+      return _this;
+    }
+
+    createClass(Person, [{
+      key: 'fullName',
+      value: function fullName() {
+        return joinWithSpace(this.givenName(), this.familyName());
+      }
+    }], [{
+      key: 'innerTypes',
+      value: function innerTypes() {
+        return Object.freeze({
+          givenName: string(),
+          familyName: string(),
+
+          birthday: _(M.Date),
+          // alternative (leaving the above for testing purposes)
+          // birthday: date(),
+
+          favouritePartOfDay: partOfDay(),
+          lifeEvents: map(string(), date()),
+          importantDatesList: list(date()),
+          importantDatesSet: set$$1(date()),
+          sex: maybe(sex())
+        });
+      }
+    }]);
+    return Person;
+  }(M.Base);
+
+  return Object.freeze(Person);
+});
+
+/* eslint-env mocha */
+
+var range = function range(minTime, maxTime) {
+  return { minTime: minTime, maxTime: maxTime };
+};
+
+var partOfDayFactory = (function (M) {
+  var PartOfDay = function (_M$Enum) {
+    inherits(PartOfDay, _M$Enum);
+
+    function PartOfDay() {
+      classCallCheck(this, PartOfDay);
+      return possibleConstructorReturn(this, (PartOfDay.__proto__ || Object.getPrototypeOf(PartOfDay)).apply(this, arguments));
+    }
+
+    createClass(PartOfDay, null, [{
+      key: 'innerTypes',
+      value: function innerTypes() {
+        return M.Enum.innerTypes();
+      }
+    }]);
+    return PartOfDay;
+  }(M.Enum);
+
+  return M.Enum.fromObject({
+    ANY: range(0, 1440),
+    MORNING: range(0, 720),
+    AFTERNOON: range(720, 1080),
+    EVENING: range(1080, 1440)
+  }, PartOfDay, 'PartOfDay');
+});
+
+/* eslint-env mocha */
+
+var sexFactory = (function (M) {
+  return M.Enum.fromArray(['FEMALE', 'MALE', 'OTHER']);
+});
+
+/* eslint-env mocha */
+
+var animalFactory = (function (M) {
+  var _M$metadata = M.metadata(),
+      string = _M$metadata.string;
+
+  var Animal = function (_M$Base) {
+    inherits(Animal, _M$Base);
+
+    function Animal(fields) {
+      classCallCheck(this, Animal);
+      return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
+    }
+
+    createClass(Animal, [{
+      key: 'speak',
+      value: function speak() {
+        return 'hello';
+      }
+    }], [{
+      key: 'innerTypes',
+      value: function innerTypes() {
+        return Object.freeze({
+          name: string()
+        });
+      }
+    }]);
+    return Animal;
+  }(M.Base);
+
+  return Object.freeze(Animal);
+});
+
+/* eslint-env mocha */
+
+var friendFactory = (function (M) {
+  var _M$metadata = M.metadata(),
+      _ = _M$metadata._,
+      string = _M$metadata.string,
+      maybe = _M$metadata.maybe;
+
+  var Friend = function (_M$Base) {
+    inherits(Friend, _M$Base);
+
+    function Friend(fields) {
+      classCallCheck(this, Friend);
+      return possibleConstructorReturn(this, (Friend.__proto__ || Object.getPrototypeOf(Friend)).call(this, Friend, fields));
+    }
+
+    createClass(Friend, null, [{
+      key: 'innerTypes',
+      value: function innerTypes(depth) {
+        return Object.freeze({
+          name: string(),
+          bestFriend: maybe(_(Friend, depth))
+        });
+      }
+    }]);
+    return Friend;
+  }(M.Base);
+
+  Friend.EMPTY = new Friend({
+    name: '',
+    bestFriend: M.Maybe.EMPTY
+  });
+
+  return Object.freeze(Friend);
+});
+
+/* eslint-env mocha */
+
+var cityFactory = (function (M, Region, countryFactory) {
+  var Country = countryFactory(M, Region);
+
+  var _M$metadata = M.metadata(),
+      _ = _M$metadata._,
+      string = _M$metadata.string;
+
+  var City = function (_M$Base) {
+    inherits(City, _M$Base);
+
+    function City(fields) {
+      var _ret;
+
+      classCallCheck(this, City);
+
+      var _this = possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, City, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
+    }
+
+    createClass(City, null, [{
+      key: "innerTypes",
+      value: function innerTypes(depth) {
+        return Object.freeze({
+          name: string(),
+          country: _(Country, depth)
+        });
+      }
+    }]);
+    return City;
+  }(M.Base);
+
+  return Object.freeze(City);
+});
+
+/* eslint-env mocha */
+
+var countryFactory = (function (M, Region) {
+  var _M$metadata = M.metadata(),
+      _ = _M$metadata._,
+      string = _M$metadata.string;
+
+  var Country = function (_M$Base) {
+    inherits(Country, _M$Base);
+
+    function Country(fields) {
+      var _ret;
+
+      classCallCheck(this, Country);
+
+      var _this = possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
+    }
+
+    createClass(Country, null, [{
+      key: "innerTypes",
+      value: function innerTypes(depth) {
+        return Object.freeze({
+          name: string(),
+          code: string(),
+          region: _(Region, depth)
+        });
+      }
+    }]);
+    return Country;
+  }(M.Base);
+
+  return Object.freeze(Country);
+});
+
+/* eslint-env mocha */
+
+var regionFactory = (function (M) {
+  var _M$metadata = M.metadata(),
+      string = _M$metadata.string;
+
+  var Region = function (_M$Base) {
+    inherits(Region, _M$Base);
+
+    function Region(fields) {
+      var _ret;
+
+      classCallCheck(this, Region);
+
+      var _this = possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
+    }
+
+    createClass(Region, [{
+      key: "customMethod",
+      value: function customMethod() {
+        return this.name() + " (" + this.code() + ")";
+      }
+    }], [{
+      key: "innerTypes",
+      value: function innerTypes() {
+        return Object.freeze({
+          name: string(),
+          code: string()
+        });
+      }
+    }]);
+    return Region;
+  }(M.Base);
+
+  return Object.freeze(Region);
+});
+
+/* eslint-env mocha */
+
+var regionIncompatibleNameKeyFactory = (function (M) {
+  var _M$metadata = M.metadata(),
+      _ = _M$metadata._,
+      number = _M$metadata.number,
+      string = _M$metadata.string;
+
+  var Code = function (_M$Base) {
+    inherits(Code, _M$Base);
+
+    function Code(fields) {
+      var _ret;
+
+      classCallCheck(this, Code);
+
+      var _this = possibleConstructorReturn(this, (Code.__proto__ || Object.getPrototypeOf(Code)).call(this, Code, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
+    }
+
+    createClass(Code, null, [{
+      key: "innerTypes",
+      value: function innerTypes() {
+        return Object.freeze({
+          id: number(),
+          value: string()
+        });
+      }
+    }]);
+    return Code;
+  }(M.Base);
+
+  var Region = function (_M$Base2) {
+    inherits(Region, _M$Base2);
+
+    function Region(fields) {
+      var _ret2;
+
+      classCallCheck(this, Region);
+
+      var _this2 = possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, fields));
+
+      return _ret2 = Object.freeze(_this2), possibleConstructorReturn(_this2, _ret2);
+    }
+
+    createClass(Region, [{
+      key: "customMethod",
+      value: function customMethod() {
+        return this.name() + " (" + this.code().value() + ")";
+      }
+    }], [{
+      key: "innerTypes",
+      value: function innerTypes() {
+        return Object.freeze({
+          name: string(),
+          code: _(Code)
+        });
+      }
+    }]);
+    return Region;
+  }(M.Base);
+
+  return Object.freeze(Region);
+});
+
+/* eslint-env mocha */
+
+var ajvMetadata = (function (should, M, fixtures, _ref) {
+  var Ajv = _ref.Ajv;
+  return function () {
+    var _M$ajvMetadata = M.ajvMetadata(Ajv()),
+        _ = _M$ajvMetadata._,
+        asIs = _M$ajvMetadata.asIs,
+        any = _M$ajvMetadata.any,
+        string = _M$ajvMetadata.string,
+        number = _M$ajvMetadata.number,
+        boolean = _M$ajvMetadata.boolean,
+        date = _M$ajvMetadata.date,
+        enumMap = _M$ajvMetadata.enumMap,
+        list = _M$ajvMetadata.list,
+        map = _M$ajvMetadata.map,
+        stringMap = _M$ajvMetadata.stringMap,
+        set$$1 = _M$ajvMetadata.set,
+        maybe = _M$ajvMetadata.maybe;
+
+    describe('Animal example', function () {
+      it('should revive as usual with valid JSON and fail otherwise', function () {
+        var Animal = function (_M$Base) {
+          inherits(Animal, _M$Base);
+
+          function Animal(fields) {
+            classCallCheck(this, Animal);
+            return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
+          }
+
+          createClass(Animal, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                name: string({ minLength: 1, maxLength: 25 }),
+                dimensions: list({ minItems: 3, maxItems: 3 }, number({ minimum: 0, exclusiveMinimum: true }))
+              });
+            }
+          }]);
+          return Animal;
+        }(M.Base);
+
+        var bane1 = M.fromJS(Animal, {
+          name: 'Bane',
+          dimensions: [20, 55, 65]
+        });
+
+        bane1.name().should.be.exactly('Bane');
+
+        bane1.dimensions().equals(M.List.of(20, 55, 65)).should.be.exactly(true);
+
+        should(function () {
+          return M.fromJS(Animal, {
+            name: 'Bane',
+            dimensions: [20, 55, 0]
+          });
+        }).throw(/should be > 0/);
+      });
+    });
+
+    describe('togglability', function () {
+      var _M$ajvMetadata2 = M.ajvMetadata(),
+          nonValidatedString = _M$ajvMetadata2.string;
+
+      it('defaults to normal behaviour when Ajv is undefined', function () {
+        JSON.parse('"aa"', nonValidatedString({ minLength: 3 }).reviver).should.be.exactly('aa');
+
+        should(function () {
+          return JSON.parse('"aa"', string({ minLength: 3 }).reviver);
+        }).throw(/shorter than 3 characters/);
+      });
+    });
+
+    describe('asIs', function () {
+      it('supports missing schema', function () {
+        JSON.parse('"test"', asIs().reviver).should.be.exactly('test');
+      });
+
+      it('supports valid values with schema', function () {
+        JSON.parse('"test"', asIs({ type: 'string' }).reviver).should.be.exactly('test');
+      });
+
+      it('supports valid values with schema and transformer', function () {
+        JSON.parse('"test"', asIs({ type: 'string', maxLength: 5 }, function (x) {
+          return x.repeat(2);
+        }).reviver).should.be.exactly('testtest');
+      });
+
+      it('rejects invalid values', function () {
+        should(function () {
+          return JSON.parse('1', asIs({ type: 'string' }).reviver);
+        }).throw(/should be string/);
+
+        should(function () {
+          return JSON.parse('"testtest"', asIs({ type: 'string', maxLength: 5 }).reviver);
+        }).throw(/should NOT be longer than 5 characters/);
+      });
+    });
+
+    describe('any', function () {
+      it('supports missing schema', function () {
+        JSON.parse('"test"', any().reviver).should.be.exactly('test');
+
+        should(JSON.parse('1', any().reviver)).be.exactly(1);
+      });
+
+      it('supports valid values with schema', function () {
+        JSON.parse('"test"', any({ type: 'string' }).reviver).should.be.exactly('test');
+      });
+
+      it('rejects invalid values', function () {
+        should(function () {
+          return JSON.parse('1', any({ type: 'string' }).reviver);
+        }).throw(/should be string/);
+      });
+    });
+
+    describe('number', function () {
+      it('reports the right type', function () {
+        number().type.should.be.exactly(Number);
+      });
+
+      it('supports missing schema', function () {
+        should(JSON.parse('1', number().reviver)).be.exactly(1);
+      });
+
+      it('supports valid numbers with schema', function () {
+        should(JSON.parse('4', number({ minimum: 3 }).reviver)).be.exactly(4);
+      });
+
+      it('rejects invalid numbers', function () {
+        should(function () {
+          return JSON.parse('2', number({ minimum: 3 }).reviver);
+        }).throw(/should be >= 3/);
+      });
+    });
+
+    describe('number: wrapped json-compatible', function () {
+      it('reports the right type', function () {
+        number({}, { wrap: true }).type.should.be.exactly(M.Number);
+      });
+
+      it('supports missing schema', function () {
+        should(JSON.parse('1', number({}, { wrap: true }).reviver).inner()).be.exactly(1);
+      });
+
+      it('supports valid numbers with schema', function () {
+        should(JSON.parse('4', number({ minimum: 3 }, { wrap: true }).reviver).inner()).be.exactly(4);
+      });
+
+      it('rejects invalid numbers', function () {
+        should(function () {
+          return JSON.parse('2', number({ minimum: 3 }, { wrap: true }).reviver).inner();
+        }).throw(/should be >= 3/);
+      });
+    });
+
+    describe('number: wrapped non-json-compatible', function () {
+      it('supports missing schema', function () {
+        should(JSON.parse('"-Infinity"', number({}, { wrap: true }).reviver).inner()).be.exactly(-Infinity);
+      });
+
+      it('supports valid numbers with schema', function () {
+        should(JSON.parse('"Infinity"', number({ minimum: 3 }, { wrap: true }).reviver).inner()).be.exactly(Infinity);
+      });
+
+      it('rejects invalid numbers', function () {
+        should(function () {
+          return JSON.parse('"-Infinity"', number({ minimum: 3 }, { wrap: true }).reviver).inner();
+        }).throw(/should be >= 3/);
+
+        should(function () {
+          return JSON.parse('"1"', number({ minimum: 3 }, { wrap: true }).reviver).inner();
+        }).throw(/should be number/);
+
+        should(function () {
+          return JSON.parse('{"a": 1}', number({ minimum: 3 }, { wrap: true }).reviver).inner();
+        }).throw(/should be number/);
+      });
+    });
+
+    describe('string', function () {
+      it('reports the right type', function () {
+        string().type.should.be.exactly(String);
+      });
+
+      it('supports missing schema', function () {
+        JSON.parse('"test"', string().reviver).should.be.exactly('test');
+      });
+
+      it('supports valid strings with schema', function () {
+        JSON.parse('"test"', string({ minLength: 3 }).reviver).should.be.exactly('test');
+      });
+
+      it('rejects invalid strings', function () {
+        should(function () {
+          return JSON.parse('"aa"', string({ minLength: 3 }).reviver);
+        }).throw(/shorter than 3 characters/);
+      });
+    });
+
+    describe('boolean', function () {
+      it('reports the right type', function () {
+        boolean().type.should.be.exactly(Boolean);
+      });
+
+      it('supports valid booleans', function () {
+        JSON.parse('true', boolean().reviver).should.be.exactly(true);
+      });
+
+      it('rejects invalid booleans', function () {
+        should(function () {
+          return JSON.parse('1', boolean().reviver);
+        }).throw(/should be boolean/);
+      });
+    });
+
+    describe('date', function () {
+      it('reports the right type', function () {
+        date().type.should.be.exactly(M.Date);
+      });
+
+      it('supports valid dates', function () {
+        should(JSON.parse('"1988-04-16T00:00:00.000Z"', date().reviver).inner().getFullYear()).be.exactly(1988);
+      });
+
+      it('rejects invalid dates', function () {
+        should(function () {
+          return JSON.parse('"1988-04-16T00:00:00.000"', date().reviver);
+        }).throw(/should match format "date-time"/);
+
+        should(function () {
+          return JSON.parse('"1988-04-16"', date().reviver);
+        }).throw(/should match format "date-time"/);
+      });
+    });
+
+    describe('enumMap', function () {
+      var Side = function (_M$Enum) {
+        inherits(Side, _M$Enum);
+
+        function Side() {
+          classCallCheck(this, Side);
+          return possibleConstructorReturn(this, (Side.__proto__ || Object.getPrototypeOf(Side)).apply(this, arguments));
+        }
+
+        createClass(Side, null, [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return M.Enum.innerTypes();
+          }
+        }]);
+        return Side;
+      }(M.Enum);
+
+      var SideEnum = M.Enum.fromArray(['A', 'B'], Side, 'Side');
+
+      it('reports the right types', function () {
+        var meta = enumMap({}, _(SideEnum), number());
+
+        meta.type.should.be.exactly(M.EnumMap);
+        meta.subtypes[0].type.should.be.exactly(Side);
+        meta.subtypes[1].type.should.be.exactly(Number);
+      });
+
+      it('supports empty schema', function () {
+        should(JSON.parse('{"B": 100}', enumMap({}, _(SideEnum), number()).reviver).get(SideEnum.B())).be.exactly(100);
+      });
+
+      it('supports valid enumMaps with schema', function () {
+        should(JSON.parse('{"B": 100}', enumMap({ minProperties: 1 }, _(SideEnum), number()).reviver).get(SideEnum.B())).be.exactly(100);
+      });
+
+      it('rejects invalid enumMaps', function () {
+        should(function () {
+          return JSON.parse('{"A": 100}', enumMap({ minProperties: 2 }, _(SideEnum), number()).reviver);
+        }).throw(/should NOT have less than 2 properties/);
+
+        // limits the amount of properties to the number of enumerators
+        should(function () {
+          return JSON.parse('{"A": 100, "B": 200, "C": 300}', enumMap({ minProperties: 1 }, _(SideEnum), number()).reviver);
+        }).throw(/should NOT have more than 2 properties/);
+
+        should(function () {
+          return JSON.parse('{"A": 100, "B": 200, "C": 300}', enumMap({ maxProperties: 3 }, _(SideEnum), number()).reviver);
+        }).throw(/missing enumerator \(C\)/);
+      });
+    });
+
+    describe('list', function () {
+      it('reports the right types', function () {
+        list({}, string()).type.should.be.exactly(M.List);
+        list({}, string()).subtypes[0].type.should.be.exactly(String);
+      });
+
+      it('supports empty schema', function () {
+        JSON.parse('[2,5]', list({}, number()).reviver).equals(M.List.of(2, 5)).should.be.exactly(true);
+      });
+
+      it('supports valid lists with schema', function () {
+        JSON.parse('[2,5]', list({ maxItems: 3 }, number()).reviver).equals(M.List.of(2, 5)).should.be.exactly(true);
+      });
+
+      it('rejects invalid lists', function () {
+        should(function () {
+          return JSON.parse('[2,5,7,1]', list({ maxItems: 3 }, number()).reviver);
+        }).throw(/should NOT have more than 3 items/);
+      });
+    });
+
+    describe('map', function () {
+      it('reports the right types', function () {
+        var meta = map({}, number(), string());
+
+        meta.type.should.be.exactly(M.Map);
+        meta.subtypes[0].type.should.be.exactly(Number);
+        meta.subtypes[1].type.should.be.exactly(String);
+      });
+
+      it('supports empty schema', function () {
+        JSON.parse('[[2, "dos"],[5, "cinco"]]', map({}, number(), string()).reviver).equals(M.Map.of(2, 'dos', 5, 'cinco')).should.be.exactly(true);
+      });
+
+      it('supports valid maps with schema', function () {
+        JSON.parse('[[2, "dos"],[5, "cinco"]]', map({ minItems: 2 }, number(), string()).reviver).equals(M.Map.of(2, 'dos', 5, 'cinco')).should.be.exactly(true);
+      });
+
+      it('rejects invalid maps', function () {
+        should(function () {
+          return JSON.parse('[[2, "dos", "extra"]]', map({}, number(), string()).reviver);
+        }).throw(/should NOT have more than 2 items/);
+
+        should(function () {
+          return JSON.parse('[[2]]', map({}, number(), string()).reviver);
+        }).throw(/should NOT have less than 2 items/);
+
+        should(function () {
+          return JSON.parse('[[1, "uno"], [2, "dos"], [3, "tres"]]', map({ minItems: 4 }, number(), string()).reviver);
+        }).throw(/should NOT have less than 4 items/);
+      });
+    });
+
+    describe('stringMap', function () {
+      it('reports the right types', function () {
+        var meta = stringMap({}, number());
+
+        meta.type.should.be.exactly(M.StringMap);
+        meta.subtypes[0].type.should.be.exactly(Number);
+      });
+
+      it('supports empty schema', function () {
+        should(JSON.parse('{"uno": 1}', stringMap({}, number()).reviver).get('uno')).be.exactly(1);
+      });
+
+      it('supports valid stringMaps with schema', function () {
+        should(JSON.parse('{"uno": 1}', stringMap({ minProperties: 1 }, number()).reviver).get('uno')).be.exactly(1);
+      });
+
+      it('rejects invalid stringMaps', function () {
+        should(function () {
+          return JSON.parse('{"uno": 1}', stringMap({ minProperties: 2 }, number()).reviver);
+        }).throw(/should NOT have less than 2 properties/);
+      });
+    });
+
+    describe('set', function () {
+      it('reports the right types', function () {
+        set$$1({}, number()).type.should.be.exactly(M.Set);
+        set$$1({}, number()).subtypes[0].type.should.be.exactly(Number);
+      });
+
+      it('supports empty schema', function () {
+        JSON.parse('[2,5]', set$$1({}, number()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
+      });
+
+      it('supports valid sets with schema', function () {
+        JSON.parse('[2,5]', set$$1({ maxItems: 3 }, number()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
+      });
+
+      it('rejects invalid sets', function () {
+        should(function () {
+          return JSON.parse('[2,5,7,1]', set$$1({ maxItems: 3 }, number()).reviver);
+        }).throw(/should NOT have more than 3 items/);
+      });
+
+      it('rejects duplicated values by default', function () {
+        should(function () {
+          return JSON.parse('[2,5,5]', set$$1({}, number()).reviver);
+        }).throw(/should NOT have duplicate items/);
+      });
+
+      it('supports duplicates when explicitly told', function () {
+        JSON.parse('[2,5,5]', set$$1({ uniqueItems: false }, number()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
+      });
+    });
+
+    describe('maybe', function () {
+      it('reports the right types', function () {
+        maybe(string()).type.should.be.exactly(M.Maybe);
+        maybe(string()).subtypes[0].type.should.be.exactly(String);
+      });
+
+      it('behaves just as the normal maybe metadata', function () {
+        JSON.parse('null', maybe(string()).reviver).getOrElse('fallback').should.be.exactly('fallback');
+
+        JSON.parse('"Javier"', maybe(string()).reviver).getOrElse('fallback').should.be.exactly('Javier');
+      });
+    });
   };
 });
 
@@ -2888,32 +3594,49 @@ var buildUtils = function buildUtils(options) {
   });
 };
 
-var modelicoSpec = (function (options, should, M) {
+var modelicoSpec = (function (options, should, M, extensions) {
   return function () {
     var U = buildUtils(options);
-    var deps = [should, M];
-    var utilsAndDeps = [U].concat(deps);
 
-    describe('Base', Base.apply(undefined, toConsumableArray(utilsAndDeps)));
+    var PartOfDay = partOfDayFactory(M);
+    var Sex = sexFactory(M);
+
+    var fixtures = Object.freeze({
+      cityFactory: cityFactory,
+      countryFactory: countryFactory,
+      PartOfDay: PartOfDay,
+      Sex: Sex,
+      Person: personFactory(M, PartOfDay, Sex),
+      Animal: animalFactory(M),
+      Friend: friendFactory(M),
+      Region: regionFactory(M),
+      RegionIncompatibleNameKey: regionIncompatibleNameKeyFactory(M)
+    });
+
+    var deps = [should, M, fixtures, extensions];
+
+    describe('Base', Base.apply(undefined, [U].concat(deps)));
     describe('Number', ModelicoNumber.apply(undefined, deps));
     describe('Date', ModelicoDate.apply(undefined, deps));
     describe('Map', ModelicoMap.apply(undefined, deps));
+    describe('StringMap', ModelicoStringMap.apply(undefined, deps));
     describe('Enum', ModelicoEnum.apply(undefined, deps));
     describe('EnumMap', ModelicoEnumMap.apply(undefined, deps));
-    describe('ModelicoList', ModelicoList.apply(undefined, deps));
+    describe('ModelicoList', ModelicoList.apply(undefined, [U].concat(deps)));
     describe('ModelicoSet', ModelicoSet.apply(undefined, deps));
     describe('ModelicoMaybe', ModelicoMaybe.apply(undefined, deps));
 
-    describe('asIs', asIs.apply(undefined, toConsumableArray(utilsAndDeps)));
-    describe('setPath', setPath.apply(undefined, deps));
+    describe('asIs', asIs.apply(undefined, [U].concat(deps)));
+    describe('setIn', setIn.apply(undefined, [U].concat(deps)));
+    describe('ajvMetadata', ajvMetadata.apply(undefined, deps));
 
     describe('Readme simple features', featuresSimple.apply(undefined, deps));
     describe('Readme advanced features', featuresAdvanced.apply(undefined, deps));
     describe('Readme advanced features ES5', featuresAdvancedES5.apply(undefined, deps));
     describe('Deep nesting features', featuresDeepNesting.apply(undefined, deps));
-    describe('Immutable.js examples', ImmutableExamples.apply(undefined, toConsumableArray(utilsAndDeps)));
+    describe('Immutable.js examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
 
-    U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, toConsumableArray(utilsAndDeps)));
+    U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 
     U.skipDescribeIfNoProxies('Proxies', function () {
       describe('Map', proxyMap.apply(undefined, deps));
