@@ -8,10 +8,10 @@ export default M => {
       super(Friend, fields)
     }
 
-    static innerTypes (depth) {
+    static innerTypes (path) {
       return Object.freeze({
         name: string(),
-        bestFriend: maybe(_(Friend, depth))
+        bestFriend: maybe(_(Friend, path))
       })
     }
   }

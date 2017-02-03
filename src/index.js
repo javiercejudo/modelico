@@ -36,12 +36,12 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear']
 
-const _ = function (Type, depth = 0, innerMetadata = []) {
+const _ = function (Type, path = [], innerMetadata = []) {
   if (Type.metadata) {
     return Type.metadata(...innerMetadata)
   }
 
-  return Object.freeze({type: Type, reviver: reviverFactory(depth, Type)})
+  return Object.freeze({type: Type, reviver: reviverFactory(path, Type)})
 }
 
 const metadata = () => Object.freeze({
@@ -63,6 +63,8 @@ const metadata = () => Object.freeze({
 })
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
+const fromJS = (Type, js) => _(Type).reviver('', js)
+const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js, [])
 
 export default {
   about: Object.freeze({ version, author, homepage, license }),
@@ -78,10 +80,10 @@ export default {
   Set: ModelicoSet,
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
-  fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
-  fromJS: (Type, js) => _(Type).reviver('', js),
-  genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
-  genericsFromJS: (Type, innerMetadata, js) => _(Type, 0, innerMetadata).reviver('', js),
+  fromJS,
+  genericsFromJS,
+  fromJSON: (Type, json) => fromJS(Type, JSON.parse(json)),
+  genericsFromJSON: (Type, innerMetadata, json) => genericsFromJS(Type, innerMetadata, JSON.parse(json)),
   metadata,
   ajvMetadata,
   proxyMap,

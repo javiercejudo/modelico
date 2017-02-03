@@ -45,7 +45,68 @@ export default (should, M, fixtures, { Ajv }) => () => {
       should(() => M.fromJS(Animal, {
         name: 'Bane',
         dimensions: [20, 55, 0]
-      })).throw(/should be > 0/)
+      }))
+        .throw(/Invalid JSON at "dimensions > 2"/)
+        .and.throw(/should be > 0/)
+    })
+  })
+
+  describe('deeply nested error examples', () => {
+    it('list', () => {
+      should(() => M.genericsFromJS(M.List, [
+        list({}, list({}, number({minimum: 5})))
+      ], [[[10], [6, 7, 4]]]))
+        .throw(/Invalid JSON at "0 > 1 > 2"/)
+        .and.throw(/should be >= 5/)
+    })
+
+    it('set', () => {
+      should(() => M.genericsFromJS(M.Set, [
+        set({}, set({}, number({minimum: 5})))
+      ], [[[10], [6, 7, 9, 4]]]))
+        .throw(/Invalid JSON at "0 > 1 > 3"/)
+        .and.throw(/should be >= 5/)
+    })
+
+    it('stringMap', () => {
+      should(() => M.genericsFromJS(M.StringMap, [
+        stringMap({}, stringMap({}, number({minimum: 5})))
+      ], {a: {b1: {c: 10}, b2: {d1: 6, d2: 7, d3: 4}}}))
+        .throw(/Invalid JSON at "a > b2 > d3"/)
+        .and.throw(/should be >= 5/)
+    })
+
+    it('map', () => {
+      should(() => M.genericsFromJS(M.Map, [
+        string(),
+        map({}, string(), number({minimum: 5}))
+      ], [['A', [['A', 6], ['B', 7], ['C', 4]]]]))
+        .throw(/Invalid JSON at "0 > 1 > 2 > 1"/)
+        .and.throw(/should be >= 5/)
+
+      should(() => M.genericsFromJS(M.Map, [
+        string(),
+        map({}, string(), number({minimum: 5}))
+      ], [['A', [['A', 6], ['B', 7], [2, 7]]]]))
+        .throw(/Invalid JSON at "0 > 1 > 2 > 0"/)
+        .and.throw(/should be string/)
+    })
+
+    it('enumMap', () => {
+      const SideEnum = M.Enum.fromArray(['A', 'B'])
+
+      should(() => M.genericsFromJS(M.EnumMap, [
+        _(SideEnum),
+        enumMap({}, _(SideEnum), enumMap({}, _(SideEnum), number({minimum: 5})))
+      ], {A: {A: {A: 10}, B: {A: 4, B: 7}}}))
+        .throw(/Invalid JSON at "A > B > A"/)
+        .and.throw(/should be >= 5/)
+
+      should(() => M.genericsFromJS(M.EnumMap, [
+        _(SideEnum),
+        enumMap({}, _(SideEnum), enumMap({}, _(SideEnum), number({minimum: 5})))
+      ], {A: {A: {A: 10}, B: {D: 5, B: 7}}}))
+        .throw(/missing enumerator "D" at "A > B"/)
     })
   })
 
@@ -258,12 +319,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
       should(() => JSON.parse('{"A": 100}', enumMap({ minProperties: 2 }, _(SideEnum), number()).reviver))
         .throw(/should NOT have less than 2 properties/)
 
-      // limits the amount of properties to the number of enumerators
-      should(() => JSON.parse('{"A": 100, "B": 200, "C": 300}', enumMap({ minProperties: 1 }, _(SideEnum), number()).reviver))
-        .throw(/should NOT have more than 2 properties/)
-
       should(() => JSON.parse('{"A": 100, "B": 200, "C": 300}', enumMap({ maxProperties: 3 }, _(SideEnum), number()).reviver))
-        .throw(/missing enumerator \(C\)/)
+        .throw(/missing enumerator "C" at ""/)
     })
   })
 

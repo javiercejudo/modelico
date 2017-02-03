@@ -7,10 +7,10 @@ const stringifyReducer = (acc, pair) => {
   return acc
 }
 
-const parseReducer = (valueReviver, obj) => (acc, key) =>
-  [...acc, [key, valueReviver('', obj[key])]]
+const parseReducer = (valueReviver, obj, path) => (acc, key) =>
+  [...acc, [key, valueReviver('', obj[key], path.concat(key))]]
 
-const reviverFactory = valueMetadata => (k, v) => {
+const reviverFactory = valueMetadata => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -19,7 +19,7 @@ const reviverFactory = valueMetadata => (k, v) => {
 
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v), []))
+    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []))
 
   return StringMap.fromMap(innerMap)
 }

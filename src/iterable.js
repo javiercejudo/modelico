@@ -1,11 +1,11 @@
-import { partial, reviverOrAsIs, equals, haveDifferentTypes } from './U'
+import { reviverOrAsIs, equals, haveDifferentTypes } from './U'
 
-const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
+const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const revive = partial(reviverOrAsIs(itemMetadata), k)
+  const revive = (x, i) => reviverOrAsIs(itemMetadata)('', x, path.concat(i))
   const iterable = (v === null)
     ? null
     : v.map(revive)
