@@ -7,14 +7,14 @@ const stringifyReducer = (acc, pair) => {
   return acc
 }
 
-const parseMapper = (keyReviver, valueReviver, obj) => enumerator => {
-  const key = keyReviver('', enumerator)
-  const val = valueReviver('', obj[enumerator])
+const parseMapper = (keyReviver, valueReviver, obj, path) => enumerator => {
+  const key = keyReviver('', enumerator, path)
+  const val = valueReviver('', obj[enumerator], path.concat(enumerator))
 
   return [key, val]
 }
 
-const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -24,7 +24,7 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
 
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).map(parseMapper(keyReviver, valueReviver, v)))
+    : new Map(Object.keys(v).map(parseMapper(keyReviver, valueReviver, v, path)))
 
   return new EnumMap(innerMap)
 }

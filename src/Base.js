@@ -18,7 +18,7 @@ class Base {
     Object.freeze(fields)
 
     const emptyMaybes = {}
-    const innerTypes = getInnerTypes(0, Type)
+    const innerTypes = getInnerTypes([], Type)
 
     thisArg = defaultTo(this)(thisArg)
     thisArg[typeSymbol] = always(Type)

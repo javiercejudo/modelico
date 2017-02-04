@@ -11,10 +11,10 @@ export default (M, Region, countryFactory) => {
       return Object.freeze(this)
     }
 
-    static innerTypes (depth) {
+    static innerTypes (path) {
       return Object.freeze({
         name: string(),
-        country: _(Country, depth)
+        country: _(Country, path)
       })
     }
   }

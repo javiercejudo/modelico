@@ -32,12 +32,12 @@ export const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
     ? a.equals(b)
     : haveSameValues(a, b)
 
-export const getInnerTypes = (depth/* : number */, Type/* : Function */) => {
+export const getInnerTypes = (path/* : Array<any> */, Type/* : Function */) => {
   if (!Type.innerTypes) {
     throw Error(`missing static innerTypes for ${Type.displayName || Type.name}`)
   }
 
-  return Type.innerTypes(depth + 1, Type)
+  return Type.innerTypes(path, Type)
 }
 
 export const unsupported = (message/* : string */) => {

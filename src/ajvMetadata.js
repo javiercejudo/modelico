@@ -1,8 +1,8 @@
 import { T, identity } from './U'
 import M from './'
 
-const formatError = (ajv, schema, value) => [
-  'Invalid JSON: according to the schema' + '\n',
+const formatError = (ajv, schema, value, path = []) => [
+  'Invalid JSON at "' + path.join(' > ') + '". According to the schema' + '\n',
   JSON.stringify(schema, null, 2) + '\n',
   'the value\n',
   JSON.stringify(value, null, 2) + '\n',
@@ -26,7 +26,7 @@ export default (ajv = { validate: T }) => {
     maybe
   } = M.metadata()
 
-  const ensure = (metadata, schema, valueTransformer = identity) => (k, value) => {
+  const ensure = (metadata, schema, valueTransformer = identity) => (k, value, path) => {
     if (k !== '') {
       return value
     }
@@ -34,10 +34,10 @@ export default (ajv = { validate: T }) => {
     const valid = ajv.validate(schema, valueTransformer(value))
 
     if (!valid) {
-      throw TypeError(formatError(ajv, schema, value))
+      throw TypeError(formatError(ajv, schema, value, path))
     }
 
-    return metadata.reviver('', value)
+    return metadata.reviver('', value, path)
   }
 
   const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
@@ -54,7 +54,7 @@ export default (ajv = { validate: T }) => {
     const schema = Object.assign({}, baseSchema, mainSchema)
     const reviver = ensure(meta, schema)
 
-    return Object.assign({}, meta, { reviver })
+    return Object.assign({}, meta, { reviver, schema })
   }
 
   const ajv_ = (Type, schema) =>
@@ -73,14 +73,16 @@ export default (ajv = { validate: T }) => {
       return ajvMeta(meta, { type: 'number' }, schema)
     }
 
+    const numberMeta = Object.assign({ type: 'number' }, schema)
+
     const reviver = ensureWrapped(meta, {
       anyOf: [
         { type: 'number' },
         { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
       ]
-    }, Object.assign({}, { type: 'number' }, schema))
+    }, numberMeta)
 
-    return Object.assign({}, meta, { reviver })
+    return Object.assign({}, meta, { reviver, schema: numberMeta })
   }
 
   const ajvString = schema =>

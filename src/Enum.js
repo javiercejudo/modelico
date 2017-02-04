@@ -3,11 +3,11 @@ import Base from './Base'
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } })
 
-const reviverFactory = enumerators => (k, v) => {
+const reviverFactory = enumerators => (k, v, path = []) => {
   const enumerator = enumerators[v]
 
   if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator (${v})`)
+    throw TypeError(`missing enumerator "${v}" at "${path.join(' > ')}"`)
   }
 
   return enumerator

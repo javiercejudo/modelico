@@ -10,11 +10,11 @@ export default (M, Region) => {
       return Object.freeze(this)
     }
 
-    static innerTypes (depth) {
+    static innerTypes (path) {
       return Object.freeze({
         name: string(),
         code: string(),
-        region: _(Region, depth)
+        region: _(Region, path)
       })
     }
   }
