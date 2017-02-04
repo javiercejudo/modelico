@@ -7,10 +7,11 @@ JSON is coerced when the metadata defined doesn't match the actual value, eg.
 if a field has `string()` as its metadata, but there is a number in the
 incoming JSON, it will be coerced with `String(5)`.
 
-To validate the JSON strictly, you have two options:
+To validate the JSON strictly, you have the following options:
 
-- use `M.ajvMetadata` for [Ajv](https://epoberezkin.github.io/ajv/)'s implementation of [JSON schema](http://json-schema.org/).
+- use `M.ajvMetadata` for [Ajv](https://epoberezkin.github.io/ajv/)'s implementation of [JSON schema](http://json-schema.org/);
 - manually create validation functions that work as revivers;
+- a bit of both
 
 ## `M.ajvMetadata` and JSON schema
 
@@ -24,7 +25,7 @@ development in favour of faster parsing in production:
 ```js
 const ajvOptions = {}
 const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined;
-const { string, list, number } = M.ajvMetadata(ajvIfProd)
+const { ajvString, ajvList, ajvNumber } = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -33,8 +34,8 @@ class Animal extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: string({ minLength: 1, maxLength: 25 }),
-      dimensions: list({ minItems: 3, maxItems: 3 }, number({ minimum: 0, exclusiveMinimum: true }))
+      name: ajvString({ minLength: 1, maxLength: 25 }),
+      dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
     })
   }
 }
@@ -50,25 +51,25 @@ If you only need to validate certain fields or you have custom rules that are
 not covered by what JSON schema can validate, you may write your own metadata:
 
 ```js
-const { string, list, number } = M.metadata
+const { string, list, number } = M.metadata()
 
-// boundedString is going to return metadata that validates the string length
-// before reviving it by overriding the string metadata revive
-const boundedString = (min = 0, max = Infinity) => {
+// lowerCaseString is going to return metadata that validates the string
+// before reviving it by overriding the string metadata reviver
+const lowerCaseString = () => {
   const stringMeta = string()
 
-  const reviver = (k, v) => {
+  const reviver = (k, v, path = []) => {
     if (k !== '') {
       return v
     }
 
-    if (typeof v !== 'string' || v.length < min || v.length > max) {
-      throw TypeError('not a string or string is out of bounds')
+    if (typeof v !== 'string' || v.toLowerCase() !== v) {
+      throw TypeError(`value at ${path.join(' > ')} is not a string or it is not all lower case`)
     }
 
     // In this case, we could return v directly since strings are the same in
     // JSON and JavaScript. However, this is the solution for general types.
-    return stringMeta.reviver('', v)
+    return stringMeta.reviver('', v, path)
   }
 
   return Object.assign({}, stringMeta, { reviver })
@@ -81,9 +82,40 @@ class Animal extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: boundedString(1, 25),
+      name: lowerCaseString(),
       dimensions: list(number())
     })
   }
 }
 ```
+
+## Why not both?
+
+In the example above, we could have based the `lowerCaseString` on `ajvString`
+instead of the normal `string` to combine custom and JSON schema rules:
+
+```js
+const { ajvString } = M.metadata(Ajv())
+
+const lowerCaseString = schema => {
+  const stringMeta = ajvString(schema)
+
+  const reviver = (k, v, path = []) => {
+    if (k !== '') {
+      return v
+    }
+
+    const revivedString = stringMeta.reviver('', v, path)
+
+    if (v.toLowerCase() !== v) {
+      throw TypeError(`string at ${path.join(' > ')} is not all lower case`)
+    }
+
+    return revivedString
+  }
+
+  return Object.assign({}, stringMeta, { reviver })
+}
+```
+
+Now we can define fields with something like `lowerCaseString({minLength: 5})`.

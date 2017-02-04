@@ -1,14 +1,14 @@
 import { always, isNothing, emptyObject, haveDifferentTypes, equals } from './U'
 import Base from './Base'
 
-const reviverFactory = itemMetadata => (k, v) => {
+const reviverFactory = itemMetadata => (k, v, path) => {
   if (k !== '') {
     return v
   }
 
   const maybeValue = (v === null)
     ? null
-    : itemMetadata.reviver(k, v)
+    : itemMetadata.reviver(k, v, path)
 
   return new Maybe(maybeValue)
 }
@@ -149,11 +149,12 @@ class Maybe extends Base {
     return new Maybe(v, false)
   }
 
-  static metadata (itemMetadata) {
+  static metadata (itemMetadata, defaultValue) {
     return Object.freeze({
       type: Maybe,
       subtypes: [itemMetadata],
-      reviver: reviverFactory(itemMetadata)
+      reviver: reviverFactory(itemMetadata),
+      default: defaultValue
     })
   }
 

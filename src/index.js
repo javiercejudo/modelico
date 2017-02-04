@@ -2,6 +2,7 @@ import { version, author, homepage, license } from '../package.json'
 import * as symbols from './symbols'
 import { partial, always, identity } from './U'
 import reviverFactory from './reviverFactory'
+import getSchema from './getSchema'
 
 import Base from './Base'
 
@@ -64,7 +65,23 @@ const metadata = () => Object.freeze({
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
 const fromJS = (Type, js) => _(Type).reviver('', js)
-const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js, [])
+const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js)
+const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js)
+const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js)
+
+const createModel = (innerTypes = {}) => class Model extends Base {
+  constructor (fields) {
+    super(Model, fields)
+  }
+
+  static innerTypes () {
+    return Object.freeze(innerTypes)
+  }
+
+  static of (fields) {
+    return fromJS(Model, fields)
+  }
+}
 
 export default {
   about: Object.freeze({ version, author, homepage, license }),
@@ -78,14 +95,20 @@ export default {
   Maybe,
   Base,
   Set: ModelicoSet,
+  createModel,
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
   fromJS,
   genericsFromJS,
   fromJSON: (Type, json) => fromJS(Type, JSON.parse(json)),
   genericsFromJSON: (Type, innerMetadata, json) => genericsFromJS(Type, innerMetadata, JSON.parse(json)),
+  ajvFromJS,
+  ajvGenericsFromJS,
+  ajvFromJSON: (_, Type, schema, json) => ajvFromJS(_, Type, schema, JSON.parse(json)),
+  ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) => ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
   metadata,
   ajvMetadata,
+  getSchema,
   proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,

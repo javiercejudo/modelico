@@ -8,12 +8,17 @@ we will create a `Point` class that can revive strings like `"5,8"`. Let's see
 how the reviver looks like:
 
 ```js
-const reviver = (k, v) => {
+const reviver = (k, v, path = []) => {
   const [x, y] = v.split(',');
 
   return new Point(x, y);
 }
 ```
+
+_Note: the additional `path` argument forwarded by the built-in revivers is
+mostly to help display more informative error messages when necessary.
+`JSON.parse(..., reviver)` would not forward a path as it is not part of the
+native API._
 
 With that, we are ready to create our `Point` class:
 

@@ -1,9 +1,10 @@
 import {
-  always, defaultTo, isPlainObject, isSomething, getInnerTypes,
+  always, defaultTo, isPlainObject, isSomething,
   emptyObject, haveDifferentTypes, equals
 } from './U'
 
 import { typeSymbol, fieldsSymbol } from './symbols'
+import getInnerTypes from './getInnerTypes'
 
 import M from './'
 
@@ -32,6 +33,10 @@ class Base {
       } else if (innerTypes[key].type !== M.Maybe) {
         throw TypeError(`no value for key "${key}"`)
       } else {
+        if (isSomething(innerTypes[key].default)) {
+          value = M.Maybe.of(innerTypes[key].default)
+        }
+
         emptyMaybes[key] = value
       }
 
@@ -42,7 +47,7 @@ class Base {
   }
 
   get (field) {
-    return this[field]()
+    return this[fieldsSymbol]()[field]
   }
 
   getIn (path) {

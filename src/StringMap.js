@@ -1,5 +1,5 @@
 import { objToArr, reviverOrAsIs, emptyObject } from './U'
-import { default as AbstractMap, set, of, metadata } from './AbstractMap'
+import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0]] = pair[1]

@@ -1,5 +1,5 @@
 import { objToArr, reviverOrAsIs, emptyObject } from './U'
-import { default as AbstractMap, set, of, metadata } from './AbstractMap'
+import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const parseMapper = (keyReviver, valueReviver, path) => (pair, i) => [
   keyReviver('', pair[0], path.concat(i, 0)),

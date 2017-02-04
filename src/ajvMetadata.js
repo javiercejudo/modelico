@@ -1,4 +1,5 @@
 import { T, identity } from './U'
+import getSchema from './getSchema'
 import M from './'
 
 const formatError = (ajv, schema, value, path = []) => [
@@ -50,15 +51,20 @@ export default (ajv = { validate: T }) => {
     return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
   }
 
-  const ajvMeta = (meta, baseSchema, mainSchema = {}) => {
-    const schema = Object.assign({}, baseSchema, mainSchema)
-    const reviver = ensure(meta, schema)
+  const ajvMeta = (meta, baseSchema, mainSchema = {}, innerSchema = {}) => {
+    const schemaToCheck = Object.assign({}, baseSchema, mainSchema)
+    const reviver = ensure(meta, schemaToCheck)
+
+    const schema = Object.assign({}, schemaToCheck, innerSchema)
 
     return Object.assign({}, meta, { reviver, schema })
   }
 
-  const ajv_ = (Type, schema) =>
-    ajvMeta(_(Type), schema)
+  const ajv_ = (Type, schema = {}, path, innerMetadata) => {
+    const metadata = _(Type, path, innerMetadata)
+
+    return ajvMeta(metadata, {}, schema, getSchema(metadata))
+  }
 
   const ajvAsIs = (schema, transformer = identity) =>
     ajvMeta(asIs(transformer), schema)
@@ -98,40 +104,55 @@ export default (ajv = { validate: T }) => {
     ajvMeta(enumMap(keyMetadata, valueMetadata), {
       type: 'object',
       maxProperties: Object.keys(keyMetadata).length
-    }, schema)
+    }, schema, { properties: getSchema(valueMetadata) })
 
   const ajvList = (schema, itemMetadata) =>
-    ajvMeta(list(itemMetadata), { type: 'array' }, schema)
+    ajvMeta(list(itemMetadata), { type: 'array' }, schema, { items: getSchema(itemMetadata) })
 
-  const ajvMap = (schema, keyMetadata, valueMetadata) =>
-    ajvMeta(map(keyMetadata, valueMetadata), {
+  const ajvMap = (schema, keyMetadata, valueMetadata) => {
+    const baseSchema = {
       type: 'array',
       items: {
         type: 'array',
         minItems: 2,
         maxItems: 2
       }
-    }, schema)
+    }
+
+    const keyValueSchema = {
+      items: Object.assign({
+        items: [
+          getSchema(keyMetadata),
+          getSchema(valueMetadata)
+        ]
+      }, baseSchema.items)
+    }
+
+    return ajvMeta(map(keyMetadata, valueMetadata), baseSchema, schema, keyValueSchema)
+  }
 
   const ajvStringMap = (schema, valueMetadata) =>
-    ajvMeta(stringMap(valueMetadata), { type: 'object' }, schema)
+    ajvMeta(stringMap(valueMetadata), { type: 'object' }, schema, { properties: getSchema(valueMetadata) })
 
   const ajvSet = (schema, itemMetadata) =>
-    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema)
+    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, { items: getSchema(itemMetadata) })
+
+  const ajvMaybe = (itemMetadata, defaultValue) =>
+    ajvMeta(maybe(itemMetadata, defaultValue), {}, {}, getSchema(itemMetadata))
 
   return Object.freeze({
-    _: ajv_,
-    asIs: ajvAsIs,
-    any: ajvAny,
-    number: ajvNumber,
-    string: ajvString,
-    boolean: ajvBoolean,
-    date: ajvDate,
-    enumMap: ajvEnumMap,
-    list: ajvList,
-    map: ajvMap,
-    stringMap: ajvStringMap,
-    set: ajvSet,
-    maybe
+    ajv_,
+    ajvAsIs,
+    ajvAny,
+    ajvNumber,
+    ajvString,
+    ajvBoolean,
+    ajvDate,
+    ajvEnumMap,
+    ajvList,
+    ajvMap,
+    ajvStringMap,
+    ajvSet,
+    ajvMaybe
   })
 }

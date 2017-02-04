@@ -1,7 +1,7 @@
 // @flow
 
 const get = (field/* : string */) => (obj/* : Object */) => obj[field]
-const pipe2 = (fn1/* : Function */, fn2/* : Function */) => (...args/* : Array<mixed> */) => fn2(fn1(...args))
+const pipe2 = (f/* : Function */, g/* : Function */) => (...args/* : Array<mixed> */) => g(f(...args))
 const not = (x/* : boolean */)/* : boolean */ => !x
 
 export const T = () => true
@@ -31,14 +31,6 @@ export const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
   (isSomething(a) && a.equals)
     ? a.equals(b)
     : haveSameValues(a, b)
-
-export const getInnerTypes = (path/* : Array<any> */, Type/* : Function */) => {
-  if (!Type.innerTypes) {
-    throw Error(`missing static innerTypes for ${Type.displayName || Type.name}`)
-  }
-
-  return Type.innerTypes(path, Type)
-}
 
 export const unsupported = (message/* : string */) => {
   throw Error(message)
