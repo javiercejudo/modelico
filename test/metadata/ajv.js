@@ -14,20 +14,32 @@ export default (should, M, fixtures, { Ajv }) => () => {
     ajvMap,
     ajvStringMap,
     ajvSet,
-    ajvMaybe
+    ajvMaybe,
+    ajvWithDefault
   } = M.ajvMetadata(Ajv())
 
   describe('Animal example', () => {
-    class Animal extends M.Base {
-      constructor (fields) {
-        super(Animal, fields)
+    class Animal extends M.createModel({
+      name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
+      dimensions:
+        ajvMaybe(
+          ajvList({ minItems: 3, maxItems: 3 },
+            ajvNumber({ minimum: 0, exclusiveMinimum: true })))
+    }) {
+      constructor (props) {
+        super(Animal, props)
       }
+    }
 
-      static innerTypes () {
-        return Object.freeze({
-          name: ajvString({ minLength: 1, maxLength: 25 }),
-          dimensions: ajvMaybe(ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true })))
-        })
+    class Animal2 extends M.createModel({
+      name: ajvString({ minLength: 1, maxLength: 25 }),
+      dimensions:
+        ajvMaybe(
+          ajvList({ minItems: 3, maxItems: 3 },
+            ajvNumber({ minimum: 0, exclusiveMinimum: true })))
+    }) {
+      constructor (props) {
+        super(Animal, props)
       }
     }
 
@@ -61,11 +73,11 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('should fail with additional properties if they are not allowed', () => {
-      should(() => M.ajvFromJS(ajv_, Animal, { additionalProperties: false }, {
-        name: 'Bane',
-        dimensions: [20, 55, 65],
-        extra: 1
-      }))
+      should(() => M.ajvFromJSON(ajv_, Animal, { additionalProperties: false }, `{
+        "name": "Bane",
+        "dimensions": [20, 55, 65],
+        "extra": 1
+      }`))
         .throw(/should NOT have additional properties/)
     })
 
@@ -78,6 +90,29 @@ export default (should, M, fixtures, { Ajv }) => () => {
       const animalSchema = M.getSchema(ajv_(Animal))
 
       animalSchema.should.deepEqual({
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 25
+          },
+          dimensions: {
+            type: 'array',
+            minItems: 3,
+            maxItems: 3,
+            items: {
+              type: 'number',
+              exclusiveMinimum: true,
+              minimum: 0
+            }
+          }
+        }
+      })
+
+      const animalSchema2 = M.getSchema(ajv_(Animal2))
+
+      animalSchema2.should.deepEqual({
         type: 'object',
         properties: {
           name: {
@@ -114,9 +149,9 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('deeply nested error examples', () => {
     it('list', () => {
-      should(() => M.genericsFromJS(M.List, [
+      should(() => M.ajvGenericsFromJSON(ajv_, M.List, {}, [
         ajvList({}, ajvList({}, ajvNumber({minimum: 5})))
-      ], [[[10], [6, 7, 4]]]))
+      ], '[[[10], [6, 7, 4]]]'))
         .throw(/Invalid JSON at "0 > 1 > 2"/)
         .and.throw(/should be >= 5/)
     })

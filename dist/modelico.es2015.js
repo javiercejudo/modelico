@@ -120,16 +120,22 @@ var getSchema = metadata => {
   const required = [];
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
     const fieldMetadata = innerTypes[fieldName];
-    const schema = fieldMetadata.schema || {};
+    const schema = fieldMetadata.schema;
 
-    if (fieldMetadata.type !== M.Maybe) {
+    if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
       required.push(fieldName);
     }
 
     return Object.assign(acc, {[fieldName]: schema})
   }, {});
 
-  return Object.assign({}, baseSchema, { properties, required })
+  const schema = Object.assign({}, baseSchema, { properties });
+
+  if (required.length > 0) {
+    schema.required = required;
+  }
+
+  return schema
 };
 
 const getPathReducer = (result, part) => result.get(part);
@@ -142,7 +148,7 @@ class Base {
 
     Object.freeze(fields);
 
-    const emptyMaybes = {};
+    const emptyMaybesOrDefaults = {};
     const innerTypes = getInnerTypes$1([], Type);
 
     thisArg = defaultTo(this)(thisArg);
@@ -154,20 +160,19 @@ class Base {
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate;
+      } else if (isSomething(innerTypes[key].default)) {
+        value = innerTypes[key].default;
+        emptyMaybesOrDefaults[key] = value;
       } else if (innerTypes[key].type !== M.Maybe) {
         throw TypeError(`no value for key "${key}"`)
       } else {
-        if (isSomething(innerTypes[key].default)) {
-          value = M.Maybe.of(innerTypes[key].default);
-        }
-
-        emptyMaybes[key] = value;
+        emptyMaybesOrDefaults[key] = value;
       }
 
       thisArg[key] = always(value);
     });
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)));
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybesOrDefaults, fields)));
   }
 
   get (field) {
@@ -293,6 +298,10 @@ class Maybe extends Base$1 {
     Object.freeze(this);
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMaybe'
+  }
+
   get (fieldOrFallbackPair) {
     const fallback = fieldOrFallbackPair[0];
     const field = fieldOrFallbackPair[1];
@@ -388,12 +397,11 @@ class Maybe extends Base$1 {
     return new Maybe(v, false)
   }
 
-  static metadata (itemMetadata, defaultValue) {
+  static metadata (itemMetadata) {
     return Object.freeze({
       type: Maybe,
       subtypes: [itemMetadata],
-      reviver: reviverFactory$2(itemMetadata),
-      default: defaultValue
+      reviver: reviverFactory$2(itemMetadata)
     })
   }
 
@@ -518,7 +526,10 @@ class AbstractMap extends Base$1 {
     this[innerOrigSymbol] = always(innerMap);
     this.inner = () => copy(innerMap);
     this.size = innerMap.size;
-    this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
+  }
+
+  [Symbol.iterator] () {
+    return this[innerOrigSymbol]()[Symbol.iterator]()
   }
 
   has (key) {
@@ -607,6 +618,10 @@ class ModelicoMap extends AbstractMap$1 {
     Object.freeze(this);
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMap'
+  }
+
   set (key, value) {
     return set(this, ModelicoMap, key, value)
   }
@@ -682,6 +697,10 @@ class StringMap extends AbstractMap$1 {
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoStringMap'
   }
 
   set (key, value) {
@@ -766,6 +785,10 @@ class EnumMap extends AbstractMap$1 {
     Object.freeze(this);
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoEnumMap'
+  }
+
   set (enumerator, value) {
     return set(this, EnumMap, enumerator, value)
   }
@@ -818,6 +841,10 @@ class ModelicoNumber extends Base$1 {
     this.inner = always(Number(number));
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoNumber'
   }
 
   set () {
@@ -895,6 +922,10 @@ class ModelicoDate extends Base$1 {
     this.inner = () => new Date(date.getTime());
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoDate'
   }
 
   set () {
@@ -1010,14 +1041,22 @@ class List extends Base$1 {
     Object.freeze(innerList);
 
     this.inner = always(innerList);
+    this[innerOrigSymbol] = this.inner;
     this.size = innerList.length;
-    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     if (!EMPTY_LIST && this.size === 0) {
       EMPTY_LIST = this;
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoList'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   includes (...args) {
@@ -1104,13 +1143,20 @@ class ModelicoSet extends Base$1 {
     this[innerOrigSymbol] = always(innerSet);
     this.inner = () => copy$1(innerSet);
     this.size = innerSet.size;
-    this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
     if (!EMPTY_SET && this.size === 0) {
       EMPTY_SET = this;
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoSet'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   has (key) {
@@ -1242,7 +1288,8 @@ var ajvMetadata = (ajv = { validate: T }) => {
     map,
     stringMap,
     set,
-    maybe
+    maybe,
+    withDefault
   } = M.metadata();
 
   const ensure = (metadata, schema, valueTransformer = identity) => (k, value, path) => {
@@ -1355,8 +1402,11 @@ var ajvMetadata = (ajv = { validate: T }) => {
   const ajvSet = (schema, itemMetadata) =>
     ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, { items: getSchema(itemMetadata) });
 
-  const ajvMaybe = (itemMetadata, defaultValue) =>
-    ajvMeta(maybe(itemMetadata, defaultValue), {}, {}, getSchema(itemMetadata));
+  const ajvMaybe = (itemMetadata) =>
+    ajvMeta(maybe(itemMetadata), {}, {}, getSchema(itemMetadata));
+
+  const ajvWithDefault = (metadata, defaultValue) =>
+    ajvMeta(withDefault(metadata, defaultValue), {}, {}, getSchema(metadata));
 
   return Object.freeze({
     ajv_,
@@ -1371,7 +1421,8 @@ var ajvMetadata = (ajv = { validate: T }) => {
     ajvMap,
     ajvStringMap,
     ajvSet,
-    ajvMaybe
+    ajvMaybe,
+    ajvWithDefault
   })
 };
 
@@ -1417,7 +1468,10 @@ const metadata = () => Object.freeze({
   map: ModelicoMap$1.metadata,
   stringMap: StringMap$1.metadata,
   maybe: Maybe$1.metadata,
-  set: ModelicoSet$1.metadata
+  set: ModelicoSet$1.metadata,
+
+  withDefault: (meta, defaultValue) =>
+    Object.freeze(Object.assign({}, meta, { default: defaultValue }))
 });
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity);
@@ -1426,17 +1480,25 @@ const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).r
 const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js);
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js);
 
-const createModel = (innerTypes = {}) => class Model extends Base$1 {
-  constructor (fields) {
-    super(Model, fields);
-  }
+const createModel = (innerTypes, stringTag = 'ModelicoModel', getType) => {
+  return class extends Base$1 {
+    constructor (Ctor, props = {}) {
+      super(Ctor, props);
+    }
 
-  static innerTypes () {
-    return Object.freeze(innerTypes)
-  }
+    get [Symbol.toStringTag] () {
+      return stringTag
+    }
 
-  static of (fields) {
-    return fromJS(Model, fields)
+    static of (props) {
+      return fromJS(getType(), props)
+    }
+
+    static innerTypes (path, Type) {
+      return (typeof innerTypes === 'function')
+        ? innerTypes(path, Type)
+        : Object.freeze(innerTypes)
+    }
   }
 };
 

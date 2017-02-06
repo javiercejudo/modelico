@@ -1,5 +1,6 @@
 import { always, isNothing, emptyObject } from './U'
 import { iterableMetadata, iterableEquals } from './iterable'
+import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 let EMPTY_LIST
@@ -19,14 +20,22 @@ class List extends Base {
     Object.freeze(innerList)
 
     this.inner = always(innerList)
+    this[innerOrigSymbol] = this.inner
     this.size = innerList.length
-    this[Symbol.iterator] = () => innerList[Symbol.iterator]()
 
     if (!EMPTY_LIST && this.size === 0) {
       EMPTY_LIST = this
     }
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoList'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   includes (...args) {

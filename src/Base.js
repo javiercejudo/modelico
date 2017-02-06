@@ -18,7 +18,7 @@ class Base {
 
     Object.freeze(fields)
 
-    const emptyMaybes = {}
+    const emptyMaybesOrDefaults = {}
     const innerTypes = getInnerTypes([], Type)
 
     thisArg = defaultTo(this)(thisArg)
@@ -30,20 +30,19 @@ class Base {
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate
+      } else if (isSomething(innerTypes[key].default)) {
+        value = innerTypes[key].default
+        emptyMaybesOrDefaults[key] = value
       } else if (innerTypes[key].type !== M.Maybe) {
         throw TypeError(`no value for key "${key}"`)
       } else {
-        if (isSomething(innerTypes[key].default)) {
-          value = M.Maybe.of(innerTypes[key].default)
-        }
-
-        emptyMaybes[key] = value
+        emptyMaybesOrDefaults[key] = value
       }
 
       thisArg[key] = always(value)
     })
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)))
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybesOrDefaults, fields)))
   }
 
   get (field) {

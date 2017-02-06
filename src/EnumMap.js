@@ -42,6 +42,10 @@ class EnumMap extends AbstractMap {
     Object.freeze(this)
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoEnumMap'
+  }
+
   set (enumerator, value) {
     return set(this, EnumMap, enumerator, value)
   }

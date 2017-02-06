@@ -3,37 +3,25 @@
 export default M => {
   const { _, number, string } = M.metadata()
 
-  class Code extends M.Base {
-    constructor (fields) {
-      super(Code, fields)
-
-      return Object.freeze(this)
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        id: number(),
-        value: string()
-      })
+  class Code extends M.createModel({
+    id: number(),
+    value: string()
+  }) {
+    constructor (props) {
+      super(Code, props)
     }
   }
 
-  class Region extends M.Base {
-    constructor (fields) {
-      super(Region, fields)
-
-      return Object.freeze(this)
+  class Region extends M.createModel(path => ({
+    name: string(),
+    code: _(Code, path)
+  })) {
+    constructor (props) {
+      super(Region, props)
     }
 
     customMethod () {
       return `${this.name()} (${this.code().value()})`
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        name: string(),
-        code: _(Code)
-      })
     }
   }
 

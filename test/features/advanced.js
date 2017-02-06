@@ -3,9 +3,11 @@
 export default (should, M) => () => {
   const { _, any, maybe, list, string } = M.metadata()
 
-  class Animal extends M.Base {
-    constructor (fields = {}) {
-      super(Animal, fields)
+  class Animal extends M.createModel({
+    name: maybe(string())
+  }) {
+    constructor (props) {
+      super(Animal, props)
     }
 
     speak () {
@@ -15,29 +17,19 @@ export default (should, M) => () => {
         ? `I don't have a name`
         : `My name is ${name}!`
     }
-
-    static innerTypes () {
-      return Object.freeze({
-        name: maybe(string())
-      })
-    }
   }
 
-  class Person extends M.Base {
-    constructor (fields) {
-      super(Person, fields)
+  class Person extends M.createModel(path => ({
+    givenName: any(),
+    familyName: string(),
+    pets: list(maybe(_(Animal, path)))
+  })) {
+    constructor (props) {
+      super(Person, props)
     }
 
     fullName () {
       return [this.givenName(), this.familyName()].join(' ').trim()
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        givenName: any(),
-        familyName: string(),
-        pets: list(maybe(_(Animal)))
-      })
     }
   }
 

@@ -54,6 +54,10 @@ class Maybe extends Base {
     Object.freeze(this)
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMaybe'
+  }
+
   get (fieldOrFallbackPair) {
     const fallback = fieldOrFallbackPair[0]
     const field = fieldOrFallbackPair[1]
@@ -149,12 +153,11 @@ class Maybe extends Base {
     return new Maybe(v, false)
   }
 
-  static metadata (itemMetadata, defaultValue) {
+  static metadata (itemMetadata) {
     return Object.freeze({
       type: Maybe,
       subtypes: [itemMetadata],
-      reviver: reviverFactory(itemMetadata),
-      default: defaultValue
+      reviver: reviverFactory(itemMetadata)
     })
   }
 

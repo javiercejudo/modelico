@@ -60,7 +60,10 @@ const metadata = () => Object.freeze({
   map: ModelicoMap.metadata,
   stringMap: StringMap.metadata,
   maybe: Maybe.metadata,
-  set: ModelicoSet.metadata
+  set: ModelicoSet.metadata,
+
+  withDefault: (meta, defaultValue) =>
+    Object.freeze(Object.assign({}, meta, { default: defaultValue }))
 })
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
@@ -69,17 +72,25 @@ const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).r
 const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js)
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js)
 
-const createModel = (innerTypes = {}) => class Model extends Base {
-  constructor (fields) {
-    super(Model, fields)
-  }
+const createModel = (innerTypes, stringTag = 'ModelicoModel', getType) => {
+  return class extends Base {
+    constructor (Ctor, props = {}) {
+      super(Ctor, props)
+    }
 
-  static innerTypes () {
-    return Object.freeze(innerTypes)
-  }
+    get [Symbol.toStringTag] () {
+      return stringTag
+    }
 
-  static of (fields) {
-    return fromJS(Model, fields)
+    static of (props) {
+      return fromJS(getType(), props)
+    }
+
+    static innerTypes (path, Type) {
+      return (typeof innerTypes === 'function')
+        ? innerTypes(path, Type)
+        : Object.freeze(innerTypes)
+    }
   }
 }
 

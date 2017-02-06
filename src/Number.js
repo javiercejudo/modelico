@@ -18,6 +18,10 @@ class ModelicoNumber extends Base {
     Object.freeze(this)
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoNumber'
+  }
+
   set () {
     unsupported('Number.set is not supported')
   }

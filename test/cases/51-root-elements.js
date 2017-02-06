@@ -3,15 +3,11 @@
 export default (should, M) => () => {
   const { string } = M.metadata()
 
-  class Country extends M.Base {
+  class Country extends M.createModel({
+    code: string()
+  }) {
     constructor (code) {
       super(Country, {code})
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        code: string()
-      })
     }
   }
 

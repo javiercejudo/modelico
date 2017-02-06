@@ -3,19 +3,15 @@
 export default M => {
   const { string } = M.metadata()
 
-  class Animal extends M.Base {
-    constructor (fields) {
-      super(Animal, fields)
+  class Animal extends M.createModel({
+    name: string()
+  }) {
+    constructor (props) {
+      super(Animal, props)
     }
 
     speak () {
       return 'hello'
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        name: string()
-      })
     }
   }
 

@@ -3,16 +3,12 @@
 export default M => {
   const { _, string, maybe } = M.metadata()
 
-  class Friend extends M.Base {
-    constructor (fields) {
-      super(Friend, fields)
-    }
-
-    static innerTypes (path) {
-      return Object.freeze({
-        name: string(),
-        bestFriend: maybe(_(Friend, path))
-      })
+  class Friend extends M.createModel(path => ({
+    name: string(),
+    bestFriend: maybe(_(Friend, path))
+  })) {
+    constructor (props) {
+      super(Friend, props)
     }
   }
 

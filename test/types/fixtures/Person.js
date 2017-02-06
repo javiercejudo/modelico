@@ -1,38 +1,32 @@
 /* eslint-env mocha */
 
 export default (M, PartOfDay, Sex) => {
-  const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ')
+  const joinWithSpace = (...parts) => parts.join(' ').trim()
 
   const { _, string, date, map, list, set, maybe } = M.metadata()
   const partOfDay = PartOfDay.metadata
   const sex = Sex.metadata
 
-  class Person extends M.Base {
-    constructor (fields) {
-      super(Person, fields)
+  class Person extends M.createModel({
+    givenName: string(),
+    familyName: string(),
 
-      Object.freeze(this)
+    birthday: _(M.Date),
+    // alternative (leaving the above for testing purposes)
+    // birthday: date(),
+
+    favouritePartOfDay: partOfDay(),
+    lifeEvents: map(string(), date()),
+    importantDatesList: list(date()),
+    importantDatesSet: set(date()),
+    sex: maybe(sex())
+  }) {
+    constructor (props) {
+      super(Person, props)
     }
 
     fullName () {
       return joinWithSpace(this.givenName(), this.familyName())
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        givenName: string(),
-        familyName: string(),
-
-        birthday: _(M.Date),
-        // alternative (leaving the above for testing purposes)
-        // birthday: date(),
-
-        favouritePartOfDay: partOfDay(),
-        lifeEvents: map(string(), date()),
-        importantDatesList: list(date()),
-        importantDatesSet: set(date()),
-        sex: maybe(sex())
-      })
     }
   }
 

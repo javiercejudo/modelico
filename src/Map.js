@@ -34,6 +34,10 @@ class ModelicoMap extends AbstractMap {
     Object.freeze(this)
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMap'
+  }
+
   set (key, value) {
     return set(this, ModelicoMap, key, value)
   }

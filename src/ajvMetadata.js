@@ -24,7 +24,8 @@ export default (ajv = { validate: T }) => {
     map,
     stringMap,
     set,
-    maybe
+    maybe,
+    withDefault
   } = M.metadata()
 
   const ensure = (metadata, schema, valueTransformer = identity) => (k, value, path) => {
@@ -137,8 +138,11 @@ export default (ajv = { validate: T }) => {
   const ajvSet = (schema, itemMetadata) =>
     ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, { items: getSchema(itemMetadata) })
 
-  const ajvMaybe = (itemMetadata, defaultValue) =>
-    ajvMeta(maybe(itemMetadata, defaultValue), {}, {}, getSchema(itemMetadata))
+  const ajvMaybe = (itemMetadata) =>
+    ajvMeta(maybe(itemMetadata), {}, {}, getSchema(itemMetadata))
+
+  const ajvWithDefault = (metadata, defaultValue) =>
+    ajvMeta(withDefault(metadata, defaultValue), {}, {}, getSchema(metadata))
 
   return Object.freeze({
     ajv_,
@@ -153,6 +157,7 @@ export default (ajv = { validate: T }) => {
     ajvMap,
     ajvStringMap,
     ajvSet,
-    ajvMaybe
+    ajvMaybe,
+    ajvWithDefault
   })
 }

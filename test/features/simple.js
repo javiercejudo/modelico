@@ -3,20 +3,16 @@
 export default (should, M) => () => {
   const { _, string } = M.metadata()
 
-  class Animal extends M.Base {
-    constructor (fields) {
-      super(Animal, fields)
+  class Animal extends M.createModel({
+    name: string()
+  }) {
+    constructor (props) {
+      super(Animal, props)
     }
 
     speak () {
       const name = this.name()
       return (name === '') ? `I don't have a name` : `My name is ${name}!`
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        name: string()
-      })
     }
   }
 

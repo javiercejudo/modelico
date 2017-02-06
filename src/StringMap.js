@@ -37,6 +37,10 @@ class StringMap extends AbstractMap {
     Object.freeze(this)
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoStringMap'
+  }
+
   set (key, value) {
     return set(this, StringMap, key, value)
   }

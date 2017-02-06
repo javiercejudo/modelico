@@ -306,16 +306,22 @@ var getSchema = (function (metadata) {
   var required = [];
   var properties = Object.keys(innerTypes).reduce(function (acc, fieldName) {
     var fieldMetadata = innerTypes[fieldName];
-    var schema = fieldMetadata.schema || {};
+    var schema = fieldMetadata.schema;
 
-    if (fieldMetadata.type !== M.Maybe) {
+    if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
       required.push(fieldName);
     }
 
     return Object.assign(acc, defineProperty({}, fieldName, schema));
   }, {});
 
-  return Object.assign({}, baseSchema, { properties: properties, required: required });
+  var schema = Object.assign({}, baseSchema, { properties: properties });
+
+  if (required.length > 0) {
+    schema.required = required;
+  }
+
+  return schema;
 });
 
 var getPathReducer = function getPathReducer(result, part) {
@@ -334,7 +340,7 @@ var Base = function () {
 
     Object.freeze(fields);
 
-    var emptyMaybes = {};
+    var emptyMaybesOrDefaults = {};
     var innerTypes = getInnerTypes$1([], Type);
 
     thisArg = defaultTo(this)(thisArg);
@@ -346,20 +352,19 @@ var Base = function () {
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate;
+      } else if (isSomething(innerTypes[key].default)) {
+        value = innerTypes[key].default;
+        emptyMaybesOrDefaults[key] = value;
       } else if (innerTypes[key].type !== M.Maybe) {
         throw TypeError('no value for key "' + key + '"');
       } else {
-        if (isSomething(innerTypes[key].default)) {
-          value = M.Maybe.of(innerTypes[key].default);
-        }
-
-        emptyMaybes[key] = value;
+        emptyMaybesOrDefaults[key] = value;
       }
 
       thisArg[key] = always(value);
     });
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)));
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybesOrDefaults, fields)));
   }
 
   createClass(Base, [{
@@ -608,6 +613,11 @@ var Maybe = function (_Base) {
 
       return equals(inner.get(), otherInner.get());
     }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoMaybe';
+    }
   }], [{
     key: 'of',
     value: function of(v) {
@@ -620,12 +630,11 @@ var Maybe = function (_Base) {
     }
   }, {
     key: 'metadata',
-    value: function metadata(itemMetadata, defaultValue) {
+    value: function metadata(itemMetadata) {
       return Object.freeze({
         type: Maybe,
         subtypes: [itemMetadata],
-        reviver: reviverFactory$2(itemMetadata),
-        default: defaultValue
+        reviver: reviverFactory$2(itemMetadata)
       });
     }
   }, {
@@ -794,13 +803,15 @@ var AbstractMap = function (_Base) {
       return copy(innerMap);
     };
     _this.size = innerMap.size;
-    _this[Symbol.iterator] = function () {
-      return innerMap[Symbol.iterator]();
-    };
     return _this;
   }
 
   createClass(AbstractMap, [{
+    key: Symbol.iterator,
+    value: function value() {
+      return this[innerOrigSymbol]()[Symbol.iterator]();
+    }
+  }, {
     key: 'has',
     value: function has(key) {
       return this[innerOrigSymbol]().has(key);
@@ -914,6 +925,11 @@ var ModelicoMap = function (_AbstractMap) {
     value: function toJSON() {
       return [].concat(toConsumableArray(this));
     }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoMap';
+    }
   }], [{
     key: 'fromMap',
     value: function fromMap(map) {
@@ -1016,6 +1032,11 @@ var StringMap = function (_AbstractMap) {
     key: 'toJSON',
     value: function toJSON() {
       return [].concat(toConsumableArray(this)).reduce(stringifyReducer, {});
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoStringMap';
     }
   }], [{
     key: 'fromMap',
@@ -1124,6 +1145,11 @@ var EnumMap = function (_AbstractMap) {
     value: function toJSON() {
       return [].concat(toConsumableArray(this)).reduce(stringifyReducer$1, {});
     }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoEnumMap';
+    }
   }], [{
     key: 'fromMap',
     value: function fromMap(map) {
@@ -1223,6 +1249,11 @@ var ModelicoNumber = function (_Base) {
 
       return haveSameValues(this.inner(), other.inner());
     }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoNumber';
+    }
   }], [{
     key: 'of',
     value: function of(number) {
@@ -1309,6 +1340,11 @@ var ModelicoDate = function (_Base) {
       }
 
       return this.toJSON() === other.toJSON();
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoDate';
     }
   }], [{
     key: 'of',
@@ -1414,10 +1450,8 @@ var List = function (_Base) {
     Object.freeze(innerList);
 
     _this.inner = always(innerList);
+    _this[innerOrigSymbol] = _this.inner;
     _this.size = innerList.length;
-    _this[Symbol.iterator] = function () {
-      return innerList[Symbol.iterator]();
-    };
 
     if (!EMPTY_LIST && _this.size === 0) {
       EMPTY_LIST = _this;
@@ -1428,6 +1462,11 @@ var List = function (_Base) {
   }
 
   createClass(List, [{
+    key: Symbol.iterator,
+    value: function value() {
+      return this.inner()[Symbol.iterator]();
+    }
+  }, {
     key: 'includes',
     value: function includes() {
       var _inner;
@@ -1475,6 +1514,11 @@ var List = function (_Base) {
     key: 'equals',
     value: function equals$$1(other) {
       return iterableEquals(this, other);
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoList';
     }
   }], [{
     key: 'fromArray',
@@ -1545,9 +1589,6 @@ var ModelicoSet = function (_Base) {
       return copy$1(innerSet);
     };
     _this.size = innerSet.size;
-    _this[Symbol.iterator] = function () {
-      return innerSet[Symbol.iterator]();
-    };
 
     if (!EMPTY_SET && _this.size === 0) {
       EMPTY_SET = _this;
@@ -1558,6 +1599,11 @@ var ModelicoSet = function (_Base) {
   }
 
   createClass(ModelicoSet, [{
+    key: Symbol.iterator,
+    value: function value() {
+      return this.inner()[Symbol.iterator]();
+    }
+  }, {
     key: 'has',
     value: function has(key) {
       return this[innerOrigSymbol]().has(key);
@@ -1589,6 +1635,11 @@ var ModelicoSet = function (_Base) {
       }
 
       return iterableEquals.apply(undefined, [this].concat(args));
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoSet';
     }
   }], [{
     key: 'fromSet',
@@ -1719,7 +1770,8 @@ var ajvMetadata = (function () {
       map = _M$metadata.map,
       stringMap = _M$metadata.stringMap,
       set = _M$metadata.set,
-      maybe = _M$metadata.maybe;
+      maybe = _M$metadata.maybe,
+      withDefault = _M$metadata.withDefault;
 
   var ensure = function ensure(metadata, schema) {
     var valueTransformer = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : identity;
@@ -1853,8 +1905,12 @@ var ajvMetadata = (function () {
     return ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, { items: getSchema(itemMetadata) });
   };
 
-  var ajvMaybe = function ajvMaybe(itemMetadata, defaultValue) {
-    return ajvMeta(maybe(itemMetadata, defaultValue), {}, {}, getSchema(itemMetadata));
+  var ajvMaybe = function ajvMaybe(itemMetadata) {
+    return ajvMeta(maybe(itemMetadata), {}, {}, getSchema(itemMetadata));
+  };
+
+  var ajvWithDefault = function ajvWithDefault(metadata, defaultValue) {
+    return ajvMeta(withDefault(metadata, defaultValue), {}, {}, getSchema(metadata));
   };
 
   return Object.freeze({
@@ -1870,7 +1926,8 @@ var ajvMetadata = (function () {
     ajvMap: ajvMap,
     ajvStringMap: ajvStringMap,
     ajvSet: ajvSet,
-    ajvMaybe: ajvMaybe
+    ajvMaybe: ajvMaybe,
+    ajvWithDefault: ajvWithDefault
   });
 });
 
@@ -1926,7 +1983,11 @@ var metadata = function metadata() {
     map: ModelicoMap$1.metadata,
     stringMap: StringMap$1.metadata,
     maybe: Maybe$1.metadata,
-    set: ModelicoSet$1.metadata
+    set: ModelicoSet$1.metadata,
+
+    withDefault: function withDefault(meta, defaultValue) {
+      return Object.freeze(Object.assign({}, meta, { default: defaultValue }));
+    }
   });
 };
 
@@ -1944,29 +2005,36 @@ var ajvGenericsFromJS = function ajvGenericsFromJS(_, Type, schema, innerMetadat
   return _(Type, schema, [], innerMetadata).reviver('', js);
 };
 
-var createModel = function createModel() {
-  var _innerTypes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+var createModel = function createModel(_innerTypes) {
+  var stringTag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'ModelicoModel';
+  var getType = arguments[2];
 
   return function (_Base) {
-    inherits(Model, _Base);
+    inherits(_class, _Base);
 
-    function Model(fields) {
-      classCallCheck(this, Model);
-      return possibleConstructorReturn(this, (Model.__proto__ || Object.getPrototypeOf(Model)).call(this, Model, fields));
+    function _class(Ctor) {
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      classCallCheck(this, _class);
+      return possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, Ctor, props));
     }
 
-    createClass(Model, null, [{
-      key: 'innerTypes',
-      value: function innerTypes() {
-        return Object.freeze(_innerTypes);
+    createClass(_class, [{
+      key: Symbol.toStringTag,
+      get: function get$$1() {
+        return stringTag;
+      }
+    }], [{
+      key: 'of',
+      value: function of(props) {
+        return fromJS(getType(), props);
       }
     }, {
-      key: 'of',
-      value: function of(fields) {
-        return fromJS(Model, fields);
+      key: 'innerTypes',
+      value: function innerTypes(path, Type) {
+        return typeof _innerTypes === 'function' ? _innerTypes(path, Type) : Object.freeze(_innerTypes);
       }
     }]);
-    return Model;
+    return _class;
   }(Base$1);
 };
 

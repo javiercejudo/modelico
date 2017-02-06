@@ -28,7 +28,7 @@ right for you:
 
 ## Introduction
 
-The goal is to parse JSON strings like the following into JavaScript custom
+The goal is to parse JSON strings like
 objects,
 
 ```JSON
@@ -37,36 +37,46 @@ objects,
 }
 ```
 
-so that we can do things like this:
+into JavaScript customm so that we can do things like this:
 
 ```js
-const pet1 = M.fromJSON(Animal, petJson);
+const myPet = M.fromJSON(Animal, petJson);
 
-pet1.speak(); //=> 'my name is Robbie!'
-
-// pet1 is immutable
-const pet2 = pet1.set('name', 'Bane');
-
-pet2.name(); //=> 'Bane'
-pet1.name(); //=> 'Robbie'
-```
-
-`M.fromJSON` is a simpler way to do the following:
-
-```js
-const { _ } = M.metadata();
-const pet1 = JSON.parse(petJson, _(Animal).reviver);
+myPet.speak(); //=> 'my name is Robbie!'
 ```
 
 Here is how `Animal` would look like:
 
 ```js
-const M = require('modelico'); // window.Modelico in the browser
-const { string } = M.metadata();
+const M = require('modelico') // window.Modelico in the browser
+const { string } = M.metadata()
 
+class Animal extends M.createModel({
+  name: string()
+}) {
+  constructor (props) {
+    super(Animal, props)
+  }
+
+  speak() {
+    // a function is created for each declared property
+    const name = this.name()
+
+    return (name === '')
+      ? `I don't have a name`
+      : `My name is ${name}!`
+  }
+}
+```
+
+`M.createModel` allows us to abstract away a bit of boilerplate for standard
+models and have the property types definition at the top. Without it, `Animal`
+could be written like this:
+
+```js
 class Animal extends M.Base {
-  constructor(fields) {
-    super(Animal, fields);
+  constructor(props) {
+    super(Animal, props);
   }
 
   speak() {

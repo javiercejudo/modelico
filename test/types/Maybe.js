@@ -231,4 +231,11 @@ export default (should, M, { Person, PartOfDay }) => () => {
       M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true)
     })
   })
+
+  describe('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Maybe.of(1))
+        .should.be.exactly('[object ModelicoMaybe]')
+    })
+  })
 }

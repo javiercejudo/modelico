@@ -16,14 +16,20 @@ export default metadata => {
   const required = []
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
     const fieldMetadata = innerTypes[fieldName]
-    const schema = fieldMetadata.schema || {}
+    const schema = fieldMetadata.schema
 
-    if (fieldMetadata.type !== M.Maybe) {
+    if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
       required.push(fieldName)
     }
 
     return Object.assign(acc, {[fieldName]: schema})
   }, {})
 
-  return Object.assign({}, baseSchema, { properties, required })
+  const schema = Object.assign({}, baseSchema, { properties })
+
+  if (required.length > 0) {
+    schema.required = required
+  }
+
+  return schema
 }
