@@ -1,4 +1,5 @@
 import M from './'
+import getInnerTypes from './getInnerTypes'
 
 export default metadata => {
   if (metadata.schema) {
@@ -7,7 +8,7 @@ export default metadata => {
 
   const baseSchema = { type: 'object' }
 
-  if (!metadata.type.innerTypes || Object.keys(metadata.type.innerTypes()).length === 0) {
+  if (!metadata.type.innerTypes || Object.keys(getInnerTypes([], metadata.type)).length === 0) {
     return baseSchema
   }
 

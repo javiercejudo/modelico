@@ -1,8 +1,9 @@
 import { version, author, homepage, license } from '../package.json'
 import * as symbols from './symbols'
-import { partial, always, identity } from './U'
+import { partial, always, identity, reviverOrAsIs } from './U'
 import reviverFactory from './reviverFactory'
 import getSchema from './getSchema'
+import withValidation from './withValidation'
 
 import Base from './Base'
 
@@ -62,8 +63,11 @@ const metadata = () => Object.freeze({
   maybe: Maybe.metadata,
   set: ModelicoSet.metadata,
 
-  withDefault: (meta, defaultValue) =>
-    Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+  withDefault: (meta, def) => {
+    const defaultValue = reviverOrAsIs(meta)('', def)
+
+    return Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+  }
 })
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
@@ -74,10 +78,6 @@ const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema
 
 const createModel = (innerTypes, stringTag = 'ModelicoModel', getType) => {
   return class extends Base {
-    constructor (Ctor, props = {}) {
-      super(Ctor, props)
-    }
-
     get [Symbol.toStringTag] () {
       return stringTag
     }
@@ -120,6 +120,7 @@ export default {
   metadata,
   ajvMetadata,
   getSchema,
+  withValidation,
   proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,

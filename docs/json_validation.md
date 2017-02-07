@@ -48,32 +48,19 @@ not bundled with Modélico.
 ## Custom validation metadata
 
 If you only need to validate certain fields or you have custom rules that are
-not covered by what JSON schema can validate, you may write your own metadata:
+not covered by what JSON schema can validate, you may write your own metadata.
+`M.withValidation` facilitates this use case.
 
 ```js
 const { string, list, number } = M.metadata()
 
 // lowerCaseString is going to return metadata that validates the string
 // before reviving it by overriding the string metadata reviver
-const lowerCaseString = () => {
-  const stringMeta = string()
-
-  const reviver = (k, v, path = []) => {
-    if (k !== '') {
-      return v
-    }
-
-    if (typeof v !== 'string' || v.toLowerCase() !== v) {
-      throw TypeError(`value at ${path.join(' > ')} is not a string or it is not all lower case`)
-    }
-
-    // In this case, we could return v directly since strings are the same in
-    // JSON and JavaScript. However, this is the solution for general types.
-    return stringMeta.reviver('', v, path)
-  }
-
-  return Object.assign({}, stringMeta, { reviver })
-}
+const lowerCaseString = () => M.withValidation(
+  string(),
+  v => v.toLowerCase() === v
+  (v, path) => `string ${v} at ${path.join(' > ')} is not all lower case`
+)
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -92,30 +79,17 @@ class Animal extends M.Base {
 ## Why not both?
 
 In the example above, we could have based the `lowerCaseString` on `ajvString`
-instead of the normal `string` to combine custom and JSON schema rules:
+instead of the normal `string` to combine custom and JSON schema rules.
+
+`M.withValidation` works with any metadata, including the `Ajv` variant and
+can be composed, since it returns metadata.
 
 ```js
-const { ajvString } = M.metadata(Ajv())
-
-const lowerCaseString = schema => {
-  const stringMeta = ajvString(schema)
-
-  const reviver = (k, v, path = []) => {
-    if (k !== '') {
-      return v
-    }
-
-    const revivedString = stringMeta.reviver('', v, path)
-
-    if (v.toLowerCase() !== v) {
-      throw TypeError(`string at ${path.join(' > ')} is not all lower case`)
-    }
-
-    return revivedString
-  }
-
-  return Object.assign({}, stringMeta, { reviver })
-}
+const lowerCaseString = schema => M.withValidation(
+  ajvString(schema),
+  v => v.toLowerCase() === v
+  (v, path) => `string ${v} at ${path.join(' > ')} is not all lower case`
+)
 ```
 
 Now we can define fields with something like `lowerCaseString({minLength: 5})`.

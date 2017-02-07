@@ -10,6 +10,14 @@ const formatError = (ajv, schema, value, path = []) => [
   ajv.errors[0].message
 ].join('\n')
 
+const formatDefaultValueError = (ajv, schema, value) => [
+  'Invalid default value. According to the schema' + '\n',
+  JSON.stringify(schema, null, 2) + '\n',
+  'the default value\n',
+  JSON.stringify(value, null, 2) + '\n',
+  ajv.errors[0].message
+].join('\n')
+
 export default (ajv = { validate: T }) => {
   const {
     _,
@@ -141,8 +149,16 @@ export default (ajv = { validate: T }) => {
   const ajvMaybe = (itemMetadata) =>
     ajvMeta(maybe(itemMetadata), {}, {}, getSchema(itemMetadata))
 
-  const ajvWithDefault = (metadata, defaultValue) =>
-    ajvMeta(withDefault(metadata, defaultValue), {}, {}, getSchema(metadata))
+  const ajvWithDefault = (metadata, defaultValue) => {
+    const schema = getSchema(metadata)
+    const valid = ajv.validate(schema, defaultValue)
+
+    if (!valid) {
+      throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
+    }
+
+    return ajvMeta(withDefault(metadata, defaultValue), {}, {}, schema)
+  }
 
   return Object.freeze({
     ajv_,

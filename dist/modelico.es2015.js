@@ -111,7 +111,7 @@ var getSchema = metadata => {
 
   const baseSchema = { type: 'object' };
 
-  if (!metadata.type.innerTypes || Object.keys(metadata.type.innerTypes()).length === 0) {
+  if (!metadata.type.innerTypes || Object.keys(getInnerTypes$1([], metadata.type)).length === 0) {
     return baseSchema
   }
 
@@ -136,6 +136,24 @@ var getSchema = metadata => {
   }
 
   return schema
+};
+
+var withValidation = (metadata, validateFn, errorMsgFn = ((x, path) => `Invalid value at ${path.join(' > ')}`)) => {
+  const reviver = (k, v, path = []) => {
+    if (k !== '') {
+      return v
+    }
+
+    const revivedValue = metadata.reviver('', v, path);
+
+    if (!validateFn(revivedValue)) {
+      throw TypeError(errorMsgFn(revivedValue, path))
+    }
+
+    return revivedValue
+  };
+
+  return Object.assign({}, metadata, { reviver })
 };
 
 const getPathReducer = (result, part) => result.get(part);
@@ -1274,6 +1292,14 @@ const formatError = (ajv, schema, value, path = []) => [
   ajv.errors[0].message
 ].join('\n');
 
+const formatDefaultValueError = (ajv, schema, value) => [
+  'Invalid default value. According to the schema' + '\n',
+  JSON.stringify(schema, null, 2) + '\n',
+  'the default value\n',
+  JSON.stringify(value, null, 2) + '\n',
+  ajv.errors[0].message
+].join('\n');
+
 var ajvMetadata = (ajv = { validate: T }) => {
   const {
     _,
@@ -1405,8 +1431,16 @@ var ajvMetadata = (ajv = { validate: T }) => {
   const ajvMaybe = (itemMetadata) =>
     ajvMeta(maybe(itemMetadata), {}, {}, getSchema(itemMetadata));
 
-  const ajvWithDefault = (metadata, defaultValue) =>
-    ajvMeta(withDefault(metadata, defaultValue), {}, {}, getSchema(metadata));
+  const ajvWithDefault = (metadata, defaultValue) => {
+    const schema = getSchema(metadata);
+    const valid = ajv.validate(schema, defaultValue);
+
+    if (!valid) {
+      throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
+    }
+
+    return ajvMeta(withDefault(metadata, defaultValue), {}, {}, schema)
+  };
 
   return Object.freeze({
     ajv_,
@@ -1470,8 +1504,11 @@ const metadata = () => Object.freeze({
   maybe: Maybe$1.metadata,
   set: ModelicoSet$1.metadata,
 
-  withDefault: (meta, defaultValue) =>
-    Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+  withDefault: (meta, def) => {
+    const defaultValue = reviverOrAsIs(meta)('', def);
+
+    return Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+  }
 });
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity);
@@ -1482,10 +1519,6 @@ const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema
 
 const createModel = (innerTypes, stringTag = 'ModelicoModel', getType) => {
   return class extends Base$1 {
-    constructor (Ctor, props = {}) {
-      super(Ctor, props);
-    }
-
     get [Symbol.toStringTag] () {
       return stringTag
     }
@@ -1528,6 +1561,7 @@ var M = {
   metadata,
   ajvMetadata,
   getSchema,
+  withValidation,
   proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,

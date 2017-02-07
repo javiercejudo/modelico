@@ -297,7 +297,7 @@ var getSchema = (function (metadata) {
 
   var baseSchema = { type: 'object' };
 
-  if (!metadata.type.innerTypes || Object.keys(metadata.type.innerTypes()).length === 0) {
+  if (!metadata.type.innerTypes || Object.keys(getInnerTypes$1([], metadata.type)).length === 0) {
     return baseSchema;
   }
 
@@ -322,6 +322,30 @@ var getSchema = (function (metadata) {
   }
 
   return schema;
+});
+
+var withValidation = (function (metadata, validateFn) {
+  var errorMsgFn = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function (x, path) {
+    return 'Invalid value at ' + path.join(' > ');
+  };
+
+  var reviver = function reviver(k, v) {
+    var path = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    if (k !== '') {
+      return v;
+    }
+
+    var revivedValue = metadata.reviver('', v, path);
+
+    if (!validateFn(revivedValue)) {
+      throw TypeError(errorMsgFn(revivedValue, path));
+    }
+
+    return revivedValue;
+  };
+
+  return Object.assign({}, metadata, { reviver: reviver });
 });
 
 var getPathReducer = function getPathReducer(result, part) {
@@ -1754,6 +1778,10 @@ var formatError = function formatError(ajv, schema, value) {
   return ['Invalid JSON at "' + path.join(' > ') + '". According to the schema' + '\n', JSON.stringify(schema, null, 2) + '\n', 'the value\n', JSON.stringify(value, null, 2) + '\n', ajv.errors[0].message].join('\n');
 };
 
+var formatDefaultValueError = function formatDefaultValueError(ajv, schema, value) {
+  return ['Invalid default value. According to the schema' + '\n', JSON.stringify(schema, null, 2) + '\n', 'the default value\n', JSON.stringify(value, null, 2) + '\n', ajv.errors[0].message].join('\n');
+};
+
 var ajvMetadata = (function () {
   var ajv = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { validate: T };
 
@@ -1910,7 +1938,14 @@ var ajvMetadata = (function () {
   };
 
   var ajvWithDefault = function ajvWithDefault(metadata, defaultValue) {
-    return ajvMeta(withDefault(metadata, defaultValue), {}, {}, getSchema(metadata));
+    var schema = getSchema(metadata);
+    var valid = ajv.validate(schema, defaultValue);
+
+    if (!valid) {
+      throw TypeError(formatDefaultValueError(ajv, schema, defaultValue));
+    }
+
+    return ajvMeta(withDefault(metadata, defaultValue), {}, {}, schema);
   };
 
   return Object.freeze({
@@ -1985,7 +2020,9 @@ var metadata = function metadata() {
     maybe: Maybe$1.metadata,
     set: ModelicoSet$1.metadata,
 
-    withDefault: function withDefault(meta, defaultValue) {
+    withDefault: function withDefault(meta, def) {
+      var defaultValue = reviverOrAsIs(meta)('', def);
+
       return Object.freeze(Object.assign({}, meta, { default: defaultValue }));
     }
   });
@@ -2012,10 +2049,9 @@ var createModel = function createModel(_innerTypes) {
   return function (_Base) {
     inherits(_class, _Base);
 
-    function _class(Ctor) {
-      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    function _class() {
       classCallCheck(this, _class);
-      return possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, Ctor, props));
+      return possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
     }
 
     createClass(_class, [{
@@ -2074,6 +2110,7 @@ var M = {
   metadata: metadata,
   ajvMetadata: ajvMetadata,
   getSchema: getSchema,
+  withValidation: withValidation,
   proxyMap: proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,
