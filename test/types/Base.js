@@ -9,7 +9,7 @@ export default (U, should, M, fixtures) => () => {
     Friend
   } = fixtures
 
-  const { _, string, withDefault } = M.metadata()
+  const { _, number, string, withDefault } = M.metadata()
   const ModelicoDate = M.Date
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
@@ -377,6 +377,21 @@ export default (U, should, M, fixtures) => () => {
 
       lazarillo3.getTitleBy()
         .should.be.exactly('"Lazarillo de Tormes" by anonymous')
+    })
+  })
+
+  describe('withDefault', () => {
+    it('should use the metadata to coerce the value if necessary', () => {
+      class CountryCallingCode extends M.createModel({
+        code: withDefault(number(), '34')
+      }) {
+        constructor (props) {
+          super(CountryCallingCode, props)
+        }
+      }
+
+      M.fromJS(CountryCallingCode, {}).code()
+        .should.be.exactly(34)
     })
   })
 }

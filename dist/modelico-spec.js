@@ -115,6 +115,7 @@ var Base = (function (U, should, M, fixtures) {
 
     var _M$metadata = M.metadata(),
         _ = _M$metadata._,
+        number = _M$metadata.number,
         string = _M$metadata.string,
         withDefault = _M$metadata.withDefault;
 
@@ -480,6 +481,25 @@ var Base = (function (U, should, M, fixtures) {
         });
 
         lazarillo3.getTitleBy().should.be.exactly('"Lazarillo de Tormes" by anonymous');
+      });
+    });
+
+    describe('withDefault', function () {
+      it('should use the metadata to coerce the value if necessary', function () {
+        var CountryCallingCode = function (_M$createModel2) {
+          inherits(CountryCallingCode, _M$createModel2);
+
+          function CountryCallingCode(props) {
+            classCallCheck(this, CountryCallingCode);
+            return possibleConstructorReturn(this, (CountryCallingCode.__proto__ || Object.getPrototypeOf(CountryCallingCode)).call(this, CountryCallingCode, props));
+          }
+
+          return CountryCallingCode;
+        }(M.createModel({
+          code: withDefault(number(), '34')
+        }));
+
+        M.fromJS(CountryCallingCode, {}).code().should.be.exactly(34);
       });
     });
   };
@@ -3678,6 +3698,25 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         JSON.parse('null', ajvMaybe(ajvString()).reviver).getOrElse('fallback').should.be.exactly('fallback');
 
         JSON.parse('"Javier"', ajvMaybe(ajvString()).reviver).getOrElse('fallback').should.be.exactly('Javier');
+      });
+    });
+
+    describe('ajvWithDefault', function () {
+      it('should validate the default value', function () {
+        (function () {
+          return function (_M$createModel3) {
+            inherits(CountryCode, _M$createModel3);
+
+            function CountryCode(props) {
+              classCallCheck(this, CountryCode);
+              return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, CountryCode, props));
+            }
+
+            return CountryCode;
+          }(M.createModel({
+            value: ajvWithDefault(ajvString({ minLength: 3, maxLength: 3 }), 'SPAIN')
+          }));
+        }).should.throw(/should NOT be longer than 3 characters/);
       });
     });
   };

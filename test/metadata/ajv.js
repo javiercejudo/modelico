@@ -552,4 +552,16 @@ export default (should, M, fixtures, { Ajv }) => () => {
         .should.be.exactly('Javier')
     })
   })
+
+  describe('ajvWithDefault', () => {
+    it('should validate the default value', () => {
+      (() => class CountryCode extends M.createModel({
+        value: ajvWithDefault(ajvString({minLength: 3, maxLength: 3}), 'SPAIN')
+      }) {
+        constructor (props) {
+          super(CountryCode, props)
+        }
+      }).should.throw(/should NOT be longer than 3 characters/)
+    })
+  })
 }
