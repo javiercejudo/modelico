@@ -15,31 +15,42 @@ export default (should, M, fixtures, { Ajv }) => () => {
     ajvStringMap,
     ajvSet,
     ajvMaybe,
-    ajvWithDefault
+    ajvWithDefault,
+    // normal
+    _,
+    number
   } = M.ajvMetadata(Ajv())
 
   describe('Animal example', () => {
-    class Animal extends M.createModel({
-      name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
-      dimensions:
-        ajvMaybe(
-          ajvList({ minItems: 3, maxItems: 3 },
-            ajvNumber({ minimum: 0, exclusiveMinimum: true })))
-    }) {
+    class Animal extends M.Base {
       constructor (props) {
         super(Animal, props)
       }
+
+      static innerTypes () {
+        return Object.freeze({
+          name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
+          dimensions:
+            ajvMaybe(
+              ajvList({ minItems: 3, maxItems: 3 },
+                ajvNumber({ minimum: 0, exclusiveMinimum: true })))
+        })
+      }
     }
 
-    class Animal2 extends M.createModel({
-      name: ajvString({ minLength: 1, maxLength: 25 }),
-      dimensions:
-        ajvMaybe(
-          ajvList({ minItems: 3, maxItems: 3 },
-            ajvNumber({ minimum: 0, exclusiveMinimum: true })))
-    }) {
+    class Animal2 extends M.Base {
       constructor (props) {
         super(Animal, props)
+      }
+
+      static innerTypes () {
+        return Object.freeze({
+          name: ajvString({ minLength: 1, maxLength: 25 }),
+          dimensions:
+            ajvMaybe(
+              ajvList({ minItems: 3, maxItems: 3 },
+                number()))
+        })
       }
     }
 
@@ -87,28 +98,44 @@ export default (should, M, fixtures, { Ajv }) => () => {
         dimensions: [20, 55, 65]
       })
 
-      const animalSchema = M.getSchema(ajv_(Animal))
+      const animalNormalMeta = _(fixtures.Animal)
+      const animalNormalMetaSchema = M.getSchema(animalNormalMeta)
 
-      animalSchema.should.deepEqual({
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 25
+      animalNormalMetaSchema
+        .should.deepEqual({
+          type: 'object',
+          properties: {
+            name: {}
           },
-          dimensions: {
-            type: 'array',
-            minItems: 3,
-            maxItems: 3,
-            items: {
-              type: 'number',
-              exclusiveMinimum: true,
-              minimum: 0
+          required: ['name']
+        })
+
+      const animalMeta = ajv_(Animal)
+      const animal1Schema1 = M.getSchema(animalMeta)
+      const animal1Schema2 = M.getSchema(animalMeta)
+
+      animal1Schema1
+        .should.deepEqual(animal1Schema2)
+        .and.deepEqual({
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 25
+            },
+            dimensions: {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                type: 'number',
+                exclusiveMinimum: true,
+                minimum: 0
+              }
             }
           }
-        }
-      })
+        })
 
       const animalSchema2 = M.getSchema(ajv_(Animal2))
 
@@ -124,11 +151,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
             type: 'array',
             minItems: 3,
             maxItems: 3,
-            items: {
-              type: 'number',
-              exclusiveMinimum: true,
-              minimum: 0
-            }
+            items: {}
           }
         },
         required: ['name']
@@ -136,13 +159,13 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       const ajv = Ajv()
 
-      ajv.validate(animalSchema, bane.toJS())
+      ajv.validate(animal1Schema1, bane.toJS())
         .should.be.exactly(true)
 
-      ajv.validate(animalSchema, bane.set('name', 'Robbie').toJS())
+      ajv.validate(animal1Schema1, bane.set('name', 'Robbie').toJS())
         .should.be.exactly(true)
 
-      ajv.validate(animalSchema, bane.set('name', 2).toJS())
+      ajv.validate(animal1Schema1, bane.set('name', 2).toJS())
         .should.be.exactly(false)
     })
   })
@@ -393,6 +416,28 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
     const SideEnum = M.Enum.fromArray(['A', 'B'], Side, 'Side')
 
+    it('reports its full schema', () => {
+      const meta = ajvEnumMap({}, ajv_(SideEnum), ajvNumber())
+
+      M.getSchema(meta)
+        .should.deepEqual({
+          type: 'object',
+          maxProperties: 3,
+          properties: {
+            type: 'number'
+          }
+        })
+
+      const meta2 = ajvEnumMap({}, ajv_(SideEnum), number())
+
+      M.getSchema(meta2)
+        .should.deepEqual({
+          type: 'object',
+          maxProperties: 3,
+          properties: {}
+        })
+    })
+
     it('reports the right types', () => {
       const meta = ajvEnumMap({}, ajv_(SideEnum), ajvNumber())
 
@@ -445,6 +490,24 @@ export default (should, M, fixtures, { Ajv }) => () => {
   })
 
   describe('map', () => {
+    it('reports its full schema', () => {
+      const meta = ajvMap({}, ajvNumber(), ajvString())
+
+      M.getSchema(meta)
+        .should.deepEqual({
+          'type': 'array',
+          'items': {
+            'type': 'array',
+            'maxItems': 2,
+            'minItems': 2,
+            'items': [
+              { 'type': 'number' },
+              { 'type': 'string' }
+            ]
+          }
+        })
+    })
+
     it('reports the right types', () => {
       const meta = ajvMap({}, ajvNumber(), ajvString())
 
@@ -478,6 +541,18 @@ export default (should, M, fixtures, { Ajv }) => () => {
   })
 
   describe('stringMap', () => {
+    it('reports its full schema', () => {
+      const meta = ajvStringMap({}, ajvNumber())
+
+      M.getSchema(meta)
+        .should.deepEqual({
+          type: 'object',
+          properties: {
+            type: 'number'
+          }
+        })
+    })
+
     it('reports the right types', () => {
       const meta = ajvStringMap({}, ajvNumber())
 
@@ -502,6 +577,19 @@ export default (should, M, fixtures, { Ajv }) => () => {
   })
 
   describe('set', () => {
+    it('reports its full schema', () => {
+      const meta = ajvSet({}, ajvNumber())
+
+      M.getSchema(meta)
+        .should.deepEqual({
+          type: 'array',
+          uniqueItems: true,
+          items: {
+            type: 'number'
+          }
+        })
+    })
+
     it('reports the right types', () => {
       ajvSet({}, ajvNumber()).type.should.be.exactly(M.Set)
       ajvSet({}, ajvNumber()).subtypes[0].type.should.be.exactly(Number)
@@ -555,13 +643,78 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('ajvWithDefault', () => {
     it('should validate the default value', () => {
-      (() => class CountryCode extends M.createModel({
-        value: ajvWithDefault(ajvString({minLength: 3, maxLength: 3}), 'SPAIN')
-      }) {
+      class CountryCode extends M.Base {
         constructor (props) {
           super(CountryCode, props)
         }
-      }).should.throw(/should NOT be longer than 3 characters/)
+
+        static innerTypes () {
+          return Object.freeze({
+            value: ajvWithDefault(ajvString({minLength: 3, maxLength: 3}), 'SPAIN')
+          })
+        }
+      }
+
+      (() => new CountryCode())
+        .should.throw(/should NOT be longer than 3 characters/)
+    })
+  })
+
+  describe('withValidation', () => {
+    it('facilitates custom validation rules', () => {
+      const lowerCaseString = schema => M.withValidation(
+        v => v.toLowerCase() === v,
+        (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`,
+      )(ajvString(schema))
+
+      JSON.parse('"abc123"', lowerCaseString({minLength: 5}).reviver)
+        .should.be.exactly('abc123')
+
+      should(() => JSON.parse('"abc"', lowerCaseString({minLength: 5}).reviver))
+        .throw(/should NOT be shorter than 5 characters/)
+
+      should(() => JSON.parse('"aBc123"', lowerCaseString({minLength: 5}).reviver))
+        .throw(/string aBc123 at "" is not all lower case/)
+    })
+
+    it('should have a default error message', () => {
+      const lowerCaseString = schema => M.withValidation(v => v.toLowerCase() === v)(ajvString(schema))
+
+      should(() => JSON.parse('"aBc123"', lowerCaseString({minLength: 5}).reviver))
+        .throw(/Invalid value at ""/)
+    })
+
+    it('should work for nested metadata', () => {
+      const lowerCaseString = schema => M.withValidation(
+        v => v.toLowerCase() === v,
+        (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`
+      )(ajvString(schema))
+
+      class MagicString extends M.Base {
+        constructor (props) {
+          super(MagicString, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            str: lowerCaseString({minLength: 5})
+          })
+        }
+      }
+
+      M.fromJSON(MagicString, '{"str": "abc123"}').str()
+        .should.be.exactly('abc123')
+
+      should(() => M.fromJSON(MagicString, '{"str": "abc"}'))
+        .throw(/should NOT be shorter than 5 characters/)
+
+      should(() => M.fromJSON(MagicString, '{"str": "aBc123"}'))
+        .throw(/string aBc123 at "str" is not all lower case/)
+
+      should(() => JSON.parse(
+        '{"str": "abc123", "forceFail": true}',
+        M.withValidation(v => M.fields(v).forceFail !== true, () => 'forcibly failed')(_(MagicString)).reviver
+      )).throw(/forcibly failed/)
     })
   })
 }

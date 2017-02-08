@@ -1,4 +1,4 @@
-export default (metadata, validateFn, errorMsgFn = ((x, path) => `Invalid value at ${path.join(' > ')}`)) => {
+export default (validateFn, errorMsgFn = ((x, path) => `Invalid value at "${path.join(' > ')}"`)) => metadata => {
   const reviver = (k, v, path = []) => {
     if (k !== '') {
       return v

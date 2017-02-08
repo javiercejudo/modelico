@@ -7,26 +7,30 @@ export default (M, PartOfDay, Sex) => {
   const partOfDay = PartOfDay.metadata
   const sex = Sex.metadata
 
-  class Person extends M.createModel({
-    givenName: string(),
-    familyName: string(),
-
-    birthday: _(M.Date),
-    // alternative (leaving the above for testing purposes)
-    // birthday: date(),
-
-    favouritePartOfDay: partOfDay(),
-    lifeEvents: map(string(), date()),
-    importantDatesList: list(date()),
-    importantDatesSet: set(date()),
-    sex: maybe(sex())
-  }) {
+  class Person extends M.Base {
     constructor (props) {
       super(Person, props)
     }
 
     fullName () {
       return joinWithSpace(this.givenName(), this.familyName())
+    }
+
+    static innerTypes () {
+      return Object.freeze({
+        givenName: string(),
+        familyName: string(),
+
+        birthday: _(M.Date),
+        // alternative (leaving the above for testing purposes)
+        // birthday: date(),
+
+        favouritePartOfDay: partOfDay(),
+        lifeEvents: map(string(), date()),
+        importantDatesList: list(date()),
+        importantDatesSet: set(date()),
+        sex: maybe(sex())
+      })
     }
   }
 

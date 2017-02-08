@@ -1,23 +1,27 @@
 import M from './'
+import { emptyObject } from './U'
 import getInnerTypes from './getInnerTypes'
 
-export default metadata => {
+const metadataSchemaCache = new WeakMap()
+
+const getSchema = metadata => {
   if (metadata.schema) {
-    return metadata.schema
+    return metadata.schema()
+  }
+
+  if (!metadata.type.innerTypes || Object.keys(getInnerTypes([], metadata.type)).length === 0) {
+    return emptyObject
   }
 
   const baseSchema = { type: 'object' }
-
-  if (!metadata.type.innerTypes || Object.keys(getInnerTypes([], metadata.type)).length === 0) {
-    return baseSchema
-  }
-
   const innerTypes = metadata.type.innerTypes()
 
   const required = []
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
     const fieldMetadata = innerTypes[fieldName]
     const schema = fieldMetadata.schema
+      ? fieldMetadata.schema()
+      : emptyObject
 
     if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
       required.push(fieldName)
@@ -33,4 +37,12 @@ export default metadata => {
   }
 
   return schema
+}
+
+export default metadata => {
+  if (!metadataSchemaCache.has(metadata)) {
+    metadataSchemaCache.set(metadata, getSchema(metadata))
+  }
+
+  return metadataSchemaCache.get(metadata)
 }

@@ -72,6 +72,9 @@ export default (U, should, M, fixtures) => () => {
         sex: M.Maybe.of(Sex.MALE())
       })
 
+      Object.prototype.toString.call(author1)
+        .should.be.exactly('[object ModelicoModel]')
+
       // sanity check
       JSON.stringify(author1)
         .should.be.exactly(author1Json)
@@ -344,13 +347,17 @@ export default (U, should, M, fixtures) => () => {
       class Book extends M.createModel({
         title: string(),
         author: withDefault(string(), 'anonymous')
-      }, 'Book', () => Book) {
+      }, 'Book') {
         constructor (props) {
           super(Book, props)
         }
 
         getTitleBy () {
           return `"${this.title()}" by ${this.author()}`
+        }
+
+        static innerTypes () {
+          return super.innerTypes()
         }
       }
 
@@ -370,28 +377,30 @@ export default (U, should, M, fixtures) => () => {
 
       lazarillo2.getTitleBy()
         .should.be.exactly('"Lazarillo de Tormes" by anonymous')
-
-      const lazarillo3 = Book.of({
-        title: 'Lazarillo de Tormes'
-      })
-
-      lazarillo3.getTitleBy()
-        .should.be.exactly('"Lazarillo de Tormes" by anonymous')
     })
   })
 
   describe('withDefault', () => {
     it('should use the metadata to coerce the value if necessary', () => {
-      class CountryCallingCode extends M.createModel({
+      class CountryCallingCode extends M.createModel(() => ({
         code: withDefault(number(), '34')
-      }) {
+      })) {
         constructor (props) {
           super(CountryCallingCode, props)
         }
+
+        static innerTypes () {
+          return super.innerTypes()
+        }
       }
 
-      M.fromJS(CountryCallingCode, {}).code()
+      const spain = M.fromJS(CountryCallingCode, {})
+
+      spain.code()
         .should.be.exactly(34)
+
+      Object.prototype.toString.call(spain)
+        .should.be.exactly('[object ModelicoModel]')
     })
   })
 }

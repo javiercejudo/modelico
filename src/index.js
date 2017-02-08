@@ -76,14 +76,10 @@ const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).r
 const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js)
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js)
 
-const createModel = (innerTypes, stringTag = 'ModelicoModel', getType) => {
+const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
   return class extends Base {
     get [Symbol.toStringTag] () {
       return stringTag
-    }
-
-    static of (props) {
-      return fromJS(getType(), props)
     }
 
     static innerTypes (path, Type) {

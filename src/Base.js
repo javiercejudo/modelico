@@ -45,6 +45,10 @@ class Base {
     thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybesOrDefaults, fields)))
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoModel'
+  }
+
   get (field) {
     return this[fieldsSymbol]()[field]
   }

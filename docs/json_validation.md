@@ -57,10 +57,9 @@ const { string, list, number } = M.metadata()
 // lowerCaseString is going to return metadata that validates the string
 // before reviving it by overriding the string metadata reviver
 const lowerCaseString = () => M.withValidation(
-  string(),
   v => v.toLowerCase() === v
   (v, path) => `string ${v} at ${path.join(' > ')} is not all lower case`
-)
+)(string())
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -78,7 +77,7 @@ class Animal extends M.Base {
 
 ## Why not both?
 
-In the example above, we could have based the `lowerCaseString` on `ajvString`
+In the example above, we could have based `lowerCaseString` on `ajvString`
 instead of the normal `string` to combine custom and JSON schema rules.
 
 `M.withValidation` works with any metadata, including the `Ajv` variant and
@@ -86,10 +85,9 @@ can be composed, since it returns metadata.
 
 ```js
 const lowerCaseString = schema => M.withValidation(
-  ajvString(schema),
-  v => v.toLowerCase() === v
+  v => v.toLowerCase() === v,
   (v, path) => `string ${v} at ${path.join(' > ')} is not all lower case`
-)
+)(ajvString(schema))
 ```
 
 Now we can define fields with something like `lowerCaseString({minLength: 5})`.
