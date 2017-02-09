@@ -10,7 +10,7 @@ Using the `Animal` and `Person` classes used in the
 [nested types example](nested_types_example.md):
 
 ```js
-const { _, string, maybe, list } = M.metadata();
+const { _, string, maybe, list } = M.metadata()
 
 class Person extends M.Base {
 
@@ -21,7 +21,7 @@ class Person extends M.Base {
       givenName: string(),
       familyName: string(),
       pets: list(maybe(_(Animal)))
-    });
+    })
   }
 }
 
@@ -32,7 +32,7 @@ class Animal extends M.Base {
   static innerTypes() {
     return Object.freeze({
       name: maybe(string())
-    });
+    })
   }
 }
 ```
@@ -45,20 +45,20 @@ the default value, and the path item that applies for the inner type.
 ## Getting
 
 ```js
-const defaultAnimal = new Animal();
+const defaultAnimal = new Animal()
 
 const ownerOfUnnamedPet = new Person({
   givenName: 'Javier',
   familyName: 'Cejudo',
   pets: M.List.of(M.Maybe.of(defaultAnimal))
-});
+})
 
 ownerOfUnnamedPet.getIn([
   'pets',                  // String for regular fields
   0,                       // Numbers for M.List
   [defaultAnimal, 'name'], // A pair of default and path item for M.Maybe
   ['Unknown']              // Same as above, but only the default name is
-]);                        // required as we aren't going deeper
+])                        // required as we aren't going deeper
 // => Unknown
 ```
 
@@ -81,8 +81,8 @@ const ownerOfBane = ownerOfUnnamedPet.setIn([
   'pets',
   0,
   [defaultAnimal, 'name']
-], 'Bane');
+], 'Bane')
 
-ownerOfBane.getIn(['pets', 0, [defaultAnimal, 'name'], ['Unknown']]);
+ownerOfBane.getIn(['pets', 0, [defaultAnimal, 'name'], ['Unknown']])
 // => Bane
 ```

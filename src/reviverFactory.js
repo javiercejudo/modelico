@@ -1,19 +1,10 @@
-import { isPlainObject, reviverOrAsIs, getInnerTypes } from './U'
-
-const innerTypesCache = new WeakMap()
-
-const getInnerTypesWithCache = (path, Type) => {
-  if (!innerTypesCache.has(Type)) {
-    innerTypesCache.set(Type, getInnerTypes(path, Type))
-  }
-
-  return innerTypesCache.get(Type)
-}
+import { isPlainObject, reviverOrAsIs } from './U'
+import getInnerTypes from './getInnerTypes'
 
 const plainObjectReviverFactory = (Type, k, v, prevPath) =>
   Object.keys(v).reduce((acc, field) => {
     const path = prevPath.concat(field)
-    const innerTypes = getInnerTypesWithCache(path, Type)
+    const innerTypes = getInnerTypes(path, Type)
 
     const metadata = innerTypes[field]
 

@@ -36,6 +36,7 @@ class Enum extends Base {
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
         type: Ctor,
+        enumerators,
         reviver: reviverFactory(enumerators)
       }))
     })

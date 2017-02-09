@@ -4,8 +4,8 @@ export default M => {
   const { _, string, maybe } = M.metadata()
 
   class Friend extends M.Base {
-    constructor (fields) {
-      super(Friend, fields)
+    constructor (props) {
+      super(Friend, props)
     }
 
     static innerTypes (path) {

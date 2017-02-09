@@ -9,7 +9,7 @@ export default (U, should, M, fixtures) => () => {
     Friend
   } = fixtures
 
-  const { _ } = M.metadata()
+  const { _, number, string, withDefault } = M.metadata()
   const ModelicoDate = M.Date
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
@@ -71,6 +71,9 @@ export default (U, should, M, fixtures) => () => {
         importantDatesSet: M.Set.EMPTY(),
         sex: M.Maybe.of(Sex.MALE())
       })
+
+      Object.prototype.toString.call(author1)
+        .should.be.exactly('[object ModelicoModel]')
 
       // sanity check
       JSON.stringify(author1)
@@ -336,6 +339,68 @@ export default (U, should, M, fixtures) => () => {
         .bestFriend().getOrElse(Friend.EMPTY)
         .name()
         .should.be.exactly('John')
+    })
+  })
+
+  describe('withDefault', () => {
+    it('should allow enhancing metadata to have default values', () => {
+      class Book extends M.createModel({
+        title: string(),
+        author: withDefault(string(), 'anonymous')
+      }, 'Book') {
+        constructor (props) {
+          super(Book, props)
+        }
+
+        getTitleBy () {
+          return `"${this.title()}" by ${this.author()}`
+        }
+
+        static innerTypes () {
+          return super.innerTypes()
+        }
+      }
+
+      const lazarillo1 = M.fromJS(Book, {
+        title: 'Lazarillo de Tormes'
+      })
+
+      Object.prototype.toString.call(lazarillo1)
+        .should.be.exactly('[object Book]')
+
+      lazarillo1.getTitleBy()
+        .should.be.exactly('"Lazarillo de Tormes" by anonymous')
+
+      const lazarillo2 = new Book({
+        title: 'Lazarillo de Tormes'
+      })
+
+      lazarillo2.getTitleBy()
+        .should.be.exactly('"Lazarillo de Tormes" by anonymous')
+    })
+  })
+
+  describe('withDefault', () => {
+    it('should use the metadata to coerce the value if necessary', () => {
+      class CountryCallingCode extends M.createModel(() => ({
+        code: withDefault(number(), '34')
+      })) {
+        constructor (props) {
+          super(CountryCallingCode, props)
+        }
+
+        static innerTypes () {
+          return super.innerTypes()
+        }
+      }
+
+      const spain = M.fromJS(CountryCallingCode, {})
+
+      spain.code()
+        .should.be.exactly(34)
+
+      Object.prototype.toString.call(spain)
+        .should.be.exactly('[object ModelicoModel]')
     })
   })
 }

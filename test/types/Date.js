@@ -103,4 +103,11 @@ export default (should, M) => () => {
       modelicoDate1.equals('abc').should.be.exactly(false)
     })
   })
+
+  describe('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Date.of())
+        .should.be.exactly('[object ModelicoDate]')
+    })
+  })
 }

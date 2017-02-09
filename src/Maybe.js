@@ -1,14 +1,14 @@
 import { always, isNothing, emptyObject, haveDifferentTypes, equals } from './U'
 import Base from './Base'
 
-const reviverFactory = itemMetadata => (k, v) => {
+const reviverFactory = itemMetadata => (k, v, path) => {
   if (k !== '') {
     return v
   }
 
   const maybeValue = (v === null)
     ? null
-    : itemMetadata.reviver(k, v)
+    : itemMetadata.reviver(k, v, path)
 
   return new Maybe(maybeValue)
 }
@@ -52,6 +52,10 @@ class Maybe extends Base {
     this.inner = always(inner)
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMaybe'
   }
 
   get (fieldOrFallbackPair) {
@@ -153,7 +157,8 @@ class Maybe extends Base {
     return Object.freeze({
       type: Maybe,
       subtypes: [itemMetadata],
-      reviver: reviverFactory(itemMetadata)
+      reviver: reviverFactory(itemMetadata),
+      default: Maybe.of()
     })
   }
 

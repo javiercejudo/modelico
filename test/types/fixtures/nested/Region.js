@@ -4,17 +4,15 @@ export default M => {
   const { string } = M.metadata()
 
   class Region extends M.Base {
-    constructor (fields) {
-      super(Region, fields)
-
-      return Object.freeze(this)
+    constructor (props) {
+      super(Region, props)
     }
 
     customMethod () {
       return `${this.name()} (${this.code()})`
     }
 
-    static innerTypes (path) {
+    static innerTypes () {
       return Object.freeze({
         name: string(),
         code: string()

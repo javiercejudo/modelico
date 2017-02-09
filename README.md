@@ -28,7 +28,7 @@ right for you:
 
 ## Introduction
 
-The goal is to parse JSON strings like the following into JavaScript custom
+The goal is to parse JSON strings like
 objects,
 
 ```JSON
@@ -37,50 +37,60 @@ objects,
 }
 ```
 
-so that we can do things like this:
+into JavaScript customm so that we can do things like this:
 
 ```js
-const pet1 = M.fromJSON(Animal, petJson);
+const myPet = M.fromJSON(Animal, petJson)
 
-pet1.speak(); //=> 'my name is Robbie!'
-
-// pet1 is immutable
-const pet2 = pet1.set('name', 'Bane');
-
-pet2.name(); //=> 'Bane'
-pet1.name(); //=> 'Robbie'
-```
-
-`M.fromJSON` is a simpler way to do the following:
-
-```js
-const { _ } = M.metadata();
-const pet1 = JSON.parse(petJson, _(Animal).reviver);
+myPet.speak() //=> 'my name is Robbie!'
 ```
 
 Here is how `Animal` would look like:
 
 ```js
-const M = require('modelico'); // window.Modelico in the browser
-const { string } = M.metadata();
+const M = require('modelico') // window.Modelico in the browser
+const { string } = M.metadata()
 
-class Animal extends M.Base {
-  constructor(fields) {
-    super(Animal, fields);
+class Animal extends M.createModel({
+  name: string()
+}) {
+  constructor (props) {
+    super(Animal, props)
   }
 
   speak() {
-    const name = this.name();
+    // a function is created for each declared property
+    const name = this.name()
 
     return (name === '')
       ? `I don't have a name`
-      : `My name is ${name}!`;
+      : `My name is ${name}!`
+  }
+}
+```
+
+`M.createModel` allows us to abstract away a bit of boilerplate for standard
+models and have the property types definition at the top. Without it, `Animal`
+could be written like this:
+
+```js
+class Animal extends M.Base {
+  constructor(props) {
+    super(Animal, props)
+  }
+
+  speak() {
+    const name = this.name()
+
+    return (name === '')
+      ? `I don't have a name`
+      : `My name is ${name}!`
   }
 
   static innerTypes() {
     return Object.freeze({
       name: string()
-    });
+    })
   }
 }
 ```
@@ -108,11 +118,13 @@ function in `M.metadata()`, with some useful additions:
 
 ```js
 {
-  _,      // to retrieve the metadata of arbitrary types, eg. _(Animal)
-  asIs,   // useful for custom deserialisation, eg: asIs(x => 2 * x) to double numbers in JSON
-  any,    // to leave JSON input untouched
-  number, // for native numbers, but optionally wraps to support -0 and ±Infinity
-          // eg. number({wrap: true})
+  _,           // to retrieve the metadata of arbitrary types, eg. _(Animal)
+  asIs,        // useful for custom deserialisation, eg: asIs(x => 2 * x) to double numbers in JSON
+  any,         // to leave JSON input untouched
+  maybe,       // to declare a value as optional
+  withDefault, // to set a default if the value is missing
+  number,      // for native numbers, but optionally wraps to support -0 and ±Infinity
+               // eg. number({wrap: true})
 
   string, // remember they are all functions, eg. string(), list(date())
   boolean,
@@ -124,9 +136,8 @@ function in `M.metadata()`, with some useful additions:
   stringMap,
   list,
   set,
-  date,
-  maybe
-} = M.metadata();
+  date
+} = M.metadata()
 ```
 
 ## A note on immutability
@@ -134,17 +145,17 @@ function in `M.metadata()`, with some useful additions:
 Following the examples above:
 
 ```js
-const person2 = person1.set('givenName', 'Javi');
+const person2 = person1.set('givenName', 'Javi')
 
 // person2 is a clone of person1 with the givenName
 // set to 'Javi', but person1 is not mutated
-person2.fullName(); //=> 'Javi Cejudo'
-person1.fullName(); //=> 'Javier Cejudo'
+person2.fullName() //=> 'Javi Cejudo'
+person1.fullName() //=> 'Javier Cejudo'
 
-const person3 = person1.setIn(['pets', 0, 'name'], 'Bane');
+const person3 = person1.setIn(['pets', 0, 'name'], 'Bane')
 
-person3.pets().get(0).name(); //=> 'Bane'
-person1.pets().get(0).name(); //=> 'Robbie'
+person3.pets().get(0).name() //=> 'Bane'
+person1.pets().get(0).name() //=> 'Robbie'
 ```
 
 The same principle applies across all Modélico classes. In the case of
@@ -153,7 +164,7 @@ canonical way of freezing the other inner structures, so a copy is returned
 each time `.inner()` is called.
 
 ```js
-person1.pets().inner().shift().speak();
+person1.pets().inner().shift().speak()
 //=> TypeError: Cannot add/remove sealed array elements
 ```
 

@@ -4,8 +4,8 @@ export default (should, M) => () => {
   const { _, any, maybe, list, string } = M.metadata()
 
   class Animal extends M.Base {
-    constructor (fields = {}) {
-      super(Animal, fields)
+    constructor (props) {
+      super(Animal, props)
     }
 
     speak () {
@@ -24,19 +24,19 @@ export default (should, M) => () => {
   }
 
   class Person extends M.Base {
-    constructor (fields) {
-      super(Person, fields)
+    constructor (props) {
+      super(Person, props)
     }
 
     fullName () {
       return [this.givenName(), this.familyName()].join(' ').trim()
     }
 
-    static innerTypes () {
+    static innerTypes (path) {
       return Object.freeze({
         givenName: any(),
         familyName: string(),
-        pets: list(maybe(_(Animal)))
+        pets: list(maybe(_(Animal, path)))
       })
     }
   }

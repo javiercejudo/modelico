@@ -24,13 +24,20 @@ class ModelicoSet extends Base {
     this[innerOrigSymbol] = always(innerSet)
     this.inner = () => copy(innerSet)
     this.size = innerSet.size
-    this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
 
     if (!EMPTY_SET && this.size === 0) {
       EMPTY_SET = this
     }
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoSet'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   has (key) {

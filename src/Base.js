@@ -1,11 +1,10 @@
 import {
-  always, defaultTo, isPlainObject, isSomething, getInnerTypes,
+  always, defaultTo, isPlainObject, isSomething,
   emptyObject, haveDifferentTypes, equals
 } from './U'
 
 import { typeSymbol, fieldsSymbol } from './symbols'
-
-import M from './'
+import getInnerTypes from './getInnerTypes'
 
 const getPathReducer = (result, part) => result.get(part)
 
@@ -17,7 +16,7 @@ class Base {
 
     Object.freeze(fields)
 
-    const emptyMaybes = {}
+    const defaults = {}
     const innerTypes = getInnerTypes([], Type)
 
     thisArg = defaultTo(this)(thisArg)
@@ -25,24 +24,30 @@ class Base {
 
     Object.keys(innerTypes).forEach(key => {
       const valueCandidate = fields[key]
-      let value = M.Maybe.EMPTY
+      const defaultCandidate = innerTypes[key].default
+      let value
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate
-      } else if (innerTypes[key].type !== M.Maybe) {
-        throw TypeError(`no value for key "${key}"`)
+      } else if (isSomething(defaultCandidate)) {
+        value = innerTypes[key].default
+        defaults[key] = value
       } else {
-        emptyMaybes[key] = value
+        throw TypeError(`no value for key "${key}"`)
       }
 
       thisArg[key] = always(value)
     })
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)))
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(defaults, fields)))
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoModel'
   }
 
   get (field) {
-    return this[field]()
+    return this[fieldsSymbol]()[field]
   }
 
   getIn (path) {

@@ -238,4 +238,11 @@ export default (U, should, M, { Person }) => () => {
         .should.eql([0, 1, 1, 2, 3, 5, 8])
     })
   })
+
+  describe('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.List.of())
+        .should.be.exactly('[object ModelicoList]')
+    })
+  })
 }

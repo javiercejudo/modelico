@@ -218,4 +218,11 @@ export default (should, M, { Person }) => () => {
       should(map.inner().get('b')).be.exactly(2)
     })
   })
+
+  describe('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Map.of())
+        .should.be.exactly('[object ModelicoMap]')
+    })
+  })
 }

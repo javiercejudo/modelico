@@ -1,7 +1,9 @@
 import { version, author, homepage, license } from '../package.json'
 import * as symbols from './symbols'
-import { partial, always, identity } from './U'
+import { partial, always, identity, reviverOrAsIs } from './U'
 import reviverFactory from './reviverFactory'
+import getSchema from './getSchema'
+import withValidation from './withValidation'
 
 import Base from './Base'
 
@@ -59,12 +61,34 @@ const metadata = () => Object.freeze({
   map: ModelicoMap.metadata,
   stringMap: StringMap.metadata,
   maybe: Maybe.metadata,
-  set: ModelicoSet.metadata
+  set: ModelicoSet.metadata,
+
+  withDefault: (meta, def) => {
+    const defaultValue = reviverOrAsIs(meta)('', def)
+
+    return Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+  }
 })
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
 const fromJS = (Type, js) => _(Type).reviver('', js)
-const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js, [])
+const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js)
+const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js)
+const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js)
+
+const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
+  return class extends Base {
+    get [Symbol.toStringTag] () {
+      return stringTag
+    }
+
+    static innerTypes (path, Type) {
+      return (typeof innerTypes === 'function')
+        ? innerTypes(path, Type)
+        : Object.freeze(innerTypes)
+    }
+  }
+}
 
 export default {
   about: Object.freeze({ version, author, homepage, license }),
@@ -78,14 +102,21 @@ export default {
   Maybe,
   Base,
   Set: ModelicoSet,
+  createModel,
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
   fromJS,
   genericsFromJS,
   fromJSON: (Type, json) => fromJS(Type, JSON.parse(json)),
   genericsFromJSON: (Type, innerMetadata, json) => genericsFromJS(Type, innerMetadata, JSON.parse(json)),
+  ajvFromJS,
+  ajvGenericsFromJS,
+  ajvFromJSON: (_, Type, schema, json) => ajvFromJS(_, Type, schema, JSON.parse(json)),
+  ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) => ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
   metadata,
   ajvMetadata,
+  getSchema,
+  withValidation,
   proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,

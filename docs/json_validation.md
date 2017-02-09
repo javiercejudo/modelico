@@ -7,10 +7,11 @@ JSON is coerced when the metadata defined doesn't match the actual value, eg.
 if a field has `string()` as its metadata, but there is a number in the
 incoming JSON, it will be coerced with `String(5)`.
 
-To validate the JSON strictly, you have two options:
+To validate the JSON strictly, you have the following options:
 
-- use `M.ajvMetadata` for [Ajv](https://epoberezkin.github.io/ajv/)'s implementation of [JSON schema](http://json-schema.org/).
+- use `M.ajvMetadata` for [Ajv](https://epoberezkin.github.io/ajv/)'s implementation of [JSON schema](http://json-schema.org/);
 - manually create validation functions that work as revivers;
+- a bit of both
 
 ## `M.ajvMetadata` and JSON schema
 
@@ -23,8 +24,8 @@ development in favour of faster parsing in production:
 
 ```js
 const ajvOptions = {}
-const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined;
-const { string, list, number } = M.ajvMetadata(ajvIfProd)
+const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined
+const { ajvString, ajvList, ajvNumber } = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -33,8 +34,8 @@ class Animal extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: string({ minLength: 1, maxLength: 25 }),
-      dimensions: list({ minItems: 3, maxItems: 3 }, number({ minimum: 0, exclusiveMinimum: true }))
+      name: ajvString({ minLength: 1, maxLength: 25 }),
+      dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
     })
   }
 }
@@ -47,32 +48,18 @@ not bundled with Modélico.
 ## Custom validation metadata
 
 If you only need to validate certain fields or you have custom rules that are
-not covered by what JSON schema can validate, you may write your own metadata:
+not covered by what JSON schema can validate, you may write your own metadata.
+`M.withValidation` facilitates this use case.
 
 ```js
-const { string, list, number } = M.metadata
+const { string, list, number } = M.metadata()
 
-// boundedString is going to return metadata that validates the string length
-// before reviving it by overriding the string metadata revive
-const boundedString = (min = 0, max = Infinity) => {
-  const stringMeta = string()
-
-  const reviver = (k, v) => {
-    if (k !== '') {
-      return v
-    }
-
-    if (typeof v !== 'string' || v.length < min || v.length > max) {
-      throw TypeError('not a string or string is out of bounds')
-    }
-
-    // In this case, we could return v directly since strings are the same in
-    // JSON and JavaScript. However, this is the solution for general types.
-    return stringMeta.reviver('', v)
-  }
-
-  return Object.assign({}, stringMeta, { reviver })
-}
+// lowerCaseString is going to return metadata that validates the string
+// before reviving it by overriding the string metadata reviver
+const lowerCaseString = () => M.withValidation(
+  v => v.toLowerCase() === v
+  (v, path) => `string ${v} at ${path.join(' > ')} is not all lower case`
+)(string())
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -81,9 +68,49 @@ class Animal extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: boundedString(1, 25),
+      name: lowerCaseString(),
       dimensions: list(number())
     })
   }
 }
 ```
+
+## Why not both?
+
+In the example above, we could have based `lowerCaseString` on `ajvString`
+instead of the normal `string` to combine custom and JSON schema rules.
+
+`M.withValidation` works with any metadata, including the `Ajv` variant and
+can be composed, since it returns a function that takes metadata and returns
+metadata.
+
+The error message function gets the path where the metadata is used to help
+debugging complex deep objects.
+
+```js
+const noNumbers = M.withValidation(
+  x => /^[^0-9]+$/.test(v),
+  (v, path) => `string ${v} at "${path.join(' > ')}" contains numbers`
+)
+
+const lowercase = M.withValidation(
+  v => v.toLowerCase() === v,
+  (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`
+)
+
+// see a sample pipe function at
+// https://gist.github.com/javiercejudo/98ab1f0742387e8aca0646adb325059f
+const stringWithoutNumbersAndLowerCase = pipe(
+  ajvString,
+  noNumbers,
+  lowercase
+)
+```
+
+Now we can define fields with something like
+`stringWithoutNumbersAndLowerCase({minLength: 5})`.
+
+Please note that although it might be tempting to compose the validation
+functions and use `M.withValidation` only once with the result, by using
+`M.withValidation` for each individual function you can attach specific
+error messages to simplify debugging.

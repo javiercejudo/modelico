@@ -137,4 +137,11 @@ export default (should, M) => () => {
       M.Number.of(NaN).equals(M.Number.of(NaN)).should.be.exactly(true)
     })
   })
+
+  describe('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Number.of(1))
+        .should.be.exactly('[object ModelicoNumber]')
+    })
+  })
 }

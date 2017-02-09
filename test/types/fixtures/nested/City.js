@@ -5,10 +5,8 @@ export default (M, Region, countryFactory) => {
   const { _, string } = M.metadata()
 
   class City extends M.Base {
-    constructor (fields) {
-      super(City, fields)
-
-      return Object.freeze(this)
+    constructor (props) {
+      super(City, props)
     }
 
     static innerTypes (path) {
