@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M) => () => {
+export default (U, should, M) => () => {
   const { date } = M.metadata()
 
   describe('immutability', () => {
@@ -104,7 +104,7 @@ export default (should, M) => () => {
     })
   })
 
-  describe('toStringTag', () => {
+  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Date.of())
         .should.be.exactly('[object ModelicoDate]')

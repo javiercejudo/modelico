@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M) => () => {
+export default (U, should, M) => () => {
   const { number } = M.metadata()
 
   describe('instantiation', () => {
@@ -138,7 +138,7 @@ export default (should, M) => () => {
     })
   })
 
-  describe('toStringTag', () => {
+  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Number.of(1))
         .should.be.exactly('[object ModelicoNumber]')

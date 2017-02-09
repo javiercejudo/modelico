@@ -30,8 +30,8 @@ export default (U, should, M, fixtures) => () => {
 
       const author = new Person(authorFields)
 
-      ;(() => { authorFields.givenName = 'Javi' })
-        .should.throw()
+      should(() => { authorFields.givenName = 'Javi' })
+        .throw()
 
       author.givenName()
         .should.be.exactly('Javier')
@@ -53,11 +53,11 @@ export default (U, should, M, fixtures) => () => {
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
-      (() => M.fromJSON(Person, author2Json))
-        .should.throw();
+      should(() => M.fromJSON(Person, author2Json))
+        .throw()
 
-      (() => new Person(null))
-        .should.throw()
+      should(() => new Person(null))
+        .throw()
     })
 
     it('should set fields returning a new object', () => {
@@ -72,9 +72,6 @@ export default (U, should, M, fixtures) => () => {
         sex: M.Maybe.of(Sex.MALE())
       })
 
-      Object.prototype.toString.call(author1)
-        .should.be.exactly('[object ModelicoModel]')
-
       // sanity check
       JSON.stringify(author1)
         .should.be.exactly(author1Json)
@@ -88,10 +85,10 @@ export default (U, should, M, fixtures) => () => {
       author1.givenName().should.be.exactly('Javier')
 
       JSON.stringify(author1)
-        .should.be.exactly(author1Json);
+        .should.be.exactly(author1Json)
 
       // new object checks
-      (author2 === author1).should.be.exactly(false)
+      should(author2 === author1).be.exactly(false)
       author2.givenName().should.be.exactly('Javi')
       author2.equals(author1).should.be.exactly(false, 'Oops, they are equal')
     })
@@ -232,10 +229,10 @@ export default (U, should, M, fixtures) => () => {
 
       should(PartOfDay.EVENING().minTime)
         .be.exactly(author1.favouritePartOfDay().minTime)
-        .and.exactly(author2.favouritePartOfDay().minTime);
+        .and.exactly(author2.favouritePartOfDay().minTime)
 
-      (Sex.MALE().toJSON())
-        .should.be.exactly(author1.sex().toJSON())
+      should(Sex.MALE().toJSON())
+        .be.exactly(author1.sex().toJSON())
         .and.exactly(author2.sex().toJSON())
     })
 
@@ -365,9 +362,6 @@ export default (U, should, M, fixtures) => () => {
         title: 'Lazarillo de Tormes'
       })
 
-      Object.prototype.toString.call(lazarillo1)
-        .should.be.exactly('[object Book]')
-
       lazarillo1.getTitleBy()
         .should.be.exactly('"Lazarillo de Tormes" by anonymous')
 
@@ -398,8 +392,42 @@ export default (U, should, M, fixtures) => () => {
 
       spain.code()
         .should.be.exactly(34)
+    })
+  })
+
+  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+    it('should use the metadata to coerce the value if necessary', () => {
+      class CountryCallingCode extends M.createModel(() => ({
+        code: withDefault(number(), '34')
+      })) {
+        constructor (props) {
+          super(CountryCallingCode, props)
+        }
+
+        static innerTypes () {
+          return super.innerTypes()
+        }
+      }
+
+      const spain = M.fromJS(CountryCallingCode, {})
 
       Object.prototype.toString.call(spain)
+        .should.be.exactly('[object ModelicoModel]')
+    })
+
+    it('should implement Symbol.toStringTag', () => {
+      const author1 = new Person({
+        givenName: 'Javier',
+        familyName: 'Cejudo',
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        favouritePartOfDay: PartOfDay.EVENING(),
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
+        sex: M.Maybe.of(Sex.MALE())
+      })
+
+      Object.prototype.toString.call(author1)
         .should.be.exactly('[object ModelicoModel]')
     })
   })

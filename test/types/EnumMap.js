@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M, { PartOfDay }) => () => {
+export default (U, should, M, { PartOfDay }) => () => {
   const { _, any, enumMap, string } = M.metadata()
 
   describe('immutability', () => {
@@ -155,7 +155,7 @@ export default (should, M, { PartOfDay }) => () => {
     })
   })
 
-  describe('toStringTag', () => {
+  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.EnumMap.of())
         .should.be.exactly('[object ModelicoEnumMap]')

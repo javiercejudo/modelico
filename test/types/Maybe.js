@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M, { Person, PartOfDay }) => () => {
+export default (U, should, M, { Person, PartOfDay }) => () => {
   const { _, number, maybe } = M.metadata()
 
   const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}'
@@ -232,7 +232,7 @@ export default (should, M, { Person, PartOfDay }) => () => {
     })
   })
 
-  describe('toStringTag', () => {
+  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Maybe.of(1))
         .should.be.exactly('[object ModelicoMaybe]')
