@@ -422,7 +422,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       M.getSchema(meta)
         .should.deepEqual({
           type: 'object',
-          maxProperties: 3,
+          maxProperties: 2,
           properties: {
             type: 'number'
           }
@@ -433,7 +433,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       M.getSchema(meta2)
         .should.deepEqual({
           type: 'object',
-          maxProperties: 3,
+          maxProperties: 2,
           properties: {}
         })
     })
@@ -657,6 +657,36 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       (() => new CountryCode())
         .should.throw(/should NOT be longer than 3 characters/)
+    })
+  })
+
+  describe('validate within the constructor', () => {
+    const ajv = Ajv()
+
+    it('should validate the default value', () => {
+      class CountryCode extends M.Base {
+        constructor (props) {
+          if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
+            throw TypeError(ajv.errors[0].message)
+          }
+
+          super(CountryCode, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            value: ajvWithDefault(ajvString({minLength: 3, maxLength: 3}), 'ESP')
+          })
+        }
+      }
+
+      (() => new CountryCode({value: 'SPAIN'}))
+        .should.throw(/should NOT be longer than 3 characters/)
+
+      const australia = new CountryCode({value: 'AUS'})
+
+      should(() => australia.set('value', 'AU'))
+        .throw(/should NOT be shorter than 3 characters/)
     })
   })
 

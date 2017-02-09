@@ -736,6 +736,7 @@ var Enum = function (_Base) {
     Object.defineProperty(_this, 'metadata', {
       value: always(Object.freeze({
         type: Ctor,
+        enumerators: enumerators,
         reviver: reviverFactory$3(enumerators)
       }))
     });
@@ -1860,7 +1861,7 @@ var ajvMetadata = (function () {
       return Object.assign({}, schemaToCheck, innerSchemaGetter());
     };
 
-    return Object.assign({}, meta, { reviver: reviver, schema: schemaGetter });
+    return Object.assign({}, meta, { reviver: reviver, ownSchema: always(schemaToCheck), schema: schemaGetter });
   };
 
   var ajv_ = function ajv_(Type) {
@@ -1901,7 +1902,7 @@ var ajvMetadata = (function () {
       anyOf: [{ type: 'number' }, { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }]
     }, numberMeta);
 
-    return Object.assign({}, meta, { reviver: reviver, schema: always(numberMeta) });
+    return Object.assign({}, meta, { reviver: reviver, ownSchema: always(numberMeta), schema: always(numberMeta) });
   };
 
   var ajvString = function ajvString(schema) {
@@ -1919,7 +1920,7 @@ var ajvMetadata = (function () {
   var ajvEnumMap = function ajvEnumMap(schema, keyMetadata, valueMetadata) {
     return ajvMeta(enumMap(keyMetadata, valueMetadata), {
       type: 'object',
-      maxProperties: Object.keys(keyMetadata).length
+      maxProperties: Object.keys(keyMetadata.enumerators).length
     }, schema, function () {
       return { properties: getSchema$1(valueMetadata) };
     });

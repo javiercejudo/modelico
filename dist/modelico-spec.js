@@ -3671,7 +3671,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         M.getSchema(meta).should.deepEqual({
           type: 'object',
-          maxProperties: 3,
+          maxProperties: 2,
           properties: {
             type: 'number'
           }
@@ -3681,7 +3681,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         M.getSchema(meta2).should.deepEqual({
           type: 'object',
-          maxProperties: 3,
+          maxProperties: 2,
           properties: {}
         });
       });
@@ -3897,6 +3897,46 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
     });
 
+    describe('validate within the constructor', function () {
+      var ajv = Ajv();
+
+      it('should validate the default value', function () {
+        var CountryCode = function (_M$Base4) {
+          inherits(CountryCode, _M$Base4);
+
+          function CountryCode(props) {
+            classCallCheck(this, CountryCode);
+
+            if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
+              throw TypeError(ajv.errors[0].message);
+            }
+
+            return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, CountryCode, props));
+          }
+
+          createClass(CountryCode, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                value: ajvWithDefault(ajvString({ minLength: 3, maxLength: 3 }), 'ESP')
+              });
+            }
+          }]);
+          return CountryCode;
+        }(M.Base);
+
+        (function () {
+          return new CountryCode({ value: 'SPAIN' });
+        }).should.throw(/should NOT be longer than 3 characters/);
+
+        var australia = new CountryCode({ value: 'AUS' });
+
+        should(function () {
+          return australia.set('value', 'AU');
+        }).throw(/should NOT be shorter than 3 characters/);
+      });
+    });
+
     describe('withValidation', function () {
       it('facilitates custom validation rules', function () {
         var lowerCaseString = function lowerCaseString(schema) {
@@ -3939,8 +3979,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           })(ajvString(schema));
         };
 
-        var MagicString = function (_M$Base4) {
-          inherits(MagicString, _M$Base4);
+        var MagicString = function (_M$Base5) {
+          inherits(MagicString, _M$Base5);
 
           function MagicString(props) {
             classCallCheck(this, MagicString);

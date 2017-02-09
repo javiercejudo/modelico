@@ -72,7 +72,7 @@ export default (ajv = { validate: T }) => {
 
     const schemaGetter = () => Object.assign({}, schemaToCheck, innerSchemaGetter())
 
-    return Object.assign({}, meta, { reviver, schema: schemaGetter })
+    return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   }
 
   const ajv_ = (Type, schema = emptyObject, path, innerMetadata) => {
@@ -103,7 +103,7 @@ export default (ajv = { validate: T }) => {
       ]
     }, numberMeta)
 
-    return Object.assign({}, meta, { reviver, schema: always(numberMeta) })
+    return Object.assign({}, meta, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
   }
 
   const ajvString = schema =>
@@ -118,7 +118,7 @@ export default (ajv = { validate: T }) => {
   const ajvEnumMap = (schema, keyMetadata, valueMetadata) =>
     ajvMeta(enumMap(keyMetadata, valueMetadata), {
       type: 'object',
-      maxProperties: Object.keys(keyMetadata).length
+      maxProperties: Object.keys(keyMetadata.enumerators).length
     }, schema, () => ({ properties: getSchema(valueMetadata) }))
 
   const ajvList = (schema, itemMetadata) =>

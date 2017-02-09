@@ -483,6 +483,7 @@ class Enum extends Base$1 {
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
         type: Ctor,
+        enumerators,
         reviver: reviverFactory$3(enumerators)
       }))
     });
@@ -1369,7 +1370,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
 
     const schemaGetter = () => Object.assign({}, schemaToCheck, innerSchemaGetter());
 
-    return Object.assign({}, meta, { reviver, schema: schemaGetter })
+    return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   };
 
   const ajv_ = (Type, schema = emptyObject, path, innerMetadata) => {
@@ -1400,7 +1401,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
       ]
     }, numberMeta);
 
-    return Object.assign({}, meta, { reviver, schema: always(numberMeta) })
+    return Object.assign({}, meta, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
   };
 
   const ajvString = schema =>
@@ -1415,7 +1416,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
   const ajvEnumMap = (schema, keyMetadata, valueMetadata) =>
     ajvMeta(enumMap(keyMetadata, valueMetadata), {
       type: 'object',
-      maxProperties: Object.keys(keyMetadata).length
+      maxProperties: Object.keys(keyMetadata.enumerators).length
     }, schema, () => ({ properties: getSchema$1(valueMetadata) }));
 
   const ajvList = (schema, itemMetadata) =>
