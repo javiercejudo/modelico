@@ -16,11 +16,11 @@ class Person extends M.Base {
 
   // ... same as before
 
-  static innerTypes() {
+  static innerTypes (path) {
     return Object.freeze({
       givenName: string(),
       familyName: string(),
-      pets: list(maybe(_(Animal)))
+      pets: list(maybe(_(Animal, path)))
     })
   }
 }
@@ -29,7 +29,7 @@ class Animal extends M.Base {
 
   // ... same as before
 
-  static innerTypes() {
+  static innerTypes () {
     return Object.freeze({
       name: maybe(string())
     })

@@ -23,6 +23,8 @@ is performed. This can be leveraged to only enable validation during
 development in favour of faster parsing in production:
 
 ```js
+import Ajv from 'ajv'
+
 const ajvOptions = {}
 const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined
 const { ajvString, ajvList, ajvNumber } = M.ajvMetadata(ajvIfProd)
@@ -57,7 +59,7 @@ const { string, list, number } = M.metadata()
 // lowerCaseString is going to return metadata that validates the string
 // before reviving it by overriding the string metadata reviver
 const lowerCaseString = () => M.withValidation(
-  v => v.toLowerCase() === v
+  v => v.toLowerCase() === v,
   (v, path) => `string ${v} at ${path.join(' > ')} is not all lower case`
 )(string())
 

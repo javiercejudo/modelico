@@ -42,7 +42,7 @@ into JavaScript customm so that we can do things like this:
 ```js
 const myPet = M.fromJSON(Animal, petJson)
 
-myPet.speak() //=> 'my name is Robbie!'
+myPet.speak() // => 'my name is Robbie!'
 ```
 
 Here is how `Animal` would look like:
@@ -51,35 +51,12 @@ Here is how `Animal` would look like:
 const M = require('modelico') // window.Modelico in the browser
 const { string } = M.metadata()
 
-class Animal extends M.createModel({
-  name: string()
-}) {
+class Animal extends M.Base {
   constructor (props) {
     super(Animal, props)
   }
 
-  speak() {
-    // a function is created for each declared property
-    const name = this.name()
-
-    return (name === '')
-      ? `I don't have a name`
-      : `My name is ${name}!`
-  }
-}
-```
-
-`M.createModel` allows us to abstract away a bit of boilerplate for standard
-models and have the property types definition at the top. Without it, `Animal`
-could be written like this:
-
-```js
-class Animal extends M.Base {
-  constructor(props) {
-    super(Animal, props)
-  }
-
-  speak() {
+  speak () {
     const name = this.name()
 
     return (name === '')
@@ -87,7 +64,7 @@ class Animal extends M.Base {
       : `My name is ${name}!`
   }
 
-  static innerTypes() {
+  static innerTypes () {
     return Object.freeze({
       name: string()
     })
@@ -117,7 +94,7 @@ Each of the types above has an associated metadata
 function in `M.metadata()`, with some useful additions:
 
 ```js
-{
+const {
   _,           // to retrieve the metadata of arbitrary types, eg. _(Animal)
   asIs,        // useful for custom deserialisation, eg: asIs(x => 2 * x) to double numbers in JSON
   any,         // to leave JSON input untouched
@@ -149,13 +126,13 @@ const person2 = person1.set('givenName', 'Javi')
 
 // person2 is a clone of person1 with the givenName
 // set to 'Javi', but person1 is not mutated
-person2.fullName() //=> 'Javi Cejudo'
-person1.fullName() //=> 'Javier Cejudo'
+person2.fullName() // => 'Javi Cejudo'
+person1.fullName() // => 'Javier Cejudo'
 
 const person3 = person1.setIn(['pets', 0, 'name'], 'Bane')
 
-person3.pets().get(0).name() //=> 'Bane'
-person1.pets().get(0).name() //=> 'Robbie'
+person3.pets().get(0).name() // => 'Bane'
+person1.pets().get(0).name() // => 'Robbie'
 ```
 
 The same principle applies across all Modélico classes. In the case of
@@ -165,7 +142,7 @@ each time `.inner()` is called.
 
 ```js
 person1.pets().inner().shift().speak()
-//=> TypeError: Cannot add/remove sealed array elements
+// => TypeError: Cannot add/remove sealed array elements
 ```
 
 ## Learn more

@@ -7,17 +7,17 @@ with ES5-style classes. In the case of the `Animal` class from the
 [introductory example](../README.md#introduction):
 
 ```js
-(function(M) {
+(function (M) {
   var m = M.metadata()
 
-  function Animal(fields) {
+  function Animal (fields) {
     M.Base.factory(Animal, fields, this)
   }
 
   Animal.prototype = Object.create(M.Base.prototype)
   Animal.prototype.constructor = Animal
 
-  Animal.prototype.speak = function() {
+  Animal.prototype.speak = function () {
     var name = this.name()
 
     return (name === '')
@@ -25,7 +25,7 @@ with ES5-style classes. In the case of the `Animal` class from the
       : 'My name is ' + name + '!'
   }
 
-  Animal.innerTypes = function() {
+  Animal.innerTypes = function () {
     return Object.freeze({
       name: m.string()
     })

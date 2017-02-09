@@ -19,10 +19,10 @@ const defaultMap = M.Map.fromObject({a: 1, b: 2, c: 3})
 const proxiedMap = p(defaultMap)
 
 // without proxies
-defaultMap.inner().keys().next() //=> { value: "a", done: false }
+defaultMap.inner().keys().next() // => { value: "a", done: false }
 
 // with proxies
-proxiedMap.keys().next() //=> { value: "a", done: false }
+proxiedMap.keys().next() // => { value: "a", done: false }
 ```
 
 Please note that native methods that modify the structure in place will
@@ -31,8 +31,8 @@ instead return a new modelico object:
 ```js
 const proxiedMap2 = proxiedMap.delete('b')
 
-proxiedMap.size  //=> 3 (still)
-proxiedMap2.size //=> 2
+proxiedMap.size  // => 3 (still)
+proxiedMap2.size // => 2
 ```
 
 See [proxy tests](../test/proxies) for more details.
