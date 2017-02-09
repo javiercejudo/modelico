@@ -69,7 +69,7 @@ class NumberCollection extends M.Base {
     }
   }
 
-  sum() {
+  sum () {
     return this.getNumbers().reduce((acc, x) => acc + x, 0)
   }
 
@@ -95,7 +95,7 @@ col1 = M.fromJSON(NumberCollection, `
   }
 `)
 
-col1.sum() //=> 4035
+col1.sum() // => 4035
 ```
 
 ```js
@@ -106,7 +106,7 @@ col2 = M.fromJSON(NumberCollection, `
   }
 `)
 
-col2.sum() //=> 13
+col2.sum() // => 13
 ```
 
 In this case, the serialisation side of things will work out of the box, since
@@ -115,8 +115,8 @@ implement `.toJSON()` methods on their instances:
 
 ```js
 JSON.stringify(col1)
-//=> {"collectionType":"StringMap","collection":{"a":10,"b":25,"c":4000}}
+// => {"collectionType":"StringMap","collection":{"a":10,"b":25,"c":4000}}
 
 JSON.stringify(col2)
-//=> {"collectionType":"List","collection":[1,2,3,4,3]}
+// => {"collectionType":"List","collection":[1,2,3,4,3]}
 ```

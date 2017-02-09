@@ -40,22 +40,23 @@ inner types using the `M.metadata()._` function.
 
 ```js
 import M from 'modelico'
+
 const { _, string, list } = M.metadata()
 
 class Person extends M.Base {
-  constructor(fields) {
+  constructor (fields) {
     super(Person, fields)
   }
 
-  fullName() {
+  fullName () {
     return [this.givenName(), this.familyName()].join(' ').trim()
   }
 
-  static innerTypes() {
+  static innerTypes (path) {
     return Object.freeze({
       givenName: string(),
       familyName: string(),
-      pets: list(_(Animal))
+      pets: list(_(Animal, path))
     })
   }
 }

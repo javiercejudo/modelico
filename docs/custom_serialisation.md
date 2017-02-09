@@ -61,8 +61,8 @@ const pointA = M.fromJSON(Point, '"2,3"')
 const pointB = new Point(3, 4)
 
 pointA.distanceTo(pointB)
-//=> 1.4142135623730951 ≈ √2
+// => 1.4142135623730951 ≈ √2
 
 JSON.stringify(pointB)
-//=> "3,4"
+// => "3,4"
 ```

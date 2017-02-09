@@ -8,7 +8,7 @@ By design, all fields are required, ie. `null` or missing fields will cause a
 
 ```js
 const pet = M.fromJSON(Animal, '{"name": null}')
-//=> TypeError: no value for key "name"
+// => TypeError: no value for key "name"
 ```
 
 To support missing properties or `null` values, you can either use
@@ -27,7 +27,7 @@ class Animal extends M.Base {
 
   // ... same as before
 
-  static innerTypes() {
+  static innerTypes () {
     return Object.freeze({
       name: withDefault(string(), 'Unknown')
     })
@@ -42,9 +42,9 @@ const pet1 = M.fromJSON(Animal, '{"name": "Bane"}')
 const pet2 = M.fromJSON(Animal, '{"name": null}')
 const pet3 = M.fromJSON(Animal, '{}')
 
-pet1.name() //=> Bane
-pet2.name() //=> Unknown
-pet3.name() //=> Unknown
+pet1.name() // => Bane
+pet2.name() // => Unknown
+pet3.name() // => Unknown
 ```
 
 ## Maybes
@@ -57,7 +57,7 @@ class Animal extends M.Base {
 
   // ... same as before
 
-  static innerTypes() {
+  static innerTypes () {
     return Object.freeze({
       name: maybe(string())
     })
@@ -72,13 +72,13 @@ Then, we can use it as follows:
 const pet1 = M.fromJSON(Animal, '{"name": null}')
 const pet2 = M.fromJSON(Animal, '{}')
 
-pet1.name().isEmpty()         //=> true
-pet1.name().getOrElse('Bane') //=> Bane
-JSON.stringify(pet1)          //=> {"name":null}
+pet1.name().isEmpty()         // => true
+pet1.name().getOrElse('Bane') // => Bane
+JSON.stringify(pet1)          // => {"name":null}
 
-pet2.name().isEmpty()         //=> true
-pet2.name().getOrElse('Bane') //=> Bane
-JSON.stringify(pet2)          //=> {"name":null}
+pet2.name().isEmpty()         // => true
+pet2.name().getOrElse('Bane') // => Bane
+JSON.stringify(pet2)          // => {"name":null}
 ```
 
 _Note: `pet2` does not produce the same JSON it was parsed from. If that is
