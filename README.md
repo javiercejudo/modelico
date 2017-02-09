@@ -15,6 +15,8 @@ See [browser tests](test/browser) for more details.*
 
 ## Installation
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/javiercejudo/modelico.svg)](https://greenkeeper.io/)
+
     npm i modelico
 
 To use it in the browser, grab the [minified](dist/modelico.min.js) or the
