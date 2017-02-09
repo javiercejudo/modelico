@@ -9,8 +9,7 @@ models.
 [![Build Status](https://saucelabs.com/browser-matrix/modelico.svg)](https://saucelabs.com/u/modelico)
 
 *Note: [babel-polyfill](https://babeljs.io/docs/usage/polyfill/) might be
-required for browsers other than Chrome, Firefox and Edge. Additionally, IE 9
-and 10 also require a `getPrototypeOf` polyfill as the one in [es5-sham](https://github.com/es-shims/es5-shim#shams).
+required for browsers other than Chrome, Firefox and Edge.
 See [browser tests](test/browser) for more details.*
 
 ## Installation
@@ -20,16 +19,12 @@ See [browser tests](test/browser) for more details.*
 To use it in the browser, grab the [minified](dist/modelico.min.js) or the
 [development](dist/modelico.js) files.
 
-Run the current tests directly on your target browsers to see what setup is
-right for you:
-
-- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html) with standard ES5 setup
-- [Run](https://rawgit.com/javiercejudo/modelico/master/test/browser/ie9_10.html) with legacy ES3 setup
+[Run the current tests](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html)
+directly on your target browsers to make sure things work as expected.
 
 ## Introduction
 
 The goal is to parse JSON strings like
-objects,
 
 ```JSON
 {
@@ -37,7 +32,7 @@ objects,
 }
 ```
 
-into JavaScript customm so that we can do things like this:
+into JavaScript custom objects so that we can do things like this:
 
 ```js
 const myPet = M.fromJSON(Animal, petJson)

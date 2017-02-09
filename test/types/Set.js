@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M, { Person }) => () => {
+export default (U, should, M, { Person }) => () => {
   const { _, date, set } = M.metadata()
 
   describe('immutability', () => {
@@ -197,7 +197,7 @@ export default (should, M, { Person }) => () => {
     })
   })
 
-  describe('toStringTag', () => {
+  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Set.of())
         .should.be.exactly('[object ModelicoSet]')

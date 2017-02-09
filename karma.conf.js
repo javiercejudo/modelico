@@ -18,7 +18,7 @@ module.exports = function (config) {
       'dist/modelico.js',
       'dist/modelico.min.js',
       'dist/modelico-spec.js',
-      'test/browser/' + (process.env.ENTRY || 'index.js')
+      'test/browser/index.js'
     ],
 
     // list of files to exclude

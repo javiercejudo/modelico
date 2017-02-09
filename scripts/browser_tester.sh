@@ -11,5 +11,5 @@ if [[ "$TRAVIS_NODE_VERSION" = "6" && "$SAUCE_ACCESS_KEY" && "$TRAVIS_PULL_REQUE
 fi
 
 echo -e '\nO_o Running browser tests...'
-ENTRY="index.js" karma start --single-run --browsers $BROWSERS
-ENTRY="ie9_10.js" karma start --single-run --browsers $LEGACY_IE_BROWSERS
+karma start --single-run --browsers $BROWSERS
+karma start --single-run --browsers $LEGACY_IE_BROWSERS

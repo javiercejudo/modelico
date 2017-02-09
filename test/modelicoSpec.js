@@ -25,9 +25,18 @@ const hasProxies = (() => {
   return false
 })()
 
+const hasToStringTagSymbol = (() => {
+  const a = {}
+
+  a[Symbol.toStringTag] = 'foo'
+
+  return (a + '') === '[object foo]'
+})()
+
 const buildUtils = options => Object.freeze({
   skipIfNoProxies: hasProxies ? it : it.skip,
   skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
+  skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
   skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
 })
@@ -94,15 +103,15 @@ export default (options, should, M, extensions) => () => {
   const deps = [should, M, fixtures, extensions]
 
   describe('Base', Base(U, ...deps))
-  describe('Number', ModelicoNumber(...deps))
-  describe('Date', ModelicoDate(...deps))
-  describe('Map', ModelicoMap(...deps))
+  describe('Number', ModelicoNumber(U, ...deps))
+  describe('Date', ModelicoDate(U, ...deps))
+  describe('Map', ModelicoMap(U, ...deps))
   describe('StringMap', ModelicoStringMap(...deps))
   describe('Enum', ModelicoEnum(...deps))
-  describe('EnumMap', ModelicoEnumMap(...deps))
-  describe('ModelicoList', ModelicoList(U, ...deps))
-  describe('ModelicoSet', ModelicoSet(...deps))
-  describe('ModelicoMaybe', ModelicoMaybe(...deps))
+  describe('EnumMap', ModelicoEnumMap(U, ...deps))
+  describe('List', ModelicoList(U, ...deps))
+  describe('Set', ModelicoSet(U, ...deps))
+  describe('Maybe', ModelicoMaybe(U, ...deps))
 
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
