@@ -157,7 +157,8 @@ class Maybe extends Base {
     return Object.freeze({
       type: Maybe,
       subtypes: [itemMetadata],
-      reviver: reviverFactory(itemMetadata)
+      reviver: reviverFactory(itemMetadata),
+      default: Maybe.of()
     })
   }
 

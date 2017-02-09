@@ -39,30 +39,7 @@ var createClass = function () {
 
 
 
-var get = function get(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
 
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
 
 var inherits = function (subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
@@ -137,10 +114,7 @@ var Base = (function (U, should, M, fixtures) {
         Friend = fixtures.Friend;
 
     var _M$metadata = M.metadata(),
-        _ = _M$metadata._,
-        number = _M$metadata.number,
-        string = _M$metadata.string,
-        withDefault = _M$metadata.withDefault;
+        _ = _M$metadata._;
 
     var ModelicoDate = M.Date;
 
@@ -209,8 +183,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Maybe.of(Sex.MALE())
         });
-
-        Object.prototype.toString.call(author1).should.be.exactly('[object ModelicoModel]');
 
         // sanity check
         JSON.stringify(author1).should.be.exactly(author1Json);
@@ -462,80 +434,6 @@ var Base = (function (U, should, M, fixtures) {
         marc.bestFriend().getOrElse(Friend.EMPTY).name().should.be.exactly('John');
       });
     });
-
-    describe('withDefault', function () {
-      it('should allow enhancing metadata to have default values', function () {
-        var Book = function (_M$createModel) {
-          inherits(Book, _M$createModel);
-
-          function Book(props) {
-            classCallCheck(this, Book);
-            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, props));
-          }
-
-          createClass(Book, [{
-            key: 'getTitleBy',
-            value: function getTitleBy() {
-              return '"' + this.title() + '" by ' + this.author();
-            }
-          }], [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return get(Book.__proto__ || Object.getPrototypeOf(Book), 'innerTypes', this).call(this);
-            }
-          }]);
-          return Book;
-        }(M.createModel({
-          title: string(),
-          author: withDefault(string(), 'anonymous')
-        }, 'Book'));
-
-        var lazarillo1 = M.fromJS(Book, {
-          title: 'Lazarillo de Tormes'
-        });
-
-        Object.prototype.toString.call(lazarillo1).should.be.exactly('[object Book]');
-
-        lazarillo1.getTitleBy().should.be.exactly('"Lazarillo de Tormes" by anonymous');
-
-        var lazarillo2 = new Book({
-          title: 'Lazarillo de Tormes'
-        });
-
-        lazarillo2.getTitleBy().should.be.exactly('"Lazarillo de Tormes" by anonymous');
-      });
-    });
-
-    describe('withDefault', function () {
-      it('should use the metadata to coerce the value if necessary', function () {
-        var CountryCallingCode = function (_M$createModel2) {
-          inherits(CountryCallingCode, _M$createModel2);
-
-          function CountryCallingCode(props) {
-            classCallCheck(this, CountryCallingCode);
-            return possibleConstructorReturn(this, (CountryCallingCode.__proto__ || Object.getPrototypeOf(CountryCallingCode)).call(this, CountryCallingCode, props));
-          }
-
-          createClass(CountryCallingCode, null, [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return get(CountryCallingCode.__proto__ || Object.getPrototypeOf(CountryCallingCode), 'innerTypes', this).call(this);
-            }
-          }]);
-          return CountryCallingCode;
-        }(M.createModel(function () {
-          return {
-            code: withDefault(number(), '34')
-          };
-        }));
-
-        var spain = M.fromJS(CountryCallingCode, {});
-
-        spain.code().should.be.exactly(34);
-
-        Object.prototype.toString.call(spain).should.be.exactly('[object ModelicoModel]');
-      });
-    });
   };
 });
 
@@ -682,12 +580,6 @@ var ModelicoNumber = (function (should, M) {
         M.Number.of(NaN).equals(M.Number.of(NaN)).should.be.exactly(true);
       });
     });
-
-    describe('toStringTag', function () {
-      it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.Number.of(1)).should.be.exactly('[object ModelicoNumber]');
-      });
-    });
   };
 });
 
@@ -794,12 +686,6 @@ var ModelicoDate = (function (should, M) {
         modelicoDate1.equals(modelicoDate1).should.be.exactly(true);
         modelicoDate1.equals(modelicoDate2).should.be.exactly(true);
         modelicoDate1.equals('abc').should.be.exactly(false);
-      });
-    });
-
-    describe('toStringTag', function () {
-      it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.Date.of()).should.be.exactly('[object ModelicoDate]');
       });
     });
   };
@@ -992,12 +878,6 @@ var ModelicoMap = (function (should, M, _ref) {
         var map = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]));
 
         should(map.inner().get('b')).be.exactly(2);
-      });
-    });
-
-    describe('toStringTag', function () {
-      it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.Map.of()).should.be.exactly('[object ModelicoMap]');
       });
     });
   };
@@ -1267,8 +1147,6 @@ var ModelicoEnumMap = (function (should, M, _ref) {
         should(M.EnumMap.EMPTY().inner().size).be.exactly(0);
 
         M.EnumMap.EMPTY().toJSON().should.eql({});
-
-        new M.EnumMap().should.be.exactly(M.EnumMap.EMPTY());
       });
 
       it('should be able to create an enum map from an even number of params', function () {
@@ -1291,12 +1169,6 @@ var ModelicoEnumMap = (function (should, M, _ref) {
         var enumMap = M.EnumMap.fromMap(new Map([[PartOfDay.MORNING(), 1], [PartOfDay.AFTERNOON(), 2]]));
 
         should(enumMap.inner().get(PartOfDay.AFTERNOON())).be.exactly(2);
-      });
-    });
-
-    describe('toStringTag', function () {
-      it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.EnumMap.of()).should.be.exactly('[object ModelicoEnumMap]');
       });
     });
   };
@@ -1511,12 +1383,6 @@ var ModelicoList = (function (U, should, M, _ref) {
         Array.from(modelicoList).should.eql([0, 1, 1, 2, 3, 5, 8]);
       });
     });
-
-    describe('toStringTag', function () {
-      it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.List.of()).should.be.exactly('[object ModelicoList]');
-      });
-    });
   };
 });
 
@@ -1580,9 +1446,9 @@ var ModelicoSet = (function (should, M, _ref) {
         var listOfSetsOfDates1 = M.List.of(modelicoDatesSet1);
         var listOfSetsOfDates2 = listOfSetsOfDates1.setIn([0], modelicoDatesSet2);
 
-        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfSetsOfDates1))[0]))[0].inner().getFullYear()).be.exactly(1988);
+        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfSetsOfDates1.inner()))[0].inner()))[0].inner().getFullYear()).be.exactly(1988);
 
-        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfSetsOfDates2))[0]))[0].inner().getFullYear()).be.exactly(2016);
+        should([].concat(toConsumableArray([].concat(toConsumableArray(listOfSetsOfDates2.inner()))[0].inner()))[0].inner().getFullYear()).be.exactly(2016);
       });
 
       it('should not support the set operation', function () {
@@ -1622,16 +1488,16 @@ var ModelicoSet = (function (should, M, _ref) {
       it('should parse the set correctly', function () {
         var modelicoSet = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', set$$1(date()).reviver);
 
-        should([].concat(toConsumableArray(modelicoSet))[0].inner().getFullYear()).be.exactly(1988);
+        should([].concat(toConsumableArray(modelicoSet.inner()))[0].inner().getFullYear()).be.exactly(1988);
 
-        should([].concat(toConsumableArray(modelicoSet))[1].inner().getMonth()).be.exactly(11);
+        should([].concat(toConsumableArray(modelicoSet.inner()))[1].inner().getMonth()).be.exactly(11);
       });
 
       it('should be parsed correctly when used within another class', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}';
         var author = JSON.parse(authorJson, _(Person).reviver);
 
-        should([].concat(toConsumableArray(author.importantDatesSet()))[0].inner().getFullYear()).be.exactly(2013);
+        should([].concat(toConsumableArray(author.importantDatesSet().inner()))[0].inner().getFullYear()).be.exactly(2013);
       });
     });
 
@@ -1676,7 +1542,7 @@ var ModelicoSet = (function (should, M, _ref) {
       it('should be able to create a set from arbitrary parameters', function () {
         var modelicoSet = M.Set.of(0, 1, 1, 2, 3, 5, 8);
 
-        [].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
+        [].concat(toConsumableArray(modelicoSet.inner())).should.eql([0, 1, 2, 3, 5, 8]);
       });
 
       it('should be able to create a set from an array', function () {
@@ -1684,7 +1550,7 @@ var ModelicoSet = (function (should, M, _ref) {
 
         var modelicoSet = M.Set.fromArray(fibArray);
 
-        [].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
+        [].concat(toConsumableArray(modelicoSet.inner())).should.eql([0, 1, 2, 3, 5, 8]);
       });
 
       it('should be able to create a set from a native set', function () {
@@ -1692,13 +1558,7 @@ var ModelicoSet = (function (should, M, _ref) {
 
         var modelicoSet = M.Set.fromSet(fibSet);
 
-        [].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
-      });
-    });
-
-    describe('toStringTag', function () {
-      it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.Set.of()).should.be.exactly('[object ModelicoSet]');
+        [].concat(toConsumableArray(modelicoSet.inner())).should.eql([0, 1, 2, 3, 5, 8]);
       });
     });
   };
@@ -1941,12 +1801,6 @@ var ModelicoMaybe = (function (should, M, _ref) {
         M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true);
       });
     });
-
-    describe('toStringTag', function () {
-      it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.Maybe.of(1)).should.be.exactly('[object ModelicoMaybe]');
-      });
-    });
   };
 });
 
@@ -2045,9 +1899,9 @@ var featuresSimple = (function (should, M) {
     var Animal = function (_M$Base) {
       inherits(Animal, _M$Base);
 
-      function Animal(props) {
+      function Animal(fields) {
         classCallCheck(this, Animal);
-        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
       }
 
       createClass(Animal, [{
@@ -2096,9 +1950,10 @@ var featuresAdvanced = (function (should, M) {
     var Animal = function (_M$Base) {
       inherits(Animal, _M$Base);
 
-      function Animal(props) {
+      function Animal() {
+        var fields = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         classCallCheck(this, Animal);
-        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
       }
 
       createClass(Animal, [{
@@ -2122,9 +1977,9 @@ var featuresAdvanced = (function (should, M) {
     var Person = function (_M$Base2) {
       inherits(Person, _M$Base2);
 
-      function Person(props) {
+      function Person(fields) {
         classCallCheck(this, Person);
-        return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, props));
+        return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, fields));
       }
 
       createClass(Person, [{
@@ -2134,11 +1989,11 @@ var featuresAdvanced = (function (should, M) {
         }
       }], [{
         key: 'innerTypes',
-        value: function innerTypes(path) {
+        value: function innerTypes() {
           return Object.freeze({
             givenName: any(),
             familyName: string(),
-            pets: list(maybe(_(Animal, path)))
+            pets: list(maybe(_(Animal)))
           });
         }
       }]);
@@ -2194,12 +2049,6 @@ var featuresAdvancedES5 = (function (should, M) {
       M.Base.factory(Animal, fields, this);
     }
 
-    Animal.innerTypes = function () {
-      return Object.freeze({
-        name: m.maybe(m.string())
-      });
-    };
-
     Animal.prototype = Object.create(M.Base.prototype);
 
     Animal.prototype.speak = function () {
@@ -2208,9 +2057,21 @@ var featuresAdvancedES5 = (function (should, M) {
       return name === '' ? "I don't have a name" : 'My name is ' + name + '!';
     };
 
+    Animal.innerTypes = function () {
+      return Object.freeze({
+        name: m.maybe(m.string())
+      });
+    };
+
     function Person(fields) {
       M.Base.factory(Person, fields, this);
     }
+
+    Person.prototype = Object.create(M.Base.prototype);
+
+    Person.prototype.fullName = function () {
+      return [this.givenName(), this.familyName()].join(' ').trim();
+    };
 
     Person.innerTypes = function () {
       return Object.freeze({
@@ -2218,12 +2079,6 @@ var featuresAdvancedES5 = (function (should, M) {
         familyName: m.string(),
         pets: m.list(m.maybe(m._(Animal)))
       });
-    };
-
-    Person.prototype = Object.create(M.Base.prototype);
-
-    Person.prototype.fullName = function () {
-      return [this.givenName(), this.familyName()].join(' ').trim();
     };
 
     // use > ES5 below
@@ -2944,7 +2799,9 @@ var personFactory = (function (M, PartOfDay, Sex) {
       parts[_key] = arguments[_key];
     }
 
-    return parts.join(' ').trim();
+    return parts.filter(function (x) {
+      return x !== null && x !== undefined;
+    }).join(' ');
   };
 
   var _M$metadata = M.metadata(),
@@ -2962,9 +2819,13 @@ var personFactory = (function (M, PartOfDay, Sex) {
   var Person = function (_M$Base) {
     inherits(Person, _M$Base);
 
-    function Person(props) {
+    function Person(fields) {
       classCallCheck(this, Person);
-      return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, props));
+
+      var _this = possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, fields));
+
+      Object.freeze(_this);
+      return _this;
     }
 
     createClass(Person, [{
@@ -3044,9 +2905,9 @@ var animalFactory = (function (M) {
   var Animal = function (_M$Base) {
     inherits(Animal, _M$Base);
 
-    function Animal(props) {
+    function Animal(fields) {
       classCallCheck(this, Animal);
-      return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+      return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
     }
 
     createClass(Animal, [{
@@ -3079,17 +2940,17 @@ var friendFactory = (function (M) {
   var Friend = function (_M$Base) {
     inherits(Friend, _M$Base);
 
-    function Friend(props) {
+    function Friend(fields) {
       classCallCheck(this, Friend);
-      return possibleConstructorReturn(this, (Friend.__proto__ || Object.getPrototypeOf(Friend)).call(this, Friend, props));
+      return possibleConstructorReturn(this, (Friend.__proto__ || Object.getPrototypeOf(Friend)).call(this, Friend, fields));
     }
 
     createClass(Friend, null, [{
       key: 'innerTypes',
-      value: function innerTypes(path) {
+      value: function innerTypes(depth) {
         return Object.freeze({
           name: string(),
-          bestFriend: maybe(_(Friend, path))
+          bestFriend: maybe(_(Friend, depth))
         });
       }
     }]);
@@ -3116,17 +2977,22 @@ var cityFactory = (function (M, Region, countryFactory) {
   var City = function (_M$Base) {
     inherits(City, _M$Base);
 
-    function City(props) {
+    function City(fields) {
+      var _ret;
+
       classCallCheck(this, City);
-      return possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, City, props));
+
+      var _this = possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, City, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
     }
 
     createClass(City, null, [{
       key: "innerTypes",
-      value: function innerTypes(path) {
+      value: function innerTypes(depth) {
         return Object.freeze({
           name: string(),
-          country: _(Country, path)
+          country: _(Country, depth)
         });
       }
     }]);
@@ -3146,18 +3012,23 @@ var countryFactory = (function (M, Region) {
   var Country = function (_M$Base) {
     inherits(Country, _M$Base);
 
-    function Country(props) {
+    function Country(fields) {
+      var _ret;
+
       classCallCheck(this, Country);
-      return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, props));
+
+      var _this = possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
     }
 
     createClass(Country, null, [{
       key: "innerTypes",
-      value: function innerTypes(path) {
+      value: function innerTypes(depth) {
         return Object.freeze({
           name: string(),
           code: string(),
-          region: _(Region, path)
+          region: _(Region, depth)
         });
       }
     }]);
@@ -3176,9 +3047,14 @@ var regionFactory = (function (M) {
   var Region = function (_M$Base) {
     inherits(Region, _M$Base);
 
-    function Region(props) {
+    function Region(fields) {
+      var _ret;
+
       classCallCheck(this, Region);
-      return possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, props));
+
+      var _this = possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
     }
 
     createClass(Region, [{
@@ -3212,9 +3088,14 @@ var regionIncompatibleNameKeyFactory = (function (M) {
   var Code = function (_M$Base) {
     inherits(Code, _M$Base);
 
-    function Code(props) {
+    function Code(fields) {
+      var _ret;
+
       classCallCheck(this, Code);
-      return possibleConstructorReturn(this, (Code.__proto__ || Object.getPrototypeOf(Code)).call(this, Code, props));
+
+      var _this = possibleConstructorReturn(this, (Code.__proto__ || Object.getPrototypeOf(Code)).call(this, Code, fields));
+
+      return _ret = Object.freeze(_this), possibleConstructorReturn(_this, _ret);
     }
 
     createClass(Code, null, [{
@@ -3232,9 +3113,14 @@ var regionIncompatibleNameKeyFactory = (function (M) {
   var Region = function (_M$Base2) {
     inherits(Region, _M$Base2);
 
-    function Region(props) {
+    function Region(fields) {
+      var _ret2;
+
       classCallCheck(this, Region);
-      return possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, props));
+
+      var _this2 = possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, fields));
+
+      return _ret2 = Object.freeze(_this2), possibleConstructorReturn(_this2, _ret2);
     }
 
     createClass(Region, [{
@@ -3244,10 +3130,10 @@ var regionIncompatibleNameKeyFactory = (function (M) {
       }
     }], [{
       key: "innerTypes",
-      value: function innerTypes(path) {
+      value: function innerTypes() {
         return Object.freeze({
           name: string(),
-          code: _(Code, path)
+          code: _(Code)
         });
       }
     }]);
@@ -3263,65 +3149,42 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
   var Ajv = _ref.Ajv;
   return function () {
     var _M$ajvMetadata = M.ajvMetadata(Ajv()),
-        ajv_ = _M$ajvMetadata.ajv_,
-        ajvAsIs = _M$ajvMetadata.ajvAsIs,
-        ajvAny = _M$ajvMetadata.ajvAny,
-        ajvString = _M$ajvMetadata.ajvString,
-        ajvNumber = _M$ajvMetadata.ajvNumber,
-        ajvBoolean = _M$ajvMetadata.ajvBoolean,
-        ajvDate = _M$ajvMetadata.ajvDate,
-        ajvEnumMap = _M$ajvMetadata.ajvEnumMap,
-        ajvList = _M$ajvMetadata.ajvList,
-        ajvMap = _M$ajvMetadata.ajvMap,
-        ajvStringMap = _M$ajvMetadata.ajvStringMap,
-        ajvSet = _M$ajvMetadata.ajvSet,
-        ajvMaybe = _M$ajvMetadata.ajvMaybe,
-        ajvWithDefault = _M$ajvMetadata.ajvWithDefault,
         _ = _M$ajvMetadata._,
-        number = _M$ajvMetadata.number;
+        asIs = _M$ajvMetadata.asIs,
+        any = _M$ajvMetadata.any,
+        string = _M$ajvMetadata.string,
+        number = _M$ajvMetadata.number,
+        boolean = _M$ajvMetadata.boolean,
+        date = _M$ajvMetadata.date,
+        enumMap = _M$ajvMetadata.enumMap,
+        list = _M$ajvMetadata.list,
+        map = _M$ajvMetadata.map,
+        stringMap = _M$ajvMetadata.stringMap,
+        set$$1 = _M$ajvMetadata.set,
+        maybe = _M$ajvMetadata.maybe;
 
     describe('Animal example', function () {
-      var Animal = function (_M$Base) {
-        inherits(Animal, _M$Base);
+      it('should revive as usual with valid JSON and fail otherwise', function () {
+        var Animal = function (_M$Base) {
+          inherits(Animal, _M$Base);
 
-        function Animal(props) {
-          classCallCheck(this, Animal);
-          return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
-        }
-
-        createClass(Animal, null, [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze({
-              name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
-              dimensions: ajvMaybe(ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true })))
-            });
+          function Animal(fields) {
+            classCallCheck(this, Animal);
+            return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, fields));
           }
-        }]);
-        return Animal;
-      }(M.Base);
 
-      var Animal2 = function (_M$Base2) {
-        inherits(Animal2, _M$Base2);
+          createClass(Animal, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                name: string({ minLength: 1, maxLength: 25 }),
+                dimensions: list({ minItems: 3, maxItems: 3 }, number({ minimum: 0, exclusiveMinimum: true }))
+              });
+            }
+          }]);
+          return Animal;
+        }(M.Base);
 
-        function Animal2(props) {
-          classCallCheck(this, Animal2);
-          return possibleConstructorReturn(this, (Animal2.__proto__ || Object.getPrototypeOf(Animal2)).call(this, Animal, props));
-        }
-
-        createClass(Animal2, null, [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze({
-              name: ajvString({ minLength: 1, maxLength: 25 }),
-              dimensions: ajvMaybe(ajvList({ minItems: 3, maxItems: 3 }, number()))
-            });
-          }
-        }]);
-        return Animal2;
-      }(M.Base);
-
-      it('should revive as usual with valid JSON', function () {
         var bane1 = M.fromJS(Animal, {
           name: 'Bane',
           dimensions: [20, 55, 65]
@@ -3329,319 +3192,190 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         bane1.name().should.be.exactly('Bane');
 
-        bane1.dimensions().getOrElse([1, 1, 1]).equals(M.List.of(20, 55, 65)).should.be.exactly(true);
-      });
+        bane1.dimensions().equals(M.List.of(20, 55, 65)).should.be.exactly(true);
 
-      it('should allow additional properties by default', function () {
-        M.fromJS(Animal, {
-          name: 'Bane',
-          dimensions: [20, 55, 65],
-          extra: 1
-        }).should.not.throw();
-      });
-
-      it('should fail with invalid JSON', function () {
         should(function () {
           return M.fromJS(Animal, {
             name: 'Bane',
             dimensions: [20, 55, 0]
           });
-        }).throw(/Invalid JSON at "dimensions > 2"/).and.throw(/should be > 0/);
-      });
-
-      it('should fail with additional properties if they are not allowed', function () {
-        should(function () {
-          return M.ajvFromJSON(ajv_, Animal, { additionalProperties: false }, '{\n        "name": "Bane",\n        "dimensions": [20, 55, 65],\n        "extra": 1\n      }');
-        }).throw(/should NOT have additional properties/);
-      });
-
-      it('should be able to return the whole schema', function () {
-        var bane = M.fromJS(Animal, {
-          name: 'Bane',
-          dimensions: [20, 55, 65]
-        });
-
-        var animalNormalMeta = _(fixtures.Animal);
-        var animalNormalMetaSchema = M.getSchema(animalNormalMeta);
-
-        animalNormalMetaSchema.should.deepEqual({
-          type: 'object',
-          properties: {
-            name: {}
-          },
-          required: ['name']
-        });
-
-        var animalMeta = ajv_(Animal);
-        var animal1Schema1 = M.getSchema(animalMeta);
-        var animal1Schema2 = M.getSchema(animalMeta);
-
-        animal1Schema1.should.deepEqual(animal1Schema2).and.deepEqual({
-          type: 'object',
-          properties: {
-            name: {
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            dimensions: {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                type: 'number',
-                exclusiveMinimum: true,
-                minimum: 0
-              }
-            }
-          }
-        });
-
-        var animalSchema2 = M.getSchema(ajv_(Animal2));
-
-        animalSchema2.should.deepEqual({
-          type: 'object',
-          properties: {
-            name: {
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            dimensions: {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {}
-            }
-          },
-          required: ['name']
-        });
-
-        var ajv = Ajv();
-
-        ajv.validate(animal1Schema1, bane.toJS()).should.be.exactly(true);
-
-        ajv.validate(animal1Schema1, bane.set('name', 'Robbie').toJS()).should.be.exactly(true);
-
-        ajv.validate(animal1Schema1, bane.set('name', 2).toJS()).should.be.exactly(false);
-      });
-    });
-
-    describe('deeply nested error examples', function () {
-      it('list', function () {
-        should(function () {
-          return M.ajvGenericsFromJSON(ajv_, M.List, {}, [ajvList({}, ajvList({}, ajvNumber({ minimum: 5 })))], '[[[10], [6, 7, 4]]]');
-        }).throw(/Invalid JSON at "0 > 1 > 2"/).and.throw(/should be >= 5/);
-      });
-
-      it('set', function () {
-        should(function () {
-          return M.genericsFromJS(M.Set, [ajvSet({}, ajvSet({}, ajvNumber({ minimum: 5 })))], [[[10], [6, 7, 9, 4]]]);
-        }).throw(/Invalid JSON at "0 > 1 > 3"/).and.throw(/should be >= 5/);
-      });
-
-      it('stringMap', function () {
-        should(function () {
-          return M.genericsFromJS(M.StringMap, [ajvStringMap({}, ajvStringMap({}, ajvNumber({ minimum: 5 })))], { a: { b1: { c: 10 }, b2: { d1: 6, d2: 7, d3: 4 } } });
-        }).throw(/Invalid JSON at "a > b2 > d3"/).and.throw(/should be >= 5/);
-      });
-
-      it('map', function () {
-        should(function () {
-          return M.genericsFromJS(M.Map, [ajvString(), ajvMap({}, ajvString(), ajvNumber({ minimum: 5 }))], [['A', [['A', 6], ['B', 7], ['C', 4]]]]);
-        }).throw(/Invalid JSON at "0 > 1 > 2 > 1"/).and.throw(/should be >= 5/);
-
-        should(function () {
-          return M.genericsFromJS(M.Map, [ajvString(), ajvMap({}, ajvString(), ajvNumber({ minimum: 5 }))], [['A', [['A', 6], ['B', 7], [2, 7]]]]);
-        }).throw(/Invalid JSON at "0 > 1 > 2 > 0"/).and.throw(/should be string/);
-      });
-
-      it('enumMap', function () {
-        var SideEnum = M.Enum.fromArray(['A', 'B']);
-
-        should(function () {
-          return M.genericsFromJS(M.EnumMap, [ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({ minimum: 5 })))], { A: { A: { A: 10 }, B: { A: 4, B: 7 } } });
-        }).throw(/Invalid JSON at "A > B > A"/).and.throw(/should be >= 5/);
-
-        should(function () {
-          return M.genericsFromJS(M.EnumMap, [ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({ minimum: 5 })))], { A: { A: { A: 10 }, B: { D: 5, B: 7 } } });
-        }).throw(/missing enumerator "D" at "A > B"/);
+        }).throw(/should be > 0/);
       });
     });
 
     describe('togglability', function () {
       var _M$ajvMetadata2 = M.ajvMetadata(),
-          nonValidatedString = _M$ajvMetadata2.ajvString;
+          nonValidatedString = _M$ajvMetadata2.string;
 
       it('defaults to normal behaviour when Ajv is undefined', function () {
         JSON.parse('"aa"', nonValidatedString({ minLength: 3 }).reviver).should.be.exactly('aa');
 
         should(function () {
-          return JSON.parse('"aa"', ajvString({ minLength: 3 }).reviver);
+          return JSON.parse('"aa"', string({ minLength: 3 }).reviver);
         }).throw(/shorter than 3 characters/);
       });
     });
 
     describe('asIs', function () {
       it('supports missing schema', function () {
-        JSON.parse('"test"', ajvAsIs().reviver).should.be.exactly('test');
+        JSON.parse('"test"', asIs().reviver).should.be.exactly('test');
       });
 
       it('supports valid values with schema', function () {
-        JSON.parse('"test"', ajvAsIs({ type: 'string' }).reviver).should.be.exactly('test');
+        JSON.parse('"test"', asIs({ type: 'string' }).reviver).should.be.exactly('test');
       });
 
       it('supports valid values with schema and transformer', function () {
-        JSON.parse('"test"', ajvAsIs({ type: 'string', maxLength: 5 }, function (x) {
+        JSON.parse('"test"', asIs({ type: 'string', maxLength: 5 }, function (x) {
           return x.repeat(2);
         }).reviver).should.be.exactly('testtest');
       });
 
       it('rejects invalid values', function () {
         should(function () {
-          return JSON.parse('1', ajvAsIs({ type: 'string' }).reviver);
+          return JSON.parse('1', asIs({ type: 'string' }).reviver);
         }).throw(/should be string/);
 
         should(function () {
-          return JSON.parse('"testtest"', ajvAsIs({ type: 'string', maxLength: 5 }).reviver);
+          return JSON.parse('"testtest"', asIs({ type: 'string', maxLength: 5 }).reviver);
         }).throw(/should NOT be longer than 5 characters/);
       });
     });
 
     describe('any', function () {
       it('supports missing schema', function () {
-        JSON.parse('"test"', ajvAny().reviver).should.be.exactly('test');
+        JSON.parse('"test"', any().reviver).should.be.exactly('test');
 
-        should(JSON.parse('1', ajvAny().reviver)).be.exactly(1);
+        should(JSON.parse('1', any().reviver)).be.exactly(1);
       });
 
       it('supports valid values with schema', function () {
-        JSON.parse('"test"', ajvAny({ type: 'string' }).reviver).should.be.exactly('test');
+        JSON.parse('"test"', any({ type: 'string' }).reviver).should.be.exactly('test');
       });
 
       it('rejects invalid values', function () {
         should(function () {
-          return JSON.parse('1', ajvAny({ type: 'string' }).reviver);
+          return JSON.parse('1', any({ type: 'string' }).reviver);
         }).throw(/should be string/);
       });
     });
 
     describe('number', function () {
       it('reports the right type', function () {
-        ajvNumber().type.should.be.exactly(Number);
+        number().type.should.be.exactly(Number);
       });
 
       it('supports missing schema', function () {
-        should(JSON.parse('1', ajvNumber().reviver)).be.exactly(1);
+        should(JSON.parse('1', number().reviver)).be.exactly(1);
       });
 
       it('supports valid numbers with schema', function () {
-        should(JSON.parse('4', ajvNumber({ minimum: 3 }).reviver)).be.exactly(4);
+        should(JSON.parse('4', number({ minimum: 3 }).reviver)).be.exactly(4);
       });
 
       it('rejects invalid numbers', function () {
         should(function () {
-          return JSON.parse('2', ajvNumber({ minimum: 3 }).reviver);
+          return JSON.parse('2', number({ minimum: 3 }).reviver);
         }).throw(/should be >= 3/);
       });
     });
 
     describe('number: wrapped json-compatible', function () {
       it('reports the right type', function () {
-        ajvNumber({}, { wrap: true }).type.should.be.exactly(M.Number);
+        number({}, { wrap: true }).type.should.be.exactly(M.Number);
       });
 
       it('supports missing schema', function () {
-        should(JSON.parse('1', ajvNumber({}, { wrap: true }).reviver).inner()).be.exactly(1);
+        should(JSON.parse('1', number({}, { wrap: true }).reviver).inner()).be.exactly(1);
       });
 
       it('supports valid numbers with schema', function () {
-        should(JSON.parse('4', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner()).be.exactly(4);
+        should(JSON.parse('4', number({ minimum: 3 }, { wrap: true }).reviver).inner()).be.exactly(4);
       });
 
       it('rejects invalid numbers', function () {
         should(function () {
-          return JSON.parse('2', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner();
+          return JSON.parse('2', number({ minimum: 3 }, { wrap: true }).reviver).inner();
         }).throw(/should be >= 3/);
       });
     });
 
     describe('number: wrapped non-json-compatible', function () {
       it('supports missing schema', function () {
-        should(JSON.parse('"-Infinity"', ajvNumber({}, { wrap: true }).reviver).inner()).be.exactly(-Infinity);
+        should(JSON.parse('"-Infinity"', number({}, { wrap: true }).reviver).inner()).be.exactly(-Infinity);
       });
 
       it('supports valid numbers with schema', function () {
-        should(JSON.parse('"Infinity"', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner()).be.exactly(Infinity);
+        should(JSON.parse('"Infinity"', number({ minimum: 3 }, { wrap: true }).reviver).inner()).be.exactly(Infinity);
       });
 
       it('rejects invalid numbers', function () {
         should(function () {
-          return JSON.parse('"-Infinity"', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner();
+          return JSON.parse('"-Infinity"', number({ minimum: 3 }, { wrap: true }).reviver).inner();
         }).throw(/should be >= 3/);
 
         should(function () {
-          return JSON.parse('"1"', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner();
+          return JSON.parse('"1"', number({ minimum: 3 }, { wrap: true }).reviver).inner();
         }).throw(/should be number/);
 
         should(function () {
-          return JSON.parse('{"a": 1}', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner();
+          return JSON.parse('{"a": 1}', number({ minimum: 3 }, { wrap: true }).reviver).inner();
         }).throw(/should be number/);
       });
     });
 
     describe('string', function () {
       it('reports the right type', function () {
-        ajvString().type.should.be.exactly(String);
+        string().type.should.be.exactly(String);
       });
 
       it('supports missing schema', function () {
-        JSON.parse('"test"', ajvString().reviver).should.be.exactly('test');
+        JSON.parse('"test"', string().reviver).should.be.exactly('test');
       });
 
       it('supports valid strings with schema', function () {
-        JSON.parse('"test"', ajvString({ minLength: 3 }).reviver).should.be.exactly('test');
+        JSON.parse('"test"', string({ minLength: 3 }).reviver).should.be.exactly('test');
       });
 
       it('rejects invalid strings', function () {
         should(function () {
-          return JSON.parse('"aa"', ajvString({ minLength: 3 }).reviver);
+          return JSON.parse('"aa"', string({ minLength: 3 }).reviver);
         }).throw(/shorter than 3 characters/);
       });
     });
 
     describe('boolean', function () {
       it('reports the right type', function () {
-        ajvBoolean().type.should.be.exactly(Boolean);
+        boolean().type.should.be.exactly(Boolean);
       });
 
       it('supports valid booleans', function () {
-        JSON.parse('true', ajvBoolean().reviver).should.be.exactly(true);
+        JSON.parse('true', boolean().reviver).should.be.exactly(true);
       });
 
       it('rejects invalid booleans', function () {
         should(function () {
-          return JSON.parse('1', ajvBoolean().reviver);
+          return JSON.parse('1', boolean().reviver);
         }).throw(/should be boolean/);
       });
     });
 
     describe('date', function () {
       it('reports the right type', function () {
-        ajvDate().type.should.be.exactly(M.Date);
+        date().type.should.be.exactly(M.Date);
       });
 
       it('supports valid dates', function () {
-        should(JSON.parse('"1988-04-16T00:00:00.000Z"', ajvDate().reviver).inner().getFullYear()).be.exactly(1988);
+        should(JSON.parse('"1988-04-16T00:00:00.000Z"', date().reviver).inner().getFullYear()).be.exactly(1988);
       });
 
       it('rejects invalid dates', function () {
         should(function () {
-          return JSON.parse('"1988-04-16T00:00:00.000"', ajvDate().reviver);
+          return JSON.parse('"1988-04-16T00:00:00.000"', date().reviver);
         }).throw(/should match format "date-time"/);
 
         should(function () {
-          return JSON.parse('"1988-04-16"', ajvDate().reviver);
+          return JSON.parse('"1988-04-16"', date().reviver);
         }).throw(/should match format "date-time"/);
       });
     });
@@ -3666,28 +3400,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
       var SideEnum = M.Enum.fromArray(['A', 'B'], Side, 'Side');
 
-      it('reports its full schema', function () {
-        var meta = ajvEnumMap({}, ajv_(SideEnum), ajvNumber());
-
-        M.getSchema(meta).should.deepEqual({
-          type: 'object',
-          maxProperties: 2,
-          properties: {
-            type: 'number'
-          }
-        });
-
-        var meta2 = ajvEnumMap({}, ajv_(SideEnum), number());
-
-        M.getSchema(meta2).should.deepEqual({
-          type: 'object',
-          maxProperties: 2,
-          properties: {}
-        });
-      });
-
       it('reports the right types', function () {
-        var meta = ajvEnumMap({}, ajv_(SideEnum), ajvNumber());
+        var meta = enumMap({}, _(SideEnum), number());
 
         meta.type.should.be.exactly(M.EnumMap);
         meta.subtypes[0].type.should.be.exactly(Side);
@@ -3695,62 +3409,53 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
 
       it('supports empty schema', function () {
-        should(JSON.parse('{"B": 100}', ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver).get(SideEnum.B())).be.exactly(100);
+        should(JSON.parse('{"B": 100}', enumMap({}, _(SideEnum), number()).reviver).get(SideEnum.B())).be.exactly(100);
       });
 
       it('supports valid enumMaps with schema', function () {
-        should(JSON.parse('{"B": 100}', ajvEnumMap({ minProperties: 1 }, ajv_(SideEnum), ajvNumber()).reviver).get(SideEnum.B())).be.exactly(100);
+        should(JSON.parse('{"B": 100}', enumMap({ minProperties: 1 }, _(SideEnum), number()).reviver).get(SideEnum.B())).be.exactly(100);
       });
 
       it('rejects invalid enumMaps', function () {
         should(function () {
-          return JSON.parse('{"A": 100}', ajvEnumMap({ minProperties: 2 }, ajv_(SideEnum), ajvNumber()).reviver);
+          return JSON.parse('{"A": 100}', enumMap({ minProperties: 2 }, _(SideEnum), number()).reviver);
         }).throw(/should NOT have less than 2 properties/);
 
+        // limits the amount of properties to the number of enumerators
         should(function () {
-          return JSON.parse('{"A": 100, "B": 200, "C": 300}', ajvEnumMap({ maxProperties: 3 }, ajv_(SideEnum), ajvNumber()).reviver);
-        }).throw(/missing enumerator "C" at ""/);
+          return JSON.parse('{"A": 100, "B": 200, "C": 300}', enumMap({ minProperties: 1 }, _(SideEnum), number()).reviver);
+        }).throw(/should NOT have more than 2 properties/);
+
+        should(function () {
+          return JSON.parse('{"A": 100, "B": 200, "C": 300}', enumMap({ maxProperties: 3 }, _(SideEnum), number()).reviver);
+        }).throw(/missing enumerator \(C\)/);
       });
     });
 
     describe('list', function () {
       it('reports the right types', function () {
-        ajvList({}, ajvString()).type.should.be.exactly(M.List);
-        ajvList({}, ajvString()).subtypes[0].type.should.be.exactly(String);
+        list({}, string()).type.should.be.exactly(M.List);
+        list({}, string()).subtypes[0].type.should.be.exactly(String);
       });
 
       it('supports empty schema', function () {
-        JSON.parse('[2,5]', ajvList({}, ajvNumber()).reviver).equals(M.List.of(2, 5)).should.be.exactly(true);
+        JSON.parse('[2,5]', list({}, number()).reviver).equals(M.List.of(2, 5)).should.be.exactly(true);
       });
 
       it('supports valid lists with schema', function () {
-        JSON.parse('[2,5]', ajvList({ maxItems: 3 }, ajvNumber()).reviver).equals(M.List.of(2, 5)).should.be.exactly(true);
+        JSON.parse('[2,5]', list({ maxItems: 3 }, number()).reviver).equals(M.List.of(2, 5)).should.be.exactly(true);
       });
 
       it('rejects invalid lists', function () {
         should(function () {
-          return JSON.parse('[2,5,7,1]', ajvList({ maxItems: 3 }, ajvNumber()).reviver);
+          return JSON.parse('[2,5,7,1]', list({ maxItems: 3 }, number()).reviver);
         }).throw(/should NOT have more than 3 items/);
       });
     });
 
     describe('map', function () {
-      it('reports its full schema', function () {
-        var meta = ajvMap({}, ajvNumber(), ajvString());
-
-        M.getSchema(meta).should.deepEqual({
-          'type': 'array',
-          'items': {
-            'type': 'array',
-            'maxItems': 2,
-            'minItems': 2,
-            'items': [{ 'type': 'number' }, { 'type': 'string' }]
-          }
-        });
-      });
-
       it('reports the right types', function () {
-        var meta = ajvMap({}, ajvNumber(), ajvString());
+        var meta = map({}, number(), string());
 
         meta.type.should.be.exactly(M.Map);
         meta.subtypes[0].type.should.be.exactly(Number);
@@ -3758,263 +3463,92 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
 
       it('supports empty schema', function () {
-        JSON.parse('[[2, "dos"],[5, "cinco"]]', ajvMap({}, ajvNumber(), ajvString()).reviver).equals(M.Map.of(2, 'dos', 5, 'cinco')).should.be.exactly(true);
+        JSON.parse('[[2, "dos"],[5, "cinco"]]', map({}, number(), string()).reviver).equals(M.Map.of(2, 'dos', 5, 'cinco')).should.be.exactly(true);
       });
 
       it('supports valid maps with schema', function () {
-        JSON.parse('[[2, "dos"],[5, "cinco"]]', ajvMap({ minItems: 2 }, ajvNumber(), ajvString()).reviver).equals(M.Map.of(2, 'dos', 5, 'cinco')).should.be.exactly(true);
+        JSON.parse('[[2, "dos"],[5, "cinco"]]', map({ minItems: 2 }, number(), string()).reviver).equals(M.Map.of(2, 'dos', 5, 'cinco')).should.be.exactly(true);
       });
 
       it('rejects invalid maps', function () {
         should(function () {
-          return JSON.parse('[[2, "dos", "extra"]]', ajvMap({}, ajvNumber(), ajvString()).reviver);
+          return JSON.parse('[[2, "dos", "extra"]]', map({}, number(), string()).reviver);
         }).throw(/should NOT have more than 2 items/);
 
         should(function () {
-          return JSON.parse('[[2]]', ajvMap({}, ajvNumber(), ajvString()).reviver);
+          return JSON.parse('[[2]]', map({}, number(), string()).reviver);
         }).throw(/should NOT have less than 2 items/);
 
         should(function () {
-          return JSON.parse('[[1, "uno"], [2, "dos"], [3, "tres"]]', ajvMap({ minItems: 4 }, ajvNumber(), ajvString()).reviver);
+          return JSON.parse('[[1, "uno"], [2, "dos"], [3, "tres"]]', map({ minItems: 4 }, number(), string()).reviver);
         }).throw(/should NOT have less than 4 items/);
       });
     });
 
     describe('stringMap', function () {
-      it('reports its full schema', function () {
-        var meta = ajvStringMap({}, ajvNumber());
-
-        M.getSchema(meta).should.deepEqual({
-          type: 'object',
-          properties: {
-            type: 'number'
-          }
-        });
-      });
-
       it('reports the right types', function () {
-        var meta = ajvStringMap({}, ajvNumber());
+        var meta = stringMap({}, number());
 
         meta.type.should.be.exactly(M.StringMap);
         meta.subtypes[0].type.should.be.exactly(Number);
       });
 
       it('supports empty schema', function () {
-        should(JSON.parse('{"uno": 1}', ajvStringMap({}, ajvNumber()).reviver).get('uno')).be.exactly(1);
+        should(JSON.parse('{"uno": 1}', stringMap({}, number()).reviver).get('uno')).be.exactly(1);
       });
 
       it('supports valid stringMaps with schema', function () {
-        should(JSON.parse('{"uno": 1}', ajvStringMap({ minProperties: 1 }, ajvNumber()).reviver).get('uno')).be.exactly(1);
+        should(JSON.parse('{"uno": 1}', stringMap({ minProperties: 1 }, number()).reviver).get('uno')).be.exactly(1);
       });
 
       it('rejects invalid stringMaps', function () {
         should(function () {
-          return JSON.parse('{"uno": 1}', ajvStringMap({ minProperties: 2 }, ajvNumber()).reviver);
+          return JSON.parse('{"uno": 1}', stringMap({ minProperties: 2 }, number()).reviver);
         }).throw(/should NOT have less than 2 properties/);
       });
     });
 
     describe('set', function () {
-      it('reports its full schema', function () {
-        var meta = ajvSet({}, ajvNumber());
-
-        M.getSchema(meta).should.deepEqual({
-          type: 'array',
-          uniqueItems: true,
-          items: {
-            type: 'number'
-          }
-        });
-      });
-
       it('reports the right types', function () {
-        ajvSet({}, ajvNumber()).type.should.be.exactly(M.Set);
-        ajvSet({}, ajvNumber()).subtypes[0].type.should.be.exactly(Number);
+        set$$1({}, number()).type.should.be.exactly(M.Set);
+        set$$1({}, number()).subtypes[0].type.should.be.exactly(Number);
       });
 
       it('supports empty schema', function () {
-        JSON.parse('[2,5]', ajvSet({}, ajvNumber()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
+        JSON.parse('[2,5]', set$$1({}, number()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
       });
 
       it('supports valid sets with schema', function () {
-        JSON.parse('[2,5]', ajvSet({ maxItems: 3 }, ajvNumber()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
+        JSON.parse('[2,5]', set$$1({ maxItems: 3 }, number()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
       });
 
       it('rejects invalid sets', function () {
         should(function () {
-          return JSON.parse('[2,5,7,1]', ajvSet({ maxItems: 3 }, ajvNumber()).reviver);
+          return JSON.parse('[2,5,7,1]', set$$1({ maxItems: 3 }, number()).reviver);
         }).throw(/should NOT have more than 3 items/);
       });
 
       it('rejects duplicated values by default', function () {
         should(function () {
-          return JSON.parse('[2,5,5]', ajvSet({}, ajvNumber()).reviver);
+          return JSON.parse('[2,5,5]', set$$1({}, number()).reviver);
         }).throw(/should NOT have duplicate items/);
       });
 
       it('supports duplicates when explicitly told', function () {
-        JSON.parse('[2,5,5]', ajvSet({ uniqueItems: false }, ajvNumber()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
+        JSON.parse('[2,5,5]', set$$1({ uniqueItems: false }, number()).reviver).equals(M.Set.of(2, 5)).should.be.exactly(true);
       });
     });
 
     describe('maybe', function () {
       it('reports the right types', function () {
-        ajvMaybe(ajvString()).type.should.be.exactly(M.Maybe);
-        ajvMaybe(ajvString()).subtypes[0].type.should.be.exactly(String);
+        maybe(string()).type.should.be.exactly(M.Maybe);
+        maybe(string()).subtypes[0].type.should.be.exactly(String);
       });
 
       it('behaves just as the normal maybe metadata', function () {
-        JSON.parse('null', ajvMaybe(ajvString()).reviver).getOrElse('fallback').should.be.exactly('fallback');
+        JSON.parse('null', maybe(string()).reviver).getOrElse('fallback').should.be.exactly('fallback');
 
-        JSON.parse('"Javier"', ajvMaybe(ajvString()).reviver).getOrElse('fallback').should.be.exactly('Javier');
-      });
-    });
-
-    describe('ajvWithDefault', function () {
-      it('should validate the default value', function () {
-        var CountryCode = function (_M$Base3) {
-          inherits(CountryCode, _M$Base3);
-
-          function CountryCode(props) {
-            classCallCheck(this, CountryCode);
-            return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, CountryCode, props));
-          }
-
-          createClass(CountryCode, null, [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return Object.freeze({
-                value: ajvWithDefault(ajvString({ minLength: 3, maxLength: 3 }), 'SPAIN')
-              });
-            }
-          }]);
-          return CountryCode;
-        }(M.Base);
-
-        (function () {
-          return new CountryCode();
-        }).should.throw(/should NOT be longer than 3 characters/);
-      });
-    });
-
-    describe('validate within the constructor', function () {
-      var ajv = Ajv();
-
-      it('should validate the default value', function () {
-        var CountryCode = function (_M$Base4) {
-          inherits(CountryCode, _M$Base4);
-
-          function CountryCode(props) {
-            classCallCheck(this, CountryCode);
-
-            if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
-              throw TypeError(ajv.errors[0].message);
-            }
-
-            return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, CountryCode, props));
-          }
-
-          createClass(CountryCode, null, [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return Object.freeze({
-                value: ajvWithDefault(ajvString({ minLength: 3, maxLength: 3 }), 'ESP')
-              });
-            }
-          }]);
-          return CountryCode;
-        }(M.Base);
-
-        (function () {
-          return new CountryCode({ value: 'SPAIN' });
-        }).should.throw(/should NOT be longer than 3 characters/);
-
-        var australia = new CountryCode({ value: 'AUS' });
-
-        should(function () {
-          return australia.set('value', 'AU');
-        }).throw(/should NOT be shorter than 3 characters/);
-      });
-    });
-
-    describe('withValidation', function () {
-      it('facilitates custom validation rules', function () {
-        var lowerCaseString = function lowerCaseString(schema) {
-          return M.withValidation(function (v) {
-            return v.toLowerCase() === v;
-          }, function (v, path) {
-            return 'string ' + v + ' at "' + path.join(' > ') + '" is not all lower case';
-          })(ajvString(schema));
-        };
-
-        JSON.parse('"abc123"', lowerCaseString({ minLength: 5 }).reviver).should.be.exactly('abc123');
-
-        should(function () {
-          return JSON.parse('"abc"', lowerCaseString({ minLength: 5 }).reviver);
-        }).throw(/should NOT be shorter than 5 characters/);
-
-        should(function () {
-          return JSON.parse('"aBc123"', lowerCaseString({ minLength: 5 }).reviver);
-        }).throw(/string aBc123 at "" is not all lower case/);
-      });
-
-      it('should have a default error message', function () {
-        var lowerCaseString = function lowerCaseString(schema) {
-          return M.withValidation(function (v) {
-            return v.toLowerCase() === v;
-          })(ajvString(schema));
-        };
-
-        should(function () {
-          return JSON.parse('"aBc123"', lowerCaseString({ minLength: 5 }).reviver);
-        }).throw(/Invalid value at ""/);
-      });
-
-      it('should work for nested metadata', function () {
-        var lowerCaseString = function lowerCaseString(schema) {
-          return M.withValidation(function (v) {
-            return v.toLowerCase() === v;
-          }, function (v, path) {
-            return 'string ' + v + ' at "' + path.join(' > ') + '" is not all lower case';
-          })(ajvString(schema));
-        };
-
-        var MagicString = function (_M$Base5) {
-          inherits(MagicString, _M$Base5);
-
-          function MagicString(props) {
-            classCallCheck(this, MagicString);
-            return possibleConstructorReturn(this, (MagicString.__proto__ || Object.getPrototypeOf(MagicString)).call(this, MagicString, props));
-          }
-
-          createClass(MagicString, null, [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return Object.freeze({
-                str: lowerCaseString({ minLength: 5 })
-              });
-            }
-          }]);
-          return MagicString;
-        }(M.Base);
-
-        M.fromJSON(MagicString, '{"str": "abc123"}').str().should.be.exactly('abc123');
-
-        should(function () {
-          return M.fromJSON(MagicString, '{"str": "abc"}');
-        }).throw(/should NOT be shorter than 5 characters/);
-
-        should(function () {
-          return M.fromJSON(MagicString, '{"str": "aBc123"}');
-        }).throw(/string aBc123 at "str" is not all lower case/);
-
-        should(function () {
-          return JSON.parse('{"str": "abc123", "forceFail": true}', M.withValidation(function (v) {
-            return M.fields(v).forceFail !== true;
-          }, function () {
-            return 'forcibly failed';
-          })(_(MagicString)).reviver);
-        }).throw(/forcibly failed/);
+        JSON.parse('"Javier"', maybe(string()).reviver).getOrElse('fallback').should.be.exactly('Javier');
       });
     });
   };

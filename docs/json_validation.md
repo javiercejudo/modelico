@@ -24,7 +24,7 @@ development in favour of faster parsing in production:
 
 ```js
 const ajvOptions = {}
-const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined;
+const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined
 const { ajvString, ajvList, ajvNumber } = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
@@ -81,13 +81,36 @@ In the example above, we could have based `lowerCaseString` on `ajvString`
 instead of the normal `string` to combine custom and JSON schema rules.
 
 `M.withValidation` works with any metadata, including the `Ajv` variant and
-can be composed, since it returns metadata.
+can be composed, since it returns a function that takes metadata and returns
+metadata.
+
+The error message function gets the path where the metadata is used to help
+debugging complex deep objects.
 
 ```js
-const lowerCaseString = schema => M.withValidation(
+const noNumbers = M.withValidation(
+  x => /^[^0-9]+$/.test(v),
+  (v, path) => `string ${v} at "${path.join(' > ')}" contains numbers`
+)
+
+const lowercase = M.withValidation(
   v => v.toLowerCase() === v,
-  (v, path) => `string ${v} at ${path.join(' > ')} is not all lower case`
-)(ajvString(schema))
+  (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`
+)
+
+// see a sample pipe function at
+// https://gist.github.com/javiercejudo/98ab1f0742387e8aca0646adb325059f
+const stringWithoutNumbersAndLowerCase = pipe(
+  ajvString,
+  noNumbers,
+  lowercase
+)
 ```
 
-Now we can define fields with something like `lowerCaseString({minLength: 5})`.
+Now we can define fields with something like
+`stringWithoutNumbersAndLowerCase({minLength: 5})`.
+
+Please note that although it might be tempting to compose the validation
+functions and use `M.withValidation` only once with the result, by using
+`M.withValidation` for each individual function you can attach specific
+error messages to simplify debugging.

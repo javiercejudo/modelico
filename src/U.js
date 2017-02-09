@@ -6,7 +6,7 @@ const not = (x/* : boolean */)/* : boolean */ => !x
 
 export const T = () => true
 export const identity = /* :: <T> */(x/* : T */)/* : T */ => x
-export const pipe = (...fns/* : Array<Function> */) => fns.reduce(pipe2, identity)
+export const pipe = (...fns/* : Array<Function> */) => [...fns, identity].reduce(pipe2)
 export const partial = (fn/* : Function */, ...args/* : Array<mixed> */) => fn.bind(undefined, ...args)
 export const asIsReviver = (transform/* : Function */) => (k/* : string */, v/* : mixed */) => transform(v)
 export const always = /* :: <T> */(x/* : T */) => ()/* : T */ => x

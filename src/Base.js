@@ -6,8 +6,6 @@ import {
 import { typeSymbol, fieldsSymbol } from './symbols'
 import getInnerTypes from './getInnerTypes'
 
-import M from './'
-
 const getPathReducer = (result, part) => result.get(part)
 
 class Base {
@@ -18,7 +16,7 @@ class Base {
 
     Object.freeze(fields)
 
-    const emptyMaybesOrDefaults = {}
+    const defaults = {}
     const innerTypes = getInnerTypes([], Type)
 
     thisArg = defaultTo(this)(thisArg)
@@ -26,23 +24,22 @@ class Base {
 
     Object.keys(innerTypes).forEach(key => {
       const valueCandidate = fields[key]
-      let value = M.Maybe.EMPTY
+      const defaultCandidate = innerTypes[key].default
+      let value
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate
-      } else if (isSomething(innerTypes[key].default)) {
+      } else if (isSomething(defaultCandidate)) {
         value = innerTypes[key].default
-        emptyMaybesOrDefaults[key] = value
-      } else if (innerTypes[key].type !== M.Maybe) {
-        throw TypeError(`no value for key "${key}"`)
+        defaults[key] = value
       } else {
-        emptyMaybesOrDefaults[key] = value
+        throw TypeError(`no value for key "${key}"`)
       }
 
       thisArg[key] = always(value)
     })
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybesOrDefaults, fields)))
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(defaults, fields)))
   }
 
   get [Symbol.toStringTag] () {

@@ -409,8 +409,9 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('enumMap', () => {
     class Side extends M.Enum {
+      // workaround for IE <=10
       static innerTypes () {
-        return M.Enum.innerTypes()
+        return super.innerTypes()
       }
     }
 

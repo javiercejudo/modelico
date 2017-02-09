@@ -23,10 +23,10 @@ Again, our goal is to parse JSON into JavaScript classes to be able to do
 things like
 
 ```js
-const person1 = M.fromJSON(Person, personJson);
+const person1 = M.fromJSON(Person, personJson)
 
-person1.fullName(); //=> 'Javier Cejudo'
-person1.pets().get(0).speak(); //=> 'my name is Robbie!'
+person1.fullName() //=> 'Javier Cejudo'
+person1.pets().get(0).speak() //=> 'my name is Robbie!'
 ```
 
 *Note: pets() returns a `Modelico.List`, which has a `get` method, but little
@@ -39,16 +39,16 @@ To achieve our goal, we need a `Person` that references `Animal` within its
 inner types using the `M.metadata()._` function.
 
 ```js
-const M = require('modelico');
-const { _, string, list } = M.metadata();
+import M from 'modelico'
+const { _, string, list } = M.metadata()
 
 class Person extends M.Base {
   constructor(fields) {
-    super(Person, fields);
+    super(Person, fields)
   }
 
   fullName() {
-    return [this.givenName(), this.familyName()].join(' ').trim();
+    return [this.givenName(), this.familyName()].join(' ').trim()
   }
 
   static innerTypes() {
@@ -56,7 +56,7 @@ class Person extends M.Base {
       givenName: string(),
       familyName: string(),
       pets: list(_(Animal))
-    });
+    })
   }
 }
 ```
