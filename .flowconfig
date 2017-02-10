@@ -1,6 +1,7 @@
 [ignore]
-.*/node_modules/flow-remove-types/.*
-.*/node_modules/rollup-plugin-flow/.*
+.*/node_modules/config-chain/.*
+.*/node_modules/read-package-tree/.*
+.*/node_modules/npm/test/fixtures/.*
 
 [include]
 

@@ -1,5 +1,3 @@
-[« back to readme](../README.md)
-
 # ES5 classes
 
 To support legacy browsers without transpiling, Modélico can be used

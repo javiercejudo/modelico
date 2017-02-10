@@ -1,5 +1,6 @@
 tmp
 .env
+_book
 
 # Logs
 logs

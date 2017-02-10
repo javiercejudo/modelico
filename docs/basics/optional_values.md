@@ -1,5 +1,3 @@
-[« back to readme](../README.md)
-
 # Optional / null values
 
 By design, all fields are required, ie. `null` or missing fields will cause a

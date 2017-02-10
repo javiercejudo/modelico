@@ -1,5 +1,3 @@
-[« back to readme](../README.md)
-
 # Reviving polymorphic JSON
 
 The [built-in metadata](../README.md#metadata) covers the bulk of use cases.
@@ -74,7 +72,7 @@ class NumberCollection extends M.Base {
   }
 
   // Since we are reviving the JSON ourselves, it isn't useful to declare
-  // inner types. Modelico is mostly about serialisation, not typing
+  // inner types
   static innerTypes () {
     return Object.freeze({})
   }
