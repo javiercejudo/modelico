@@ -1,5 +1,3 @@
-[« back to readme](../README.md)
-
 # Nested types example
 
 The [introductory example](../README.md#introduction) features a standalone
@@ -25,14 +23,14 @@ things like
 ```js
 const person1 = M.fromJSON(Person, personJson)
 
-person1.fullName() //=> 'Javier Cejudo'
-person1.pets().get(0).speak() //=> 'my name is Robbie!'
+person1.fullName() // => 'Javier Cejudo'
+person1.pets().get(0).speak() // => 'my name is Robbie!'
 ```
 
 *Note: pets() returns a `Modelico.List`, which has a `get` method, but little
 more. To `map`, `filter` or perform other operations, you will need to grab
 the underlying array with `.inner()`. See the
-[proxies docs](docs/es2015-proxies) for a way to use methods and properties of
+[proxies docs](/docs/advanced/proxies) for a way to use methods and properties of
 the inner structure directly.*
 
 To achieve our goal, we need a `Person` that references `Animal` within its

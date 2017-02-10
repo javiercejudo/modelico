@@ -1,0 +1,18 @@
+# Table of contents
+
+- [Read me](/README.md)
+- [Introduction](/docs/introduction/README.md)
+  - [Types](/docs/introduction/types.md)
+  - [Metadata](/docs/introduction/metadata.md)
+  - [Immutability](/docs/introduction/immutability.md)
+- [Basics](/docs/basics/README.md)
+  - [Nested types example](/docs/basics/nested_types_example.md)
+  - [Optional / null values](/docs/basics/optional_values.md)
+  - [Deep operations: getIn and setIn](/docs/basics/deep_operations.md)
+- [Advanced](/docs/advanced/README.md)
+  - [JSON validation](/docs/advanced/json_validation.md)
+  - [Custom serialisation](/docs/advanced/custom_serialisation.md)
+  - [Reviving polymorphic JSON](/docs/advanced/reviving_polymorphic_json.md)
+  - [Proxies: accessing inner methods directly](/docs/advanced/proxies.md)
+- [Recipes](/docs/recipes/README.md)
+  - [ES5: write for all browsers without transpiling](/docs/recipes/es5.md)

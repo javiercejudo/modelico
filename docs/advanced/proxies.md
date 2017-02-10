@@ -1,5 +1,3 @@
-[« back to readme](../README.md)
-
 # ES2015 proxies
 
 Most built-in types in Modélico (List, Set, Map, EnumMap and Date)

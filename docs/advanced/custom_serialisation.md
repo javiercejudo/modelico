@@ -1,5 +1,3 @@
-[« back to readme](../README.md)
-
 # Custom serialisation
 
 Borrowing the example from

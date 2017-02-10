@@ -1,5 +1,3 @@
-[« back to readme](../README.md)
-
 # JSON validation
 
 By default, Modélico does not validate JSON in any special way. Morover, the

@@ -1,0 +1,22 @@
+{
+  "gitbook": "^3.2.2",
+  "title": "Modélico",
+  "structure": {
+    "summary": "SUMMARY.md"
+  },
+  "plugins": ["edit-link", "prism", "-highlight", "github", "anchorjs", "advanced-emoji"],
+  "pluginsConfig": {
+    "edit-link": {
+      "base": "https://github.com/javiercejudo/modelico/tree/master",
+      "label": "Edit this page"
+    },
+    "github": {
+      "url": "https://github.com/javiercejudo/modelico/"
+    },
+    "theme-default": {
+      "styles": {
+        "website": "docs/gitbook.css"
+      }
+    }
+  }
+}
