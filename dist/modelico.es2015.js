@@ -1,4 +1,4 @@
-var version = "20.0.0";
+var version = "21.0.0";
 
 
 
@@ -23,7 +23,7 @@ var symbols = Object.freeze({
 // @flow
 
 const get = (field/* : string */) => (obj/* : Object */) => obj[field];
-const pipe2 = (fn1/* : Function */, fn2/* : Function */) => (...args/* : Array<mixed> */) => fn2(fn1(...args));
+const pipe2 = (f/* : Function */, g/* : Function */) => (...args/* : Array<mixed> */) => g(f(...args));
 const not = (x/* : boolean */)/* : boolean */ => !x;
 
 const T = () => true;
@@ -54,36 +54,37 @@ const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
     ? a.equals(b)
     : haveSameValues(a, b);
 
-const getInnerTypes = (depth/* : number */, Type/* : Function */) => {
-  if (!Type.innerTypes) {
-    throw Error(`missing static innerTypes for ${Type.displayName || Type.name}`)
-  }
-
-  return Type.innerTypes(depth + 1, Type)
-};
-
 const unsupported = (message/* : string */) => {
   throw Error(message)
 };
 
 const innerTypesCache = new WeakMap();
 
-const getInnerTypesWithCache = (depth, Type) => {
+const getInnerTypes = (path/* : Array<any> */, Type/* : Function */) => {
+  if (!Type.innerTypes) {
+    throw Error(`missing static innerTypes for ${Type.displayName || Type.name}`)
+  }
+
+  return Type.innerTypes(path, Type)
+};
+
+var getInnerTypes$1 = (path, Type) => {
   if (!innerTypesCache.has(Type)) {
-    innerTypesCache.set(Type, getInnerTypes(depth, Type));
+    innerTypesCache.set(Type, getInnerTypes(path, Type));
   }
 
   return innerTypesCache.get(Type)
 };
 
-const plainObjectReviverFactory = (depth, Type, k, v) =>
+const plainObjectReviverFactory = (Type, k, v, prevPath) =>
   Object.keys(v).reduce((acc, field) => {
-    const innerTypes = getInnerTypesWithCache(depth, Type);
+    const path = prevPath.concat(field);
+    const innerTypes = getInnerTypes$1(path, Type);
 
     const metadata = innerTypes[field];
 
     if (metadata) {
-      acc[field] = reviverOrAsIs(metadata)(k, v[field]);
+      acc[field] = reviverOrAsIs(metadata)(k, v[field], path);
     } else {
       acc[field] = v[field];
     }
@@ -91,16 +92,81 @@ const plainObjectReviverFactory = (depth, Type, k, v) =>
     return acc
   }, {});
 
-const reviverFactory = (depth, Type) => (k, v) => {
+const reviverFactory = (path, Type) => (k, v) => {
   if (k !== '') {
     return v
   }
 
   const fields = isPlainObject(v)
-    ? plainObjectReviverFactory(depth, Type, k, v)
+    ? plainObjectReviverFactory(Type, k, v, path)
     : v;
 
   return new Type(fields)
+};
+
+const metadataSchemaCache = new WeakMap();
+
+const getSchema = metadata => {
+  if (metadata.schema) {
+    return metadata.schema()
+  }
+
+  if (!metadata.type.innerTypes || Object.keys(getInnerTypes$1([], metadata.type)).length === 0) {
+    return emptyObject
+  }
+
+  const baseSchema = { type: 'object' };
+  const innerTypes = metadata.type.innerTypes();
+
+  const required = [];
+  const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
+    const fieldMetadata = innerTypes[fieldName];
+    const schema = fieldMetadata.schema
+      ? fieldMetadata.schema()
+      : emptyObject;
+
+    if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
+      required.push(fieldName);
+    }
+
+    return Object.assign(acc, {[fieldName]: schema})
+  }, {});
+
+  const schema = Object.assign({}, baseSchema, { properties });
+
+  if (required.length > 0) {
+    schema.required = required;
+  }
+
+  return schema
+};
+
+var getSchema$1 = metadata => {
+  if (!metadataSchemaCache.has(metadata)) {
+    metadataSchemaCache.set(metadata, getSchema(metadata));
+  }
+
+  return metadataSchemaCache.get(metadata)
+};
+
+const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' > ')}"`;
+
+var withValidation = (validateFn, errorMsgFn = defaultErrorMsgFn) => metadata => {
+  const reviver = (k, v, path = []) => {
+    if (k !== '') {
+      return v
+    }
+
+    const revivedValue = metadata.reviver('', v, path);
+
+    if (!validateFn(revivedValue)) {
+      throw TypeError(errorMsgFn(revivedValue, path))
+    }
+
+    return revivedValue
+  };
+
+  return Object.assign({}, metadata, { reviver })
 };
 
 const getPathReducer = (result, part) => result.get(part);
@@ -113,32 +179,38 @@ class Base {
 
     Object.freeze(fields);
 
-    const emptyMaybes = {};
-    const innerTypes = getInnerTypes(0, Type);
+    const defaults = {};
+    const innerTypes = getInnerTypes$1([], Type);
 
     thisArg = defaultTo(this)(thisArg);
     thisArg[typeSymbol] = always(Type);
 
     Object.keys(innerTypes).forEach(key => {
       const valueCandidate = fields[key];
-      let value = M.Maybe.EMPTY;
+      const defaultCandidate = innerTypes[key].default;
+      let value;
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate;
-      } else if (innerTypes[key].type !== M.Maybe) {
-        throw TypeError(`no value for key "${key}"`)
+      } else if (isSomething(defaultCandidate)) {
+        value = innerTypes[key].default;
+        defaults[key] = value;
       } else {
-        emptyMaybes[key] = value;
+        throw TypeError(`no value for key "${key}"`)
       }
 
       thisArg[key] = always(value);
     });
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)));
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(defaults, fields)));
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoModel'
   }
 
   get (field) {
-    return this[field]()
+    return this[fieldsSymbol]()[field]
   }
 
   getIn (path) {
@@ -207,14 +279,14 @@ class Base {
 
 var Base$1 = Object.freeze(Base);
 
-const reviverFactory$2 = itemMetadata => (k, v) => {
+const reviverFactory$2 = itemMetadata => (k, v, path) => {
   if (k !== '') {
     return v
   }
 
   const maybeValue = (v === null)
     ? null
-    : itemMetadata.reviver(k, v);
+    : itemMetadata.reviver(k, v, path);
 
   return new Maybe(maybeValue)
 };
@@ -258,6 +330,10 @@ class Maybe extends Base$1 {
     this.inner = always(inner);
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMaybe'
   }
 
   get (fieldOrFallbackPair) {
@@ -359,7 +435,8 @@ class Maybe extends Base$1 {
     return Object.freeze({
       type: Maybe,
       subtypes: [itemMetadata],
-      reviver: reviverFactory$2(itemMetadata)
+      reviver: reviverFactory$2(itemMetadata),
+      default: Maybe.of()
     })
   }
 
@@ -375,11 +452,11 @@ var Maybe$1 = Object.freeze(Maybe);
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
 
-const reviverFactory$3 = enumerators => (k, v) => {
+const reviverFactory$3 = enumerators => (k, v, path = []) => {
   const enumerator = enumerators[v];
 
   if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator (${v})`)
+    throw TypeError(`missing enumerator "${v}" at "${path.join(' > ')}"`)
   }
 
   return enumerator
@@ -408,6 +485,7 @@ class Enum extends Base$1 {
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
         type: Ctor,
+        enumerators,
         reviver: reviverFactory$3(enumerators)
       }))
     });
@@ -484,7 +562,10 @@ class AbstractMap extends Base$1 {
     this[innerOrigSymbol] = always(innerMap);
     this.inner = () => copy(innerMap);
     this.size = innerMap.size;
-    this[Symbol.iterator] = () => innerMap[Symbol.iterator]();
+  }
+
+  [Symbol.iterator] () {
+    return this[innerOrigSymbol]()[Symbol.iterator]()
   }
 
   has (key) {
@@ -540,12 +621,12 @@ class AbstractMap extends Base$1 {
 
 var AbstractMap$1 = Object.freeze(AbstractMap);
 
-const parseMapper = (keyReviver, valueReviver) => pair => [
-  keyReviver('', pair[0]),
-  valueReviver('', pair[1])
+const parseMapper = (keyReviver, valueReviver, path) => (pair, i) => [
+  keyReviver('', pair[0], path.concat(i, 0)),
+  valueReviver('', pair[1], path.concat(i, 1))
 ];
 
-const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v) => {
+const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -555,7 +636,7 @@ const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v) => {
 
   const innerMap = (v === null)
     ? null
-    : new Map(v.map(parseMapper(keyReviver, valueReviver)));
+    : new Map(v.map(parseMapper(keyReviver, valueReviver, path)));
 
   return ModelicoMap.fromMap(innerMap)
 };
@@ -571,6 +652,10 @@ class ModelicoMap extends AbstractMap$1 {
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMap'
   }
 
   set (key, value) {
@@ -620,10 +705,10 @@ const stringifyReducer = (acc, pair) => {
   return acc
 };
 
-const parseReducer = (valueReviver, obj) => (acc, key) =>
-  [...acc, [key, valueReviver('', obj[key])]];
+const parseReducer = (valueReviver, obj, path) => (acc, key) =>
+  [...acc, [key, valueReviver('', obj[key], path.concat(key))]];
 
-const reviverFactory$5 = valueMetadata => (k, v) => {
+const reviverFactory$5 = valueMetadata => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -632,7 +717,7 @@ const reviverFactory$5 = valueMetadata => (k, v) => {
 
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v), []));
+    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []));
 
   return StringMap.fromMap(innerMap)
 };
@@ -648,6 +733,10 @@ class StringMap extends AbstractMap$1 {
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoStringMap'
   }
 
   set (key, value) {
@@ -697,14 +786,14 @@ const stringifyReducer$1 = (acc, pair) => {
   return acc
 };
 
-const parseMapper$1 = (keyReviver, valueReviver, obj) => enumerator => {
-  const key = keyReviver('', enumerator);
-  const val = valueReviver('', obj[enumerator]);
+const parseMapper$1 = (keyReviver, valueReviver, obj, path) => enumerator => {
+  const key = keyReviver('', enumerator, path);
+  const val = valueReviver('', obj[enumerator], path.concat(enumerator));
 
   return [key, val]
 };
 
-const reviverFactory$6 = (keyMetadata, valueMetadata) => (k, v) => {
+const reviverFactory$6 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -714,7 +803,7 @@ const reviverFactory$6 = (keyMetadata, valueMetadata) => (k, v) => {
 
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v)));
+    : new Map(Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v, path)));
 
   return new EnumMap(innerMap)
 };
@@ -730,6 +819,10 @@ class EnumMap extends AbstractMap$1 {
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoEnumMap'
   }
 
   set (enumerator, value) {
@@ -784,6 +877,10 @@ class ModelicoNumber extends Base$1 {
     this.inner = always(Number(number));
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoNumber'
   }
 
   set () {
@@ -863,6 +960,10 @@ class ModelicoDate extends Base$1 {
     Object.freeze(this);
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoDate'
+  }
+
   set () {
     unsupported('Date.set is not supported');
   }
@@ -911,12 +1012,12 @@ ModelicoDate.displayName = 'ModelicoDate';
 
 var ModelicoDate$1 = Object.freeze(ModelicoDate);
 
-const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
+const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const revive = partial(reviverOrAsIs(itemMetadata), k);
+  const revive = (x, i) => reviverOrAsIs(itemMetadata)('', x, path.concat(i));
   const iterable = (v === null)
     ? null
     : v.map(revive);
@@ -976,14 +1077,22 @@ class List extends Base$1 {
     Object.freeze(innerList);
 
     this.inner = always(innerList);
+    this[innerOrigSymbol] = this.inner;
     this.size = innerList.length;
-    this[Symbol.iterator] = () => innerList[Symbol.iterator]();
 
     if (!EMPTY_LIST && this.size === 0) {
       EMPTY_LIST = this;
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoList'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   includes (...args) {
@@ -1070,13 +1179,20 @@ class ModelicoSet extends Base$1 {
     this[innerOrigSymbol] = always(innerSet);
     this.inner = () => copy$1(innerSet);
     this.size = innerSet.size;
-    this[Symbol.iterator] = () => innerSet[Symbol.iterator]();
 
     if (!EMPTY_SET && this.size === 0) {
       EMPTY_SET = this;
     }
 
     Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoSet'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   has (key) {
@@ -1186,15 +1302,26 @@ const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
   return new Proxy(obj, {get})
 };
 
-const formatError = (ajv, schema, value) => [
-  'Invalid JSON: according to the schema' + '\n',
+const formatError = (ajv, schema, value, path = []) => [
+  'Invalid JSON at "' + path.join(' > ') + '". According to the schema\n',
   JSON.stringify(schema, null, 2) + '\n',
   'the value\n',
   JSON.stringify(value, null, 2) + '\n',
   ajv.errors[0].message
 ].join('\n');
 
+const formatDefaultValueError = (ajv, schema, value) => [
+  'Invalid default value. According to the schema\n',
+  JSON.stringify(schema, null, 2) + '\n',
+  'the default value\n',
+  JSON.stringify(value, null, 2) + '\n',
+  ajv.errors[0].message
+].join('\n');
+
 var ajvMetadata = (ajv = { validate: T }) => {
+  const metadata = M.metadata();
+  const ajvMetadata = {};
+
   const {
     _,
     asIs,
@@ -1208,21 +1335,24 @@ var ajvMetadata = (ajv = { validate: T }) => {
     map,
     stringMap,
     set,
-    maybe
-  } = M.metadata();
+    maybe,
+    withDefault
+  } = metadata;
 
-  const ensure = (metadata, schema, valueTransformer = identity) => (k, value) => {
+  const ensure = (metadata, schema, valueTransformer = identity) => (k, value, path) => {
     if (k !== '') {
       return value
     }
 
-    const valid = ajv.validate(schema, valueTransformer(value));
+    const valid = (schema === emptyObject)
+      ? true
+      : ajv.validate(schema, valueTransformer(value));
 
     if (!valid) {
-      throw TypeError(formatError(ajv, schema, value))
+      throw TypeError(formatError(ajv, schema, value, path))
     }
 
-    return metadata.reviver('', value)
+    return metadata.reviver('', value, path)
   };
 
   const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
@@ -1235,22 +1365,30 @@ var ajvMetadata = (ajv = { validate: T }) => {
     return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
   };
 
-  const ajvMeta = (meta, baseSchema, mainSchema = {}) => {
-    const schema = Object.assign({}, baseSchema, mainSchema);
-    const reviver = ensure(meta, schema);
+  const ajvMeta = (meta, baseSchema, mainSchema = emptyObject, innerSchemaGetter = always(emptyObject)) => {
+    const schemaToCheck = (baseSchema === emptyObject && mainSchema === emptyObject)
+      ? emptyObject
+      : Object.assign({}, baseSchema, mainSchema);
 
-    return Object.assign({}, meta, { reviver })
+    const reviver = ensure(meta, schemaToCheck);
+
+    const schemaGetter = () => Object.assign({}, schemaToCheck, innerSchemaGetter());
+
+    return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   };
 
-  const ajv_ = (Type, schema) =>
-    ajvMeta(_(Type), schema);
+  ajvMetadata.ajv_ = (Type, schema = emptyObject, path, innerMetadata) => {
+    const metadata = _(Type, path, innerMetadata);
 
-  const ajvAsIs = (schema, transformer = identity) =>
+    return ajvMeta(metadata, emptyObject, schema, () => getSchema$1(metadata))
+  };
+
+  ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
     ajvMeta(asIs(transformer), schema);
 
-  const ajvAny = schema => ajvAsIs(schema);
+  ajvMetadata.ajvAny = schema => ajvMetadata.ajvAsIs(schema);
 
-  const ajvNumber = (schema, options = {}) => {
+  ajvMetadata.ajvNumber = (schema, options = emptyObject) => {
     const { wrap = false } = options;
     const meta = number(options);
 
@@ -1258,65 +1396,103 @@ var ajvMetadata = (ajv = { validate: T }) => {
       return ajvMeta(meta, { type: 'number' }, schema)
     }
 
+    const numberMeta = Object.assign({ type: 'number' }, schema);
+
     const reviver = ensureWrapped(meta, {
       anyOf: [
         { type: 'number' },
         { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
       ]
-    }, Object.assign({}, { type: 'number' }, schema));
+    }, numberMeta);
 
-    return Object.assign({}, meta, { reviver })
+    return Object.assign({}, meta, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
   };
 
-  const ajvString = schema =>
+  ajvMetadata.ajvString = schema =>
     ajvMeta(string(), { type: 'string' }, schema);
 
-  const ajvBoolean = schema =>
+  ajvMetadata.ajvBoolean = schema =>
     ajvMeta(boolean(), { type: 'boolean' }, schema);
 
-  const ajvDate = schema =>
+  ajvMetadata.ajvDate = schema =>
     ajvMeta(date(), { type: 'string', format: 'date-time' }, schema);
 
-  const ajvEnumMap = (schema, keyMetadata, valueMetadata) =>
-    ajvMeta(enumMap(keyMetadata, valueMetadata), {
-      type: 'object',
-      maxProperties: Object.keys(keyMetadata).length
-    }, schema);
+  ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {
+    const enumeratorsKeys = Object.keys(keyMetadata.enumerators);
+    const keysRegex = `^(${enumeratorsKeys.join('|')})$`;
 
-  const ajvList = (schema, itemMetadata) =>
-    ajvMeta(list(itemMetadata), { type: 'array' }, schema);
+    return ajvMeta(
+      enumMap(keyMetadata, valueMetadata), {
+        type: 'object',
+        maxProperties: enumeratorsKeys.length,
+        additionalProperties: false,
+        patternProperties: {
+          [keysRegex]: {}
+        }
+      },
+      schema,
+      () => ({
+        patternProperties: {
+          [keysRegex]: getSchema$1(valueMetadata)
+        }
+      })
+    )
+  };
 
-  const ajvMap = (schema, keyMetadata, valueMetadata) =>
-    ajvMeta(map(keyMetadata, valueMetadata), {
+  ajvMetadata.ajvList = (schema, itemMetadata) =>
+    ajvMeta(list(itemMetadata), { type: 'array' }, schema, () => ({ items: getSchema$1(itemMetadata) }));
+
+  ajvMetadata.ajvMap = (schema, keyMetadata, valueMetadata) => {
+    const baseSchema = {
       type: 'array',
       items: {
         type: 'array',
         minItems: 2,
         maxItems: 2
       }
-    }, schema);
+    };
 
-  const ajvStringMap = (schema, valueMetadata) =>
-    ajvMeta(stringMap(valueMetadata), { type: 'object' }, schema);
+    const keyValueSchemaGetter = () => ({
+      items: Object.assign({
+        items: [
+          getSchema$1(keyMetadata),
+          getSchema$1(valueMetadata)
+        ]
+      }, baseSchema.items)
+    });
 
-  const ajvSet = (schema, itemMetadata) =>
-    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema);
+    return ajvMeta(map(keyMetadata, valueMetadata), baseSchema, schema, keyValueSchemaGetter)
+  };
 
-  return Object.freeze({
-    _: ajv_,
-    asIs: ajvAsIs,
-    any: ajvAny,
-    number: ajvNumber,
-    string: ajvString,
-    boolean: ajvBoolean,
-    date: ajvDate,
-    enumMap: ajvEnumMap,
-    list: ajvList,
-    map: ajvMap,
-    stringMap: ajvStringMap,
-    set: ajvSet,
-    maybe
-  })
+  ajvMetadata.ajvStringMap = (schema, valueMetadata) =>
+    ajvMeta(
+      stringMap(valueMetadata),
+      { type: 'object' },
+      schema,
+      () => ({
+        additionalProperties: false,
+        patternProperties: { '.*': getSchema$1(valueMetadata) }
+      })
+    );
+
+  ajvMetadata.ajvSet = (schema, itemMetadata) =>
+    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, () => ({ items: getSchema$1(itemMetadata) }));
+
+  ajvMetadata.ajvMaybe = (itemMetadata) =>
+    ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema$1(itemMetadata));
+
+  ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
+    const schema = getSchema$1(metadata);
+    const valid = ajv.validate(schema, defaultValue);
+
+    if (!valid) {
+      throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
+    }
+
+    return ajvMeta(withDefault(metadata, defaultValue), emptyObject, emptyObject, always(schema))
+  };
+
+  return Object.freeze(Object.assign(ajvMetadata, metadata))
 };
 
 var asIs = (tranformer = identity) =>
@@ -1338,12 +1514,12 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear'];
 
-const _ = function (Type, depth = 0, innerMetadata = []) {
+const _ = function (Type, path = [], innerMetadata = []) {
   if (Type.metadata) {
     return Type.metadata(...innerMetadata)
   }
 
-  return Object.freeze({type: Type, reviver: reviverFactory(depth, Type)})
+  return Object.freeze({type: Type, reviver: reviverFactory(path, Type)})
 };
 
 const metadata = () => Object.freeze({
@@ -1361,10 +1537,34 @@ const metadata = () => Object.freeze({
   map: ModelicoMap$1.metadata,
   stringMap: StringMap$1.metadata,
   maybe: Maybe$1.metadata,
-  set: ModelicoSet$1.metadata
+  set: ModelicoSet$1.metadata,
+
+  withDefault: (meta, def) => {
+    const defaultValue = reviverOrAsIs(meta)('', def);
+
+    return Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+  }
 });
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity);
+const fromJS = (Type, js) => _(Type).reviver('', js);
+const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js);
+const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js);
+const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js);
+
+const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
+  return class extends Base$1 {
+    get [Symbol.toStringTag] () {
+      return stringTag
+    }
+
+    static innerTypes (path, Type) {
+      return (typeof innerTypes === 'function')
+        ? innerTypes(path, Type)
+        : Object.freeze(innerTypes)
+    }
+  }
+};
 
 var M = {
   about: Object.freeze({ version, author, homepage, license }),
@@ -1378,14 +1578,21 @@ var M = {
   Maybe: Maybe$1,
   Base: Base$1,
   Set: ModelicoSet$1,
+  createModel,
   fields: x => x[fieldsSymbol](),
   symbols,
-  fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
-  fromJS: (Type, js) => _(Type).reviver('', js),
-  genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
-  genericsFromJS: (Type, innerMetadata, js) => _(Type, 0, innerMetadata).reviver('', js),
+  fromJS,
+  genericsFromJS,
+  fromJSON: (Type, json) => fromJS(Type, JSON.parse(json)),
+  genericsFromJSON: (Type, innerMetadata, json) => genericsFromJS(Type, innerMetadata, JSON.parse(json)),
+  ajvFromJS,
+  ajvGenericsFromJS,
+  ajvFromJSON: (_, Type, schema, json) => ajvFromJS(_, Type, schema, JSON.parse(json)),
+  ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) => ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
   metadata,
   ajvMetadata,
+  getSchema: getSchema$1,
+  withValidation,
   proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,
