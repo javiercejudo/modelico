@@ -64,7 +64,7 @@ module.exports = function (config) {
     browsers: Object.keys(customLaunchers()),
 
     // how many browsers Karma launches in parallel
-    concurrency: 3,
+    concurrency: 4,
 
     // timeout for capturing a browser (in ms)
     captureTimeout: 0,
