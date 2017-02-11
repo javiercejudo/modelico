@@ -47,7 +47,7 @@ class Person extends M.Base {
   }
 
   fullName () {
-    return [this.givenName(), this.familyName()].join(' ').trim()
+    return `${this.givenName()} ${this.familyName()}`.trim()
   }
 
   static innerTypes (path) {

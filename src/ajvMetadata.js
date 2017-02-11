@@ -117,11 +117,27 @@ export default (ajv = { validate: T }) => {
   ajvMetadata.ajvDate = schema =>
     ajvMeta(date(), { type: 'string', format: 'date-time' }, schema)
 
-  ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) =>
-    ajvMeta(enumMap(keyMetadata, valueMetadata), {
-      type: 'object',
-      maxProperties: Object.keys(keyMetadata.enumerators).length
-    }, schema, () => ({ properties: getSchema(valueMetadata) }))
+  ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {
+    const enumeratorsKeys = Object.keys(keyMetadata.enumerators)
+    const keysRegex = `^(${enumeratorsKeys.join('|')})$`
+
+    return ajvMeta(
+      enumMap(keyMetadata, valueMetadata), {
+        type: 'object',
+        maxProperties: enumeratorsKeys.length,
+        additionalProperties: false,
+        patternProperties: {
+          [keysRegex]: {}
+        }
+      },
+      schema,
+      () => ({
+        patternProperties: {
+          [keysRegex]: getSchema(valueMetadata)
+        }
+      })
+    )
+  }
 
   ajvMetadata.ajvList = (schema, itemMetadata) =>
     ajvMeta(list(itemMetadata), { type: 'array' }, schema, () => ({ items: getSchema(itemMetadata) }))
@@ -149,7 +165,15 @@ export default (ajv = { validate: T }) => {
   }
 
   ajvMetadata.ajvStringMap = (schema, valueMetadata) =>
-    ajvMeta(stringMap(valueMetadata), { type: 'object' }, schema, () => ({ properties: getSchema(valueMetadata) }))
+    ajvMeta(
+      stringMap(valueMetadata),
+      { type: 'object' },
+      schema,
+      () => ({
+        additionalProperties: false,
+        patternProperties: { '.*': getSchema(valueMetadata) }
+      })
+    )
 
   ajvMetadata.ajvSet = (schema, itemMetadata) =>
     ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, () => ({ items: getSchema(itemMetadata) }))

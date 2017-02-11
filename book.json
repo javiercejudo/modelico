@@ -8,7 +8,7 @@
   "pluginsConfig": {
     "edit-link": {
       "base": "https://github.com/javiercejudo/modelico/tree/master",
-      "label": "Edit this page"
+      "label": ""
     },
     "github": {
       "url": "https://github.com/javiercejudo/modelico/"
