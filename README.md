@@ -6,7 +6,8 @@ models.
 [![Code Climate](https://codeclimate.com/github/javiercejudo/modelico/badges/gpa.svg)](https://codeclimate.com/github/javiercejudo/modelico)
 [![Dependency Status](https://gemnasium.com/badges/github.com/javiercejudo/modelico.svg)](https://gemnasium.com/github.com/javiercejudo/modelico)
 
-[![Build Status](https://saucelabs.com/browser-matrix/modelico.svg)](https://saucelabs.com/u/modelico)
+## Documentation
+https://javiercejudo.gitbooks.io/modelico/content/docs/introduction/
 
 ## Installation
 
@@ -22,9 +23,9 @@ directly on your target browsers to make sure things work as expected.
 required for browsers other than Chrome, Firefox and Edge.
 See [browser tests](test/browser) for more details.*
 
-## Documentation
+## Browser support
 
-[See full documentation](https://javiercejudo.gitbooks.io/modelico/content/)
+[![Build Status](https://saucelabs.com/browser-matrix/modelico.svg)](https://saucelabs.com/u/modelico)
 
 ## Acknowledgments :bow:
 
