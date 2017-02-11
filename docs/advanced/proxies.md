@@ -1,4 +1,4 @@
-# ES2015 proxies
+# ES2015 proxies: accessing inner methods directly
 
 Most built-in types in Modélico (List, Set, Map, EnumMap and Date)
 are wrappers around native structures. Except for a few built-in basic

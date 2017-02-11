@@ -54,6 +54,11 @@ const ownerOfBane = ownerOfUnnamedPet.setIn([
   [defaultAnimal, 'name']
 ], 'Bane')
 
-ownerOfBane.getIn(['pets', 0, [defaultAnimal, 'name'], ['Unknown']])
+ownerOfBane.getIn([
+  'pets',
+  0,
+  [defaultAnimal, 'name'],
+  ['Unknown']
+])
 // => Bane
 ```

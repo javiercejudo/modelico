@@ -225,7 +225,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
         ajv_(SideEnum),
         ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5})))
       ], {A: {A: {A: 10}, B: {D: 5, B: 7}}}))
-        .throw(/missing enumerator "D" at "A > B"/)
+        .throw(/Invalid JSON at "A > B"/)
+        .and.throw(/should NOT have additional properties/)
     })
   })
 
@@ -424,8 +425,11 @@ export default (should, M, fixtures, { Ajv }) => () => {
         .should.deepEqual({
           type: 'object',
           maxProperties: 2,
-          properties: {
-            type: 'number'
+          additionalProperties: false,
+          patternProperties: {
+            '^(A|B)$': {
+              type: 'number'
+            }
           }
         })
 
@@ -435,7 +439,10 @@ export default (should, M, fixtures, { Ajv }) => () => {
         .should.deepEqual({
           type: 'object',
           maxProperties: 2,
-          properties: {}
+          additionalProperties: false,
+          patternProperties: {
+            '^(A|B)$': {}
+          }
         })
     })
 
@@ -461,12 +468,28 @@ export default (should, M, fixtures, { Ajv }) => () => {
       should(() => JSON.parse('{"A": 100}', ajvEnumMap({ minProperties: 2 }, ajv_(SideEnum), ajvNumber()).reviver))
         .throw(/should NOT have less than 2 properties/)
 
+      should(() => JSON.parse('{"A": 100, "B": 200, "C": 300}', ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver))
+        .throw(/should NOT have more than 2 properties/)
+
       should(() => JSON.parse('{"A": 100, "B": 200, "C": 300}', ajvEnumMap({ maxProperties: 3 }, ajv_(SideEnum), ajvNumber()).reviver))
-        .throw(/missing enumerator "C" at ""/)
+        .throw(/Invalid JSON at ""/)
+        .and.throw(/should NOT have additional properties/)
     })
   })
 
   describe('list', () => {
+    it('list', () => {
+      M.getSchema(ajvList({minItems: 2}, ajvNumber({minimum: 5})))
+        .should.deepEqual({
+          type: 'array',
+          minItems: 2,
+          items: {
+            type: 'number',
+            minimum: 5
+          }
+        })
+    })
+
     it('reports the right types', () => {
       ajvList({}, ajvString()).type.should.be.exactly(M.List)
       ajvList({}, ajvString()).subtypes[0].type.should.be.exactly(String)
@@ -548,8 +571,11 @@ export default (should, M, fixtures, { Ajv }) => () => {
       M.getSchema(meta)
         .should.deepEqual({
           type: 'object',
-          properties: {
-            type: 'number'
+          additionalProperties: false,
+          patternProperties: {
+            '.*': {
+              type: 'number'
+            }
           }
         })
     })

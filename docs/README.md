@@ -13,6 +13,6 @@
   - [JSON validation](/docs/advanced/json_validation.md)
   - [Custom serialisation](/docs/advanced/custom_serialisation.md)
   - [Reviving polymorphic JSON](/docs/advanced/reviving_polymorphic_json.md)
-  - [Proxies: accessing inner methods directly](/docs/advanced/proxies.md)
+  - [Proxies](/docs/advanced/proxies.md)
 - [Recipes](/docs/recipes/README.md)
   - [ES5: write for all browsers without transpiling](/docs/recipes/es5.md)
