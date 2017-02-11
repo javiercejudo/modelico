@@ -15,4 +15,4 @@
   - [Reviving polymorphic JSON](/docs/advanced/reviving_polymorphic_json.md)
   - [Proxies](/docs/advanced/proxies.md)
 - [Recipes](/docs/recipes/README.md)
-  - [ES5: write for all browsers without transpiling](/docs/recipes/es5.md)
+  - [ES5 classes](/docs/recipes/es5.md)

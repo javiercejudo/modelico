@@ -1,4 +1,4 @@
-# ES5 classes
+# ES5: write for all browsers without transpiling
 
 To support legacy browsers without transpiling, Modélico can be used
 with ES5-style classes. In the case of the `Animal` class from the
