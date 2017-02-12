@@ -3304,6 +3304,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
   return function () {
     var _M$ajvMetadata = M.ajvMetadata(Ajv()),
         ajv_ = _M$ajvMetadata.ajv_,
+        ajvBase = _M$ajvMetadata.ajvBase,
         ajvAsIs = _M$ajvMetadata.ajvAsIs,
         ajvAny = _M$ajvMetadata.ajvAny,
         ajvString = _M$ajvMetadata.ajvString,
@@ -3318,6 +3319,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         ajvMaybe = _M$ajvMetadata.ajvMaybe,
         ajvWithDefault = _M$ajvMetadata.ajvWithDefault,
         _ = _M$ajvMetadata._,
+        base = _M$ajvMetadata.base,
         number = _M$ajvMetadata.number;
 
     describe('Animal example', function () {
@@ -3387,12 +3389,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             dimensions: [20, 55, 0]
           });
         }).throw(/Invalid JSON at "dimensions > 2"/).and.throw(/should be > 0/);
-      });
-
-      it('should fail with additional properties if they are not allowed', function () {
-        should(function () {
-          return M.ajvFromJSON(ajv_, Animal, { additionalProperties: false }, '{\n        "name": "Bane",\n        "dimensions": [20, 55, 65],\n        "extra": 1\n      }');
-        }).throw(/should NOT have additional properties/);
       });
 
       it('should be able to return the whole schema', function () {
@@ -3963,7 +3959,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
     });
 
-    describe('validate within the constructor', function () {
+    describe('recipe: validate within the constructor', function () {
       var ajv = Ajv();
 
       it('should validate the default value', function () {
@@ -4000,6 +3996,86 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         should(function () {
           return australia.set('value', 'AU');
         }).throw(/should NOT be shorter than 3 characters/);
+      });
+    });
+
+    describe('recipe: validation at top level', function () {
+      var Animal = function (_M$Base5) {
+        inherits(Animal, _M$Base5);
+
+        function Animal(props) {
+          classCallCheck(this, Animal);
+          return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+        }
+
+        createClass(Animal, null, [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              name: ajvString()
+            });
+          }
+        }]);
+        return Animal;
+      }(M.Base);
+
+      var baseSchema = M.getSchema(base(Animal));
+
+      var enhancedMeta = function enhancedMeta(additionalProperties) {
+        return ajvBase(Animal, Object.assign({}, baseSchema, { additionalProperties: additionalProperties }));
+      };
+
+      it('supports additional properties unless otherwise stated', function () {
+        should(function () {
+          return ajvBase(Animal).reviver('', {
+            name: 'Bane',
+            extra: 1
+          });
+        }).not.throw();
+
+        should(function () {
+          return enhancedMeta(true).reviver('', {
+            name: 'Bane',
+            extra: 1
+          });
+        }).not.throw();
+
+        M.getSchema(enhancedMeta(true)).should.deepEqual({
+          type: 'object',
+          additionalProperties: true,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        });
+      });
+
+      it('supports failing with additional properties', function () {
+        should(function () {
+          return enhancedMeta(false).reviver('', {
+            name: 'Bane',
+            extra: 1
+          });
+        }).throw(/should NOT have additional properties/);
+
+        M.getSchema(enhancedMeta(false)).should.deepEqual({
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        });
+      });
+
+      it('should allow basic validation at top level', function () {
+        should(function () {
+          return M.ajvFromJSON(ajv_, Animal, { maxProperties: 2 }, '{\n        "name": "Bane",\n        "dimensions": [20, 55, 65],\n        "extra": 1\n      }');
+        }).throw(/should NOT have more than 2 properties/);
       });
     });
 
@@ -4045,8 +4121,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           })(ajvString(schema));
         };
 
-        var MagicString = function (_M$Base5) {
-          inherits(MagicString, _M$Base5);
+        var MagicString = function (_M$Base6) {
+          inherits(MagicString, _M$Base6);
 
           function MagicString(props) {
             classCallCheck(this, MagicString);

@@ -1,4 +1,4 @@
-var version = "21.0.0";
+var version = "21.1.0";
 
 
 
@@ -79,7 +79,7 @@ var getInnerTypes$1 = (path, Type) => {
 const plainObjectReviverFactory = (Type, k, v, prevPath) =>
   Object.keys(v).reduce((acc, field) => {
     const path = prevPath.concat(field);
-    const innerTypes = getInnerTypes$1(path, Type);
+    const innerTypes = getInnerTypes$1(prevPath, Type);
 
     const metadata = innerTypes[field];
 
@@ -92,7 +92,7 @@ const plainObjectReviverFactory = (Type, k, v, prevPath) =>
     return acc
   }, {});
 
-const reviverFactory = (path, Type) => (k, v) => {
+const reviverFactory = Type => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -1324,6 +1324,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
 
   const {
     _,
+    base,
     asIs,
     any,
     string,
@@ -1377,10 +1378,16 @@ var ajvMetadata = (ajv = { validate: T }) => {
     return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   };
 
-  ajvMetadata.ajv_ = (Type, schema = emptyObject, path, innerMetadata) => {
-    const metadata = _(Type, path, innerMetadata);
+  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
+    const metadata = _(Type, innerMetadata);
 
     return ajvMeta(metadata, emptyObject, schema, () => getSchema$1(metadata))
+  };
+
+  ajvMetadata.ajvBase = (Type, schema = emptyObject) => {
+    const metadata = base(Type);
+
+    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema$1(metadata))
   };
 
   ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
@@ -1514,16 +1521,16 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear'];
 
-const _ = function (Type, path = [], innerMetadata = []) {
-  if (Type.metadata) {
-    return Type.metadata(...innerMetadata)
-  }
+const base = Type =>
+  Object.freeze({type: Type, reviver: reviverFactory(Type)});
 
-  return Object.freeze({type: Type, reviver: reviverFactory(path, Type)})
-};
+const _ = (Type, innerMetadata = []) => Type.metadata
+  ? Type.metadata(...innerMetadata)
+  : base(Type);
 
 const metadata = () => Object.freeze({
   _,
+  base,
   asIs,
   any: always(asIs(identity)),
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber$1.metadata() : asIs(Number),
@@ -1548,9 +1555,9 @@ const metadata = () => Object.freeze({
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity);
 const fromJS = (Type, js) => _(Type).reviver('', js);
-const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js);
+const genericsFromJS = (Type, innerMetadata, js) => _(Type, innerMetadata).reviver('', js);
 const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js);
-const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js);
+const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js);
 
 const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
   return class extends Base$1 {

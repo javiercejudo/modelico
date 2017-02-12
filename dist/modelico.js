@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "21.0.0";
+var version = "21.1.0";
 
 
 
@@ -264,7 +264,7 @@ var getInnerTypes$1 = (function (path, Type) {
 var plainObjectReviverFactory = function plainObjectReviverFactory(Type, k, v, prevPath) {
   return Object.keys(v).reduce(function (acc, field) {
     var path = prevPath.concat(field);
-    var innerTypes = getInnerTypes$1(path, Type);
+    var innerTypes = getInnerTypes$1(prevPath, Type);
 
     var metadata = innerTypes[field];
 
@@ -278,8 +278,10 @@ var plainObjectReviverFactory = function plainObjectReviverFactory(Type, k, v, p
   }, {});
 };
 
-var reviverFactory = function reviverFactory(path, Type) {
+var reviverFactory = function reviverFactory(Type) {
   return function (k, v) {
+    var path = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
     if (k !== '') {
       return v;
     }
@@ -1807,6 +1809,7 @@ var ajvMetadata = (function () {
   var ajvMetadata = {};
 
   var _ = metadata._,
+      base = metadata.base,
       asIs = metadata.asIs,
       any = metadata.any,
       string = metadata.string,
@@ -1870,12 +1873,21 @@ var ajvMetadata = (function () {
 
   ajvMetadata.ajv_ = function (Type) {
     var schema = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
-    var path = arguments[2];
-    var innerMetadata = arguments[3];
+    var innerMetadata = arguments[2];
 
-    var metadata = _(Type, path, innerMetadata);
+    var metadata = _(Type, innerMetadata);
 
     return ajvMeta(metadata, emptyObject, schema, function () {
+      return getSchema$1(metadata);
+    });
+  };
+
+  ajvMetadata.ajvBase = function (Type) {
+    var schema = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
+
+    var metadata = base(Type);
+
+    return ajvMeta(metadata, { type: 'object' }, schema, function () {
       return getSchema$1(metadata);
     });
   };
@@ -2018,20 +2030,19 @@ var listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'so
 var dateNonMutators = internalNonMutators;
 var dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds', 'setYear'];
 
+var base = function base(Type) {
+  return Object.freeze({ type: Type, reviver: reviverFactory(Type) });
+};
+
 var _ = function _(Type) {
-  var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-  var innerMetadata = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
-  if (Type.metadata) {
-    return Type.metadata.apply(Type, toConsumableArray(innerMetadata));
-  }
-
-  return Object.freeze({ type: Type, reviver: reviverFactory(path, Type) });
+  var innerMetadata = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  return Type.metadata ? Type.metadata.apply(Type, toConsumableArray(innerMetadata)) : base(Type);
 };
 
 var metadata = function metadata() {
   return Object.freeze({
     _: _,
+    base: base,
     asIs: asIs,
     any: always(asIs(identity)),
     number: function number() {
@@ -2066,13 +2077,13 @@ var fromJS = function fromJS(Type, js) {
   return _(Type).reviver('', js);
 };
 var genericsFromJS = function genericsFromJS(Type, innerMetadata, js) {
-  return _(Type, [], innerMetadata).reviver('', js);
+  return _(Type, innerMetadata).reviver('', js);
 };
 var ajvFromJS = function ajvFromJS(_, Type, schema, js) {
   return _(Type, schema).reviver('', js);
 };
 var ajvGenericsFromJS = function ajvGenericsFromJS(_, Type, schema, innerMetadata, js) {
-  return _(Type, schema, [], innerMetadata).reviver('', js);
+  return _(Type, schema, innerMetadata).reviver('', js);
 };
 
 var createModel = function createModel(_innerTypes) {
