@@ -192,7 +192,10 @@ export default (ajv = { validate: T }) => {
     )
 
   ajvMetadata.ajvSet = (schema, itemMetadata) =>
-    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, () => ({ items: getSchema(itemMetadata) }))
+    ajvMeta(set(itemMetadata), {
+      type: 'array',
+      uniqueItems: true
+    }, schema, () => ({ items: getSchema(itemMetadata) }))
 
   ajvMetadata.ajvMaybe = (itemMetadata) =>
     ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema(itemMetadata))
@@ -205,7 +208,9 @@ export default (ajv = { validate: T }) => {
       throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
     }
 
-    return ajvMeta(withDefault(metadata, defaultValue), emptyObject, emptyObject, always(schema))
+    return ajvMeta(withDefault(metadata, defaultValue), {
+      default: defaultValue
+    }, emptyObject, always(schema))
   }
 
   return Object.freeze(Object.assign(ajvMetadata, metadata))

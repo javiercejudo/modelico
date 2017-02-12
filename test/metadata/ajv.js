@@ -114,6 +114,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
           type: 'object',
           properties: {
             name: {
+              default: 'unknown',
               type: 'string',
               minLength: 1,
               maxLength: 25
