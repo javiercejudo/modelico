@@ -24,6 +24,7 @@ export default (ajv = { validate: T }) => {
 
   const {
     _,
+    base,
     asIs,
     any,
     string,
@@ -77,10 +78,16 @@ export default (ajv = { validate: T }) => {
     return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   }
 
-  ajvMetadata.ajv_ = (Type, schema = emptyObject, path, innerMetadata) => {
-    const metadata = _(Type, path, innerMetadata)
+  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
+    const metadata = _(Type, innerMetadata)
 
     return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata))
+  }
+
+  ajvMetadata.ajvBase = (Type, schema = emptyObject) => {
+    const metadata = base(Type)
+
+    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata))
   }
 
   ajvMetadata.ajvAsIs = (schema, transformer = identity) =>

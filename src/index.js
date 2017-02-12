@@ -38,16 +38,16 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear']
 
-const _ = function (Type, path = [], innerMetadata = []) {
-  if (Type.metadata) {
-    return Type.metadata(...innerMetadata)
-  }
+const base = Type =>
+  Object.freeze({type: Type, reviver: reviverFactory(Type)})
 
-  return Object.freeze({type: Type, reviver: reviverFactory(path, Type)})
-}
+const _ = (Type, innerMetadata = []) => Type.metadata
+  ? Type.metadata(...innerMetadata)
+  : base(Type)
 
 const metadata = () => Object.freeze({
   _,
+  base,
   asIs,
   any: always(asIs(identity)),
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber.metadata() : asIs(Number),
@@ -72,9 +72,9 @@ const metadata = () => Object.freeze({
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
 const fromJS = (Type, js) => _(Type).reviver('', js)
-const genericsFromJS = (Type, innerMetadata, js) => _(Type, [], innerMetadata).reviver('', js)
+const genericsFromJS = (Type, innerMetadata, js) => _(Type, innerMetadata).reviver('', js)
 const ajvFromJS = (_, Type, schema, js) => _(Type, schema).reviver('', js)
-const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, [], innerMetadata).reviver('', js)
+const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js)
 
 const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
   return class extends Base {

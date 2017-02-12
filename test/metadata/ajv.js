@@ -3,6 +3,7 @@
 export default (should, M, fixtures, { Ajv }) => () => {
   const {
     ajv_,
+    ajvBase,
     ajvAsIs,
     ajvAny,
     ajvString,
@@ -18,6 +19,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     ajvWithDefault,
     // normal
     _,
+    base,
     number
   } = M.ajvMetadata(Ajv())
 
@@ -81,15 +83,6 @@ export default (should, M, fixtures, { Ajv }) => () => {
       }))
         .throw(/Invalid JSON at "dimensions > 2"/)
         .and.throw(/should be > 0/)
-    })
-
-    it('should fail with additional properties if they are not allowed', () => {
-      should(() => M.ajvFromJSON(ajv_, Animal, { additionalProperties: false }, `{
-        "name": "Bane",
-        "dimensions": [20, 55, 65],
-        "extra": 1
-      }`))
-        .throw(/should NOT have additional properties/)
     })
 
     it('should be able to return the whole schema', () => {
@@ -687,7 +680,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
   })
 
-  describe('validate within the constructor', () => {
+  describe('recipe: validate within the constructor', () => {
     const ajv = Ajv()
 
     it('should validate the default value', () => {
@@ -714,6 +707,80 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       should(() => australia.set('value', 'AU'))
         .throw(/should NOT be shorter than 3 characters/)
+    })
+  })
+
+  describe('recipe: validation at top level', () => {
+    class Animal extends M.Base {
+      constructor (props) {
+        super(Animal, props)
+      }
+
+      static innerTypes () {
+        return Object.freeze({
+          name: ajvString()
+        })
+      }
+    }
+
+    const baseSchema = M.getSchema(base(Animal))
+
+    const enhancedMeta = additionalProperties =>
+      ajvBase(
+        Animal,
+        Object.assign({}, baseSchema, { additionalProperties })
+      )
+
+    it('supports additional properties unless otherwise stated', () => {
+      should(() => ajvBase(Animal).reviver('', {
+        name: 'Bane',
+        extra: 1
+      })).not.throw()
+
+      should(() => enhancedMeta(true).reviver('', {
+        name: 'Bane',
+        extra: 1
+      })).not.throw()
+
+      M.getSchema(enhancedMeta(true))
+        .should.deepEqual({
+          type: 'object',
+          additionalProperties: true,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        })
+    })
+
+    it('supports failing with additional properties', () => {
+      should(() => enhancedMeta(false).reviver('', {
+        name: 'Bane',
+        extra: 1
+      })).throw(/should NOT have additional properties/)
+
+      M.getSchema(enhancedMeta(false))
+        .should.deepEqual({
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        })
+    })
+
+    it('should allow basic validation at top level', () => {
+      should(() => M.ajvFromJSON(ajv_, Animal, { maxProperties: 2 }, `{
+        "name": "Bane",
+        "dimensions": [20, 55, 65],
+        "extra": 1
+      }`))
+        .throw(/should NOT have more than 2 properties/)
     })
   })
 

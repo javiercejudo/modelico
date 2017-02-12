@@ -4,7 +4,7 @@ import getInnerTypes from './getInnerTypes'
 const plainObjectReviverFactory = (Type, k, v, prevPath) =>
   Object.keys(v).reduce((acc, field) => {
     const path = prevPath.concat(field)
-    const innerTypes = getInnerTypes(path, Type)
+    const innerTypes = getInnerTypes(prevPath, Type)
 
     const metadata = innerTypes[field]
 
@@ -17,7 +17,7 @@ const plainObjectReviverFactory = (Type, k, v, prevPath) =>
     return acc
   }, {})
 
-const reviverFactory = (path, Type) => (k, v) => {
+const reviverFactory = Type => (k, v, path = []) => {
   if (k !== '') {
     return v
   }

@@ -6,6 +6,7 @@ function in `M.metadata()`, with some useful additions:
 ```js
 const {
   _,           // to retrieve the metadata of arbitrary types, eg. _(Animal)
+  base,        // to retrieve the metadata of standard models for extension
   asIs,        // useful for simple transforms, eg: asIs(x => 2 * x) to double numbers
   any,         // to leave JSON input untouched
   maybe,       // to declare a value as optional
