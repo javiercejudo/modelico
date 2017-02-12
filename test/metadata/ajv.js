@@ -10,6 +10,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     ajvNumber,
     ajvBoolean,
     ajvDate,
+    ajvEnum,
     ajvEnumMap,
     ajvList,
     ajvMap,
@@ -398,6 +399,18 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       should(() => JSON.parse('"1988-04-16"', ajvDate().reviver))
         .throw(/should match format "date-time"/)
+    })
+  })
+
+  describe('enum', () => {
+    it('reports its full schema', () => {
+      const Side = M.Enum.fromArray(['A', 'B'])
+
+      M.getSchema(ajvEnum(Side))
+        .should.deepEqual({
+          type: 'string',
+          enum: ['A', 'B']
+        })
     })
   })
 
