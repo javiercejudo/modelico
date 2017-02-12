@@ -1,4 +1,4 @@
-var version = "21.2.0";
+var version = "21.2.1";
 
 
 
@@ -121,9 +121,7 @@ const getSchema = metadata => {
   const required = [];
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
     const fieldMetadata = innerTypes[fieldName];
-    const schema = fieldMetadata.schema
-      ? fieldMetadata.schema()
-      : emptyObject;
+    const schema = getSchema(fieldMetadata);
 
     if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
       required.push(fieldName);

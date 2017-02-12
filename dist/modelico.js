@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "21.2.0";
+var version = "21.2.1";
 
 
 
@@ -309,7 +309,7 @@ var getSchema = function getSchema(metadata) {
   var required = [];
   var properties = Object.keys(innerTypes).reduce(function (acc, fieldName) {
     var fieldMetadata = innerTypes[fieldName];
-    var schema = fieldMetadata.schema ? fieldMetadata.schema() : emptyObject;
+    var schema = getSchema(fieldMetadata);
 
     if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
       required.push(fieldName);
