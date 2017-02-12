@@ -1,4 +1,4 @@
-var version = "21.1.0";
+var version = "21.2.0";
 
 
 
@@ -1423,6 +1423,15 @@ var ajvMetadata = (ajv = { validate: T }) => {
 
   ajvMetadata.ajvDate = schema =>
     ajvMeta(date(), { type: 'string', format: 'date-time' }, schema);
+
+  ajvMetadata.ajvEnum = Type => {
+    const metadata = _(Type);
+
+    return ajvMeta(metadata, {
+      type: 'string',
+      enum: Object.keys(metadata.enumerators)
+    })
+  };
 
   ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {
     const enumeratorsKeys = Object.keys(keyMetadata.enumerators);

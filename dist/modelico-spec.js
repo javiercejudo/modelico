@@ -3311,6 +3311,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         ajvNumber = _M$ajvMetadata.ajvNumber,
         ajvBoolean = _M$ajvMetadata.ajvBoolean,
         ajvDate = _M$ajvMetadata.ajvDate,
+        ajvEnum = _M$ajvMetadata.ajvEnum,
         ajvEnumMap = _M$ajvMetadata.ajvEnumMap,
         ajvList = _M$ajvMetadata.ajvList,
         ajvMap = _M$ajvMetadata.ajvMap,
@@ -3679,6 +3680,17 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         should(function () {
           return JSON.parse('"1988-04-16"', ajvDate().reviver);
         }).throw(/should match format "date-time"/);
+      });
+    });
+
+    describe('enum', function () {
+      it('reports its full schema', function () {
+        var Side = M.Enum.fromArray(['A', 'B']);
+
+        M.getSchema(ajvEnum(Side)).should.deepEqual({
+          type: 'string',
+          enum: ['A', 'B']
+        });
       });
     });
 

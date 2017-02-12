@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "21.1.0";
+var version = "21.2.0";
 
 
 
@@ -1931,6 +1931,15 @@ var ajvMetadata = (function () {
 
   ajvMetadata.ajvDate = function (schema) {
     return ajvMeta(date(), { type: 'string', format: 'date-time' }, schema);
+  };
+
+  ajvMetadata.ajvEnum = function (Type) {
+    var metadata = _(Type);
+
+    return ajvMeta(metadata, {
+      type: 'string',
+      enum: Object.keys(metadata.enumerators)
+    });
   };
 
   ajvMetadata.ajvEnumMap = function (schema, keyMetadata, valueMetadata) {
