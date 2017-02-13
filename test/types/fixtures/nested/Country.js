@@ -8,11 +8,11 @@ export default (M, Region) => {
       super(Country, props)
     }
 
-    static innerTypes (path) {
+    static innerTypes () {
       return Object.freeze({
         name: string(),
         code: string(),
-        region: _(Region, path)
+        region: _(Region)
       })
     }
   }

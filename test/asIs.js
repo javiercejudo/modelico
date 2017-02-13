@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  const { asIs, any, string } = M.metadata()
+  const { asIs, any, anyOf, string } = M.metadata()
 
   describe('toJSON', () => {
     it('should stringify the valfnue as is', () => {
@@ -30,7 +30,8 @@ export default (U, should, M) => () => {
     it('should return metadata like type', () => {
       string().type.should.be.exactly(String)
 
-      const asIsObject = JSON.parse('{"two":2}', any().reviver)
+      // using empty anyOf for testing purposes
+      const asIsObject = JSON.parse('{"two":2}', anyOf()().reviver)
 
       should(asIsObject.two).be.exactly(2)
     })

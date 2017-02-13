@@ -10,7 +10,6 @@
     "t": "gulp test",
     "bt": "npm run build && npm run t",
     "test": "npm run standard && flow && npm run t",
-    "test-dev": "npm run build-dev && npm run build-browser-spec && gulp test",
     "test-browsers": "./scripts/browser_tester.sh",
     "send-coverage": "./scripts/coverage_reporter.sh",
     "standard": "standard --fix \"src/**/*.js\" \"test/**/*.js\"",

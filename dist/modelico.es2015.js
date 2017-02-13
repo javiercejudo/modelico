@@ -11,7 +11,7 @@ var homepage = "https://github.com/javiercejudo/modelico#readme";
 
 const typeSymbol = Symbol('type');
 const fieldsSymbol = Symbol('fields');
-const innerOrigSymbol = Symbol('innerOrigSymbol');
+const innerOrigSymbol = Symbol('innerOrig');
 
 
 var symbols = Object.freeze({
@@ -38,6 +38,7 @@ const defaultTo = (d/* : mixed */) => (v/* : mixed */) => isNothing(v) ? d : v;
 const objToArr = (obj/* : Object */) => Object.keys(obj).map(k => [k, obj[k]]);
 const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
 const isPlainObject = (x/* : mixed */)/* : boolean */ => typeof x === 'object' && !!x;
+const isFunction = (x/* : mixed */)/* : boolean */ => typeof x === 'function';
 const emptyObject = Object.freeze({});
 
 const haveSameValues = (a/* : any */, b/* : any */)/* : boolean */ =>
@@ -81,7 +82,10 @@ const plainObjectReviverFactory = (Type, k, v, prevPath) =>
     const path = prevPath.concat(field);
     const innerTypes = getInnerTypes$1(prevPath, Type);
 
-    const metadata = innerTypes[field];
+    const metadataCandidate = innerTypes[field];
+    const metadata = isFunction(metadataCandidate)
+      ? metadataCandidate(v, path)
+      : metadataCandidate;
 
     if (metadata) {
       acc[field] = reviverOrAsIs(metadata)(k, v[field], path);
@@ -105,8 +109,15 @@ const reviverFactory = Type => (k, v, path = []) => {
 };
 
 const metadataSchemaCache = new WeakMap();
+const metadataRefCache = new WeakMap();
 
-const getSchema = metadata => {
+const state = {
+  nextRef: 1,
+  definitions: {},
+  usedDefinitions: new Set()
+};
+
+const getSchemaImpl = metadata => {
   if (metadata.schema) {
     return metadata.schema()
   }
@@ -121,10 +132,19 @@ const getSchema = metadata => {
   const required = [];
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
     const fieldMetadata = innerTypes[fieldName];
-    const schema = getSchema(fieldMetadata);
+    const fieldSchema = getSchema(fieldMetadata, false);
+    let schema;
 
-    if (fieldMetadata.type !== M.Maybe && fieldMetadata.default === undefined) {
+    if (fieldMetadata.default === undefined) {
       required.push(fieldName);
+      schema = fieldSchema;
+    } else {
+      schema = {
+        anyOf: [
+          { type: 'null' },
+          fieldSchema
+        ]
+      };
     }
 
     return Object.assign(acc, {[fieldName]: schema})
@@ -139,12 +159,64 @@ const getSchema = metadata => {
   return schema
 };
 
-var getSchema$1 = metadata => {
-  if (!metadataSchemaCache.has(metadata)) {
-    metadataSchemaCache.set(metadata, getSchema(metadata));
+const getUsedDefinitions = () => {
+  const { definitions, usedDefinitions } = state;
+
+  return Object.keys(definitions).map(Number).reduce((acc, ref) => {
+    if (usedDefinitions.has(ref)) {
+      acc[ref] = definitions[ref];
+    }
+
+    return acc
+  }, {})
+};
+
+const schemaDeclaration = (schema, specification) =>
+  (specification !== '')
+    ? Object.assign({'$schema': specification}, schema)
+    : schema;
+
+const getSchema = (metadata, topLevel = true, specification = '') => {
+  if (metadataSchemaCache.has(metadata)) {
+    return schemaDeclaration(metadataSchemaCache.get(metadata), specification)
   }
 
-  return metadataSchemaCache.get(metadata)
+  if (metadataRefCache.has(metadata)) {
+    const ref = metadataRefCache.get(metadata);
+    state.usedDefinitions.add(ref);
+    return { $ref: `#/definitions/${ref}` }
+  }
+
+  if (topLevel) {
+    state.nextRef = 1;
+    state.definitions = {};
+    state.usedDefinitions = new Set();
+  }
+
+  const ref = state.nextRef;
+
+  metadataRefCache.set(metadata, ref);
+  state.nextRef += 1;
+
+  const schema = getSchemaImpl(metadata);
+  metadataSchemaCache.set(metadata, schema);
+
+  Object.assign(state.definitions, { [ref]: schema });
+
+  if (!topLevel) {
+    return schema
+  }
+
+  const definitions = getUsedDefinitions();
+
+  if (Object.keys(definitions).length === 0) {
+    return schemaDeclaration(schema, specification)
+  }
+
+  return schemaDeclaration({
+    definitions: Object.assign(definitions, { [ref]: schema }),
+    $ref: `#/definitions/${ref}`
+  }, specification)
 };
 
 const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' > ')}"`;
@@ -476,6 +548,7 @@ class Enum extends Base$1 {
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {
         this[enumerator] = always(enumerators[enumerator]);
+        enumerators[enumerator][typeSymbol] = always(this);
         enumerators[enumerator].toJSON = always(enumerator);
         enumerators[enumerator].equals = other => (enumerators[enumerator] === other);
       });
@@ -1304,9 +1377,8 @@ const formatError = (ajv, schema, value, path = []) => [
   'Invalid JSON at "' + path.join(' > ') + '". According to the schema\n',
   JSON.stringify(schema, null, 2) + '\n',
   'the value\n',
-  JSON.stringify(value, null, 2) + '\n',
-  ajv.errors[0].message
-].join('\n');
+  JSON.stringify(value, null, 2) + '\n'
+].concat(ajv.errors.map(error => error.message)).join('\n');
 
 const formatDefaultValueError = (ajv, schema, value) => [
   'Invalid default value. According to the schema\n',
@@ -1347,6 +1419,8 @@ var ajvMetadata = (ajv = { validate: T }) => {
       ? true
       : ajv.validate(schema, valueTransformer(value));
 
+    // console.log(JSON.stringify(schema, null, 2))
+
     if (!valid) {
       throw TypeError(formatError(ajv, schema, value, path))
     }
@@ -1379,13 +1453,13 @@ var ajvMetadata = (ajv = { validate: T }) => {
   ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
     const metadata = _(Type, innerMetadata);
 
-    return ajvMeta(metadata, emptyObject, schema, () => getSchema$1(metadata))
+    return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata, false))
   };
 
   ajvMetadata.ajvBase = (Type, schema = emptyObject) => {
     const metadata = base(Type);
 
-    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema$1(metadata))
+    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata, false))
   };
 
   ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
@@ -1447,14 +1521,14 @@ var ajvMetadata = (ajv = { validate: T }) => {
       schema,
       () => ({
         patternProperties: {
-          [keysRegex]: getSchema$1(valueMetadata)
+          [keysRegex]: getSchema(valueMetadata, false)
         }
       })
     )
   };
 
   ajvMetadata.ajvList = (schema, itemMetadata) =>
-    ajvMeta(list(itemMetadata), { type: 'array' }, schema, () => ({ items: getSchema$1(itemMetadata) }));
+    ajvMeta(list(itemMetadata), { type: 'array' }, schema, () => ({ items: getSchema(itemMetadata, false) }));
 
   ajvMetadata.ajvMap = (schema, keyMetadata, valueMetadata) => {
     const baseSchema = {
@@ -1469,8 +1543,8 @@ var ajvMetadata = (ajv = { validate: T }) => {
     const keyValueSchemaGetter = () => ({
       items: Object.assign({
         items: [
-          getSchema$1(keyMetadata),
-          getSchema$1(valueMetadata)
+          getSchema(keyMetadata, false),
+          getSchema(valueMetadata, false)
         ]
       }, baseSchema.items)
     });
@@ -1485,25 +1559,30 @@ var ajvMetadata = (ajv = { validate: T }) => {
       schema,
       () => ({
         additionalProperties: false,
-        patternProperties: { '.*': getSchema$1(valueMetadata) }
+        patternProperties: { '.*': getSchema(valueMetadata, false) }
       })
     );
 
   ajvMetadata.ajvSet = (schema, itemMetadata) =>
-    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema, () => ({ items: getSchema$1(itemMetadata) }));
+    ajvMeta(set(itemMetadata), {
+      type: 'array',
+      uniqueItems: true
+    }, schema, () => ({ items: getSchema(itemMetadata, false) }));
 
   ajvMetadata.ajvMaybe = (itemMetadata) =>
-    ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema$1(itemMetadata));
+    ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema(itemMetadata, false));
 
   ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
-    const schema = getSchema$1(metadata);
+    const schema = getSchema(metadata, false);
     const valid = ajv.validate(schema, defaultValue);
 
     if (!valid) {
       throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
     }
 
-    return ajvMeta(withDefault(metadata, defaultValue), emptyObject, emptyObject, always(schema))
+    return ajvMeta(withDefault(metadata, defaultValue), {
+      default: defaultValue
+    }, emptyObject, always(schema))
   };
 
   return Object.freeze(Object.assign(ajvMetadata, metadata))
@@ -1511,6 +1590,31 @@ var ajvMetadata = (ajv = { validate: T }) => {
 
 var asIs = (tranformer = identity) =>
   Object.freeze({ type: tranformer, reviver: asIsReviver(tranformer) });
+
+var any = always(asIs(identity));
+
+var anyOf = (conditionedMetas = [], enumField = 'type') => (v, path) => {
+  if (conditionedMetas.length === 0) {
+    return any
+  }
+
+  const Enum = conditionedMetas[0][1][typeSymbol]();
+  const enumeratorToMatch = Enum.metadata().reviver('', v[enumField]);
+
+  for (let i = 0; i < conditionedMetas.length; i += 1) {
+    const conditionedMeta = conditionedMetas[i];
+    const metadata = conditionedMeta[0];
+    const enumerator = conditionedMeta[1];
+
+    if (enumeratorToMatch === enumerator) {
+      return metadata
+    }
+  }
+
+  const prevPath = path.slice(0, -1);
+
+  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' > ')}"`)
+};
 
 const internalNonMutators = ['set', 'setIn'];
 
@@ -1528,18 +1632,34 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear'];
 
+const metadataCache = new WeakMap();
+
 const base = Type =>
   Object.freeze({type: Type, reviver: reviverFactory(Type)});
 
-const _ = (Type, innerMetadata = []) => Type.metadata
-  ? Type.metadata(...innerMetadata)
-  : base(Type);
+const raw_ = (Type, innerMetadata) =>
+  Type.metadata
+    ? Type.metadata(...innerMetadata)
+    : base(Type);
+
+const _ = (Type, metadata = []) => {
+  if (metadata.length > 0) {
+    return raw_(Type, metadata)
+  }
+
+  if (!metadataCache.has(Type)) {
+    metadataCache.set(Type, raw_(Type, metadata));
+  }
+
+  return metadataCache.get(Type)
+};
 
 const metadata = () => Object.freeze({
   _,
   base,
   asIs,
-  any: always(asIs(identity)),
+  any,
+  anyOf,
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber$1.metadata() : asIs(Number),
 
   string: always(asIs(String)),
@@ -1605,7 +1725,7 @@ var M = {
   ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) => ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
   metadata,
   ajvMetadata,
-  getSchema: getSchema$1,
+  getSchema,
   withValidation,
   proxyMap,
   proxyEnumMap: proxyMap,

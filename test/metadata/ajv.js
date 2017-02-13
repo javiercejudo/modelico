@@ -105,8 +105,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
 
       const animalMeta = ajv_(Animal)
-      const animal1Schema1 = M.getSchema(animalMeta, 'http://json-schema.org/draft-04/schema#')
-      const animal1Schema2 = M.getSchema(animalMeta, 'http://json-schema.org/draft-04/schema#')
+      const animal1Schema1 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
+      const animal1Schema2 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
 
       animal1Schema1
         .should.deepEqual(animal1Schema2)
@@ -115,20 +115,30 @@ export default (should, M, fixtures, { Ajv }) => () => {
           type: 'object',
           properties: {
             name: {
-              default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
+              anyOf: [
+                { type: 'null' },
+                {
+                  default: 'unknown',
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 25
+                }
+              ]
             },
             dimensions: {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                type: 'number',
-                exclusiveMinimum: true,
-                minimum: 0
-              }
+              anyOf: [
+                { type: 'null' },
+                {
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {
+                    type: 'number',
+                    exclusiveMinimum: true,
+                    minimum: 0
+                  }
+                }
+              ]
             }
           }
         })
@@ -144,10 +154,15 @@ export default (should, M, fixtures, { Ajv }) => () => {
             maxLength: 25
           },
           dimensions: {
-            type: 'array',
-            minItems: 3,
-            maxItems: 3,
-            items: {}
+            anyOf: [
+              { type: 'null' },
+              {
+                type: 'array',
+                minItems: 3,
+                maxItems: 3,
+                items: {}
+              }
+            ]
           }
         },
         required: ['name']
@@ -702,7 +717,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       class CountryCode extends M.Base {
         constructor (props) {
           if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
-            throw TypeError(ajv.errors[0].message)
+            throw TypeError(ajv.errors.map(error => error.message).join('\n'))
           }
 
           super(CountryCode, props)
@@ -854,6 +869,212 @@ export default (should, M, fixtures, { Ajv }) => () => {
         '{"str": "abc123", "forceFail": true}',
         M.withValidation(v => M.fields(v).forceFail !== true, () => 'forcibly failed')(_(MagicString)).reviver
       )).throw(/forcibly failed/)
+    })
+  })
+
+  describe('Circular innerTypes', () => {
+    it('self reference', () => {
+      class Chain extends M.Base {
+        constructor (props) {
+          super(Chain, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            description: ajvString({minLength: 1}),
+            previous: ajvMaybe(_(Chain)),
+            next: ajvMaybe(_(Chain)),
+            relatedChains: ajvList({}, _(Chain))
+          })
+        }
+      }
+
+      M.getSchema(_(Chain))
+        .should.deepEqual({
+          'definitions': {
+            '1': {
+              'type': 'object',
+              'properties': {
+                'description': {
+                  'type': 'string',
+                  'minLength': 1
+                },
+                'previous': {
+                  anyOf: [
+                    { type: 'null' },
+                    { $ref: '#/definitions/1' }
+                  ]
+                },
+                'next': {
+                  anyOf: [
+                    { type: 'null' },
+                    { $ref: '#/definitions/1' }
+                  ]
+                },
+                'relatedChains': {
+                  'type': 'array',
+                  'items': {
+                    '$ref': '#/definitions/1'
+                  }
+                }
+              },
+              'required': [
+                'description',
+                'relatedChains'
+              ]
+            }
+          },
+          '$ref': '#/definitions/1'
+        })
+    })
+
+    it('indirect reference', () => {
+      class Parent extends M.Base {
+        constructor (props) {
+          super(Parent, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvString({minLength: 11}),
+            child: ajvMaybe(_(Child))
+          })
+        }
+      }
+
+      class Child extends M.Base {
+        constructor (props) {
+          super(Parent, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvString({minLength: 22}),
+            parent: _(Parent)
+          })
+        }
+      }
+
+      class Person extends M.Base {
+        constructor (props) {
+          super(Parent, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvString({minLength: 33}),
+            parent: _(Parent),
+            child: ajvMaybe(_(Child))
+          })
+        }
+      }
+
+      M.getSchema(_(Person))
+        .should.deepEqual({
+          'definitions': {
+            '1': {
+              'type': 'object',
+              'properties': {
+                'name': {
+                  'type': 'string',
+                  'minLength': 33
+                },
+                'parent': {
+                  'type': 'object',
+                  'properties': {
+                    'name': {
+                      'type': 'string',
+                      'minLength': 11
+                    },
+                    'child': {
+                      anyOf: [
+                        { type: 'null' },
+                        {
+                          'type': 'object',
+                          'properties': {
+                            'name': {
+                              'type': 'string',
+                              'minLength': 22
+                            },
+                            'parent': {
+                              '$ref': '#/definitions/3'
+                            }
+                          },
+                          'required': [
+                            'name',
+                            'parent'
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  'required': [
+                    'name'
+                  ]
+                },
+                'child': {
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      'type': 'object',
+                      'properties': {
+                        'name': {
+                          'type': 'string',
+                          'minLength': 22
+                        },
+                        'parent': {
+                          '$ref': '#/definitions/3'
+                        }
+                      },
+                      'required': [
+                        'name',
+                        'parent'
+                      ]
+                    }
+                  ]
+                }
+              },
+              'required': [
+                'name',
+                'parent'
+              ]
+            },
+            '3': {
+              'type': 'object',
+              'properties': {
+                'name': {
+                  'type': 'string',
+                  'minLength': 11
+                },
+                'child': {
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      'type': 'object',
+                      'properties': {
+                        'name': {
+                          'type': 'string',
+                          'minLength': 22
+                        },
+                        'parent': {
+                          '$ref': '#/definitions/3'
+                        }
+                      },
+                      'required': [
+                        'name',
+                        'parent'
+                      ]
+                    }
+                  ]
+                }
+              },
+              'required': [
+                'name'
+              ]
+            }
+          },
+          '$ref': '#/definitions/1'
+        })
     })
   })
 }

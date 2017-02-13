@@ -8,10 +8,10 @@ export default M => {
       super(Friend, props)
     }
 
-    static innerTypes (path) {
+    static innerTypes () {
       return Object.freeze({
         name: string(),
-        bestFriend: maybe(_(Friend, path))
+        bestFriend: maybe(_(Friend))
       })
     }
   }

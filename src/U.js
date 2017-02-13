@@ -16,6 +16,7 @@ export const defaultTo = (d/* : mixed */) => (v/* : mixed */) => isNothing(v) ? 
 export const objToArr = (obj/* : Object */) => Object.keys(obj).map(k => [k, obj[k]])
 export const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)))
 export const isPlainObject = (x/* : mixed */)/* : boolean */ => typeof x === 'object' && !!x
+export const isFunction = (x/* : mixed */)/* : boolean */ => typeof x === 'function'
 export const emptyObject = Object.freeze({})
 
 export const haveSameValues = (a/* : any */, b/* : any */)/* : boolean */ =>

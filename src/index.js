@@ -21,6 +21,8 @@ import proxyFactory from './proxyFactory'
 import ajvMetadata from './ajvMetadata'
 
 import asIs from './asIs'
+import any from './any'
+import anyOf from './anyOf'
 
 const internalNonMutators = ['set', 'setIn']
 
@@ -38,18 +40,34 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear']
 
+const metadataCache = new WeakMap()
+
 const base = Type =>
   Object.freeze({type: Type, reviver: reviverFactory(Type)})
 
-const _ = (Type, innerMetadata = []) => Type.metadata
-  ? Type.metadata(...innerMetadata)
-  : base(Type)
+const raw_ = (Type, innerMetadata) =>
+  Type.metadata
+    ? Type.metadata(...innerMetadata)
+    : base(Type)
+
+const _ = (Type, metadata = []) => {
+  if (metadata.length > 0) {
+    return raw_(Type, metadata)
+  }
+
+  if (!metadataCache.has(Type)) {
+    metadataCache.set(Type, raw_(Type, metadata))
+  }
+
+  return metadataCache.get(Type)
+}
 
 const metadata = () => Object.freeze({
   _,
   base,
   asIs,
-  any: always(asIs(identity)),
+  any,
+  anyOf,
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber.metadata() : asIs(Number),
 
   string: always(asIs(String)),

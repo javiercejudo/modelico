@@ -59,6 +59,7 @@ import featuresSimple from './features/simple'
 import featuresAdvanced from './features/advanced'
 import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
+import featuresPolymorphic from './features/polymorphic'
 import ImmutableExamples from './Immutable.js/index'
 import ImmutableProxied from './Immutable.js/proxied'
 
@@ -121,6 +122,7 @@ export default (options, should, M, extensions) => () => {
   describe('Readme advanced features', featuresAdvanced(...deps))
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps))
   describe('Deep nesting features', featuresDeepNesting(...deps))
+  describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
   describe('Immutable.js examples', ImmutableExamples(U, ...deps))
 
   U.skipDescribeIfNoProxies(

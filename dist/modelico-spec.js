@@ -1997,6 +1997,7 @@ var asIs = (function (U, should, M) {
     var _M$metadata = M.metadata(),
         asIs = _M$metadata.asIs,
         any = _M$metadata.any,
+        anyOf = _M$metadata.anyOf,
         string = _M$metadata.string;
 
     describe('toJSON', function () {
@@ -2027,7 +2028,8 @@ var asIs = (function (U, should, M) {
       it('should return metadata like type', function () {
         string().type.should.be.exactly(String);
 
-        var asIsObject = JSON.parse('{"two":2}', any().reviver);
+        // using empty anyOf for testing purposes
+        var asIsObject = JSON.parse('{"two":2}', anyOf()().reviver);
 
         should(asIsObject.two).be.exactly(2);
       });
@@ -2174,11 +2176,11 @@ var featuresAdvanced = (function (should, M) {
         }
       }], [{
         key: 'innerTypes',
-        value: function innerTypes(path) {
+        value: function innerTypes() {
           return Object.freeze({
             givenName: any(),
             familyName: string(),
-            pets: list(maybe(_(Animal, path)))
+            pets: list(maybe(_(Animal)))
           });
         }
       }]);
@@ -2340,6 +2342,232 @@ var featuresDeepNesting = (function (should, M, fixtures) {
       city.country().name().should.be.exactly('Spain');
       city.country().code().should.be.exactly('ESP');
       city.country().region().customMethod().should.be.exactly('Europe (EU)');
+    });
+  };
+});
+
+/* eslint-env mocha */
+
+var featuresPolymorphic = (function (should, M) {
+  return function () {
+    describe('Enumerated: default type field', function () {
+      var CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER']);
+
+      var _M$metadata = M.metadata(),
+          _ = _M$metadata._,
+          number = _M$metadata.number,
+          stringMap = _M$metadata.stringMap,
+          list = _M$metadata.list,
+          anyOf = _M$metadata.anyOf;
+
+      var NumberCollection = function (_M$Base) {
+        inherits(NumberCollection, _M$Base);
+
+        function NumberCollection(props) {
+          classCallCheck(this, NumberCollection);
+          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, NumberCollection, props));
+        }
+
+        createClass(NumberCollection, [{
+          key: 'getNumbers',
+          value: function getNumbers() {
+            var type = this.type,
+                collection = this.collection;
+
+
+            switch (type()) {
+              case CollectionType.OBJECT():
+                return [].concat(toConsumableArray(collection()[M.symbols.innerOrigSymbol]().values()));
+              case CollectionType.ARRAY():
+                return [].concat(toConsumableArray(collection()));
+              default:
+                throw TypeError('Unsupported NumberCollection with type ' + type().toJSON());
+            }
+          }
+        }, {
+          key: 'sum',
+          value: function sum() {
+            return this.getNumbers().reduce(function (acc, x) {
+              return acc + x;
+            }, 0);
+          }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              type: _(CollectionType),
+              collection: anyOf([[stringMap(number()), CollectionType.OBJECT()], [list(number()), CollectionType.ARRAY()]])
+            });
+          }
+        }]);
+        return NumberCollection;
+      }(M.Base);
+
+      it('should revive polymorphic JSON (1)', function () {
+        var col1 = M.fromJS(NumberCollection, {
+          type: 'OBJECT',
+          collection: { 'a': 10, 'b': 25, 'c': 4000 }
+        });
+
+        should(col1.sum()).be.exactly(4035);
+      });
+
+      it('should revive polymorphic JSON (2)', function () {
+        var col2 = M.fromJS(NumberCollection, {
+          type: 'ARRAY',
+          collection: [1, 2, 3, 4, 3]
+        });
+
+        should(col2.sum()).be.exactly(13);
+      });
+
+      it('should revive polymorphic JSON (3)', function () {
+        should(function () {
+          return M.fromJS(NumberCollection, {
+            type: 'OTHER',
+            collection: '1,2,3,4,5'
+          });
+        }).throw(/unsupported enumerator "OTHER" at ""/);
+      });
+    });
+
+    describe('Enumerated: custom field', function () {
+      var CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER']);
+
+      var _M$metadata2 = M.metadata(),
+          _ = _M$metadata2._,
+          number = _M$metadata2.number,
+          stringMap = _M$metadata2.stringMap,
+          list = _M$metadata2.list,
+          anyOf = _M$metadata2.anyOf;
+
+      var NumberCollection = function (_M$Base2) {
+        inherits(NumberCollection, _M$Base2);
+
+        function NumberCollection(props) {
+          classCallCheck(this, NumberCollection);
+          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, NumberCollection, props));
+        }
+
+        createClass(NumberCollection, [{
+          key: 'getNumbers',
+          value: function getNumbers() {
+            var collectionType = this.collectionType,
+                collection = this.collection;
+
+
+            switch (collectionType()) {
+              case CollectionType.OBJECT():
+                return [].concat(toConsumableArray(collection()[M.symbols.innerOrigSymbol]().values()));
+              case CollectionType.ARRAY():
+                return [].concat(toConsumableArray(collection()));
+              default:
+                throw TypeError('Unsupported NumberCollection with type ' + collectionType().toJSON());
+            }
+          }
+        }, {
+          key: 'sum',
+          value: function sum() {
+            return this.getNumbers().reduce(function (acc, x) {
+              return acc + x;
+            }, 0);
+          }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              collectionType: _(CollectionType),
+              collection: anyOf([[stringMap(number()), CollectionType.OBJECT()], [list(number()), CollectionType.ARRAY()]], 'collectionType')
+            });
+          }
+        }]);
+        return NumberCollection;
+      }(M.Base);
+
+      it('should revive polymorphic JSON (1)', function () {
+        var col1 = M.fromJS(NumberCollection, {
+          collectionType: 'OBJECT',
+          collection: { 'a': 10, 'b': 25, 'c': 4000 }
+        });
+
+        should(col1.sum()).be.exactly(4035);
+      });
+
+      it('should revive polymorphic JSON (2)', function () {
+        var col2 = M.fromJS(NumberCollection, {
+          collectionType: 'ARRAY',
+          collection: [1, 2, 3, 4, 3]
+        });
+
+        should(col2.sum()).be.exactly(13);
+      });
+
+      it('should revive polymorphic JSON (3)', function () {
+        should(function () {
+          return M.fromJS(NumberCollection, {
+            collectionType: 'OTHER',
+            collection: '1,2,3,4,5'
+          });
+        }).throw(/unsupported enumerator "OTHER" at ""/);
+      });
+    });
+
+    describe('Base on value only', function () {
+      var _M$metadata3 = M.metadata(),
+          number = _M$metadata3.number,
+          stringMap = _M$metadata3.stringMap,
+          list = _M$metadata3.list;
+
+      var NumberCollection = function (_M$Base3) {
+        inherits(NumberCollection, _M$Base3);
+
+        function NumberCollection(props) {
+          classCallCheck(this, NumberCollection);
+          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, NumberCollection, props));
+        }
+
+        createClass(NumberCollection, [{
+          key: 'getNumbers',
+          value: function getNumbers() {
+            var collection = this.collection();
+
+            return Array.isArray(collection) ? [].concat(toConsumableArray(collection)) : [].concat(toConsumableArray(collection[M.symbols.innerOrigSymbol]().values()));
+          }
+        }, {
+          key: 'sum',
+          value: function sum() {
+            return this.getNumbers().reduce(function (acc, x) {
+              return acc + x;
+            }, 0);
+          }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              collection: function collection(v) {
+                return Array.isArray(v) ? list(number()) : stringMap(number());
+              }
+            });
+          }
+        }]);
+        return NumberCollection;
+      }(M.Base);
+
+      it('should revive polymorphic JSON (1)', function () {
+        var col1 = M.fromJS(NumberCollection, {
+          collection: { 'a': 10, 'b': 25, 'c': 4000 }
+        });
+
+        should(col1.sum()).be.exactly(4035);
+      });
+
+      it('should revive polymorphic JSON (2)', function () {
+        var col2 = M.fromJS(NumberCollection, {
+          collection: [1, 2, 3, 4, 3]
+        });
+
+        should(col2.sum()).be.exactly(13);
+      });
     });
   };
 });
@@ -3126,10 +3354,10 @@ var friendFactory = (function (M) {
 
     createClass(Friend, null, [{
       key: 'innerTypes',
-      value: function innerTypes(path) {
+      value: function innerTypes() {
         return Object.freeze({
           name: string(),
-          bestFriend: maybe(_(Friend, path))
+          bestFriend: maybe(_(Friend))
         });
       }
     }]);
@@ -3163,10 +3391,10 @@ var cityFactory = (function (M, Region, countryFactory) {
 
     createClass(City, null, [{
       key: "innerTypes",
-      value: function innerTypes(path) {
+      value: function innerTypes() {
         return Object.freeze({
           name: string(),
-          country: _(Country, path)
+          country: _(Country)
         });
       }
     }]);
@@ -3193,11 +3421,11 @@ var countryFactory = (function (M, Region) {
 
     createClass(Country, null, [{
       key: "innerTypes",
-      value: function innerTypes(path) {
+      value: function innerTypes() {
         return Object.freeze({
           name: string(),
           code: string(),
-          region: _(Region, path)
+          region: _(Region)
         });
       }
     }]);
@@ -3284,10 +3512,10 @@ var regionIncompatibleNameKeyFactory = (function (M) {
       }
     }], [{
       key: "innerTypes",
-      value: function innerTypes(path) {
+      value: function innerTypes() {
         return Object.freeze({
           name: string(),
-          code: _(Code, path)
+          code: _(Code)
         });
       }
     }]);
@@ -3410,26 +3638,32 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         });
 
         var animalMeta = ajv_(Animal);
-        var animal1Schema1 = M.getSchema(animalMeta);
-        var animal1Schema2 = M.getSchema(animalMeta);
+        var animal1Schema1 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#');
+        var animal1Schema2 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#');
 
         animal1Schema1.should.deepEqual(animal1Schema2).and.deepEqual({
+          '$schema': 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
+              anyOf: [{ type: 'null' }, {
+                default: 'unknown',
+                type: 'string',
+                minLength: 1,
+                maxLength: 25
+              }]
             },
             dimensions: {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                type: 'number',
-                exclusiveMinimum: true,
-                minimum: 0
-              }
+              anyOf: [{ type: 'null' }, {
+                type: 'array',
+                minItems: 3,
+                maxItems: 3,
+                items: {
+                  type: 'number',
+                  exclusiveMinimum: true,
+                  minimum: 0
+                }
+              }]
             }
           }
         });
@@ -3445,10 +3679,12 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
               maxLength: 25
             },
             dimensions: {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {}
+              anyOf: [{ type: 'null' }, {
+                type: 'array',
+                minItems: 3,
+                maxItems: 3,
+                items: {}
+              }]
             }
           },
           required: ['name']
@@ -3982,7 +4218,9 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             classCallCheck(this, CountryCode);
 
             if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
-              throw TypeError(ajv.errors[0].message);
+              throw TypeError(ajv.errors.map(function (error) {
+                return error.message;
+              }).join('\n'));
             }
 
             return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, CountryCode, props));
@@ -4171,6 +4409,204 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         }).throw(/forcibly failed/);
       });
     });
+
+    describe('Circular innerTypes', function () {
+      it('self reference', function () {
+        var Chain = function (_M$Base7) {
+          inherits(Chain, _M$Base7);
+
+          function Chain(props) {
+            classCallCheck(this, Chain);
+            return possibleConstructorReturn(this, (Chain.__proto__ || Object.getPrototypeOf(Chain)).call(this, Chain, props));
+          }
+
+          createClass(Chain, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                description: ajvString({ minLength: 1 }),
+                previous: ajvMaybe(_(Chain)),
+                next: ajvMaybe(_(Chain)),
+                relatedChains: ajvList({}, _(Chain))
+              });
+            }
+          }]);
+          return Chain;
+        }(M.Base);
+
+        M.getSchema(_(Chain)).should.deepEqual({
+          'definitions': {
+            '1': {
+              'type': 'object',
+              'properties': {
+                'description': {
+                  'type': 'string',
+                  'minLength': 1
+                },
+                'previous': {
+                  anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
+                },
+                'next': {
+                  anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
+                },
+                'relatedChains': {
+                  'type': 'array',
+                  'items': {
+                    '$ref': '#/definitions/1'
+                  }
+                }
+              },
+              'required': ['description', 'relatedChains']
+            }
+          },
+          '$ref': '#/definitions/1'
+        });
+      });
+
+      it('indirect reference', function () {
+        var Parent = function (_M$Base8) {
+          inherits(Parent, _M$Base8);
+
+          function Parent(props) {
+            classCallCheck(this, Parent);
+            return possibleConstructorReturn(this, (Parent.__proto__ || Object.getPrototypeOf(Parent)).call(this, Parent, props));
+          }
+
+          createClass(Parent, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                name: ajvString({ minLength: 11 }),
+                child: ajvMaybe(_(Child))
+              });
+            }
+          }]);
+          return Parent;
+        }(M.Base);
+
+        var Child = function (_M$Base9) {
+          inherits(Child, _M$Base9);
+
+          function Child(props) {
+            classCallCheck(this, Child);
+            return possibleConstructorReturn(this, (Child.__proto__ || Object.getPrototypeOf(Child)).call(this, Parent, props));
+          }
+
+          createClass(Child, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                name: ajvString({ minLength: 22 }),
+                parent: _(Parent)
+              });
+            }
+          }]);
+          return Child;
+        }(M.Base);
+
+        var Person = function (_M$Base10) {
+          inherits(Person, _M$Base10);
+
+          function Person(props) {
+            classCallCheck(this, Person);
+            return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Parent, props));
+          }
+
+          createClass(Person, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                name: ajvString({ minLength: 33 }),
+                parent: _(Parent),
+                child: ajvMaybe(_(Child))
+              });
+            }
+          }]);
+          return Person;
+        }(M.Base);
+
+        M.getSchema(_(Person)).should.deepEqual({
+          'definitions': {
+            '1': {
+              'type': 'object',
+              'properties': {
+                'name': {
+                  'type': 'string',
+                  'minLength': 33
+                },
+                'parent': {
+                  'type': 'object',
+                  'properties': {
+                    'name': {
+                      'type': 'string',
+                      'minLength': 11
+                    },
+                    'child': {
+                      anyOf: [{ type: 'null' }, {
+                        'type': 'object',
+                        'properties': {
+                          'name': {
+                            'type': 'string',
+                            'minLength': 22
+                          },
+                          'parent': {
+                            '$ref': '#/definitions/3'
+                          }
+                        },
+                        'required': ['name', 'parent']
+                      }]
+                    }
+                  },
+                  'required': ['name']
+                },
+                'child': {
+                  anyOf: [{ type: 'null' }, {
+                    'type': 'object',
+                    'properties': {
+                      'name': {
+                        'type': 'string',
+                        'minLength': 22
+                      },
+                      'parent': {
+                        '$ref': '#/definitions/3'
+                      }
+                    },
+                    'required': ['name', 'parent']
+                  }]
+                }
+              },
+              'required': ['name', 'parent']
+            },
+            '3': {
+              'type': 'object',
+              'properties': {
+                'name': {
+                  'type': 'string',
+                  'minLength': 11
+                },
+                'child': {
+                  anyOf: [{ type: 'null' }, {
+                    'type': 'object',
+                    'properties': {
+                      'name': {
+                        'type': 'string',
+                        'minLength': 22
+                      },
+                      'parent': {
+                        '$ref': '#/definitions/3'
+                      }
+                    },
+                    'required': ['name', 'parent']
+                  }]
+                }
+              },
+              'required': ['name']
+            }
+          },
+          '$ref': '#/definitions/1'
+        });
+      });
+    });
   };
 });
 
@@ -4263,6 +4699,7 @@ var modelicoSpec = (function (options, should, M, extensions) {
     describe('Readme advanced features', featuresAdvanced.apply(undefined, deps));
     describe('Readme advanced features ES5', featuresAdvancedES5.apply(undefined, deps));
     describe('Deep nesting features', featuresDeepNesting.apply(undefined, deps));
+    describe('Reviving polymrphic JSON', featuresPolymorphic.apply(undefined, deps));
     describe('Immutable.js examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
 
     U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));

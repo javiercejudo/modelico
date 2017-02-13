@@ -50,11 +50,11 @@ class Person extends M.Base {
     return `${this.givenName()} ${this.familyName()}`.trim()
   }
 
-  static innerTypes (path) {
+  static innerTypes () {
     return Object.freeze({
       givenName: string(),
       familyName: string(),
-      pets: list(_(Animal, path))
+      pets: list(_(Animal))
     })
   }
 }

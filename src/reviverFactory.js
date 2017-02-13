@@ -1,4 +1,4 @@
-import { isPlainObject, reviverOrAsIs } from './U'
+import { isPlainObject, reviverOrAsIs, isFunction } from './U'
 import getInnerTypes from './getInnerTypes'
 
 const plainObjectReviverFactory = (Type, k, v, prevPath) =>
@@ -6,7 +6,10 @@ const plainObjectReviverFactory = (Type, k, v, prevPath) =>
     const path = prevPath.concat(field)
     const innerTypes = getInnerTypes(prevPath, Type)
 
-    const metadata = innerTypes[field]
+    const metadataCandidate = innerTypes[field]
+    const metadata = isFunction(metadataCandidate)
+      ? metadataCandidate(v, path)
+      : metadataCandidate
 
     if (metadata) {
       acc[field] = reviverOrAsIs(metadata)(k, v[field], path)

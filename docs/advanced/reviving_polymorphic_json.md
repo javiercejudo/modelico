@@ -2,68 +2,53 @@
 
 The [built-in metadata](../README.md#metadata) covers the bulk of use cases.
 However, to deal with types whose JSON might take more than one form, you will
-need a custom reviving strategy.
+need a custom reviving strategy. We are going to walk through two examples:
+first, we will revive objects based on an enumerated field that will indicate
+how the object should be revived; second, we will revive objects based on
+their shape only, without any additional fields.
+
+## Example 1: revive based on an enumerated field
 
 We are going to create a `NumberCollection` class which models either an
 `M.StringMap` or an `M.List` to parse JSON like this:
 
 ```js
-/* eg. 1: */ {"collectionType": "StringMap", "collection": {"a": 1, "b": 2}}
-/* eg. 2: */ {"collectionType": "List"     , "collection": [1, 2, 3, 4, 3]}
+/* eg. 1: */ {"collectionType": "OBJECT", "collection": {"a": 1, "b": 2}}
+/* eg. 2: */ {"collectionType": "ARRAY" , "collection": [1, 2, 3, 4, 3]}
 ```
+
+_Note: the convention is to name the type field as simply `type`, but we will
+continue with `collectionType` to show that it is up to you._
 
 First, we can use `M.Enum` to create `CollectionType`:
 
 ```js
-const CollectionType = M.Enum.fromObject({
-  StringMap: { impl: M.StringMap },
-  List: { impl: M.List }
-})
+const CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY'])
 ```
 
-_Note: `impl` is not a special keyword, but a regular property that you can
-name however you prefer._
-
-Now, we are going to write a reviver to deserialise the JSON:
+Now, we can create our `NumberCollection` class:
 
 ```js
-const { number } = M.metadata()
+const { _, number, stringMap, list, anyOf } = M.metadata()
 
-const reviver = (k, v) => {
-  // JSON.parse revivers are called for each key-value pair from the
-  // bottom-up, so we are going to wait until we are at the root of the JSON
-  // to do our processing
-  if (k !== '') {
-    return v
-  }
-
-  const collectionType = M.fromJS(CollectionType, v.collectionType)
-  const collection = M.genericsFromJS(collectionType.impl, [number()], v.collection)
-
-  return new NumberCollection(collectionType, collection)
-}
-```
-
-_Learn more: [Using the reviver parameter in JSON.parse()](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#Using_the_reviver_parameter)_
-
-Finally, we can create our `NumberCollection` class:
-
-```js
 class NumberCollection extends M.Base {
-  constructor (collectionType, collection) {
-    super(NumberCollection, { collectionType, collection })
+  constructor (props) {
+    super(NumberCollection, props)
   }
 
   getNumbers () {
-    const { collectionType, collection } = M.fields(this)
+    const { collectionType, collection } = this
 
-    switch (collectionType) {
-      case CollectionType.StringMap():
-        return [...collection[M.symbols.innerOrigSymbol].values()]
-      case CollectionType.List():
-        return [...collection]
+    switch (collectionType()) {
+      case CollectionType.OBJECT():
+        // Note that .inner() creates a copy. For improved performance,
+        // [...collection()[M.symbols.innerOrigSymbol]().values()]
+        // could be used
+        return [...collection().inner().values()]
+      case CollectionType.ARRAY():
+        return [...collection()]
       default:
-        throw TypeError(`Unknown NumberCollection type ${collectionType.toJSON()}`)
+        throw TypeError(`Unsupported NumberCollection with type ${collectionType.toJSON()}`)
     }
   }
 
@@ -71,24 +56,28 @@ class NumberCollection extends M.Base {
     return this.getNumbers().reduce((acc, x) => acc + x, 0)
   }
 
-  // Since we are reviving the JSON ourselves, it isn't useful to declare
-  // inner types
   static innerTypes () {
-    return Object.freeze({})
-  }
-
-  static metadata () {
-    return Object.freeze({ type: NumberCollection, reviver })
+    return Object.freeze({
+      collectionType: _(CollectionType),
+      collection: anyOf([
+        [stringMap(number()), CollectionType.OBJECT()],
+        [list(number()), CollectionType.ARRAY()]
+      ], 'collectionType') // if omitted, the enumerated field is 'type'
+    })
   }
 }
 ```
 
+Note that the value for each field in `innerTypes` can be either metadata or
+a metadata-returning function that will be passed the plain object being
+revived.
+
 We can now use it as follows:
 
 ```js
-col1 = M.fromJSON(NumberCollection, `
+const col1 = M.fromJSON(NumberCollection, `
   {
-    "collectionType": "StringMap",
+    "collectionType": "OBJECT",
     "collection": {"a": 10, "b": 25, "c": 4000}
   }
 `)
@@ -97,9 +86,9 @@ col1.sum() // => 4035
 ```
 
 ```js
-col2 = M.fromJSON(NumberCollection, `
+const col2 = M.fromJSON(NumberCollection, `
   {
-    "collectionType": "List",
+    "collectionType": "ARRAY",
     "collection": [1, 2, 3, 4, 3]
   }
 `)
@@ -118,3 +107,47 @@ JSON.stringify(col1)
 JSON.stringify(col2)
 // => {"collectionType":"List","collection":[1,2,3,4,3]}
 ```
+
+## Example 2: revive based purely on the shape of the values
+
+First, it is worth mentioning this is not always possible, as the shape of the
+JSON representation might be ambiguous (see example in
+[Gson's RuntimeTypeAdapterFactory](https://github.com/google/gson/blob/9e6f2bab20257b6823a5b753739f047d79e9dcbd/extras/src/main/java/com/google/gson/typeadapters/RuntimeTypeAdapterFactory.java#L36)).
+
+In this example, we are going to revive polymorphic JSON like the one above,
+but without an enumerated field to hint the type of the collection.
+
+```js
+const { number, stringMap, list } = M.metadata()
+
+class NumberCollection extends M.Base {
+  constructor (props) {
+    super(NumberCollection, props)
+  }
+
+  getNumbers () {
+    const collection = this.collection()
+
+    return Array.isArray(collection)
+      ? [...collection]
+      : [...collection[M.symbols.innerOrigSymbol]().values()]
+  }
+
+  sum () {
+    return this.getNumbers().reduce((acc, x) => acc + x, 0)
+  }
+
+  static innerTypes () {
+    return Object.freeze({
+      collection: v => Array.isArray(v)
+        ? list(number())
+        : stringMap(number())
+    })
+  }
+}
+```
+
+The end result is simpler, but less generic. It might require non-trivial
+updates to the logic that figures out which metadata to use. For example,
+if we start supporting `map(number())`, whose JSON representation is an
+array of pairs, `Array.isArray` will not be enough.
