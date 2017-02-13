@@ -105,12 +105,13 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
 
       const animalMeta = ajv_(Animal)
-      const animal1Schema1 = M.getSchema(animalMeta)
-      const animal1Schema2 = M.getSchema(animalMeta)
+      const animal1Schema1 = M.getSchema(animalMeta, 'http://json-schema.org/draft-04/schema#')
+      const animal1Schema2 = M.getSchema(animalMeta, 'http://json-schema.org/draft-04/schema#')
 
       animal1Schema1
         .should.deepEqual(animal1Schema2)
         .and.deepEqual({
+          '$schema': 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {

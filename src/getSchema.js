@@ -4,6 +4,11 @@ import getInnerTypes from './getInnerTypes'
 
 const metadataSchemaCache = new WeakMap()
 
+const schemaDeclaration = (schema, specification) =>
+  (specification !== '')
+    ? Object.assign({'$schema': specification}, schema)
+    : schema
+
 const getSchema = metadata => {
   if (metadata.schema) {
     return metadata.schema()
@@ -37,10 +42,10 @@ const getSchema = metadata => {
   return schema
 }
 
-export default metadata => {
+export default (metadata, specification = '') => {
   if (!metadataSchemaCache.has(metadata)) {
     metadataSchemaCache.set(metadata, getSchema(metadata))
   }
 
-  return metadataSchemaCache.get(metadata)
+  return schemaDeclaration(metadataSchemaCache.get(metadata), specification)
 }
