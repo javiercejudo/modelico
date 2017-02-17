@@ -142,7 +142,7 @@ export default (should, M) => () => {
       getNumbers () {
         const collection = this.collection()
 
-        return Array.isArray(collection)
+        return (collection[M.symbols.typeSymbol]() === M.List)
           ? [...collection]
           : [...collection[M.symbols.innerOrigSymbol]().values()]
       }
@@ -153,7 +153,7 @@ export default (should, M) => () => {
 
       static innerTypes () {
         return Object.freeze({
-          collection: v => Array.isArray(v)
+          collection: v => Array.isArray(v.collection)
             ? list(number())
             : stringMap(number())
         })

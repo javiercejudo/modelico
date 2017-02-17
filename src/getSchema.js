@@ -1,3 +1,4 @@
+import M from './'
 import { emptyObject } from './U'
 import getInnerTypes from './getInnerTypes'
 
@@ -15,7 +16,10 @@ const getSchemaImpl = metadata => {
     return metadata.schema()
   }
 
-  if (!metadata.type.innerTypes || Object.keys(getInnerTypes([], metadata.type)).length === 0) {
+  if (
+    !metadata.type || !metadata.type.innerTypes ||
+    Object.keys(getInnerTypes([], metadata.type)).length === 0
+  ) {
     return emptyObject
   }
 
@@ -32,12 +36,12 @@ const getSchemaImpl = metadata => {
       required.push(fieldName)
       schema = fieldSchema
     } else {
-      schema = {
+      schema = Object.assign({
         anyOf: [
           { type: 'null' },
           fieldSchema
         ]
-      }
+      }, (fieldMetadata.type === M.Maybe) ? undefined : { default: fieldMetadata.default })
     }
 
     return Object.assign(acc, {[fieldName]: schema})

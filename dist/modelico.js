@@ -311,7 +311,7 @@ var getSchemaImpl = function getSchemaImpl(metadata) {
     return metadata.schema();
   }
 
-  if (!metadata.type.innerTypes || Object.keys(getInnerTypes$1([], metadata.type)).length === 0) {
+  if (!metadata.type || !metadata.type.innerTypes || Object.keys(getInnerTypes$1([], metadata.type)).length === 0) {
     return emptyObject;
   }
 
@@ -328,9 +328,9 @@ var getSchemaImpl = function getSchemaImpl(metadata) {
       required.push(fieldName);
       schema = fieldSchema;
     } else {
-      schema = {
+      schema = Object.assign({
         anyOf: [{ type: 'null' }, fieldSchema]
-      };
+      }, fieldMetadata.type === M.Maybe ? undefined : { default: fieldMetadata.default });
     }
 
     return Object.assign(acc, defineProperty({}, fieldName, schema));
@@ -1499,9 +1499,14 @@ var iterableReviverFactory = function iterableReviverFactory(IterableType, itemM
       return v;
     }
 
+    var itemMetadataGetter = Array.isArray(itemMetadata) ? function (i) {
+      return itemMetadata[i];
+    } : always(itemMetadata);
+
     var revive = function revive(x, i) {
-      return reviverOrAsIs(itemMetadata)('', x, path.concat(i));
+      return reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i));
     };
+
     var iterable = v === null ? null : v.map(revive);
 
     return new IterableType(iterable);
@@ -1870,13 +1875,19 @@ var proxyFactory = function proxyFactory(nonMutators, mutators, innerCloner, obj
 
 var formatError = function formatError(ajv, schema, value) {
   var path = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-  return ['Invalid JSON at "' + path.join(' > ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value\n', JSON.stringify(value, null, 2) + '\n'].concat(ajv.errors.map(function (error) {
+  return ['Invalid JSON at "' + path.join(' > ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value (data path "' + ajv.errors.filter(function (e) {
+    return e.dataPath !== '';
+  }).map(function (error) {
+    return error.dataPath;
+  }) + '")\n', JSON.stringify(value, null, 2) + '\n'].concat(ajv.errors.map(function (error) {
     return error.message;
   })).join('\n');
 };
 
 var formatDefaultValueError = function formatDefaultValueError(ajv, schema, value) {
-  return ['Invalid default value. According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the default value\n', JSON.stringify(value, null, 2) + '\n', ajv.errors[0].message].join('\n');
+  return ['Invalid default value. According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the default value\n', JSON.stringify(value, null, 2) + '\n'].concat(ajv.errors.map(function (error) {
+    return error.message;
+  })).join('\n');
 };
 
 var ajvMetadata = (function () {
@@ -2037,10 +2048,27 @@ var ajvMetadata = (function () {
     });
   };
 
-  ajvMetadata.ajvList = function (schema, itemMetadata) {
+  var ajvList = function ajvList(schema, itemMetadata) {
     return ajvMeta(list(itemMetadata), { type: 'array' }, schema, function () {
       return { items: getSchema(itemMetadata, false) };
     });
+  };
+
+  var ajvTuple = function ajvTuple(schema, itemsMetadata) {
+    var length = itemsMetadata.length;
+
+    return ajvMeta(list(itemsMetadata), {
+      type: 'array',
+      minItems: length,
+      maxItems: length,
+      items: itemsMetadata.map(function (itemMetadata) {
+        return getSchema(itemMetadata, false);
+      })
+    }, schema);
+  };
+
+  ajvMetadata.ajvList = function (schema, itemMetadata) {
+    return Array.isArray(itemMetadata) ? ajvTuple(schema, itemMetadata) : ajvList(schema, itemMetadata);
   };
 
   ajvMetadata.ajvMap = function (schema, keyMetadata, valueMetadata) {

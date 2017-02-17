@@ -115,6 +115,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
           type: 'object',
           properties: {
             name: {
+              default: 'unknown',
               anyOf: [
                 { type: 'null' },
                 {
@@ -145,28 +146,29 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       const animalSchema2 = M.getSchema(ajv_(Animal2))
 
-      animalSchema2.should.deepEqual({
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 25
+      animalSchema2
+        .should.deepEqual({
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 25
+            },
+            dimensions: {
+              anyOf: [
+                { type: 'null' },
+                {
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {}
+                }
+              ]
+            }
           },
-          dimensions: {
-            anyOf: [
-              { type: 'null' },
-              {
-                type: 'array',
-                minItems: 3,
-                maxItems: 3,
-                items: {}
-              }
-            ]
-          }
-        },
-        required: ['name']
-      })
+          required: ['name']
+        })
 
       const ajv = Ajv()
 
@@ -536,6 +538,105 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
   })
 
+  describe('tuple', () => {
+    it('supports tuples (valid data)', () => {
+      const metadata = ajvList({}, [ajvString(), ajvNumber()])
+
+      JSON.parse('["a",5]', metadata.reviver)
+        .equals(M.List.of('a', 5))
+        .should.be.exactly(true)
+
+      M.getSchema(metadata)
+        .should.deepEqual({
+          type: 'array',
+          minItems: 2,
+          maxItems: 2,
+          items: [
+            { type: 'string' },
+            { type: 'number' }
+          ]
+        })
+    })
+
+    it('supports tuples (valid data, nested modelico object)', () => {
+      class Animal extends M.Base {
+        constructor (props) {
+          super(Animal, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
+            dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+          })
+        }
+      }
+
+      const metadata = ajvList({}, [ajvString(), _(Animal)])
+
+      M.genericsFromJS(M.List, [[ajvString(), _(Animal)]], [
+        'a',
+        {
+          name: 'Bane',
+          dimensions: [20, 55, 65]
+        }
+      ]).equals(
+        M.List.of(
+          'a',
+          new Animal({
+            name: 'Bane',
+            dimensions: M.List.of(20, 55, 65)
+          })
+        )
+      ).should.be.exactly(true)
+
+      M.getSchema(metadata)
+        .should.deepEqual({
+          type: 'array',
+          minItems: 2,
+          maxItems: 2,
+          items: [
+            { type: 'string' },
+            {
+              type: 'object',
+              required: ['dimensions'],
+              properties: {
+                name: {
+                  default: 'unknown',
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      default: 'unknown',
+                      type: 'string',
+                      minLength: 1,
+                      maxLength: 25
+                    }
+                  ]
+                },
+                dimensions: {
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {
+                    type: 'number',
+                    exclusiveMinimum: true,
+                    minimum: 0
+                  }
+                }
+              }
+            }
+          ]
+        })
+    })
+
+    it('supports tuples (invalid data)', () => {
+      const metadata = ajvList({}, [ajvString(), ajvNumber()])
+
+      should(() => JSON.parse('["a",true]', metadata.reviver))
+        .throw(/should be number/)
+    })
+  })
+
   describe('map', () => {
     it('reports its full schema', () => {
       const meta = ajvMap({}, ajvNumber(), ajvString())
@@ -891,40 +992,40 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       M.getSchema(_(Chain))
         .should.deepEqual({
-          'definitions': {
+          definitions: {
             '1': {
-              'type': 'object',
-              'properties': {
-                'description': {
-                  'type': 'string',
-                  'minLength': 1
+              type: 'object',
+              properties: {
+                description: {
+                  type: 'string',
+                  minLength: 1
                 },
-                'previous': {
+                previous: {
                   anyOf: [
                     { type: 'null' },
                     { $ref: '#/definitions/1' }
                   ]
                 },
-                'next': {
+                next: {
                   anyOf: [
                     { type: 'null' },
                     { $ref: '#/definitions/1' }
                   ]
                 },
-                'relatedChains': {
-                  'type': 'array',
-                  'items': {
+                relatedChains: {
+                  type: 'array',
+                  items: {
                     '$ref': '#/definitions/1'
                   }
                 }
               },
-              'required': [
+              required: [
                 'description',
                 'relatedChains'
               ]
             }
           },
-          '$ref': '#/definitions/1'
+          $ref: '#/definitions/1'
         })
     })
 
@@ -936,7 +1037,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
         static innerTypes () {
           return Object.freeze({
-            name: ajvString({minLength: 11}),
+            name: ajvString({minLength: 1}),
             child: ajvMaybe(_(Child))
           })
         }
@@ -949,7 +1050,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
         static innerTypes () {
           return Object.freeze({
-            name: ajvString({minLength: 22}),
+            name: ajvString({minLength: 1}),
             parent: _(Parent)
           })
         }
@@ -962,7 +1063,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
         static innerTypes () {
           return Object.freeze({
-            name: ajvString({minLength: 33}),
+            name: ajvString({minLength: 1}),
             parent: _(Parent),
             child: ajvMaybe(_(Child))
           })
@@ -971,36 +1072,36 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       M.getSchema(_(Person))
         .should.deepEqual({
-          'definitions': {
+          definitions: {
             '1': {
-              'type': 'object',
-              'properties': {
-                'name': {
-                  'type': 'string',
-                  'minLength': 33
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  minLength: 1
                 },
-                'parent': {
-                  'type': 'object',
-                  'properties': {
-                    'name': {
-                      'type': 'string',
-                      'minLength': 11
+                parent: {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                      minLength: 1
                     },
-                    'child': {
+                    child: {
                       anyOf: [
                         { type: 'null' },
                         {
-                          'type': 'object',
-                          'properties': {
-                            'name': {
-                              'type': 'string',
-                              'minLength': 22
+                          type: 'object',
+                          properties: {
+                            name: {
+                              type: 'string',
+                              minLength: 1
                             },
-                            'parent': {
-                              '$ref': '#/definitions/3'
+                            parent: {
+                              $ref: '#/definitions/3'
                             }
                           },
-                          'required': [
+                          required: [
                             'name',
                             'parent'
                           ]
@@ -1008,25 +1109,25 @@ export default (should, M, fixtures, { Ajv }) => () => {
                       ]
                     }
                   },
-                  'required': [
+                  required: [
                     'name'
                   ]
                 },
-                'child': {
+                child: {
                   anyOf: [
                     { type: 'null' },
                     {
-                      'type': 'object',
-                      'properties': {
-                        'name': {
-                          'type': 'string',
-                          'minLength': 22
+                      type: 'object',
+                      properties: {
+                        name: {
+                          type: 'string',
+                          minLength: 1
                         },
-                        'parent': {
-                          '$ref': '#/definitions/3'
+                        parent: {
+                          $ref: '#/definitions/3'
                         }
                       },
-                      'required': [
+                      required: [
                         'name',
                         'parent'
                       ]
@@ -1034,33 +1135,33 @@ export default (should, M, fixtures, { Ajv }) => () => {
                   ]
                 }
               },
-              'required': [
+              required: [
                 'name',
                 'parent'
               ]
             },
             '3': {
-              'type': 'object',
-              'properties': {
-                'name': {
-                  'type': 'string',
-                  'minLength': 11
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  minLength: 1
                 },
-                'child': {
+                child: {
                   anyOf: [
                     { type: 'null' },
                     {
-                      'type': 'object',
-                      'properties': {
-                        'name': {
-                          'type': 'string',
-                          'minLength': 22
+                      type: 'object',
+                      properties: {
+                        name: {
+                          type: 'string',
+                          minLength: 1
                         },
-                        'parent': {
-                          '$ref': '#/definitions/3'
+                        parent: {
+                          $ref: '#/definitions/3'
                         }
                       },
-                      'required': [
+                      required: [
                         'name',
                         'parent'
                       ]
@@ -1068,12 +1169,12 @@ export default (should, M, fixtures, { Ajv }) => () => {
                   ]
                 }
               },
-              'required': [
+              required: [
                 'name'
               ]
             }
           },
-          '$ref': '#/definitions/1'
+          $ref: '#/definitions/1'
         })
     })
   })

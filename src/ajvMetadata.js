@@ -5,7 +5,7 @@ import M from './'
 const formatError = (ajv, schema, value, path = []) => [
   'Invalid JSON at "' + path.join(' > ') + '". According to the schema\n',
   JSON.stringify(schema, null, 2) + '\n',
-  'the value\n',
+  'the value (data path "' + ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) + '")\n',
   JSON.stringify(value, null, 2) + '\n'
 ].concat(ajv.errors.map(error => error.message)).join('\n')
 
@@ -13,9 +13,8 @@ const formatDefaultValueError = (ajv, schema, value) => [
   'Invalid default value. According to the schema\n',
   JSON.stringify(schema, null, 2) + '\n',
   'the default value\n',
-  JSON.stringify(value, null, 2) + '\n',
-  ajv.errors[0].message
-].join('\n')
+  JSON.stringify(value, null, 2) + '\n'
+].concat(ajv.errors.map(error => error.message)).join('\n')
 
 export default (ajv = { validate: T }) => {
   const metadata = M.metadata()
@@ -156,8 +155,32 @@ export default (ajv = { validate: T }) => {
     )
   }
 
-  ajvMetadata.ajvList = (schema, itemMetadata) =>
-    ajvMeta(list(itemMetadata), { type: 'array' }, schema, () => ({ items: getSchema(itemMetadata, false) }))
+  const ajvList = (schema, itemMetadata) =>
+    ajvMeta(
+      list(itemMetadata),
+      { type: 'array' },
+      schema,
+      () => ({ items: getSchema(itemMetadata, false) })
+    )
+
+  const ajvTuple = (schema, itemsMetadata) => {
+    const length = itemsMetadata.length
+
+    return ajvMeta(
+      list(itemsMetadata),
+      {
+        type: 'array',
+        minItems: length,
+        maxItems: length,
+        items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false))
+      },
+      schema
+    )
+  }
+
+  ajvMetadata.ajvList = (schema, itemMetadata) => Array.isArray(itemMetadata)
+    ? ajvTuple(schema, itemMetadata)
+    : ajvList(schema, itemMetadata)
 
   ajvMetadata.ajvMap = (schema, keyMetadata, valueMetadata) => {
     const baseSchema = {

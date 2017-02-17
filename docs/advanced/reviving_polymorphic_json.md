@@ -108,7 +108,7 @@ JSON.stringify(col2)
 // => {"collectionType":"List","collection":[1,2,3,4,3]}
 ```
 
-## Example 2: revive based purely on the shape of the values
+## Example 2: revive based on the shape of the value
 
 First, it is worth mentioning this is not always possible, as the shape of the
 JSON representation might be ambiguous (see example in
@@ -128,7 +128,7 @@ class NumberCollection extends M.Base {
   getNumbers () {
     const collection = this.collection()
 
-    return Array.isArray(collection)
+    return (collection[M.symbols.typeSymbol]() === M.List)
       ? [...collection]
       : [...collection[M.symbols.innerOrigSymbol]().values()]
   }
@@ -139,7 +139,7 @@ class NumberCollection extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      collection: v => Array.isArray(v)
+      collection: v => Array.isArray(v.collection)
         ? list(number())
         : stringMap(number())
     })

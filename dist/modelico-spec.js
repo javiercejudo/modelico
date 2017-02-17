@@ -2531,7 +2531,7 @@ var featuresPolymorphic = (function (should, M) {
           value: function getNumbers() {
             var collection = this.collection();
 
-            return Array.isArray(collection) ? [].concat(toConsumableArray(collection)) : [].concat(toConsumableArray(collection[M.symbols.innerOrigSymbol]().values()));
+            return collection[M.symbols.typeSymbol]() === M.List ? [].concat(toConsumableArray(collection)) : [].concat(toConsumableArray(collection[M.symbols.innerOrigSymbol]().values()));
           }
         }, {
           key: 'sum',
@@ -2545,7 +2545,7 @@ var featuresPolymorphic = (function (should, M) {
           value: function innerTypes() {
             return Object.freeze({
               collection: function collection(v) {
-                return Array.isArray(v) ? list(number()) : stringMap(number());
+                return Array.isArray(v.collection) ? list(number()) : stringMap(number());
               }
             });
           }
@@ -3646,6 +3646,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             name: {
+              default: 'unknown',
               anyOf: [{ type: 'null' }, {
                 default: 'unknown',
                 type: 'string',
@@ -4041,6 +4042,92 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
     });
 
+    describe('tuple', function () {
+      it('supports tuples (valid data)', function () {
+        var metadata = ajvList({}, [ajvString(), ajvNumber()]);
+
+        JSON.parse('["a",5]', metadata.reviver).equals(M.List.of('a', 5)).should.be.exactly(true);
+
+        M.getSchema(metadata).should.deepEqual({
+          type: 'array',
+          minItems: 2,
+          maxItems: 2,
+          items: [{ type: 'string' }, { type: 'number' }]
+        });
+      });
+
+      it('supports tuples (valid data, nested modelico object)', function () {
+        var Animal = function (_M$Base3) {
+          inherits(Animal, _M$Base3);
+
+          function Animal(props) {
+            classCallCheck(this, Animal);
+            return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+          }
+
+          createClass(Animal, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return Object.freeze({
+                name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
+                dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+              });
+            }
+          }]);
+          return Animal;
+        }(M.Base);
+
+        var metadata = ajvList({}, [ajvString(), _(Animal)]);
+
+        M.genericsFromJS(M.List, [[ajvString(), _(Animal)]], ['a', {
+          name: 'Bane',
+          dimensions: [20, 55, 65]
+        }]).equals(M.List.of('a', new Animal({
+          name: 'Bane',
+          dimensions: M.List.of(20, 55, 65)
+        }))).should.be.exactly(true);
+
+        M.getSchema(metadata).should.deepEqual({
+          type: 'array',
+          minItems: 2,
+          maxItems: 2,
+          items: [{ type: 'string' }, {
+            type: 'object',
+            required: ['dimensions'],
+            properties: {
+              name: {
+                default: 'unknown',
+                anyOf: [{ type: 'null' }, {
+                  default: 'unknown',
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 25
+                }]
+              },
+              dimensions: {
+                type: 'array',
+                minItems: 3,
+                maxItems: 3,
+                items: {
+                  type: 'number',
+                  exclusiveMinimum: true,
+                  minimum: 0
+                }
+              }
+            }
+          }]
+        });
+      });
+
+      it('supports tuples (invalid data)', function () {
+        var metadata = ajvList({}, [ajvString(), ajvNumber()]);
+
+        should(function () {
+          return JSON.parse('["a",true]', metadata.reviver);
+        }).throw(/should be number/);
+      });
+    });
+
     describe('map', function () {
       it('reports its full schema', function () {
         var meta = ajvMap({}, ajvNumber(), ajvString());
@@ -4182,8 +4269,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
     describe('ajvWithDefault', function () {
       it('should validate the default value', function () {
-        var CountryCode = function (_M$Base3) {
-          inherits(CountryCode, _M$Base3);
+        var CountryCode = function (_M$Base4) {
+          inherits(CountryCode, _M$Base4);
 
           function CountryCode(props) {
             classCallCheck(this, CountryCode);
@@ -4211,8 +4298,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       var ajv = Ajv();
 
       it('should validate the default value', function () {
-        var CountryCode = function (_M$Base4) {
-          inherits(CountryCode, _M$Base4);
+        var CountryCode = function (_M$Base5) {
+          inherits(CountryCode, _M$Base5);
 
           function CountryCode(props) {
             classCallCheck(this, CountryCode);
@@ -4250,8 +4337,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
     });
 
     describe('recipe: validation at top level', function () {
-      var Animal = function (_M$Base5) {
-        inherits(Animal, _M$Base5);
+      var Animal = function (_M$Base6) {
+        inherits(Animal, _M$Base6);
 
         function Animal(props) {
           classCallCheck(this, Animal);
@@ -4371,8 +4458,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           })(ajvString(schema));
         };
 
-        var MagicString = function (_M$Base6) {
-          inherits(MagicString, _M$Base6);
+        var MagicString = function (_M$Base7) {
+          inherits(MagicString, _M$Base7);
 
           function MagicString(props) {
             classCallCheck(this, MagicString);
@@ -4412,8 +4499,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
     describe('Circular innerTypes', function () {
       it('self reference', function () {
-        var Chain = function (_M$Base7) {
-          inherits(Chain, _M$Base7);
+        var Chain = function (_M$Base8) {
+          inherits(Chain, _M$Base8);
 
           function Chain(props) {
             classCallCheck(this, Chain);
@@ -4435,37 +4522,37 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         }(M.Base);
 
         M.getSchema(_(Chain)).should.deepEqual({
-          'definitions': {
+          definitions: {
             '1': {
-              'type': 'object',
-              'properties': {
-                'description': {
-                  'type': 'string',
-                  'minLength': 1
+              type: 'object',
+              properties: {
+                description: {
+                  type: 'string',
+                  minLength: 1
                 },
-                'previous': {
+                previous: {
                   anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
                 },
-                'next': {
+                next: {
                   anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
                 },
-                'relatedChains': {
-                  'type': 'array',
-                  'items': {
+                relatedChains: {
+                  type: 'array',
+                  items: {
                     '$ref': '#/definitions/1'
                   }
                 }
               },
-              'required': ['description', 'relatedChains']
+              required: ['description', 'relatedChains']
             }
           },
-          '$ref': '#/definitions/1'
+          $ref: '#/definitions/1'
         });
       });
 
       it('indirect reference', function () {
-        var Parent = function (_M$Base8) {
-          inherits(Parent, _M$Base8);
+        var Parent = function (_M$Base9) {
+          inherits(Parent, _M$Base9);
 
           function Parent(props) {
             classCallCheck(this, Parent);
@@ -4476,7 +4563,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             key: 'innerTypes',
             value: function innerTypes() {
               return Object.freeze({
-                name: ajvString({ minLength: 11 }),
+                name: ajvString({ minLength: 1 }),
                 child: ajvMaybe(_(Child))
               });
             }
@@ -4484,8 +4571,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return Parent;
         }(M.Base);
 
-        var Child = function (_M$Base9) {
-          inherits(Child, _M$Base9);
+        var Child = function (_M$Base10) {
+          inherits(Child, _M$Base10);
 
           function Child(props) {
             classCallCheck(this, Child);
@@ -4496,7 +4583,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             key: 'innerTypes',
             value: function innerTypes() {
               return Object.freeze({
-                name: ajvString({ minLength: 22 }),
+                name: ajvString({ minLength: 1 }),
                 parent: _(Parent)
               });
             }
@@ -4504,8 +4591,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return Child;
         }(M.Base);
 
-        var Person = function (_M$Base10) {
-          inherits(Person, _M$Base10);
+        var Person = function (_M$Base11) {
+          inherits(Person, _M$Base11);
 
           function Person(props) {
             classCallCheck(this, Person);
@@ -4516,7 +4603,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             key: 'innerTypes',
             value: function innerTypes() {
               return Object.freeze({
-                name: ajvString({ minLength: 33 }),
+                name: ajvString({ minLength: 1 }),
                 parent: _(Parent),
                 child: ajvMaybe(_(Child))
               });
@@ -4526,84 +4613,84 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         }(M.Base);
 
         M.getSchema(_(Person)).should.deepEqual({
-          'definitions': {
+          definitions: {
             '1': {
-              'type': 'object',
-              'properties': {
-                'name': {
-                  'type': 'string',
-                  'minLength': 33
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  minLength: 1
                 },
-                'parent': {
-                  'type': 'object',
-                  'properties': {
-                    'name': {
-                      'type': 'string',
-                      'minLength': 11
+                parent: {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                      minLength: 1
                     },
-                    'child': {
+                    child: {
                       anyOf: [{ type: 'null' }, {
-                        'type': 'object',
-                        'properties': {
-                          'name': {
-                            'type': 'string',
-                            'minLength': 22
+                        type: 'object',
+                        properties: {
+                          name: {
+                            type: 'string',
+                            minLength: 1
                           },
-                          'parent': {
-                            '$ref': '#/definitions/3'
+                          parent: {
+                            $ref: '#/definitions/3'
                           }
                         },
-                        'required': ['name', 'parent']
+                        required: ['name', 'parent']
                       }]
                     }
                   },
-                  'required': ['name']
+                  required: ['name']
                 },
-                'child': {
+                child: {
                   anyOf: [{ type: 'null' }, {
-                    'type': 'object',
-                    'properties': {
-                      'name': {
-                        'type': 'string',
-                        'minLength': 22
+                    type: 'object',
+                    properties: {
+                      name: {
+                        type: 'string',
+                        minLength: 1
                       },
-                      'parent': {
-                        '$ref': '#/definitions/3'
+                      parent: {
+                        $ref: '#/definitions/3'
                       }
                     },
-                    'required': ['name', 'parent']
+                    required: ['name', 'parent']
                   }]
                 }
               },
-              'required': ['name', 'parent']
+              required: ['name', 'parent']
             },
             '3': {
-              'type': 'object',
-              'properties': {
-                'name': {
-                  'type': 'string',
-                  'minLength': 11
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  minLength: 1
                 },
-                'child': {
+                child: {
                   anyOf: [{ type: 'null' }, {
-                    'type': 'object',
-                    'properties': {
-                      'name': {
-                        'type': 'string',
-                        'minLength': 22
+                    type: 'object',
+                    properties: {
+                      name: {
+                        type: 'string',
+                        minLength: 1
                       },
-                      'parent': {
-                        '$ref': '#/definitions/3'
+                      parent: {
+                        $ref: '#/definitions/3'
                       }
                     },
-                    'required': ['name', 'parent']
+                    required: ['name', 'parent']
                   }]
                 }
               },
-              'required': ['name']
+              required: ['name']
             }
           },
-          '$ref': '#/definitions/1'
+          $ref: '#/definitions/1'
         });
       });
     });

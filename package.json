@@ -8,6 +8,7 @@
     "docs-prepare": "gitbook install",
     "docs-watch": "npm run docs-prepare && gitbook serve",
     "t": "gulp test",
+    "t2": "gulp test-no-cov",
     "bt": "npm run build && npm run t",
     "test": "npm run standard && flow && npm run t",
     "test-browsers": "./scripts/browser_tester.sh",

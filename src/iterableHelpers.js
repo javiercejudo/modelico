@@ -1,11 +1,16 @@
-import { reviverOrAsIs, equals, haveDifferentTypes } from './U'
+import { always, reviverOrAsIs, equals, haveDifferentTypes } from './U'
 
 const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const revive = (x, i) => reviverOrAsIs(itemMetadata)('', x, path.concat(i))
+  const itemMetadataGetter = Array.isArray(itemMetadata)
+    ? i => itemMetadata[i]
+    : always(itemMetadata)
+
+  const revive = (x, i) => reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i))
+
   const iterable = (v === null)
     ? null
     : v.map(revive)
