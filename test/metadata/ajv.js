@@ -538,7 +538,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
   })
 
   describe('tuple', () => {
-    it('supports tuples (valid data)', () => {
+    it('valid data', () => {
       const metadata = ajvList({}, [ajvString(), ajvNumber()])
 
       JSON.parse('["a",5]', metadata.reviver)
@@ -557,7 +557,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
     })
 
-    it('supports tuples (valid data, nested modelico object)', () => {
+    it('nested modelico object', () => {
       class Animal extends M.Base {
         constructor (props) {
           super(Animal, props)
@@ -628,11 +628,27 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
     })
 
-    it('supports tuples (invalid data)', () => {
+    it('invalid data', () => {
       const metadata = ajvList({}, [ajvString(), ajvNumber()])
 
       should(() => JSON.parse('["a",true]', metadata.reviver))
         .throw(/should be number/)
+
+      should(() => JSON.parse('["a"]', metadata.reviver))
+        .throw(/should NOT have less than 2 items/)
+
+      should(() => JSON.parse('["a",1,2]', metadata.reviver))
+        .throw(/should NOT have more than 2 items/)
+    })
+
+    it('maybe', () => {
+      M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",1]')
+        .equals(M.List.of('a', M.Maybe.of(1)))
+        .should.be.exactly(true)
+
+      M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",null]')
+        .equals(M.List.of('a', M.Maybe.of()))
+        .should.be.exactly(true)
     })
   })
 
