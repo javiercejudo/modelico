@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M, { Person }) => () => {
-  const { _, list, date } = M.metadata()
+  const { _, list, date, string, number, maybe } = M.metadata()
 
   describe('immutability', () => {
     U.skipIfNoObjectFreeze('must freeze the input', () => {
@@ -170,8 +170,46 @@ export default (U, should, M, { Person }) => () => {
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => JSON.parse('null', list(date()).reviver))
-        .should.throw()
+      should(() => JSON.parse('null', list(date()).reviver))
+        .throw('missing list')
+
+      should(() => M.genericsFromJS(M.List, [date()], [null]))
+        .throw(/missing date/)
+
+      should(() => M.genericsFromJS(M.List, [string()], [null]))
+        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+
+      should(() => M.genericsFromJS(M.List, [string()], [undefined]))
+        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+
+      should(() => M.genericsFromJS(M.List, [string()], [NaN]))
+        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+    })
+  })
+
+  describe('tuples', () => {
+    it('should support tuples', () => {
+      M.genericsFromJS(M.List, [[string(), date()]], ['a', new Date('1988-04-16T00:00:00.000Z')])
+        .equals(M.List.of('a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))))
+        .should.be.exactly(true)
+    })
+
+    it('should require all values', () => {
+      should(() => M.genericsFromJS(M.List, [[string(), number()]], ['a']))
+        .throw(/tuple has missing or extra items/)
+
+      should(() => M.genericsFromJS(M.List, [[string(), number()]], []))
+        .throw(/tuple has missing or extra items/)
+    })
+
+    it('should not support null (wrap with Maybe)', () => {
+      should(() => M.genericsFromJS(M.List, [[string(), number()]], [undefined, NaN]))
+        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+    })
+
+    it('should support missing maybes', () => {
+      should(() => M.genericsFromJS(M.List, [[maybe(string()), maybe(number())]], [undefined, NaN]))
+        .not.throw()
     })
   })
 

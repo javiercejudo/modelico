@@ -17,8 +17,6 @@ const {
 
   string,      // remember they are all functions, eg. string(), list(date())
   boolean,
-  regExp,
-  fn,
 
   map,
   enumMap,

@@ -4,8 +4,8 @@ Modélico objects support deeply getting values given a path, and
 deeply setting values given a path and a value.
 
 Using the `Animal` and `Person` classes used in the
-[introductory example](../README.md#introduction) and the
-[nested types example](nested_types_example.md)
+[introductory example](../introduction/README.md) and the
+[nested types example](../basics/nested_types_example.md)
 
 ## `getIn`
 

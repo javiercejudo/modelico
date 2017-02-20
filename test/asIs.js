@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  const { asIs, any, anyOf, string } = M.metadata()
+  const { asIs, any, anyOf, string, maybe } = M.metadata()
 
   describe('toJSON', () => {
     it('should stringify the valfnue as is', () => {
@@ -23,6 +23,17 @@ export default (U, should, M) => () => {
       const asIsObject = JSON.parse('9', asIs(x => x * 2).reviver)
 
       should(asIsObject).be.exactly(18)
+    })
+
+    it('should not support null (wrap with Maybe)', () => {
+      should(() => asIs(String).reviver('', null))
+        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+
+      maybe(asIs(String)).reviver('', 'aaa').getOrElse('abc')
+        .should.be.exactly('aaa')
+
+      maybe(asIs(String)).reviver('', null).getOrElse('abc')
+        .should.be.exactly('abc')
     })
   })
 

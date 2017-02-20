@@ -180,7 +180,14 @@ var identity = /* :: <T> */function identity(x /* : T */) {
   return (/* : T */x
   );
 };
+var pipe = function pipe() {
+  for (var _len = arguments.length, fns = Array(_len), _key = 0; _key < _len; _key++) {
+    fns[_key] = arguments[_key];
+  }
 
+  return (/* : Array<Function> */[].concat(fns, [identity]).reduce(pipe2)
+  );
+};
 var partial = function partial(fn /* : Function */) {
   for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
     args[_key2 - 1] = arguments[_key2];
@@ -205,6 +212,15 @@ var isNothing = function isNothing(v /* : mixed */) {
   );
 };
 var isSomething = pipe2(isNothing, not);
+
+var assertSomethingIdentity = /* :: <T> */function assertSomethingIdentity(x /* : T */) /* : T */{
+  if (isNothing(x)) {
+    throw TypeError('expected a value but got nothing (null, undefined or NaN)');
+  }
+
+  return x;
+};
+
 var defaultTo = function defaultTo(d /* : mixed */) {
   return function (v /* : mixed */) {
     return isNothing(v) ? d : v;
@@ -215,7 +231,7 @@ var objToArr = function objToArr(obj /* : Object */) {
     return [k, obj[k]];
   });
 };
-var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver(identity)));
+var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver(assertSomethingIdentity)));
 var isPlainObject = function isPlainObject(x /* : mixed */) {
   return (/* : boolean */(typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x
   );
@@ -580,9 +596,9 @@ var reviverFactory$2 = function reviverFactory(itemMetadata) {
       return v;
     }
 
-    var maybeValue = v === null ? null : itemMetadata.reviver(k, v, path);
+    var revive = v === null ? always(null) : defaultTo(itemMetadata.reviver)(itemMetadata.maybeReviver);
 
-    return new Maybe(maybeValue);
+    return new Maybe(revive(k, v, path));
   };
 };
 
@@ -1499,7 +1515,13 @@ var iterableReviverFactory = function iterableReviverFactory(IterableType, itemM
       return v;
     }
 
-    var itemMetadataGetter = Array.isArray(itemMetadata) ? function (i) {
+    var isTuple = Array.isArray(itemMetadata);
+
+    if (isTuple && v.length !== itemMetadata.length) {
+      throw TypeError('tuple has missing or extra items');
+    }
+
+    var itemMetadataGetter = isTuple ? function (i) {
       return itemMetadata[i];
     } : always(itemMetadata);
 
@@ -2133,8 +2155,12 @@ var ajvMetadata = (function () {
 });
 
 var asIs = (function () {
-  var tranformer = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : identity;
-  return Object.freeze({ type: tranformer, reviver: asIsReviver(tranformer) });
+  var transformer = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : identity;
+  return Object.freeze({
+    type: transformer,
+    reviver: asIsReviver(pipe(assertSomethingIdentity, transformer)),
+    maybeReviver: asIsReviver(transformer)
+  });
 });
 
 var any = always(asIs(identity));

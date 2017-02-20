@@ -28,15 +28,24 @@ const not = (x/* : boolean */)/* : boolean */ => !x;
 
 const T = () => true;
 const identity = /* :: <T> */(x/* : T */)/* : T */ => x;
-
+const pipe = (...fns/* : Array<Function> */) => [...fns, identity].reduce(pipe2);
 const partial = (fn/* : Function */, ...args/* : Array<mixed> */) => fn.bind(undefined, ...args);
 const asIsReviver = (transform/* : Function */) => (k/* : string */, v/* : mixed */) => transform(v);
 const always = /* :: <T> */(x/* : T */) => ()/* : T */ => x;
 const isNothing = (v/* : mixed */)/* : boolean */ => v == null || Number.isNaN(v);
 const isSomething = pipe2(isNothing, not);
+
+const assertSomethingIdentity = /* :: <T> */(x/* : T */)/* : T */ => {
+  if (isNothing(x)) {
+    throw TypeError(`expected a value but got nothing (null, undefined or NaN)`)
+  }
+
+  return x
+};
+
 const defaultTo = (d/* : mixed */) => (v/* : mixed */) => isNothing(v) ? d : v;
 const objToArr = (obj/* : Object */) => Object.keys(obj).map(k => [k, obj[k]]);
-const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)));
+const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(assertSomethingIdentity)));
 const isPlainObject = (x/* : mixed */)/* : boolean */ => typeof x === 'object' && !!x;
 const isFunction = (x/* : mixed */)/* : boolean */ => typeof x === 'function';
 const emptyObject = Object.freeze({});
@@ -357,11 +366,11 @@ const reviverFactory$2 = itemMetadata => (k, v, path) => {
     return v
   }
 
-  const maybeValue = (v === null)
-    ? null
-    : itemMetadata.reviver(k, v, path);
+  const revive = (v === null)
+    ? always(null)
+    : defaultTo(itemMetadata.reviver)(itemMetadata.maybeReviver);
 
-  return new Maybe(maybeValue)
+  return new Maybe(revive(k, v, path))
 };
 
 class Nothing {
@@ -1091,9 +1100,15 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = [])
     return v
   }
 
-  const itemMetadataGetter = i => Array.isArray(itemMetadata)
-    ? itemMetadata[i]
-    : itemMetadata;
+  const isTuple = Array.isArray(itemMetadata);
+
+  if (isTuple && v.length !== itemMetadata.length) {
+    throw TypeError('tuple has missing or extra items')
+  }
+
+  const itemMetadataGetter = isTuple
+    ? i => itemMetadata[i]
+    : always(itemMetadata);
 
   const revive = (x, i) => reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i));
 
@@ -1619,8 +1634,12 @@ var ajvMetadata = (ajv = { validate: T }) => {
   return Object.freeze(Object.assign(ajvMetadata, metadata))
 };
 
-var asIs = (tranformer = identity) =>
-  Object.freeze({ type: tranformer, reviver: asIsReviver(tranformer) });
+var asIs = (transformer = identity) =>
+  Object.freeze({
+    type: transformer,
+    reviver: asIsReviver(pipe(assertSomethingIdentity, transformer)),
+    maybeReviver: asIsReviver(transformer)
+  });
 
 var any = always(asIs(identity));
 

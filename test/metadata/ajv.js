@@ -1,5 +1,4 @@
 /* eslint-env mocha */
-
 export default (should, M, fixtures, { Ajv }) => () => {
   const {
     ajv_,
@@ -111,7 +110,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       animal1Schema1
         .should.deepEqual(animal1Schema2)
         .and.deepEqual({
-          '$schema': 'http://json-schema.org/draft-04/schema#',
+          $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {
@@ -643,14 +642,14 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       M.getSchema(meta)
         .should.deepEqual({
-          'type': 'array',
-          'items': {
-            'type': 'array',
-            'maxItems': 2,
-            'minItems': 2,
-            'items': [
-              { 'type': 'number' },
-              { 'type': 'string' }
+          type: 'array',
+          items: {
+            type: 'array',
+            maxItems: 2,
+            minItems: 2,
+            items: [
+              { type: 'number' },
+              { type: 'string' }
             ]
           }
         })

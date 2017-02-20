@@ -1350,7 +1350,10 @@ var ModelicoList = (function (U, should, M, _ref) {
     var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         list = _M$metadata.list,
-        date = _M$metadata.date;
+        date = _M$metadata.date,
+        string = _M$metadata.string,
+        number = _M$metadata.number,
+        maybe = _M$metadata.maybe;
 
     describe('immutability', function () {
       U.skipIfNoObjectFreeze('must freeze the input', function () {
@@ -1485,9 +1488,53 @@ var ModelicoList = (function (U, should, M, _ref) {
       });
 
       it('should not support null (wrap with Maybe)', function () {
-        (function () {
+        should(function () {
           return JSON.parse('null', list(date()).reviver);
-        }).should.throw();
+        }).throw('missing list');
+
+        should(function () {
+          return M.genericsFromJS(M.List, [date()], [null]);
+        }).throw(/missing date/);
+
+        should(function () {
+          return M.genericsFromJS(M.List, [string()], [null]);
+        }).throw(/expected a value but got nothing \(null, undefined or NaN\)/);
+
+        should(function () {
+          return M.genericsFromJS(M.List, [string()], [undefined]);
+        }).throw(/expected a value but got nothing \(null, undefined or NaN\)/);
+
+        should(function () {
+          return M.genericsFromJS(M.List, [string()], [NaN]);
+        }).throw(/expected a value but got nothing \(null, undefined or NaN\)/);
+      });
+    });
+
+    describe('tuples', function () {
+      it('should support tuples', function () {
+        M.genericsFromJS(M.List, [[string(), date()]], ['a', new Date('1988-04-16T00:00:00.000Z')]).equals(M.List.of('a', M.Date.of(new Date('1988-04-16T00:00:00.000Z')))).should.be.exactly(true);
+      });
+
+      it('should require all values', function () {
+        should(function () {
+          return M.genericsFromJS(M.List, [[string(), number()]], ['a']);
+        }).throw(/tuple has missing or extra items/);
+
+        should(function () {
+          return M.genericsFromJS(M.List, [[string(), number()]], []);
+        }).throw(/tuple has missing or extra items/);
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        should(function () {
+          return M.genericsFromJS(M.List, [[string(), number()]], [undefined, NaN]);
+        }).throw(/expected a value but got nothing \(null, undefined or NaN\)/);
+      });
+
+      it('should support missing maybes', function () {
+        should(function () {
+          return M.genericsFromJS(M.List, [[maybe(string()), maybe(number())]], [undefined, NaN]);
+        }).not.throw();
       });
     });
 
@@ -1998,7 +2045,8 @@ var asIs = (function (U, should, M) {
         asIs = _M$metadata.asIs,
         any = _M$metadata.any,
         anyOf = _M$metadata.anyOf,
-        string = _M$metadata.string;
+        string = _M$metadata.string,
+        maybe = _M$metadata.maybe;
 
     describe('toJSON', function () {
       it('should stringify the valfnue as is', function () {
@@ -2021,6 +2069,16 @@ var asIs = (function (U, should, M) {
         }).reviver);
 
         should(asIsObject).be.exactly(18);
+      });
+
+      it('should not support null (wrap with Maybe)', function () {
+        should(function () {
+          return asIs(String).reviver('', null);
+        }).throw(/expected a value but got nothing \(null, undefined or NaN\)/);
+
+        maybe(asIs(String)).reviver('', 'aaa').getOrElse('abc').should.be.exactly('aaa');
+
+        maybe(asIs(String)).reviver('', null).getOrElse('abc').should.be.exactly('abc');
       });
     });
 
@@ -3526,7 +3584,6 @@ var regionIncompatibleNameKeyFactory = (function (M) {
 });
 
 /* eslint-env mocha */
-
 var ajvMetadata = (function (should, M, fixtures, _ref) {
   var Ajv = _ref.Ajv;
   return function () {
@@ -3642,7 +3699,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         var animal1Schema2 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#');
 
         animal1Schema1.should.deepEqual(animal1Schema2).and.deepEqual({
-          '$schema': 'http://json-schema.org/draft-04/schema#',
+          $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {
@@ -4133,12 +4190,12 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         var meta = ajvMap({}, ajvNumber(), ajvString());
 
         M.getSchema(meta).should.deepEqual({
-          'type': 'array',
-          'items': {
-            'type': 'array',
-            'maxItems': 2,
-            'minItems': 2,
-            'items': [{ 'type': 'number' }, { 'type': 'string' }]
+          type: 'array',
+          items: {
+            type: 'array',
+            maxItems: 2,
+            minItems: 2,
+            items: [{ type: 'number' }, { type: 'string' }]
           }
         });
       });

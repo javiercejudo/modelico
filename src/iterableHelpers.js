@@ -5,7 +5,13 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = [])
     return v
   }
 
-  const itemMetadataGetter = Array.isArray(itemMetadata)
+  const isTuple = Array.isArray(itemMetadata)
+
+  if (isTuple && v.length !== itemMetadata.length) {
+    throw TypeError('tuple has missing or extra items')
+  }
+
+  const itemMetadataGetter = isTuple
     ? i => itemMetadata[i]
     : always(itemMetadata)
 

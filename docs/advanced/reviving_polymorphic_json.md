@@ -1,6 +1,6 @@
 # Reviving polymorphic JSON
 
-The [built-in metadata](../README.md#metadata) covers the bulk of use cases.
+The [built-in metadata](../introduction/metadata.md) covers the bulk of use cases.
 However, to deal with types whose JSON might take more than one form, you will
 need a custom reviving strategy. We are going to walk through two examples:
 first, we will revive objects based on an enumerated field that will indicate
