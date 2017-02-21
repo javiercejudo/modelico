@@ -24,22 +24,25 @@ With that, we are ready to create our `Point` class:
 class Point extends M.Base {
   constructor (x, y) {
     super(Point, { x, y })
+
+    this.x = () => x
+    this.y = () => y
   }
 
   distanceTo (point) {
-    const { x: x1, y: y1 } = M.fields(this)
-    const { x: x2, y: y2 } = M.fields(point)
+    const { x: x1, y: y1 } = this
+    const { x: x2, y: y2 } = point
 
     return Math.sqrt(
-      ((x2 - x1) ** 2) +
-      ((y2 - y1) ** 2)
+      ((x2() - x1()) ** 2) +
+      ((y2() - y1()) ** 2)
     )
   }
 
   toJSON () {
-    const { x, y } = M.fields(this)
+    const { x, y } = this
 
-    return `${x},${y}`
+    return `${x()},${y()}`
   }
 
   static innerTypes () {

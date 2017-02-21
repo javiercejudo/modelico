@@ -2,7 +2,7 @@
 
 By design, all fields are required, ie. `null` or missing fields will cause a
 `TypeError` while reviving. In the case of the `Animal` class from the
-[introductory example](../README.md#introduction):
+[introductory example](../introduction/README.md):
 
 ```js
 const pet = M.fromJSON(Animal, '{"name": null}')

@@ -25,10 +25,10 @@ export default M => {
       return `${this.name()} (${this.code().value()})`
     }
 
-    static innerTypes (path) {
+    static innerTypes () {
       return Object.freeze({
         name: string(),
-        code: _(Code, path)
+        code: _(Code)
       })
     }
   }

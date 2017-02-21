@@ -1,5 +1,5 @@
 import { always, isNothing, unsupported, emptyObject } from './U'
-import { iterableMetadata, iterableEquals } from './iterable'
+import { iterableMetadata, iterableEquals } from './iterableHelpers'
 import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 

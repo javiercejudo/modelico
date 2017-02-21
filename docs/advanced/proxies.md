@@ -33,4 +33,5 @@ proxiedMap.size  // => 3 (still)
 proxiedMap2.size // => 2
 ```
 
-See [proxy tests](../test/proxies) for more details.
+See [proxy tests](https://github.com/javiercejudo/modelico/tree/master/test/proxies)
+for more details.

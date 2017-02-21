@@ -1,11 +1,22 @@
-import { reviverOrAsIs, equals, haveDifferentTypes } from './U'
+import { always, reviverOrAsIs, equals, haveDifferentTypes } from './U'
 
 const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const revive = (x, i) => reviverOrAsIs(itemMetadata)('', x, path.concat(i))
+  const isTuple = Array.isArray(itemMetadata)
+
+  if (isTuple && v.length !== itemMetadata.length) {
+    throw TypeError('tuple has missing or extra items')
+  }
+
+  const itemMetadataGetter = isTuple
+    ? i => itemMetadata[i]
+    : always(itemMetadata)
+
+  const revive = (x, i) => reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i))
+
   const iterable = (v === null)
     ? null
     : v.map(revive)

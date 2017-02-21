@@ -12,10 +12,20 @@ export const asIsReviver = (transform/* : Function */) => (k/* : string */, v/* 
 export const always = /* :: <T> */(x/* : T */) => ()/* : T */ => x
 export const isNothing = (v/* : mixed */)/* : boolean */ => v == null || Number.isNaN(v)
 export const isSomething = pipe2(isNothing, not)
+
+export const assertSomethingIdentity = /* :: <T> */(x/* : T */)/* : T */ => {
+  if (isNothing(x)) {
+    throw TypeError(`expected a value but got nothing (null, undefined or NaN)`)
+  }
+
+  return x
+}
+
 export const defaultTo = (d/* : mixed */) => (v/* : mixed */) => isNothing(v) ? d : v
 export const objToArr = (obj/* : Object */) => Object.keys(obj).map(k => [k, obj[k]])
-export const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(identity)))
+export const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(assertSomethingIdentity)))
 export const isPlainObject = (x/* : mixed */)/* : boolean */ => typeof x === 'object' && !!x
+export const isFunction = (x/* : mixed */)/* : boolean */ => typeof x === 'function'
 export const emptyObject = Object.freeze({})
 
 export const haveSameValues = (a/* : any */, b/* : any */)/* : boolean */ =>

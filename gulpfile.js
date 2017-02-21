@@ -31,6 +31,14 @@ gulp.task('test', ['clean', 'instrument'], () => {
     .pipe(istanbul.writeReports({ coverageVariable }))
 })
 
+gulp.task('test-no-cov', ['clean'], () => {
+  return gulp.src(['test/index.js'])
+    .pipe(
+      mocha({ bail: true })
+        .on('error', process.exit.bind(process, 1))
+    )
+})
+
 gulp.task('codecov', () => gulp.src('coverage/coverage-final.json').pipe(codecov()))
 
 gulp.task('default', ['test'])

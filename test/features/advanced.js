@@ -32,11 +32,11 @@ export default (should, M) => () => {
       return [this.givenName(), this.familyName()].join(' ').trim()
     }
 
-    static innerTypes (path) {
+    static innerTypes () {
       return Object.freeze({
         givenName: any(),
         familyName: string(),
-        pets: list(maybe(_(Animal, path)))
+        pets: list(maybe(_(Animal)))
       })
     }
   }

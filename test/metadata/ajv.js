@@ -1,5 +1,4 @@
 /* eslint-env mocha */
-
 export default (should, M, fixtures, { Ajv }) => () => {
   const {
     ajv_,
@@ -105,53 +104,70 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
 
       const animalMeta = ajv_(Animal)
-      const animal1Schema1 = M.getSchema(animalMeta, 'http://json-schema.org/draft-04/schema#')
-      const animal1Schema2 = M.getSchema(animalMeta, 'http://json-schema.org/draft-04/schema#')
+      const animal1Schema1 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
+      const animal1Schema2 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
 
       animal1Schema1
         .should.deepEqual(animal1Schema2)
         .and.deepEqual({
-          '$schema': 'http://json-schema.org/draft-04/schema#',
+          $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {
               default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
+              anyOf: [
+                { type: 'null' },
+                {
+                  default: 'unknown',
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 25
+                }
+              ]
             },
             dimensions: {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                type: 'number',
-                exclusiveMinimum: true,
-                minimum: 0
-              }
+              anyOf: [
+                { type: 'null' },
+                {
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {
+                    type: 'number',
+                    exclusiveMinimum: true,
+                    minimum: 0
+                  }
+                }
+              ]
             }
           }
         })
 
       const animalSchema2 = M.getSchema(ajv_(Animal2))
 
-      animalSchema2.should.deepEqual({
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 25
+      animalSchema2
+        .should.deepEqual({
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 25
+            },
+            dimensions: {
+              anyOf: [
+                { type: 'null' },
+                {
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {}
+                }
+              ]
+            }
           },
-          dimensions: {
-            type: 'array',
-            minItems: 3,
-            maxItems: 3,
-            items: {}
-          }
-        },
-        required: ['name']
-      })
+          required: ['name']
+        })
 
       const ajv = Ajv()
 
@@ -521,20 +537,135 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
   })
 
+  describe('tuple', () => {
+    it('valid data', () => {
+      const metadata = ajvList({}, [ajvString(), ajvNumber()])
+
+      JSON.parse('["a",5]', metadata.reviver)
+        .equals(M.List.of('a', 5))
+        .should.be.exactly(true)
+
+      M.getSchema(metadata)
+        .should.deepEqual({
+          type: 'array',
+          minItems: 2,
+          maxItems: 2,
+          items: [
+            { type: 'string' },
+            { type: 'number' }
+          ]
+        })
+    })
+
+    it('nested modelico object', () => {
+      class Animal extends M.Base {
+        constructor (props) {
+          super(Animal, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
+            dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+          })
+        }
+      }
+
+      const metadata = ajvList({}, [ajvString(), _(Animal)])
+
+      M.genericsFromJS(M.List, [[ajvString(), _(Animal)]], [
+        'a',
+        {
+          name: 'Bane',
+          dimensions: [20, 55, 65]
+        }
+      ]).equals(
+        M.List.of(
+          'a',
+          new Animal({
+            name: 'Bane',
+            dimensions: M.List.of(20, 55, 65)
+          })
+        )
+      ).should.be.exactly(true)
+
+      M.getSchema(metadata)
+        .should.deepEqual({
+          type: 'array',
+          minItems: 2,
+          maxItems: 2,
+          items: [
+            { type: 'string' },
+            {
+              type: 'object',
+              required: ['dimensions'],
+              properties: {
+                name: {
+                  default: 'unknown',
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      default: 'unknown',
+                      type: 'string',
+                      minLength: 1,
+                      maxLength: 25
+                    }
+                  ]
+                },
+                dimensions: {
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {
+                    type: 'number',
+                    exclusiveMinimum: true,
+                    minimum: 0
+                  }
+                }
+              }
+            }
+          ]
+        })
+    })
+
+    it('invalid data', () => {
+      const metadata = ajvList({}, [ajvString(), ajvNumber()])
+
+      should(() => JSON.parse('["a",true]', metadata.reviver))
+        .throw(/should be number/)
+
+      should(() => JSON.parse('["a"]', metadata.reviver))
+        .throw(/should NOT have less than 2 items/)
+
+      should(() => JSON.parse('["a",1,2]', metadata.reviver))
+        .throw(/should NOT have more than 2 items/)
+    })
+
+    it('maybe', () => {
+      M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",1]')
+        .equals(M.List.of('a', M.Maybe.of(1)))
+        .should.be.exactly(true)
+
+      M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",null]')
+        .equals(M.List.of('a', M.Maybe.of()))
+        .should.be.exactly(true)
+    })
+  })
+
   describe('map', () => {
     it('reports its full schema', () => {
       const meta = ajvMap({}, ajvNumber(), ajvString())
 
       M.getSchema(meta)
         .should.deepEqual({
-          'type': 'array',
-          'items': {
-            'type': 'array',
-            'maxItems': 2,
-            'minItems': 2,
-            'items': [
-              { 'type': 'number' },
-              { 'type': 'string' }
+          type: 'array',
+          items: {
+            type: 'array',
+            maxItems: 2,
+            minItems: 2,
+            items: [
+              { type: 'number' },
+              { type: 'string' }
             ]
           }
         })
@@ -702,7 +833,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       class CountryCode extends M.Base {
         constructor (props) {
           if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
-            throw TypeError(ajv.errors[0].message)
+            throw TypeError(ajv.errors.map(error => error.message).join('\n'))
           }
 
           super(CountryCode, props)
@@ -854,6 +985,212 @@ export default (should, M, fixtures, { Ajv }) => () => {
         '{"str": "abc123", "forceFail": true}',
         M.withValidation(v => M.fields(v).forceFail !== true, () => 'forcibly failed')(_(MagicString)).reviver
       )).throw(/forcibly failed/)
+    })
+  })
+
+  describe('Circular innerTypes', () => {
+    it('self reference', () => {
+      class Chain extends M.Base {
+        constructor (props) {
+          super(Chain, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            description: ajvString({minLength: 1}),
+            previous: ajvMaybe(_(Chain)),
+            next: ajvMaybe(_(Chain)),
+            relatedChains: ajvList({}, _(Chain))
+          })
+        }
+      }
+
+      M.getSchema(_(Chain))
+        .should.deepEqual({
+          definitions: {
+            '1': {
+              type: 'object',
+              properties: {
+                description: {
+                  type: 'string',
+                  minLength: 1
+                },
+                previous: {
+                  anyOf: [
+                    { type: 'null' },
+                    { $ref: '#/definitions/1' }
+                  ]
+                },
+                next: {
+                  anyOf: [
+                    { type: 'null' },
+                    { $ref: '#/definitions/1' }
+                  ]
+                },
+                relatedChains: {
+                  type: 'array',
+                  items: {
+                    '$ref': '#/definitions/1'
+                  }
+                }
+              },
+              required: [
+                'description',
+                'relatedChains'
+              ]
+            }
+          },
+          $ref: '#/definitions/1'
+        })
+    })
+
+    it('indirect reference', () => {
+      class Parent extends M.Base {
+        constructor (props) {
+          super(Parent, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvString({minLength: 1}),
+            child: ajvMaybe(_(Child))
+          })
+        }
+      }
+
+      class Child extends M.Base {
+        constructor (props) {
+          super(Parent, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvString({minLength: 1}),
+            parent: _(Parent)
+          })
+        }
+      }
+
+      class Person extends M.Base {
+        constructor (props) {
+          super(Parent, props)
+        }
+
+        static innerTypes () {
+          return Object.freeze({
+            name: ajvString({minLength: 1}),
+            parent: _(Parent),
+            child: ajvMaybe(_(Child))
+          })
+        }
+      }
+
+      M.getSchema(_(Person))
+        .should.deepEqual({
+          definitions: {
+            '1': {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  minLength: 1
+                },
+                parent: {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                      minLength: 1
+                    },
+                    child: {
+                      anyOf: [
+                        { type: 'null' },
+                        {
+                          type: 'object',
+                          properties: {
+                            name: {
+                              type: 'string',
+                              minLength: 1
+                            },
+                            parent: {
+                              $ref: '#/definitions/3'
+                            }
+                          },
+                          required: [
+                            'name',
+                            'parent'
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  required: [
+                    'name'
+                  ]
+                },
+                child: {
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      type: 'object',
+                      properties: {
+                        name: {
+                          type: 'string',
+                          minLength: 1
+                        },
+                        parent: {
+                          $ref: '#/definitions/3'
+                        }
+                      },
+                      required: [
+                        'name',
+                        'parent'
+                      ]
+                    }
+                  ]
+                }
+              },
+              required: [
+                'name',
+                'parent'
+              ]
+            },
+            '3': {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  minLength: 1
+                },
+                child: {
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      type: 'object',
+                      properties: {
+                        name: {
+                          type: 'string',
+                          minLength: 1
+                        },
+                        parent: {
+                          $ref: '#/definitions/3'
+                        }
+                      },
+                      required: [
+                        'name',
+                        'parent'
+                      ]
+                    }
+                  ]
+                }
+              },
+              required: [
+                'name'
+              ]
+            }
+          },
+          $ref: '#/definitions/1'
+        })
     })
   })
 }

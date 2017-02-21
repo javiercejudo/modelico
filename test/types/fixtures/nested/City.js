@@ -9,10 +9,10 @@ export default (M, Region, countryFactory) => {
       super(City, props)
     }
 
-    static innerTypes (path) {
+    static innerTypes () {
       return Object.freeze({
         name: string(),
-        country: _(Country, path)
+        country: _(Country)
       })
     }
   }

@@ -1,6 +1,6 @@
 # Nested types example
 
-The [introductory example](../README.md#introduction) features a standalone
+The [introductory example](../introduction/README.md) features a standalone
 class. Let's look at a more involved example that builds on top of that:
 
 ```JSON
@@ -30,7 +30,7 @@ person1.pets().get(0).speak() // => 'my name is Robbie!'
 *Note: pets() returns a `Modelico.List`, which has a `get` method, but little
 more. To `map`, `filter` or perform other operations, you will need to grab
 the underlying array with `.inner()`. See the
-[proxies docs](/docs/advanced/proxies) for a way to use methods and properties of
+[proxies docs](../advanced/proxies.md) for a way to use methods and properties of
 the inner structure directly.*
 
 To achieve our goal, we need a `Person` that references `Animal` within its
@@ -50,11 +50,11 @@ class Person extends M.Base {
     return `${this.givenName()} ${this.familyName()}`.trim()
   }
 
-  static innerTypes (path) {
+  static innerTypes () {
     return Object.freeze({
       givenName: string(),
       familyName: string(),
-      pets: list(_(Animal, path))
+      pets: list(_(Animal))
     })
   }
 }
