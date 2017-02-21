@@ -2,7 +2,7 @@
 
 To support legacy browsers without transpiling, Modélico can be used
 with ES5-style classes. In the case of the `Animal` class from the
-[introductory example](../introduction/metadata.md):
+[introductory example](../introduction/README.md):
 
 ```js
 (function (M) {

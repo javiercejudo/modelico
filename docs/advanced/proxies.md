@@ -9,28 +9,44 @@ However, if your environment
 [supports ES2015 proxies](https://kangax.github.io/compat-table/es6/#test-Proxy),
 Modélico provides utilities to get around this:
 
+  - M.proxyDate
+  - M.proxyList
+  - M.proxySet
+  - M.proxyMap, M.proxyEnumMap, M.proxyStringMap
+
+Example:
+
 ```js
 import M from 'modelico'
-const p = M.proxyMap
+const p = M.proxyDate
 
-const defaultMap = M.Map.fromObject({a: 1, b: 2, c: 3})
-const proxiedMap = p(defaultMap)
+const defaultDate = M.Date.of(new Date('1988-04-16'))
+const proxiedDate = p(defaultDate)
 
 // without proxies
-defaultMap.inner().keys().next() // => { value: "a", done: false }
+defaultDate.inner().getFullYear() // => 1988
 
 // with proxies
-proxiedMap.keys().next() // => { value: "a", done: false }
+proxiedDate.getFullYear() // => 1988
 ```
 
 Please note that native methods that modify the structure in place will
-instead return a new modelico object:
+instead return a new Modélico object:
 
 ```js
-const proxiedMap2 = proxiedMap.delete('b')
+// without proxies
+const tmpDate = defaultDate.inner()
+tmpDate.setFullYear(2000)
+const defaultDate2 = M.Date.of(tmpDate)
 
-proxiedMap.size  // => 3 (still)
-proxiedMap2.size // => 2
+defaultDate.inner().getFullYear()  // => 1988 (still)
+defaultDate2.inner().getFullYear() // => 2000
+
+// with proxies
+const proxiedDate2 = proxiedDate.setFullYear(2000)
+
+proxiedDate.getFullYear()  // => 1988 (still)
+proxiedDate2.getFullYear() // => 2000
 ```
 
 See [proxy tests](https://github.com/javiercejudo/modelico/tree/master/test/proxies)

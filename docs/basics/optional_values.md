@@ -33,7 +33,7 @@ class Animal extends M.Base {
 }
 ```
 
-Then, it can be used normally:
+Then, it can be used as any other value:
 
 ```js
 const pet1 = M.fromJSON(Animal, '{"name": "Bane"}')
@@ -66,17 +66,22 @@ class Animal extends M.Base {
 Then, we can use it as follows:
 
 ```js
-// both behave the same way
-const pet1 = M.fromJSON(Animal, '{"name": null}')
-const pet2 = M.fromJSON(Animal, '{}')
+const pet1 = M.fromJSON(Animal, '{"name": "Bane"}')
+// pet2 and pet3 behave the same way
+const pet2 = M.fromJSON(Animal, '{"name": null}')
+const pet3 = M.fromJSON(Animal, '{}')
 
-pet1.name().isEmpty()         // => true
-pet1.name().getOrElse('Bane') // => Bane
-JSON.stringify(pet1)          // => {"name":null}
+pet1.name().isEmpty()         // => false
+pet1.name().getOrElse('Coco') // => Bane
+JSON.stringify(pet1)          // => {"name":"Bane"}
 
 pet2.name().isEmpty()         // => true
 pet2.name().getOrElse('Bane') // => Bane
 JSON.stringify(pet2)          // => {"name":null}
+
+pet3.name().isEmpty()         // => true
+pet3.name().getOrElse('Bane') // => Bane
+JSON.stringify(pet3)          // => {"name":null}
 ```
 
 _Note: `pet2` does not produce the same JSON it was parsed from. If that is

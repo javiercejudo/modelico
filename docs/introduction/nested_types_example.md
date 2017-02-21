@@ -1,6 +1,6 @@
 # Nested types example
 
-The [introductory example](../introduction/README.md) features a standalone
+The [introductory example](README.md) features a standalone
 class. Let's look at a more involved example that builds on top of that:
 
 ```JSON
