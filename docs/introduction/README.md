@@ -1,6 +1,6 @@
-## Introduction
+# Introduction
 
-The goal is to parse JSON strings like
+Modélico's goal is to parse JSON strings like
 
 ```JSON
 {
@@ -43,4 +43,4 @@ class Animal extends M.Base {
 }
 ```
 
-See the [nested types example](/docs/basics/nested_types_example.md) to learn more.
+See the [nested types example](/docs/introduction/nested_types_example.md) to learn more.

@@ -82,6 +82,7 @@ import regionFactory from './types/fixtures/nested/Region'
 import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
 
 import ajvMetadata from './metadata/ajv'
+import baseMetadataExample from './metadata/base'
 
 export default (options, should, M, extensions) => () => {
   const U = buildUtils(options)
@@ -117,6 +118,7 @@ export default (options, should, M, extensions) => () => {
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
   describe('ajvMetadata', ajvMetadata(...deps))
+  describe('base metadata example', baseMetadataExample(...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))

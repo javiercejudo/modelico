@@ -1,6 +1,6 @@
-## A note on immutability
+# A note on immutability
 
-Following the examples above:
+Following the [nested types example](nested_types_example.md):
 
 ```js
 const person2 = person1.set('givenName', 'Javi')

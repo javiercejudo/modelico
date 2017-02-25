@@ -5,7 +5,7 @@ deeply setting values given a path and a value.
 
 Using the `Animal` and `Person` classes used in the
 [introductory example](../introduction/README.md) and the
-[nested types example](../basics/nested_types_example.md)
+[nested types example](../introduction/nested_types_example.md)
 
 ## `getIn`
 
@@ -32,7 +32,7 @@ numbers for `M.List`. There is another dedicated way for `M.Maybe` for the
 case where the value is not present, consisting of an array with two items:
 the default value, and the path item that applies for the inner type.
 
-The above is equivalent to
+This is equivalent to the `getIn` method above
 
 ```js
 ownerOfUnnamedPet

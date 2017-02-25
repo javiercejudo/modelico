@@ -47,8 +47,6 @@ export default (ajv = { validate: T }) => {
       ? true
       : ajv.validate(schema, valueTransformer(value))
 
-    // console.log(JSON.stringify(schema, null, 2))
-
     if (!valid) {
       throw TypeError(formatError(ajv, schema, value, path))
     }

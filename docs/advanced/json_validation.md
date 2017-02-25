@@ -9,7 +9,8 @@ To validate the JSON strictly, you have the following options:
 
 - use `M.ajvMetadata` for [Ajv](https://epoberezkin.github.io/ajv/)'s implementation of [JSON schema](http://json-schema.org/);
 - manually create validation functions that work as revivers;
-- a bit of both
+- a bit of both;
+- alternatively, you can also override the reviver with your own.
 
 ## `M.ajvMetadata` and JSON schema
 
@@ -114,3 +115,78 @@ Please note that although it might be tempting to compose the validation
 functions and use `M.withValidation` only once with the result, by using
 `M.withValidation` for each individual function you can attach specific
 error messages to simplify debugging.
+
+## Overriding the reviver
+
+If you need to validate the JSON in a way not covered by the examples above,
+you may override the reviver with your own. This might be needed if the
+validity of some fields depends on other fields. In the following example,
+we make sure that `min <= max` in a `Range` class:
+
+```js
+const { base } = M.metadata()
+
+const customReviver = baseReviver => (k, v, path = []) => {
+  if (k !== '') {
+    return v
+  }
+
+  if (v.min > v.max) {
+    throw RangeError('"min" must be less than or equal to "max"')
+  }
+
+  return baseReviver(k, v, path)
+}
+
+class Range extends M.Base {
+  constructor ({ min = -Infinity, max = Infinity } = {}) {
+    super(Range, { min, max })
+  }
+
+  length () {
+    return this.max() - this.min()
+  }
+
+  static innerTypes () {
+    return Object.freeze({
+      min: number(),
+      max: number()
+    })
+  }
+
+  static metadata () {
+    const baseMetadata = base(Range)
+    const baseReviver = baseMetadata.reviver
+
+    return Object.assign({}, baseMetadata, { reviver: customReviver(baseReviver) })
+  }
+}
+```
+
+In the class above, the validation could happen in the constructor. Although
+that would ensure direct use of the class or creation of new instances via
+`set` are also valid, it is sometimes preferable to consider internal use of
+the class as trusted and only validate external JSON.
+
+One-off validations can be performed with `M.validate`, which takes a Modélico
+instance, optional inner metadata for generic types, and returns an array
+with 2 items: the result of the validation (boolean), and an `Error` if the
+validation was not successful.
+
+Using the class:
+
+```js
+M.fromJS(Range, { min: 4, max: 3.5 })
+// => RangeError: "min" must be less than or equal to "max"
+
+const myRange = new Range({ min: 4, max: 3.5 })
+// => No error, but...
+
+M.validate(myRange)
+// => [false, RangeError("min" must be less than or equal to "max")]
+
+const myRange2 = new Range({ min: 4, max: 6.5 })
+
+M.validate(myRange2)
+// => [true, undefined]
+```

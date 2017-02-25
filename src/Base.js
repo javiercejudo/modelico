@@ -14,6 +14,9 @@ class Base {
       throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`)
     }
 
+    // This slows down the benchmarks by a lot, but it isn't clear whether
+    // real usage would benefit from emoving it.
+    // See: https://github.com/javiercejudo/modelico-benchmarks
     Object.freeze(fields)
 
     const defaults = {}

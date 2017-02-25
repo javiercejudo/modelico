@@ -114,8 +114,8 @@ First, it is worth mentioning this is not always possible, as the shape of the
 JSON representation might be ambiguous (see example in
 [Gson's RuntimeTypeAdapterFactory](https://github.com/google/gson/blob/9e6f2bab20257b6823a5b753739f047d79e9dcbd/extras/src/main/java/com/google/gson/typeadapters/RuntimeTypeAdapterFactory.java#L36)).
 
-In this example, we are going to revive polymorphic JSON like the one above,
-but without an enumerated field to hint the type of the collection.
+In this example, we are going to revive the same polymorphic JSON as the one
+above, but without an enumerated field to hint the type of the collection.
 
 ```js
 const { number, stringMap, list } = M.metadata()
