@@ -1,6 +1,6 @@
 {
   "name": "modelico",
-  "version": "21.2.1",
+  "version": "21.3.0",
   "description": "Universal library for serialisable immutable models",
   "main": "dist/modelico.js",
   "jsnext:main": "dist/modelico.es2015.js",
@@ -28,8 +28,14 @@
   },
   "nyc": {
     "report-dir": "./coverage",
-    "include": ["dist/modelico.js"],
-    "reporter": ["json", "text", "text-summary"]
+    "include": [
+      "dist/modelico.js"
+    ],
+    "reporter": [
+      "json",
+      "text",
+      "text-summary"
+    ]
   },
   "repository": {
     "type": "git",
