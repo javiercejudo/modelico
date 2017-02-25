@@ -1,6 +1,7 @@
 tmp
 .env
 _book
+.nyc_output
 
 # Logs
 logs
