@@ -13,15 +13,17 @@ https://javiercejudo.gitbooks.io/modelico/content/docs/introduction/
 
     npm i modelico
 
-To use it in the browser, grab the [minified](dist/modelico.min.js) or the
-[development](dist/modelico.js) files.
+To use it in the browser, grab the
+[minified](https://raw.githubusercontent.com/javiercejudo/modelico/master/dist/modelico.min.js)
+or the
+[development](https://raw.githubusercontent.com/javiercejudo/modelico/master/dist/modelico.js)
+files.
 
 [Run the current tests](https://rawgit.com/javiercejudo/modelico/master/test/browser/index.html)
 directly on your target browsers to make sure things work as expected.
 
 *Note: [babel-polyfill](https://babeljs.io/docs/usage/polyfill/) might be
-required for browsers other than Chrome, Firefox and Edge.
-See [browser tests](test/browser) for more details.*
+required for browsers other than Chrome, Firefox and Edge.*
 
 ## Browser support
 

@@ -2,7 +2,7 @@
 export default (should, M, fixtures, { Ajv }) => () => {
   const { base, number, ajvAny, ajvNumber } = M.ajvMetadata(Ajv())
 
-  it('should revive as usual with valid JSON', () => {
+  it('should return the base metadata for standard models', () => {
     const customReviver = baseReviver => (k, v, path = []) => {
       if (k !== '') {
         return v
