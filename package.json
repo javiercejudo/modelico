@@ -7,6 +7,7 @@
   "scripts": {
     "docs-prepare": "gitbook install",
     "docs-watch": "npm run docs-prepare && gitbook serve",
+    "docs-pdf": "npm run docs-prepare && gitbook pdf ./ ./dist/modelico.pdf",
     "mocha": "mocha test/index.js",
     "prenyc": "rm -rf coverage",
     "nyc": "nyc npm run mocha",
@@ -81,6 +82,7 @@
     "rollup-watch": "^3.1.0",
     "should": "^11.1.2",
     "standard": "^8.6.0",
+    "svgexport": "^0.3.2",
     "uglify-js": "^2.7.5"
   },
   "dependencies": {
