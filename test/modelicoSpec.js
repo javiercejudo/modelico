@@ -81,6 +81,9 @@ import countryFactory from './types/fixtures/nested/Country'
 import regionFactory from './types/fixtures/nested/Region'
 import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
 
+import fixerIoFactory from './api-examples/fixer-io/index'
+import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
+
 import ajvMetadata from './metadata/ajv'
 import baseMetadataExample from './metadata/base'
 
@@ -93,6 +96,7 @@ export default (options, should, M, extensions) => () => {
   const fixtures = Object.freeze({
     cityFactory,
     countryFactory,
+    fixerIoFactory,
     PartOfDay,
     Sex,
     Person: personFactory(M, PartOfDay, Sex),
@@ -126,6 +130,8 @@ export default (options, should, M, extensions) => () => {
   describe('Deep nesting features', featuresDeepNesting(...deps))
   describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
   describe('Immutable.js examples', ImmutableExamples(U, ...deps))
+
+  describe('Api Example: Fixer IO', fixerIoSpec(...deps))
 
   U.skipDescribeIfNoProxies(
     'Immutable.js examples (proxied)',
