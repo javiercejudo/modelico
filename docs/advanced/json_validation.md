@@ -1,6 +1,6 @@
 # JSON validation
 
-By default, Modélico does not validate JSON in any special way. Morover, the
+By default, Modélico does not validate JSON in any special way. Moreover, the
 JSON is coerced when the metadata defined doesn't match the actual value, eg.
 if a field has `string()` as its metadata, but there is a number in the
 incoming JSON, it will be coerced with `String(5)`.

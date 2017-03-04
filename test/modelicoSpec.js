@@ -33,7 +33,7 @@ const hasToStringTagSymbol = (() => {
   return (a + '') === '[object foo]'
 })()
 
-const buildUtils = options => Object.freeze({
+const buildUtils = () => Object.freeze({
   skipIfNoProxies: hasProxies ? it : it.skip,
   skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
   skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
@@ -87,8 +87,8 @@ import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 import ajvMetadata from './metadata/ajv'
 import baseMetadataExample from './metadata/base'
 
-export default (options, should, M, extensions) => () => {
-  const U = buildUtils(options)
+export default ({Should, Modelico: M, extensions}) => () => {
+  const U = buildUtils()
 
   const PartOfDay = partOfDayFactory(M)
   const Sex = sexFactory(M)
@@ -106,7 +106,7 @@ export default (options, should, M, extensions) => () => {
     RegionIncompatibleNameKey: regionIncompatibleNameKeyFactory(M)
   })
 
-  const deps = [should, M, fixtures, extensions]
+  const deps = [Should, M, fixtures, extensions]
 
   describe('Base', Base(U, ...deps))
   describe('Number', ModelicoNumber(U, ...deps))
