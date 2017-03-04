@@ -76,6 +76,8 @@ export default (ajv = { validate: T }) => {
     return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   }
 
+  ajvMetadata.ajvMeta = ajvMeta
+
   ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
     const metadata = _(Type, innerMetadata)
 
@@ -169,10 +171,10 @@ export default (ajv = { validate: T }) => {
       {
         type: 'array',
         minItems: length,
-        maxItems: length,
-        items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false))
+        maxItems: length
       },
-      schema
+      schema,
+      () => ({ items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false)) })
     )
   }
 
