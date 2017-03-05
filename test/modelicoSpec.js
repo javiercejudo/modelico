@@ -1,46 +1,5 @@
 /* eslint-env mocha */
 
-const hasObjectFreeze = (() => {
-  const a = {}
-
-  try {
-    Object.freeze(a)
-  } catch (e) {
-    return false
-  }
-
-  try {
-    a.test = 1
-    return false
-  } catch (ignore) {}
-
-  return true
-})()
-
-const hasProxies = (() => {
-  try {
-    return new Proxy({}, {}) && true
-  } catch (ignore) {}
-
-  return false
-})()
-
-const hasToStringTagSymbol = (() => {
-  const a = {}
-
-  a[Symbol.toStringTag] = 'foo'
-
-  return (a + '') === '[object foo]'
-})()
-
-const buildUtils = () => Object.freeze({
-  skipIfNoProxies: hasProxies ? it : it.skip,
-  skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-  skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
-  skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
-  objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
-})
-
 import Base from './types/Base'
 import ModelicoNumber from './types/Number'
 import ModelicoDate from './types/Date'
@@ -86,6 +45,47 @@ import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 
 import ajvMetadata from './metadata/ajv'
 import baseMetadataExample from './metadata/base'
+
+const hasObjectFreeze = (() => {
+  const a = {}
+
+  try {
+    Object.freeze(a)
+  } catch (e) {
+    return false
+  }
+
+  try {
+    a.test = 1
+    return false
+  } catch (ignore) {}
+
+  return true
+})()
+
+const hasProxies = (() => {
+  try {
+    return new Proxy({}, {}) && true
+  } catch (ignore) {}
+
+  return false
+})()
+
+const hasToStringTagSymbol = (() => {
+  const a = {}
+
+  a[Symbol.toStringTag] = 'foo'
+
+  return (a + '') === '[object foo]'
+})()
+
+const buildUtils = () => Object.freeze({
+  skipIfNoProxies: hasProxies ? it : it.skip,
+  skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
+  skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
+  skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
+  objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
+})
 
 export default ({Should, Modelico: M, extensions}) => () => {
   const U = buildUtils()

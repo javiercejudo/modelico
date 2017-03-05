@@ -934,7 +934,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('facilitates custom validation rules', () => {
       const lowerCaseString = schema => M.withValidation(
         v => v.toLowerCase() === v,
-        (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`,
+        (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`
       )(ajvString(schema))
 
       JSON.parse('"abc123"', lowerCaseString({minLength: 5}).reviver)
