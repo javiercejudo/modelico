@@ -18,9 +18,8 @@ export default (
 
     convert (from, to, x) {
       const rates = this.rates()
-      const inBase = x * (1 / rates.get(from))
 
-      return inBase * rates.get(to)
+      return x * rates.get(to) / rates.get(from)
     }
 
     static innerTypes () {
