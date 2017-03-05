@@ -63,7 +63,7 @@
     "babel-preset-es2015-rollup": "^3.0.0",
     "babili": "0.0.11",
     "codecov": "^1.0.1",
-    "flow-bin": "^0.40.0",
+    "flow-bin": "^0.41.0",
     "foreman": "^2.0.0",
     "gitbook-cli": "^2.3.0",
     "karma": "^1.1.2",
