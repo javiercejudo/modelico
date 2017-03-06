@@ -72,6 +72,14 @@ export default (should, M, { Person }) => () => {
         stringMap(date()).reviver
       )
 
+      const modelicoMapAlt = JSON.parse(
+        '{"a":"1988-04-16T00:00:00.000Z","b":"2012-12-25T00:00:00.000Z"}',
+        stringMap(() => date()).reviver
+      )
+
+      modelicoMap.equals(modelicoMapAlt)
+        .should.be.exactly(true)
+
       should(modelicoMap.inner().get('a').inner().getFullYear())
         .be.exactly(1988)
 

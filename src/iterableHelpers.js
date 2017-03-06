@@ -1,4 +1,4 @@
-import { always, reviverOrAsIs, equals, haveDifferentTypes } from './U'
+import { always, reviverOrAsIs, equals, haveDifferentTypes, isFunction } from './U'
 
 const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = []) => {
   if (k !== '') {
@@ -12,8 +12,8 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = [])
   }
 
   const itemMetadataGetter = isTuple
-    ? i => itemMetadata[i]
-    : always(itemMetadata)
+    ? i => isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
+    : isFunction(itemMetadata) ? always(itemMetadata(v, path)) : always(itemMetadata)
 
   const revive = (x, i) => reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i))
 

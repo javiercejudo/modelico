@@ -82,10 +82,10 @@ const metadata = () => Object.freeze({
   maybe: Maybe.metadata,
   set: ModelicoSet.metadata,
 
-  withDefault: (meta, def) => {
-    const defaultValue = reviverOrAsIs(meta)('', def)
+  withDefault: (metadata, def) => {
+    const defaultValue = reviverOrAsIs(metadata)('', def)
 
-    return Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+    return Object.freeze(Object.assign({}, metadata, { default: defaultValue }))
   }
 })
 
