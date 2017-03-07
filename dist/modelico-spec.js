@@ -102,7 +102,43 @@ var possibleConstructorReturn = function (self, call) {
 
 
 
+var slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
 
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
 
 
 
@@ -934,6 +970,14 @@ var ModelicoMap = (function (U, should, M, _ref) {
       it('should parse the map correctly', function () {
         var modelicoMap = JSON.parse('[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]', map(string(), date()).reviver);
 
+        var modelicoMapAlt = JSON.parse('[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]', map(function () {
+          return string();
+        }, function () {
+          return date();
+        }).reviver);
+
+        modelicoMap.equals(modelicoMapAlt).should.be.exactly(true);
+
         should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(1988);
 
         should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11);
@@ -1105,6 +1149,12 @@ var ModelicoStringMap = (function (should, M, _ref) {
       it('should parse the map correctly', function () {
         var modelicoMap = JSON.parse('{"a":"1988-04-16T00:00:00.000Z","b":"2012-12-25T00:00:00.000Z"}', stringMap(date()).reviver);
 
+        var modelicoMapAlt = JSON.parse('{"a":"1988-04-16T00:00:00.000Z","b":"2012-12-25T00:00:00.000Z"}', stringMap(function () {
+          return date();
+        }).reviver);
+
+        modelicoMap.equals(modelicoMapAlt).should.be.exactly(true);
+
         should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(1988);
 
         should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11);
@@ -1221,6 +1271,7 @@ var ModelicoEnumMap = (function (U, should, M, _ref) {
     var _M$metadata = M.metadata(),
         _ = _M$metadata._,
         any = _M$metadata.any,
+        anyOf = _M$metadata.anyOf,
         enumMap = _M$metadata.enumMap,
         string = _M$metadata.string;
 
@@ -1290,7 +1341,13 @@ var ModelicoEnumMap = (function (U, should, M, _ref) {
 
     describe('parsing', function () {
       it('should parse the enum map correctly', function () {
-        var greetings = JSON.parse('{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":[]}', enumMap(_(PartOfDay), any()).reviver);
+        var greetings = JSON.parse('{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":true}', enumMap(_(PartOfDay), any()).reviver);
+
+        var greetingsAlt = JSON.parse('{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":true}', enumMap(function () {
+          return _(PartOfDay);
+        }, anyOf()).reviver);
+
+        greetings.equals(greetingsAlt).should.be.exactly(true);
 
         greetings.inner().get(PartOfDay.MORNING()).should.be.exactly('Good morning!');
       });
@@ -1535,6 +1592,26 @@ var ModelicoList = (function (U, should, M, _ref) {
         should(function () {
           return M.genericsFromJS(M.List, [[maybe(string()), maybe(number())]], [undefined, NaN]);
         }).not.throw();
+      });
+    });
+
+    describe('metadata-returning function', function () {
+      it('should parse the list correctly', function () {
+        var modelicoList = JSON.parse('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]', list(function () {
+          return date();
+        }).reviver);
+
+        should(modelicoList.get(0).inner().getFullYear()).be.exactly(1988);
+
+        should(modelicoList.get(1).inner().getMonth()).be.exactly(11);
+      });
+
+      it('should support tuples', function () {
+        M.genericsFromJS(M.List, [[function () {
+          return string();
+        }, function () {
+          return date();
+        }]], ['a', new Date('1988-04-16T00:00:00.000Z')]).equals(M.List.of('a', M.Date.of(new Date('1988-04-16T00:00:00.000Z')))).should.be.exactly(true);
       });
     });
 
@@ -1885,6 +1962,11 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
 
         var maybe2 = JSON.parse('null', maybe(number()).reviver);
         maybe2.isEmpty().should.be.exactly(true);
+
+        var maybe3 = M.genericsFromJS(M.Maybe, [function () {
+          return number();
+        }], 5);
+        should(maybe3.getOrElse(0)).be.exactly(5);
       });
 
       it('should support arbitrary Modelico types', function () {
@@ -3583,6 +3665,238 @@ var regionIncompatibleNameKeyFactory = (function (M) {
   return Object.freeze(Region);
 });
 
+var currencyFactory = (function (_ref) {
+  var M = _ref.M;
+
+  return M.Enum.fromArray(['AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR']);
+});
+
+var localDateFactory = (function (_ref) {
+  var M = _ref.M,
+      Ajv = _ref.Ajv,
+      validationEnabled = _ref.validationEnabled,
+      ajvOptions = _ref.ajvOptions;
+
+  var _M$ajvMetadata = M.ajvMetadata(validationEnabled ? Ajv(ajvOptions) : undefined),
+      base = _M$ajvMetadata.base,
+      ajvMeta = _M$ajvMetadata.ajvMeta;
+
+  var reviver = function reviver(k, v) {
+    return new (Function.prototype.bind.apply(LocalDate, [null].concat(toConsumableArray(v.split('-').map(Number)))))();
+  };
+
+  var LocalDate = function (_M$Base) {
+    inherits(LocalDate, _M$Base);
+
+    function LocalDate(year, month, day) {
+      classCallCheck(this, LocalDate);
+
+      var _this = possibleConstructorReturn(this, (LocalDate.__proto__ || Object.getPrototypeOf(LocalDate)).call(this, LocalDate, { year: year, month: month, day: day }));
+
+      _this.year = function () {
+        return year;
+      };
+      _this.month = function () {
+        return month;
+      };
+      _this.day = function () {
+        return day;
+      };
+
+      Object.freeze(_this);
+      return _this;
+    }
+
+    createClass(LocalDate, [{
+      key: 'toJSON',
+      value: function toJSON() {
+        var year = this.year,
+            month = this.month,
+            day = this.day;
+
+
+        return year() + '-' + month() + '-' + day();
+      }
+    }], [{
+      key: 'innerTypes',
+      value: function innerTypes() {
+        return Object.freeze({});
+      }
+    }, {
+      key: 'metadata',
+      value: function metadata() {
+        var baseMetadata = Object.assign({}, base(LocalDate), { reviver: reviver });
+
+        // baseMetadata as a function for testing purposes
+        return ajvMeta(function () {
+          return baseMetadata;
+        }, {
+          type: 'string',
+          pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
+        });
+      }
+    }]);
+    return LocalDate;
+  }(M.Base);
+
+  return LocalDate;
+});
+
+var fixerIoResultFactory = (function (_ref, _ref2) {
+  var M = _ref.M,
+      Ajv = _ref.Ajv,
+      validationEnabled = _ref.validationEnabled,
+      ajvOptions = _ref.ajvOptions;
+
+  var _ref3 = slicedToArray(_ref2, 2),
+      Currency = _ref3[0],
+      LocalDate = _ref3[1];
+
+  var _M$ajvMetadata = M.ajvMetadata(validationEnabled ? Ajv(ajvOptions) : undefined),
+      _ = _M$ajvMetadata._,
+      ajvEnum = _M$ajvMetadata.ajvEnum,
+      ajvEnumMap = _M$ajvMetadata.ajvEnumMap,
+      ajvNumber = _M$ajvMetadata.ajvNumber;
+
+  var FixerIoResult = function (_M$Base) {
+    inherits(FixerIoResult, _M$Base);
+
+    function FixerIoResult(fields) {
+      classCallCheck(this, FixerIoResult);
+
+      // ensure base is included in the rates
+      var rates = fields.rates.set(fields.base, 1);
+      var enhancedFields = Object.assign({}, fields, { rates: rates });
+
+      var _this = possibleConstructorReturn(this, (FixerIoResult.__proto__ || Object.getPrototypeOf(FixerIoResult)).call(this, FixerIoResult, enhancedFields));
+
+      Object.freeze(_this);
+      return _this;
+    }
+
+    createClass(FixerIoResult, [{
+      key: "convert",
+      value: function convert(from, to, x) {
+        var rates = this.rates();
+
+        return x * rates.get(to) / rates.get(from);
+      }
+    }], [{
+      key: "innerTypes",
+      value: function innerTypes() {
+        return Object.freeze({
+          base: ajvEnum(Currency),
+          date: _(LocalDate),
+          rates: ajvEnumMap({}, ajvEnum(Currency), ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+        });
+      }
+    }]);
+    return FixerIoResult;
+  }(M.Base);
+
+  return FixerIoResult;
+});
+
+var fixerIoFactory = (function () {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      M = _ref.M,
+      Ajv = _ref.Ajv,
+      _ref$ajvOptions = _ref.ajvOptions,
+      ajvOptions = _ref$ajvOptions === undefined ? {} : _ref$ajvOptions,
+      _ref$validationEnable = _ref.validationEnabled,
+      validationEnabled = _ref$validationEnable === undefined ? true : _ref$validationEnable;
+
+  var options = { M: M, Ajv: Ajv, ajvOptions: ajvOptions, validationEnabled: validationEnabled };
+  var Currency = currencyFactory({ M: M });
+  var LocalDate = localDateFactory(options);
+
+  return Object.freeze({
+    Currency: Currency,
+    FixerIoResult: fixerIoResultFactory(options, [Currency, LocalDate])
+  });
+});
+
+/* eslint-env mocha */
+
+var json = '\n{\n  "base": "EUR",\n  "date": "2017-03-02",\n  "rates": {\n    "AUD": 1.384,\n    "BGN": 1.9558,\n    "BRL": 3.2687,\n    "CAD": 1.4069,\n    "CHF": 1.0651,\n    "CNY": 7.2399,\n    "CZK": 27.021,\n    "DKK": 7.4336,\n    "GBP": 0.8556,\n    "HKD": 8.1622,\n    "HRK": 7.4193,\n    "HUF": 308.33,\n    "IDR": 14045,\n    "ILS": 3.881,\n    "INR": 70.2,\n    "JPY": 120.24,\n    "KRW": 1204.3,\n    "MXN": 20.95,\n    "MYR": 4.6777,\n    "NOK": 8.883,\n    "NZD": 1.4823,\n    "PHP": 52.997,\n    "PLN": 4.2941,\n    "RON": 4.522,\n    "RUB": 61.68,\n    "SEK": 9.5195,\n    "SGD": 1.484,\n    "THB": 36.804,\n    "TRY": 3.8972,\n    "USD": 1.0514,\n    "ZAR": 13.78\n  }\n}\n';
+
+var fixerIoSpec = (function (should, M, _ref, _ref2) {
+  var fixerIoFactory = _ref.fixerIoFactory;
+  var Ajv = _ref2.Ajv;
+  return function () {
+    var _M$metadata = M.metadata(),
+        _ = _M$metadata._;
+
+    var _fixerIoFactory = fixerIoFactory({ M: M, Ajv: Ajv }),
+        FixerIoResult = _fixerIoFactory.FixerIoResult,
+        Currency = _fixerIoFactory.Currency;
+
+    it('should parse results from fixer.io', function () {
+      var fixerIoResult = M.fromJSON(FixerIoResult, json);
+
+      fixerIoResult.base().should.be.exactly(Currency.EUR());
+
+      fixerIoResult.date().year().should.be.exactly(2017);
+      fixerIoResult.date().month().should.be.exactly(3);
+      fixerIoResult.date().day().should.be.exactly(2);
+
+      fixerIoResult.rates().get(Currency.AUD()).should.be.exactly(1.384);
+    });
+
+    it('should convert between any available currencies', function () {
+      var GBP = Currency.GBP,
+          USD = Currency.USD,
+          EUR = Currency.EUR,
+          AUD = Currency.AUD,
+          CNY = Currency.CNY;
+
+
+      var fixerIoResult = M.fromJSON(FixerIoResult, json);
+
+      fixerIoResult.convert(GBP(), USD(), 7.20).toFixed(2).should.be.exactly('8.85');
+
+      fixerIoResult.convert(EUR(), AUD(), 15).toFixed(2).should.be.exactly('20.76');
+
+      fixerIoResult.convert(CNY(), EUR(), 500).toFixed(2).should.be.exactly('69.06');
+    });
+
+    it('should generate the right schema', function () {
+      var schema = M.getSchema(_(FixerIoResult));
+
+      var expectedSchema = {
+        type: 'object',
+        properties: {
+          base: {
+            type: 'string',
+            enum: ['AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR']
+          },
+          date: {
+            type: 'string',
+            pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
+          },
+          rates: {
+            type: 'object',
+            maxProperties: 32,
+            additionalProperties: false,
+            patternProperties: {
+              '^(AUD|BGN|BRL|CAD|CHF|CNY|CZK|DKK|EUR|GBP|HKD|HRK|HUF|IDR|ILS|INR|JPY|KRW|MXN|MYR|NOK|NZD|PHP|PLN|RON|RUB|SEK|SGD|THB|TRY|USD|ZAR)$': {
+                type: 'number',
+                minimum: 0,
+                exclusiveMinimum: true
+              }
+            }
+          }
+        },
+        required: ['base', 'date', 'rates']
+      };
+
+      schema.should.deepEqual(expectedSchema);
+
+      Ajv().validate(schema, JSON.parse(json)).should.be.exactly(true);
+    });
+  };
+});
+
 /* eslint-env mocha */
 var ajvMetadata = (function (should, M, fixtures, _ref) {
   var Ajv = _ref.Ajv;
@@ -3604,6 +3918,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         ajvSet = _M$ajvMetadata.ajvSet,
         ajvMaybe = _M$ajvMetadata.ajvMaybe,
         ajvWithDefault = _M$ajvMetadata.ajvWithDefault,
+        ajvAnyOf = _M$ajvMetadata.ajvAnyOf,
         _ = _M$ajvMetadata._,
         base = _M$ajvMetadata.base,
         number = _M$ajvMetadata.number;
@@ -4568,10 +4883,71 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
     });
 
+    describe('anyOf', function () {
+      var ScoreType = function (_M$Enum2) {
+        inherits(ScoreType, _M$Enum2);
+
+        function ScoreType() {
+          classCallCheck(this, ScoreType);
+          return possibleConstructorReturn(this, (ScoreType.__proto__ || Object.getPrototypeOf(ScoreType)).apply(this, arguments));
+        }
+
+        createClass(ScoreType, null, [{
+          key: 'innerTypes',
+
+          // workaround for IE <=10
+          value: function innerTypes() {
+            return get(ScoreType.__proto__ || Object.getPrototypeOf(ScoreType), 'innerTypes', this).call(this);
+          }
+        }]);
+        return ScoreType;
+      }(M.Enum);
+
+      var ScoreTypeEnum = M.Enum.fromArray(['Numeric', 'Alphabetic'], ScoreType, 'ScoreType');
+
+      var Score = function (_M$Base8) {
+        inherits(Score, _M$Base8);
+
+        function Score(props) {
+          classCallCheck(this, Score);
+          return possibleConstructorReturn(this, (Score.__proto__ || Object.getPrototypeOf(Score)).call(this, Score, props));
+        }
+
+        createClass(Score, null, [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              type: ajvEnum(ScoreTypeEnum),
+              score: ajvAnyOf([[ajvString({ minLength: 1 }), ScoreTypeEnum.Numeric()], [ajvNumber({ minimum: 0 }), ScoreTypeEnum.Alphabetic()]])
+            });
+          }
+        }]);
+        return Score;
+      }(M.Base);
+
+      it('reports its full schema', function () {
+        var expectedSchema = {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['Numeric', 'Alphabetic']
+            },
+            score: {
+              anyOf: [{ type: 'string', minLength: 1 }, { type: 'number', minimum: 0 }]
+            }
+          },
+          required: ['type', 'score']
+        };
+
+        M.getSchema(_(Score)).should.deepEqual(expectedSchema);
+      });
+    });
+
     describe('Circular innerTypes', function () {
       it('self reference', function () {
-        var Chain = function (_M$Base8) {
-          inherits(Chain, _M$Base8);
+        var Chain = function (_M$Base9) {
+          inherits(Chain, _M$Base9);
 
           function Chain(props) {
             classCallCheck(this, Chain);
@@ -4622,8 +4998,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
 
       it('indirect reference', function () {
-        var Parent = function (_M$Base9) {
-          inherits(Parent, _M$Base9);
+        var Parent = function (_M$Base10) {
+          inherits(Parent, _M$Base10);
 
           function Parent(props) {
             classCallCheck(this, Parent);
@@ -4642,8 +5018,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return Parent;
         }(M.Base);
 
-        var Child = function (_M$Base10) {
-          inherits(Child, _M$Base10);
+        var Child = function (_M$Base11) {
+          inherits(Child, _M$Base11);
 
           function Child(props) {
             classCallCheck(this, Child);
@@ -4662,8 +5038,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return Child;
         }(M.Base);
 
-        var Person = function (_M$Base11) {
-          inherits(Person, _M$Base11);
+        var Person = function (_M$Base12) {
+          inherits(Person, _M$Base12);
 
           function Person(props) {
             classCallCheck(this, Person);
@@ -4778,7 +5154,7 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
         ajvAny = _M$ajvMetadata.ajvAny,
         ajvNumber = _M$ajvMetadata.ajvNumber;
 
-    it('should revive as usual with valid JSON', function () {
+    it('should return the base metadata for standard models', function () {
       var customReviver = function customReviver(baseReviver) {
         return function (k, v) {
           var path = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
@@ -4899,7 +5275,7 @@ var hasToStringTagSymbol = function () {
   return a + '' === '[object foo]';
 }();
 
-var buildUtils = function buildUtils(options) {
+var buildUtils = function buildUtils() {
   return Object.freeze({
     skipIfNoProxies: hasProxies ? it : it.skip,
     skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
@@ -4913,9 +5289,12 @@ var buildUtils = function buildUtils(options) {
   });
 };
 
-var modelicoSpec = (function (options, should, M, extensions) {
+var modelicoSpec = (function (_ref) {
+  var Should = _ref.Should,
+      M = _ref.Modelico,
+      extensions = _ref.extensions;
   return function () {
-    var U = buildUtils(options);
+    var U = buildUtils();
 
     var PartOfDay = partOfDayFactory(M);
     var Sex = sexFactory(M);
@@ -4923,6 +5302,7 @@ var modelicoSpec = (function (options, should, M, extensions) {
     var fixtures = Object.freeze({
       cityFactory: cityFactory,
       countryFactory: countryFactory,
+      fixerIoFactory: fixerIoFactory,
       PartOfDay: PartOfDay,
       Sex: Sex,
       Person: personFactory(M, PartOfDay, Sex),
@@ -4932,7 +5312,7 @@ var modelicoSpec = (function (options, should, M, extensions) {
       RegionIncompatibleNameKey: regionIncompatibleNameKeyFactory(M)
     });
 
-    var deps = [should, M, fixtures, extensions];
+    var deps = [Should, M, fixtures, extensions];
 
     describe('Base', Base.apply(undefined, [U].concat(deps)));
     describe('Number', ModelicoNumber.apply(undefined, [U].concat(deps)));
@@ -4956,6 +5336,8 @@ var modelicoSpec = (function (options, should, M, extensions) {
     describe('Deep nesting features', featuresDeepNesting.apply(undefined, deps));
     describe('Reviving polymrphic JSON', featuresPolymorphic.apply(undefined, deps));
     describe('Immutable.js examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
+
+    describe('Api Example: Fixer IO', fixerIoSpec.apply(undefined, deps));
 
     U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 

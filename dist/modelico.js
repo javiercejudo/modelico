@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "21.3.0";
+var version = "21.4.0";
 
 
 
@@ -612,7 +612,9 @@ var reviverFactory$2 = function reviverFactory(itemMetadata) {
       return v;
     }
 
-    var revive = v === null ? always(null) : defaultTo(itemMetadata.reviver)(itemMetadata.maybeReviver);
+    var metadata = isFunction(itemMetadata) ? itemMetadata(v, path) : itemMetadata;
+
+    var revive = v === null ? always(null) : defaultTo(metadata.reviver)(metadata.maybeReviver);
 
     return new Maybe(revive(k, v, path));
   };
@@ -1039,8 +1041,8 @@ var reviverFactory$4 = function reviverFactory(keyMetadata, valueMetadata) {
       return v;
     }
 
-    var keyReviver = reviverOrAsIs(keyMetadata);
-    var valueReviver = reviverOrAsIs(valueMetadata);
+    var keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata);
+    var valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
 
     var innerMap = v === null ? null : new Map(v.map(parseMapper(keyReviver, valueReviver, path)));
 
@@ -1148,7 +1150,7 @@ var reviverFactory$5 = function reviverFactory(valueMetadata) {
       return v;
     }
 
-    var valueReviver = reviverOrAsIs(valueMetadata);
+    var valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
 
     var innerMap = v === null ? null : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []));
 
@@ -1259,8 +1261,8 @@ var reviverFactory$6 = function reviverFactory(keyMetadata, valueMetadata) {
       return v;
     }
 
-    var keyReviver = reviverOrAsIs(keyMetadata);
-    var valueReviver = reviverOrAsIs(valueMetadata);
+    var keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata);
+    var valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
 
     var innerMap = v === null ? null : new Map(Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v, path)));
 
@@ -1538,8 +1540,8 @@ var iterableReviverFactory = function iterableReviverFactory(IterableType, itemM
     }
 
     var itemMetadataGetter = isTuple ? function (i) {
-      return itemMetadata[i];
-    } : always(itemMetadata);
+      return isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i];
+    } : isFunction(itemMetadata) ? always(itemMetadata(v, path)) : always(itemMetadata);
 
     var revive = function revive(x, i) {
       return reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i));
@@ -1938,6 +1940,7 @@ var ajvMetadata = (function () {
       base = metadata.base,
       asIs = metadata.asIs,
       any = metadata.any,
+      anyOf = metadata.anyOf,
       string = metadata.string,
       number = metadata.number,
       boolean = metadata.boolean,
@@ -1964,7 +1967,9 @@ var ajvMetadata = (function () {
         throw TypeError(formatError(ajv, schema, value, path));
       }
 
-      return metadata.reviver('', value, path);
+      var resolvedMetadata = isFunction(metadata) ? metadata(value, path) : metadata;
+
+      return resolvedMetadata.reviver('', value, path);
     };
   };
 
@@ -1982,20 +1987,24 @@ var ajvMetadata = (function () {
     };
   };
 
-  var ajvMeta = function ajvMeta(meta, baseSchema) {
+  var ajvMeta = function ajvMeta(metadata, baseSchema) {
     var mainSchema = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : emptyObject;
     var innerSchemaGetter = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : always(emptyObject);
 
     var schemaToCheck = baseSchema === emptyObject && mainSchema === emptyObject ? emptyObject : Object.assign({}, baseSchema, mainSchema);
 
-    var reviver = ensure(meta, schemaToCheck);
+    var reviver = ensure(metadata, schemaToCheck);
 
     var schemaGetter = function schemaGetter() {
       return Object.assign({}, schemaToCheck, innerSchemaGetter());
     };
 
-    return Object.assign({}, meta, { reviver: reviver, ownSchema: always(schemaToCheck), schema: schemaGetter });
+    var baseMetadata = isFunction(metadata) ? { type: metadata } : metadata;
+
+    return Object.assign({}, baseMetadata, { reviver: reviver, ownSchema: always(schemaToCheck), schema: schemaGetter });
   };
+
+  ajvMetadata.ajvMeta = ajvMeta;
 
   ajvMetadata.ajv_ = function (Type) {
     var schema = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
@@ -2032,19 +2041,19 @@ var ajvMetadata = (function () {
     var _options$wrap = options.wrap,
         wrap = _options$wrap === undefined ? false : _options$wrap;
 
-    var meta = number(options);
+    var metadata = number(options);
 
     if (!wrap) {
-      return ajvMeta(meta, { type: 'number' }, schema);
+      return ajvMeta(metadata, { type: 'number' }, schema);
     }
 
     var numberMeta = Object.assign({ type: 'number' }, schema);
 
-    var reviver = ensureWrapped(meta, {
+    var reviver = ensureWrapped(metadata, {
       anyOf: [{ type: 'number' }, { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }]
     }, numberMeta);
 
-    return Object.assign({}, meta, { reviver: reviver, ownSchema: always(numberMeta), schema: always(numberMeta) });
+    return Object.assign({}, metadata, { reviver: reviver, ownSchema: always(numberMeta), schema: always(numberMeta) });
   };
 
   ajvMetadata.ajvString = function (schema) {
@@ -2096,11 +2105,12 @@ var ajvMetadata = (function () {
     return ajvMeta(list(itemsMetadata), {
       type: 'array',
       minItems: length,
-      maxItems: length,
-      items: itemsMetadata.map(function (itemMetadata) {
-        return getSchema(itemMetadata, false);
-      })
-    }, schema);
+      maxItems: length
+    }, schema, function () {
+      return { items: itemsMetadata.map(function (itemMetadata) {
+          return getSchema(itemMetadata, false);
+        }) };
+    });
   };
 
   ajvMetadata.ajvList = function (schema, itemMetadata) {
@@ -2163,6 +2173,14 @@ var ajvMetadata = (function () {
     return ajvMeta(withDefault(metadata, defaultValue), {
       default: defaultValue
     }, emptyObject, always(schema));
+  };
+
+  ajvMetadata.ajvAnyOf = function (conditionedMetas, enumField) {
+    return ajvMeta(anyOf(conditionedMetas, enumField), {
+      anyOf: conditionedMetas.map(function (conditionMeta) {
+        return getSchema(conditionMeta[0], false);
+      })
+    });
   };
 
   return Object.freeze(Object.assign(ajvMetadata, metadata));
@@ -2270,10 +2288,10 @@ var metadata = function metadata() {
     maybe: Maybe$1.metadata,
     set: ModelicoSet$1.metadata,
 
-    withDefault: function withDefault(meta, def) {
-      var defaultValue = reviverOrAsIs(meta)('', def);
+    withDefault: function withDefault(metadata, def) {
+      var defaultValue = reviverOrAsIs(metadata)('', def);
 
-      return Object.freeze(Object.assign({}, meta, { default: defaultValue }));
+      return Object.freeze(Object.assign({}, metadata, { default: defaultValue }));
     }
   });
 };

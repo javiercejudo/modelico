@@ -1,4 +1,4 @@
-var version = "21.3.0";
+var version = "21.4.0";
 
 
 
@@ -384,9 +384,13 @@ const reviverFactory$2 = itemMetadata => (k, v, path) => {
     return v
   }
 
+  const metadata = isFunction(itemMetadata)
+    ? itemMetadata(v, path)
+    : itemMetadata;
+
   const revive = (v === null)
     ? always(null)
-    : defaultTo(itemMetadata.reviver)(itemMetadata.maybeReviver);
+    : defaultTo(metadata.reviver)(metadata.maybeReviver);
 
   return new Maybe(revive(k, v, path))
 };
@@ -732,8 +736,8 @@ const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(keyMetadata);
-  const valueReviver = reviverOrAsIs(valueMetadata);
+  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata);
+  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
 
   const innerMap = (v === null)
     ? null
@@ -814,7 +818,7 @@ const reviverFactory$5 = valueMetadata => (k, v, path = []) => {
     return v
   }
 
-  const valueReviver = reviverOrAsIs(valueMetadata);
+  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
 
   const innerMap = (v === null)
     ? null
@@ -899,8 +903,8 @@ const reviverFactory$6 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(keyMetadata);
-  const valueReviver = reviverOrAsIs(valueMetadata);
+  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata);
+  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
 
   const innerMap = (v === null)
     ? null
@@ -1125,8 +1129,8 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = [])
   }
 
   const itemMetadataGetter = isTuple
-    ? i => itemMetadata[i]
-    : always(itemMetadata);
+    ? i => isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
+    : isFunction(itemMetadata) ? always(itemMetadata(v, path)) : always(itemMetadata);
 
   const revive = (x, i) => reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i));
 
@@ -1437,6 +1441,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
     base,
     asIs,
     any,
+    anyOf,
     string,
     number,
     boolean,
@@ -1463,7 +1468,11 @@ var ajvMetadata = (ajv = { validate: T }) => {
       throw TypeError(formatError(ajv, schema, value, path))
     }
 
-    return metadata.reviver('', value, path)
+    const resolvedMetadata = isFunction(metadata)
+      ? metadata(value, path)
+      : metadata;
+
+    return resolvedMetadata.reviver('', value, path)
   };
 
   const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
@@ -1476,17 +1485,23 @@ var ajvMetadata = (ajv = { validate: T }) => {
     return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
   };
 
-  const ajvMeta = (meta, baseSchema, mainSchema = emptyObject, innerSchemaGetter = always(emptyObject)) => {
+  const ajvMeta = (metadata, baseSchema, mainSchema = emptyObject, innerSchemaGetter = always(emptyObject)) => {
     const schemaToCheck = (baseSchema === emptyObject && mainSchema === emptyObject)
       ? emptyObject
       : Object.assign({}, baseSchema, mainSchema);
 
-    const reviver = ensure(meta, schemaToCheck);
+    const reviver = ensure(metadata, schemaToCheck);
 
     const schemaGetter = () => Object.assign({}, schemaToCheck, innerSchemaGetter());
 
-    return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
+    const baseMetadata = isFunction(metadata)
+      ? { type: metadata }
+      : metadata;
+
+    return Object.assign({}, baseMetadata, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   };
+
+  ajvMetadata.ajvMeta = ajvMeta;
 
   ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
     const metadata = _(Type, innerMetadata);
@@ -1507,22 +1522,22 @@ var ajvMetadata = (ajv = { validate: T }) => {
 
   ajvMetadata.ajvNumber = (schema, options = emptyObject) => {
     const { wrap = false } = options;
-    const meta = number(options);
+    const metadata = number(options);
 
     if (!wrap) {
-      return ajvMeta(meta, { type: 'number' }, schema)
+      return ajvMeta(metadata, { type: 'number' }, schema)
     }
 
     const numberMeta = Object.assign({ type: 'number' }, schema);
 
-    const reviver = ensureWrapped(meta, {
+    const reviver = ensureWrapped(metadata, {
       anyOf: [
         { type: 'number' },
         { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
       ]
     }, numberMeta);
 
-    return Object.assign({}, meta, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
+    return Object.assign({}, metadata, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
   };
 
   ajvMetadata.ajvString = schema =>
@@ -1581,10 +1596,10 @@ var ajvMetadata = (ajv = { validate: T }) => {
       {
         type: 'array',
         minItems: length,
-        maxItems: length,
-        items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false))
+        maxItems: length
       },
-      schema
+      schema,
+      () => ({ items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false)) })
     )
   };
 
@@ -1646,6 +1661,11 @@ var ajvMetadata = (ajv = { validate: T }) => {
       default: defaultValue
     }, emptyObject, always(schema))
   };
+
+  ajvMetadata.ajvAnyOf = (conditionedMetas, enumField) =>
+    ajvMeta(anyOf(conditionedMetas, enumField), {
+      anyOf: conditionedMetas.map(conditionMeta => getSchema(conditionMeta[0], false))
+    });
 
   return Object.freeze(Object.assign(ajvMetadata, metadata))
 };
@@ -1739,10 +1759,10 @@ const metadata = () => Object.freeze({
   maybe: Maybe$1.metadata,
   set: ModelicoSet$1.metadata,
 
-  withDefault: (meta, def) => {
-    const defaultValue = reviverOrAsIs(meta)('', def);
+  withDefault: (metadata, def) => {
+    const defaultValue = reviverOrAsIs(metadata)('', def);
 
-    return Object.freeze(Object.assign({}, meta, { default: defaultValue }))
+    return Object.freeze(Object.assign({}, metadata, { default: defaultValue }))
   }
 });
 
