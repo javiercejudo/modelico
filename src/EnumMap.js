@@ -1,4 +1,4 @@
-import { reviverOrAsIs, emptyObject } from './U'
+import { reviverOrAsIs, emptyObject, isFunction } from './U'
 import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
@@ -19,8 +19,8 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(keyMetadata)
-  const valueReviver = reviverOrAsIs(valueMetadata)
+  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata)
+  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata)
 
   const innerMap = (v === null)
     ? null

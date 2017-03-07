@@ -1,4 +1,4 @@
-import { always, isNothing, emptyObject, haveDifferentTypes, equals, defaultTo } from './U'
+import { always, isNothing, emptyObject, haveDifferentTypes, equals, defaultTo, isFunction } from './U'
 import Base from './Base'
 
 const reviverFactory = itemMetadata => (k, v, path) => {
@@ -6,9 +6,13 @@ const reviverFactory = itemMetadata => (k, v, path) => {
     return v
   }
 
+  const metadata = isFunction(itemMetadata)
+    ? itemMetadata(v, path)
+    : itemMetadata
+
   const revive = (v === null)
     ? always(null)
-    : defaultTo(itemMetadata.reviver)(itemMetadata.maybeReviver)
+    : defaultTo(metadata.reviver)(metadata.maybeReviver)
 
   return new Maybe(revive(k, v, path))
 }

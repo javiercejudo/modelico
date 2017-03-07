@@ -17,6 +17,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
     ajvSet,
     ajvMaybe,
     ajvWithDefault,
+    ajvAnyOf,
+
     // normal
     _,
     base,
@@ -985,6 +987,61 @@ export default (should, M, fixtures, { Ajv }) => () => {
         '{"str": "abc123", "forceFail": true}',
         M.withValidation(v => M.fields(v).forceFail !== true, () => 'forcibly failed')(_(MagicString)).reviver
       )).throw(/forcibly failed/)
+    })
+  })
+
+  describe('anyOf', () => {
+    class ScoreType extends M.Enum {
+      // workaround for IE <=10
+      static innerTypes () {
+        return super.innerTypes()
+      }
+    }
+
+    const ScoreTypeEnum = M.Enum.fromArray(['Numeric', 'Alphabetic'], ScoreType, 'ScoreType')
+
+    class Score extends M.Base {
+      constructor (props) {
+        super(Score, props)
+      }
+
+      static innerTypes () {
+        return Object.freeze({
+          type: ajvEnum(ScoreTypeEnum),
+          score: ajvAnyOf([
+            [ajvString({minLength: 1}), ScoreTypeEnum.Numeric()],
+            [ajvNumber({minimum: 0}), ScoreTypeEnum.Alphabetic()]
+          ])
+        })
+      }
+    }
+
+    it('reports its full schema', () => {
+      const expectedSchema = {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            enum: [
+              'Numeric',
+              'Alphabetic'
+            ]
+          },
+          score: {
+            anyOf: [
+              { type: 'string', minLength: 1 },
+              { type: 'number', minimum: 0 }
+            ]
+          }
+        },
+        required: [
+          'type',
+          'score'
+        ]
+      }
+
+      M.getSchema(_(Score))
+        .should.deepEqual(expectedSchema)
     })
   })
 

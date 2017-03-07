@@ -1,4 +1,4 @@
-import { T, identity, always, emptyObject } from './U'
+import { T, identity, always, emptyObject, isFunction } from './U'
 import getSchema from './getSchema'
 import M from './'
 
@@ -25,6 +25,7 @@ export default (ajv = { validate: T }) => {
     base,
     asIs,
     any,
+    anyOf,
     string,
     number,
     boolean,
@@ -51,7 +52,11 @@ export default (ajv = { validate: T }) => {
       throw TypeError(formatError(ajv, schema, value, path))
     }
 
-    return metadata.reviver('', value, path)
+    const resolvedMetadata = isFunction(metadata)
+      ? metadata(value, path)
+      : metadata
+
+    return resolvedMetadata.reviver('', value, path)
   }
 
   const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
@@ -64,16 +69,20 @@ export default (ajv = { validate: T }) => {
     return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
   }
 
-  const ajvMeta = (meta, baseSchema, mainSchema = emptyObject, innerSchemaGetter = always(emptyObject)) => {
+  const ajvMeta = (metadata, baseSchema, mainSchema = emptyObject, innerSchemaGetter = always(emptyObject)) => {
     const schemaToCheck = (baseSchema === emptyObject && mainSchema === emptyObject)
       ? emptyObject
       : Object.assign({}, baseSchema, mainSchema)
 
-    const reviver = ensure(meta, schemaToCheck)
+    const reviver = ensure(metadata, schemaToCheck)
 
     const schemaGetter = () => Object.assign({}, schemaToCheck, innerSchemaGetter())
 
-    return Object.assign({}, meta, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
+    const baseMetadata = isFunction(metadata)
+      ? { type: metadata }
+      : metadata
+
+    return Object.assign({}, baseMetadata, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   }
 
   ajvMetadata.ajvMeta = ajvMeta
@@ -97,22 +106,22 @@ export default (ajv = { validate: T }) => {
 
   ajvMetadata.ajvNumber = (schema, options = emptyObject) => {
     const { wrap = false } = options
-    const meta = number(options)
+    const metadata = number(options)
 
     if (!wrap) {
-      return ajvMeta(meta, { type: 'number' }, schema)
+      return ajvMeta(metadata, { type: 'number' }, schema)
     }
 
     const numberMeta = Object.assign({ type: 'number' }, schema)
 
-    const reviver = ensureWrapped(meta, {
+    const reviver = ensureWrapped(metadata, {
       anyOf: [
         { type: 'number' },
         { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
       ]
     }, numberMeta)
 
-    return Object.assign({}, meta, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
+    return Object.assign({}, metadata, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
   }
 
   ajvMetadata.ajvString = schema =>
@@ -236,6 +245,11 @@ export default (ajv = { validate: T }) => {
       default: defaultValue
     }, emptyObject, always(schema))
   }
+
+  ajvMetadata.ajvAnyOf = (conditionedMetas, enumField) =>
+    ajvMeta(anyOf(conditionedMetas, enumField), {
+      anyOf: conditionedMetas.map(conditionMeta => getSchema(conditionMeta[0], false))
+    })
 
   return Object.freeze(Object.assign(ajvMetadata, metadata))
 }

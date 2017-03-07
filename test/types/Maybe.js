@@ -98,6 +98,9 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
 
       const maybe2 = JSON.parse('null', maybe(number()).reviver)
       maybe2.isEmpty().should.be.exactly(true)
+
+      const maybe3 = M.genericsFromJS(M.Maybe, [() => number()], 5)
+      should(maybe3.getOrElse(0)).be.exactly(5)
     })
 
     it('should support arbitrary Modelico types', () => {
