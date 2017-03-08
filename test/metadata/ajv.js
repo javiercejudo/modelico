@@ -1009,8 +1009,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
         return Object.freeze({
           type: ajvEnum(ScoreTypeEnum),
           score: ajvAnyOf([
-            [ajvString({minLength: 1}), ScoreTypeEnum.Numeric()],
-            [ajvNumber({minimum: 0}), ScoreTypeEnum.Alphabetic()]
+            [ajvNumber({minimum: 0}), ScoreTypeEnum.Numeric()],
+            [ajvString({minLength: 1}), ScoreTypeEnum.Alphabetic()]
           ])
         })
       }
@@ -1029,8 +1029,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
           },
           score: {
             anyOf: [
-              { type: 'string', minLength: 1 },
-              { type: 'number', minimum: 0 }
+              { type: 'number', minimum: 0 },
+              { type: 'string', minLength: 1 }
             ]
           }
         },

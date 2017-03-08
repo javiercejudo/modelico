@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M) => () => {
+export default (should, M, fixtures, {Ajv}) => () => {
   describe('Enumerated: default type field', () => {
     const CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER'])
     const { _, number, stringMap, list, anyOf } = M.metadata()
@@ -131,7 +131,287 @@ export default (should, M) => () => {
     })
   })
 
-  describe('Base on value only', () => {
+  describe('Based on own type field', () => {
+    const { _, base, ajvMeta, ajvNumber, ajvString, ajvMaybe } = M.ajvMetadata(Ajv())
+
+    const reviver = (k, v) => {
+      if (k !== '') {
+        return v
+      }
+
+      switch (v.type) {
+        case 'circle':
+          return new Circle(v)
+        case 'diamond':
+          return new Diamond(v)
+        default:
+          throw TypeError(`Unknown type "${v.type}"`)
+      }
+    }
+
+    class Shape extends M.Base {
+      constructor (Type, props) {
+        super(Type, props)
+
+        this.shapeType = () => props.type
+      }
+
+      static innerTypes () {
+        return Object.freeze({
+          relatedShape: ajvMaybe(_(Shape))
+        })
+      }
+
+      static metadata () {
+        const baseMetadata = Object.assign({}, base(Shape), {reviver})
+
+        return ajvMeta(baseMetadata, {}, {}, () => ({
+          anyOf: [
+            Circle,
+            Diamond
+          ].map(x => M.getSchema(_(x), false))
+        }))
+      }
+    }
+
+    class Circle extends Shape {
+      constructor (props) {
+        super(Circle, props)
+      }
+
+      area () {
+        return Math.PI * Math.pow(this.radius(), 2)
+      }
+
+      static innerTypes () {
+        return Object.freeze(Object.assign({}, super.innerTypes(), {
+          radius: ajvNumber({minimum: 0, exclusiveMinimum: true})
+        }))
+      }
+
+      static metadata () {
+        return base(Circle)
+      }
+    }
+
+    class Diamond extends Shape {
+      constructor (props) {
+        super(Diamond, props)
+      }
+
+      area () {
+        return this.width() * this.height() / 2
+      }
+
+      static innerTypes () {
+        return Object.freeze(Object.assign({}, super.innerTypes(), {
+          width: ajvNumber({minimum: 0, exclusiveMinimum: true}),
+          height: ajvNumber({minimum: 0, exclusiveMinimum: true})
+        }))
+      }
+
+      static metadata () {
+        return base(Diamond)
+      }
+    }
+
+    class Person extends M.Base {
+      constructor (props) {
+        super(Person, props)
+      }
+
+      static innerTypes () {
+        return Object.freeze({
+          name: ajvString({minLength: 1}),
+          favouriteShape: _(Shape)
+        })
+      }
+    }
+
+    it('should revive polymorphic JSON', () => {
+      const person1 = M.fromJS(Person, {
+        name: 'Audrey',
+        favouriteShape: {
+          type: 'diamond',
+          width: 8,
+          height: 7
+        }
+      })
+
+      const person2 = M.fromJS(Person, {
+        name: 'Javier',
+        favouriteShape: {
+          type: 'circle',
+          radius: 3
+        }
+      })
+
+      should(person1.favouriteShape().area())
+        .be.exactly(28)
+
+      should(person2.favouriteShape().area())
+        .be.above(28)
+        .and.exactly(Math.PI * Math.pow(3, 2))
+
+      person1.toJS().should.deepEqual({
+        name: 'Audrey',
+        favouriteShape: {
+          type: 'diamond',
+          relatedShape: null,
+          width: 8,
+          height: 7
+        }
+      })
+
+      person2.toJS().should.deepEqual({
+        name: 'Javier',
+        favouriteShape: {
+          type: 'circle',
+          relatedShape: null,
+          radius: 3
+        }
+      })
+    })
+
+    it('should provide its full schema', () => {
+      const expectedSchema = {
+        'definitions': {
+          '1': {
+            'type': 'object',
+            'properties': {
+              'name': {
+                'type': 'string',
+                'minLength': 1
+              },
+              'favouriteShape': {
+                'anyOf': [
+                  {
+                    'type': 'object',
+                    'properties': {
+                      'relatedShape': {
+                        'anyOf': [
+                          {
+                            'type': 'null'
+                          },
+                          {
+                            '$ref': '#/definitions/3'
+                          }
+                        ]
+                      },
+                      'radius': {
+                        'type': 'number',
+                        'minimum': 0,
+                        'exclusiveMinimum': true
+                      }
+                    },
+                    'required': [
+                      'radius'
+                    ]
+                  },
+                  {
+                    'type': 'object',
+                    'properties': {
+                      'relatedShape': {
+                        'anyOf': [
+                          {
+                            'type': 'null'
+                          },
+                          {
+                            '$ref': '#/definitions/3'
+                          }
+                        ]
+                      },
+                      'width': {
+                        'type': 'number',
+                        'minimum': 0,
+                        'exclusiveMinimum': true
+                      },
+                      'height': {
+                        'type': 'number',
+                        'minimum': 0,
+                        'exclusiveMinimum': true
+                      }
+                    },
+                    'required': [
+                      'width',
+                      'height'
+                    ]
+                  }
+                ]
+              }
+            },
+            'required': [
+              'name',
+              'favouriteShape'
+            ]
+          },
+          '3': {
+            'anyOf': [
+              {
+                'type': 'object',
+                'properties': {
+                  'relatedShape': {
+                    'anyOf': [
+                      {
+                        'type': 'null'
+                      },
+                      {
+                        '$ref': '#/definitions/3'
+                      }
+                    ]
+                  },
+                  'radius': {
+                    'type': 'number',
+                    'minimum': 0,
+                    'exclusiveMinimum': true
+                  }
+                },
+                'required': [
+                  'radius'
+                ]
+              },
+              {
+                'type': 'object',
+                'properties': {
+                  'relatedShape': {
+                    'anyOf': [
+                      {
+                        'type': 'null'
+                      },
+                      {
+                        '$ref': '#/definitions/3'
+                      }
+                    ]
+                  },
+                  'width': {
+                    'type': 'number',
+                    'minimum': 0,
+                    'exclusiveMinimum': true
+                  },
+                  'height': {
+                    'type': 'number',
+                    'minimum': 0,
+                    'exclusiveMinimum': true
+                  }
+                },
+                'required': [
+                  'width',
+                  'height'
+                ]
+              }
+            ]
+          }
+        },
+        '$ref': '#/definitions/1'
+      }
+
+      const actualSchema = M.getSchema(_(Person))
+
+      actualSchema.should.deepEqual(expectedSchema)
+    })
+  })
+
+  describe('Based on value only', () => {
     const { number, stringMap, list } = M.metadata()
 
     class NumberCollection extends M.Base {
@@ -162,7 +442,7 @@ export default (should, M) => () => {
 
     it('should revive polymorphic JSON (1)', () => {
       const col1 = M.fromJS(NumberCollection, {
-        collection: {'a': 10, 'b': 25, 'c': 4000}
+        collection: {a: 10, b: 25, c: 4000}
       })
 
       should(col1.sum())
