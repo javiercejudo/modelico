@@ -131,7 +131,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
   })
 
-  describe('Based on own type field', () => {
+  describe('Based on runtime type field', () => {
     const { _, base, ajvMeta, ajvNumber, ajvString, ajvMaybe } = M.ajvMetadata(Ajv())
 
     const reviver = (k, v) => {
@@ -145,7 +145,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         case 'diamond':
           return new Diamond(v)
         default:
-          throw TypeError(`Unknown type "${v.type}"`)
+          return new Shape(v)
       }
     }
 
@@ -154,6 +154,24 @@ export default (should, M, fixtures, {Ajv}) => () => {
         super(Type, props)
 
         this.shapeType = () => props.type
+      }
+
+      toJSON () {
+        const fields = M.fields(this)
+        let type
+
+        switch (this[M.symbols.typeSymbol]()) {
+          case Circle:
+            type = 'circle'
+            break
+          case Diamond:
+            type = 'diamond'
+            break
+          default:
+            type = undefined
+        }
+
+        return Object.freeze(Object.assign({type}, fields))
       }
 
       static innerTypes () {
@@ -180,7 +198,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
 
       area () {
-        return Math.PI * Math.pow(this.radius(), 2)
+        return Math.PI * this.radius() ** 2
       }
 
       static innerTypes () {
@@ -246,12 +264,20 @@ export default (should, M, fixtures, {Ajv}) => () => {
         }
       })
 
+      const person3 = new Person({
+        name: 'Leonardo',
+        favouriteShape: new Diamond({
+          width: 4,
+          height: 12
+        })
+      })
+
       should(person1.favouriteShape().area())
         .be.exactly(28)
 
       should(person2.favouriteShape().area())
         .be.above(28)
-        .and.exactly(Math.PI * Math.pow(3, 2))
+        .and.exactly(Math.PI * 3 ** 2)
 
       person1.toJS().should.deepEqual({
         name: 'Audrey',
@@ -271,68 +297,78 @@ export default (should, M, fixtures, {Ajv}) => () => {
           radius: 3
         }
       })
+
+      person3.toJS().should.deepEqual({
+        name: 'Leonardo',
+        favouriteShape: {
+          type: 'diamond',
+          relatedShape: null,
+          width: 4,
+          height: 12
+        }
+      })
     })
 
     it('should provide its full schema', () => {
       const expectedSchema = {
-        'definitions': {
-          '1': {
-            'type': 'object',
-            'properties': {
-              'name': {
-                'type': 'string',
-                'minLength': 1
+        definitions: {
+          1: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                minLength: 1
               },
-              'favouriteShape': {
-                'anyOf': [
+              favouriteShape: {
+                anyOf: [
                   {
-                    'type': 'object',
-                    'properties': {
-                      'relatedShape': {
-                        'anyOf': [
+                    type: 'object',
+                    properties: {
+                      relatedShape: {
+                        anyOf: [
                           {
-                            'type': 'null'
+                            type: 'null'
                           },
                           {
-                            '$ref': '#/definitions/3'
+                            $ref: '#/definitions/3'
                           }
                         ]
                       },
-                      'radius': {
-                        'type': 'number',
-                        'minimum': 0,
-                        'exclusiveMinimum': true
+                      radius: {
+                        type: 'number',
+                        minimum: 0,
+                        exclusiveMinimum: true
                       }
                     },
-                    'required': [
+                    required: [
                       'radius'
                     ]
                   },
                   {
-                    'type': 'object',
-                    'properties': {
-                      'relatedShape': {
-                        'anyOf': [
+                    type: 'object',
+                    properties: {
+                      relatedShape: {
+                        anyOf: [
                           {
-                            'type': 'null'
+                            type: 'null'
                           },
                           {
-                            '$ref': '#/definitions/3'
+                            $ref: '#/definitions/3'
                           }
                         ]
                       },
-                      'width': {
-                        'type': 'number',
-                        'minimum': 0,
-                        'exclusiveMinimum': true
+                      width: {
+                        type: 'number',
+                        minimum: 0,
+                        exclusiveMinimum: true
                       },
-                      'height': {
-                        'type': 'number',
-                        'minimum': 0,
-                        'exclusiveMinimum': true
+                      height: {
+                        type: 'number',
+                        minimum: 0,
+                        exclusiveMinimum: true
                       }
                     },
-                    'required': [
+                    required: [
                       'width',
                       'height'
                     ]
@@ -340,61 +376,61 @@ export default (should, M, fixtures, {Ajv}) => () => {
                 ]
               }
             },
-            'required': [
+            required: [
               'name',
               'favouriteShape'
             ]
           },
-          '3': {
-            'anyOf': [
+          3: {
+            anyOf: [
               {
-                'type': 'object',
-                'properties': {
-                  'relatedShape': {
-                    'anyOf': [
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
                       {
-                        'type': 'null'
+                        type: 'null'
                       },
                       {
-                        '$ref': '#/definitions/3'
+                        $ref: '#/definitions/3'
                       }
                     ]
                   },
-                  'radius': {
-                    'type': 'number',
-                    'minimum': 0,
-                    'exclusiveMinimum': true
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
                   }
                 },
-                'required': [
+                required: [
                   'radius'
                 ]
               },
               {
-                'type': 'object',
-                'properties': {
-                  'relatedShape': {
-                    'anyOf': [
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
                       {
-                        'type': 'null'
+                        type: 'null'
                       },
                       {
-                        '$ref': '#/definitions/3'
+                        $ref: '#/definitions/3'
                       }
                     ]
                   },
-                  'width': {
-                    'type': 'number',
-                    'minimum': 0,
-                    'exclusiveMinimum': true
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
                   },
-                  'height': {
-                    'type': 'number',
-                    'minimum': 0,
-                    'exclusiveMinimum': true
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
                   }
                 },
-                'required': [
+                required: [
                   'width',
                   'height'
                 ]
@@ -402,7 +438,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
             ]
           }
         },
-        '$ref': '#/definitions/1'
+        $ref: '#/definitions/1'
       }
 
       const actualSchema = M.getSchema(_(Person))
