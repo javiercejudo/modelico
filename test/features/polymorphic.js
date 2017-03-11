@@ -134,18 +134,20 @@ export default (should, M, fixtures, {Ajv}) => () => {
   describe('Based on runtime type field', () => {
     const { _, base, ajvMeta, ajvNumber, ajvString, ajvMaybe } = M.ajvMetadata(Ajv())
 
+    const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
+
     const reviver = (k, v) => {
       if (k !== '') {
         return v
       }
 
       switch (v.type) {
-        case 'Circle':
+        case ShapeType.CIRCLE().toJSON():
           return new Circle(v)
-        case 'Diamond':
+        case ShapeType.DIAMOND().toJSON():
           return new Diamond(v)
         default:
-          return new Shape(v)
+          throw TypeError('Unsupported or missing shape type in the Shape reviver.')
       }
     }
 
@@ -156,13 +158,13 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
         switch (this[M.symbols.typeSymbol]()) {
           case Circle:
-            type = 'Circle'
+            type = ShapeType.CIRCLE()
             break
           case Diamond:
-            type = 'Diamond'
+            type = ShapeType.DIAMOND()
             break
           default:
-            type = 'Shape'
+            throw TypeError('Unsupported Shape in the toJSON method.')
         }
 
         return Object.freeze(Object.assign({type}, fields))
@@ -181,12 +183,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
           anyOf: [
             Circle,
             Diamond
-          ].map(x => M.getSchema(_(x), false))
+          ].map(x => M.getSchema(base(x), false))
         }))
       }
     }
-
-    Shape.displayName = 'Shape'
 
     class Circle extends Shape {
       constructor (props) {
@@ -199,16 +199,13 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
       static innerTypes () {
         return Object.freeze(Object.assign({}, super.innerTypes(), {
-          radius: ajvNumber({minimum: 0, exclusiveMinimum: true})
+          radius: ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          })
         }))
       }
-
-      static metadata () {
-        return base(Circle)
-      }
     }
-
-    Circle.displayName = 'Circle'
 
     class Diamond extends Shape {
       constructor (props) {
@@ -221,50 +218,52 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
       static innerTypes () {
         return Object.freeze(Object.assign({}, super.innerTypes(), {
-          width: ajvNumber({minimum: 0, exclusiveMinimum: true}),
-          height: ajvNumber({minimum: 0, exclusiveMinimum: true})
+          width: ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          }),
+          height: ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          })
         }))
-      }
-
-      static metadata () {
-        return base(Diamond)
       }
     }
 
-    Diamond.displayName = 'Diamond'
-
-    class Person extends M.Base {
+    class Geometer extends M.Base {
       constructor (props) {
-        super(Person, props)
+        super(Geometer, props)
       }
 
       static innerTypes () {
         return Object.freeze({
-          name: ajvString({minLength: 1}),
+          name: ajvString({
+            minLength: 1
+          }),
           favouriteShape: _(Shape)
         })
       }
     }
 
     it('should revive polymorphic JSON', () => {
-      const person1 = M.fromJS(Person, {
+      const geometer1 = M.fromJS(Geometer, {
         name: 'Audrey',
         favouriteShape: {
-          type: 'Diamond',
+          type: 'DIAMOND',
           width: 8,
           height: 7
         }
       })
 
-      const person2 = M.fromJS(Person, {
+      const geometer2 = M.fromJS(Geometer, {
         name: 'Javier',
         favouriteShape: {
-          type: 'Circle',
+          type: 'CIRCLE',
           radius: 3
         }
       })
 
-      const person3 = new Person({
+      const geometer3 = new Geometer({
         name: 'Leonardo',
         favouriteShape: new Diamond({
           width: 4,
@@ -272,36 +271,36 @@ export default (should, M, fixtures, {Ajv}) => () => {
         })
       })
 
-      should(person1.favouriteShape().area())
+      should(geometer1.favouriteShape().area())
         .be.exactly(28)
 
-      should(person2.favouriteShape().area())
+      should(geometer2.favouriteShape().area())
         .be.above(28)
         .and.exactly(Math.PI * 3 ** 2)
 
-      person1.toJS().should.deepEqual({
+      geometer1.toJS().should.deepEqual({
         name: 'Audrey',
         favouriteShape: {
-          type: 'Diamond',
+          type: 'DIAMOND',
           relatedShape: null,
           width: 8,
           height: 7
         }
       })
 
-      person2.toJS().should.deepEqual({
+      geometer2.toJS().should.deepEqual({
         name: 'Javier',
         favouriteShape: {
-          type: 'Circle',
+          type: 'CIRCLE',
           relatedShape: null,
           radius: 3
         }
       })
 
-      person3.toJS().should.deepEqual({
+      geometer3.toJS().should.deepEqual({
         name: 'Leonardo',
         favouriteShape: {
-          type: 'Diamond',
+          type: 'DIAMOND',
           relatedShape: null,
           width: 4,
           height: 12
@@ -311,77 +310,13 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     it('should provide its full schema', () => {
       const expectedSchema = {
-        definitions: {
-          1: {
-            type: 'object',
-            properties: {
-              name: {
-                type: 'string',
-                minLength: 1
-              },
-              favouriteShape: {
-                anyOf: [
-                  {
-                    type: 'object',
-                    properties: {
-                      relatedShape: {
-                        anyOf: [
-                          {
-                            type: 'null'
-                          },
-                          {
-                            $ref: '#/definitions/3'
-                          }
-                        ]
-                      },
-                      radius: {
-                        type: 'number',
-                        minimum: 0,
-                        exclusiveMinimum: true
-                      }
-                    },
-                    required: [
-                      'radius'
-                    ]
-                  },
-                  {
-                    type: 'object',
-                    properties: {
-                      relatedShape: {
-                        anyOf: [
-                          {
-                            type: 'null'
-                          },
-                          {
-                            $ref: '#/definitions/3'
-                          }
-                        ]
-                      },
-                      width: {
-                        type: 'number',
-                        minimum: 0,
-                        exclusiveMinimum: true
-                      },
-                      height: {
-                        type: 'number',
-                        minimum: 0,
-                        exclusiveMinimum: true
-                      }
-                    },
-                    required: [
-                      'width',
-                      'height'
-                    ]
-                  }
-                ]
-              }
-            },
-            required: [
-              'name',
-              'favouriteShape'
-            ]
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            minLength: 1
           },
-          3: {
+          favouriteShape: {
             anyOf: [
               {
                 type: 'object',
@@ -438,10 +373,71 @@ export default (should, M, fixtures, {Ajv}) => () => {
             ]
           }
         },
-        $ref: '#/definitions/1'
+        required: [
+          'name',
+          'favouriteShape'
+        ],
+        definitions: {
+          3: {
+            anyOf: [
+              {
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
+                      {
+                        type: 'null'
+                      },
+                      {
+                        $ref: '#/definitions/3'
+                      }
+                    ]
+                  },
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: [
+                  'radius'
+                ]
+              },
+              {
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
+                      {
+                        type: 'null'
+                      },
+                      {
+                        $ref: '#/definitions/3'
+                      }
+                    ]
+                  },
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  },
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: [
+                  'width',
+                  'height'
+                ]
+              }
+            ]
+          }
+        }
       }
 
-      const actualSchema = M.getSchema(_(Person))
+      const actualSchema = M.getSchema(_(Geometer))
 
       actualSchema.should.deepEqual(expectedSchema)
     })

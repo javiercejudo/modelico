@@ -376,16 +376,11 @@ var getUsedDefinitions = function getUsedDefinitions() {
   }, {});
 };
 
-var schemaDeclaration = function schemaDeclaration(schema, specification) {
-  return specification !== '' ? Object.assign({ '$schema': specification }, schema) : schema;
-};
-
 var getSchema = function getSchema(metadata) {
   var topLevel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-  var specification = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
   if (metadataSchemaCache.has(metadata)) {
-    return schemaDeclaration(metadataSchemaCache.get(metadata), specification);
+    return metadataSchemaCache.get(metadata);
   }
 
   if (metadataRefCache.has(metadata)) {
@@ -417,13 +412,17 @@ var getSchema = function getSchema(metadata) {
   var definitions = getUsedDefinitions();
 
   if (Object.keys(definitions).length === 0) {
-    return schemaDeclaration(schema, specification);
+    return schema;
   }
 
-  return schemaDeclaration({
-    definitions: Object.assign(definitions, defineProperty({}, ref, schema)),
-    $ref: '#/definitions/' + ref
-  }, specification);
+  if (definitions.hasOwnProperty(ref)) {
+    return {
+      definitions: Object.assign(definitions, defineProperty({}, ref, schema)),
+      $ref: '#/definitions/' + ref
+    };
+  }
+
+  return Object.assign(schema, { definitions: definitions });
 };
 
 var validate = (function (instance) {
@@ -439,7 +438,7 @@ var validate = (function (instance) {
 });
 
 var defaultErrorMsgFn = function defaultErrorMsgFn(x, path) {
-  return 'Invalid value at "' + path.join(' > ') + '"';
+  return 'Invalid value at "' + path.join(' -> ') + '"';
 };
 
 var withValidation = (function (validateFn) {
@@ -813,7 +812,7 @@ var reviverFactory$3 = function reviverFactory(enumerators) {
     var enumerator = enumerators[v];
 
     if (isNothing(enumerator)) {
-      throw TypeError('missing enumerator "' + v + '" at "' + path.join(' > ') + '"');
+      throw TypeError('missing enumerator "' + v + '" at "' + path.join(' -> ') + '"');
     }
 
     return enumerator;
@@ -1915,7 +1914,7 @@ var proxyFactory = function proxyFactory(nonMutators, mutators, innerCloner, obj
 
 var formatError = function formatError(ajv, schema, value) {
   var path = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-  return ['Invalid JSON at "' + path.join(' > ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value (data path "' + ajv.errors.filter(function (e) {
+  return ['Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value (data path "' + ajv.errors.filter(function (e) {
     return e.dataPath !== '';
   }).map(function (error) {
     return error.dataPath;
@@ -2220,7 +2219,7 @@ var anyOf = (function () {
 
     var prevPath = path.slice(0, -1);
 
-    throw TypeError('unsupported enumerator "' + enumeratorToMatch.toJSON() + '" at "' + prevPath.join(' > ') + '"');
+    throw TypeError('unsupported enumerator "' + enumeratorToMatch.toJSON() + '" at "' + prevPath.join(' -> ') + '"');
   };
 });
 

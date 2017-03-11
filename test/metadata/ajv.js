@@ -106,13 +106,12 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
 
       const animalMeta = ajv_(Animal)
-      const animal1Schema1 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
-      const animal1Schema2 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
+      const animal1Schema1 = M.getSchema(animalMeta)
+      const animal1Schema2 = M.getSchema(animalMeta)
 
       animal1Schema1
         .should.deepEqual(animal1Schema2)
         .and.deepEqual({
-          $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {
@@ -1144,46 +1143,18 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       M.getSchema(_(Person))
         .should.deepEqual({
-          definitions: {
-            '1': {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 1
+            },
+            parent: {
               type: 'object',
               properties: {
                 name: {
                   type: 'string',
                   minLength: 1
-                },
-                parent: {
-                  type: 'object',
-                  properties: {
-                    name: {
-                      type: 'string',
-                      minLength: 1
-                    },
-                    child: {
-                      anyOf: [
-                        { type: 'null' },
-                        {
-                          type: 'object',
-                          properties: {
-                            name: {
-                              type: 'string',
-                              minLength: 1
-                            },
-                            parent: {
-                              $ref: '#/definitions/3'
-                            }
-                          },
-                          required: [
-                            'name',
-                            'parent'
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  required: [
-                    'name'
-                  ]
                 },
                 child: {
                   anyOf: [
@@ -1208,10 +1179,36 @@ export default (should, M, fixtures, { Ajv }) => () => {
                 }
               },
               required: [
-                'name',
-                'parent'
+                'name'
               ]
             },
+            child: {
+              anyOf: [
+                { type: 'null' },
+                {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                      minLength: 1
+                    },
+                    parent: {
+                      $ref: '#/definitions/3'
+                    }
+                  },
+                  required: [
+                    'name',
+                    'parent'
+                  ]
+                }
+              ]
+            }
+          },
+          required: [
+            'name',
+            'parent'
+          ],
+          definitions: {
             '3': {
               type: 'object',
               properties: {
@@ -1245,8 +1242,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
                 'name'
               ]
             }
-          },
-          $ref: '#/definitions/1'
+          }
         })
     })
   })
