@@ -3,7 +3,7 @@ import getSchema from './getSchema'
 import M from './'
 
 const formatError = (ajv, schema, value, path = []) => [
-  'Invalid JSON at "' + path.join(' > ') + '". According to the schema\n',
+  'Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n',
   JSON.stringify(schema, null, 2) + '\n',
   'the value (data path "' + ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) + '")\n',
   JSON.stringify(value, null, 2) + '\n'

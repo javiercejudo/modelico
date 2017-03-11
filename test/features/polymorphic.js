@@ -140,9 +140,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
 
       switch (v.type) {
-        case 'circle':
+        case 'Circle':
           return new Circle(v)
-        case 'diamond':
+        case 'Diamond':
           return new Diamond(v)
         default:
           return new Shape(v)
@@ -150,25 +150,19 @@ export default (should, M, fixtures, {Ajv}) => () => {
     }
 
     class Shape extends M.Base {
-      constructor (Type, props) {
-        super(Type, props)
-
-        this.shapeType = () => props.type
-      }
-
       toJSON () {
         const fields = M.fields(this)
         let type
 
         switch (this[M.symbols.typeSymbol]()) {
           case Circle:
-            type = 'circle'
+            type = 'Circle'
             break
           case Diamond:
-            type = 'diamond'
+            type = 'Diamond'
             break
           default:
-            type = undefined
+            type = 'Shape'
         }
 
         return Object.freeze(Object.assign({type}, fields))
@@ -192,6 +186,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
+    Shape.displayName = 'Shape'
+
     class Circle extends Shape {
       constructor (props) {
         super(Circle, props)
@@ -211,6 +207,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
         return base(Circle)
       }
     }
+
+    Circle.displayName = 'Circle'
 
     class Diamond extends Shape {
       constructor (props) {
@@ -233,6 +231,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
+    Diamond.displayName = 'Diamond'
+
     class Person extends M.Base {
       constructor (props) {
         super(Person, props)
@@ -250,7 +250,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       const person1 = M.fromJS(Person, {
         name: 'Audrey',
         favouriteShape: {
-          type: 'diamond',
+          type: 'Diamond',
           width: 8,
           height: 7
         }
@@ -259,7 +259,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       const person2 = M.fromJS(Person, {
         name: 'Javier',
         favouriteShape: {
-          type: 'circle',
+          type: 'Circle',
           radius: 3
         }
       })
@@ -282,7 +282,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       person1.toJS().should.deepEqual({
         name: 'Audrey',
         favouriteShape: {
-          type: 'diamond',
+          type: 'Diamond',
           relatedShape: null,
           width: 8,
           height: 7
@@ -292,7 +292,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       person2.toJS().should.deepEqual({
         name: 'Javier',
         favouriteShape: {
-          type: 'circle',
+          type: 'Circle',
           relatedShape: null,
           radius: 3
         }
@@ -301,7 +301,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       person3.toJS().should.deepEqual({
         name: 'Leonardo',
         favouriteShape: {
-          type: 'diamond',
+          type: 'Diamond',
           relatedShape: null,
           width: 4,
           height: 12
