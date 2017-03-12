@@ -116,7 +116,7 @@ export default (U, should, M, fixtures) => () => {
         .be.exactly(1988)
     })
 
-    it('edge case when Modelico setIn is called with an empty path', () => {
+    it('edge case when Modélico setIn is called with an empty path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author = JSON.parse(authorJson, _(Person).reviver)
       const listOfPeople1 = M.List.of(author)
@@ -236,7 +236,7 @@ export default (U, should, M, fixtures) => () => {
         .and.exactly(author2.sex().toJSON())
     })
 
-    it('should work with plain classes extending Modelico', () => {
+    it('should work with plain classes extending Modélico', () => {
       const animal = JSON.parse('{"name": "Sam"}', _(Animal).reviver)
 
       animal.speak().should.be.exactly('hello')
@@ -321,7 +321,7 @@ export default (U, should, M, fixtures) => () => {
   })
 
   describe('circular innerTypes', () => {
-    it('a Modelico type can have a key that is a Maybe of its own type', () => {
+    it('a Modélico type can have a key that is a Maybe of its own type', () => {
       const bestFriend = new Friend({
         name: 'John',
         bestFriend: M.Maybe.EMPTY

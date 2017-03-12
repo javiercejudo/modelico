@@ -68,14 +68,9 @@ const getUsedDefinitions = () => {
   }, {})
 }
 
-const schemaDeclaration = (schema, specification) =>
-  (specification !== '')
-    ? Object.assign({'$schema': specification}, schema)
-    : schema
-
-const getSchema = (metadata, topLevel = true, specification = '') => {
+const getSchema = (metadata, topLevel = true) => {
   if (metadataSchemaCache.has(metadata)) {
-    return schemaDeclaration(metadataSchemaCache.get(metadata), specification)
+    return metadataSchemaCache.get(metadata)
   }
 
   if (metadataRefCache.has(metadata)) {
@@ -107,13 +102,17 @@ const getSchema = (metadata, topLevel = true, specification = '') => {
   const definitions = getUsedDefinitions()
 
   if (Object.keys(definitions).length === 0) {
-    return schemaDeclaration(schema, specification)
+    return schema
   }
 
-  return schemaDeclaration({
-    definitions: Object.assign(definitions, { [ref]: schema }),
-    $ref: `#/definitions/${ref}`
-  }, specification)
+  if (definitions.hasOwnProperty(ref)) {
+    return {
+      definitions: Object.assign(definitions, { [ref]: schema }),
+      $ref: `#/definitions/${ref}`
+    }
+  }
+
+  return Object.assign(schema, {definitions})
 }
 
 export default getSchema

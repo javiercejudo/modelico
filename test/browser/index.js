@@ -5,7 +5,7 @@
 
 var ModelicoMin = Modelico.noConflict()
 
-describe('Modelico', function () {
-  describe('Modelico Dev', modelicoSpec({Should: Should, Modelico: Modelico, extensions: {Ajv: Ajv}}))
-  describe('Modelico Min', modelicoSpec({Should: Should, Modelico: ModelicoMin, extensions: {Ajv: Ajv}}))
+describe('Modélico', function () {
+  describe('Modélico Dev', modelicoSpec({Should: Should, Modelico: Modelico, extensions: {Ajv: Ajv}}))
+  describe('Modélico Min', modelicoSpec({Should: Should, Modelico: ModelicoMin, extensions: {Ajv: Ajv}}))
 })

@@ -83,7 +83,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
         name: 'Bane',
         dimensions: [20, 55, 0]
       }))
-        .throw(/Invalid JSON at "dimensions > 2"/)
+        .throw(/Invalid JSON at "dimensions -> 2"/)
         .and.throw(/should be > 0/)
     })
 
@@ -106,13 +106,12 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
 
       const animalMeta = ajv_(Animal)
-      const animal1Schema1 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
-      const animal1Schema2 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#')
+      const animal1Schema1 = M.getSchema(animalMeta)
+      const animal1Schema2 = M.getSchema(animalMeta)
 
       animal1Schema1
         .should.deepEqual(animal1Schema2)
         .and.deepEqual({
-          $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {
@@ -189,7 +188,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       should(() => M.ajvGenericsFromJSON(ajv_, M.List, {}, [
         ajvList({}, ajvList({}, ajvNumber({minimum: 5})))
       ], '[[[10], [6, 7, 4]]]'))
-        .throw(/Invalid JSON at "0 > 1 > 2"/)
+        .throw(/Invalid JSON at "0 -> 1 -> 2"/)
         .and.throw(/should be >= 5/)
     })
 
@@ -197,7 +196,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       should(() => M.genericsFromJS(M.Set, [
         ajvSet({}, ajvSet({}, ajvNumber({minimum: 5})))
       ], [[[10], [6, 7, 9, 4]]]))
-        .throw(/Invalid JSON at "0 > 1 > 3"/)
+        .throw(/Invalid JSON at "0 -> 1 -> 3"/)
         .and.throw(/should be >= 5/)
     })
 
@@ -205,7 +204,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       should(() => M.genericsFromJS(M.StringMap, [
         ajvStringMap({}, ajvStringMap({}, ajvNumber({minimum: 5})))
       ], {a: {b1: {c: 10}, b2: {d1: 6, d2: 7, d3: 4}}}))
-        .throw(/Invalid JSON at "a > b2 > d3"/)
+        .throw(/Invalid JSON at "a -> b2 -> d3"/)
         .and.throw(/should be >= 5/)
     })
 
@@ -214,14 +213,14 @@ export default (should, M, fixtures, { Ajv }) => () => {
         ajvString(),
         ajvMap({}, ajvString(), ajvNumber({minimum: 5}))
       ], [['A', [['A', 6], ['B', 7], ['C', 4]]]]))
-        .throw(/Invalid JSON at "0 > 1 > 2 > 1"/)
+        .throw(/Invalid JSON at "0 -> 1 -> 2 -> 1"/)
         .and.throw(/should be >= 5/)
 
       should(() => M.genericsFromJS(M.Map, [
         ajvString(),
         ajvMap({}, ajvString(), ajvNumber({minimum: 5}))
       ], [['A', [['A', 6], ['B', 7], [2, 7]]]]))
-        .throw(/Invalid JSON at "0 > 1 > 2 > 0"/)
+        .throw(/Invalid JSON at "0 -> 1 -> 2 -> 0"/)
         .and.throw(/should be string/)
     })
 
@@ -232,14 +231,14 @@ export default (should, M, fixtures, { Ajv }) => () => {
         ajv_(SideEnum),
         ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5})))
       ], {A: {A: {A: 10}, B: {A: 4, B: 7}}}))
-        .throw(/Invalid JSON at "A > B > A"/)
+        .throw(/Invalid JSON at "A -> B -> A"/)
         .and.throw(/should be >= 5/)
 
       should(() => M.genericsFromJS(M.EnumMap, [
         ajv_(SideEnum),
         ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5})))
       ], {A: {A: {A: 10}, B: {D: 5, B: 7}}}))
-        .throw(/Invalid JSON at "A > B"/)
+        .throw(/Invalid JSON at "A -> B"/)
         .and.throw(/should NOT have additional properties/)
     })
   })
@@ -936,7 +935,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('facilitates custom validation rules', () => {
       const lowerCaseString = schema => M.withValidation(
         v => v.toLowerCase() === v,
-        (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`
+        (v, path) => `string ${v} at "${path.join(' -> ')}" is not all lower case`
       )(ajvString(schema))
 
       JSON.parse('"abc123"', lowerCaseString({minLength: 5}).reviver)
@@ -959,7 +958,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('should work for nested metadata', () => {
       const lowerCaseString = schema => M.withValidation(
         v => v.toLowerCase() === v,
-        (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`
+        (v, path) => `string ${v} at "${path.join(' -> ')}" is not all lower case`
       )(ajvString(schema))
 
       class MagicString extends M.Base {
@@ -1009,8 +1008,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
         return Object.freeze({
           type: ajvEnum(ScoreTypeEnum),
           score: ajvAnyOf([
-            [ajvString({minLength: 1}), ScoreTypeEnum.Numeric()],
-            [ajvNumber({minimum: 0}), ScoreTypeEnum.Alphabetic()]
+            [ajvNumber({minimum: 0}), ScoreTypeEnum.Numeric()],
+            [ajvString({minLength: 1}), ScoreTypeEnum.Alphabetic()]
           ])
         })
       }
@@ -1029,8 +1028,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
           },
           score: {
             anyOf: [
-              { type: 'string', minLength: 1 },
-              { type: 'number', minimum: 0 }
+              { type: 'number', minimum: 0 },
+              { type: 'string', minLength: 1 }
             ]
           }
         },
@@ -1144,46 +1143,18 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       M.getSchema(_(Person))
         .should.deepEqual({
-          definitions: {
-            '1': {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 1
+            },
+            parent: {
               type: 'object',
               properties: {
                 name: {
                   type: 'string',
                   minLength: 1
-                },
-                parent: {
-                  type: 'object',
-                  properties: {
-                    name: {
-                      type: 'string',
-                      minLength: 1
-                    },
-                    child: {
-                      anyOf: [
-                        { type: 'null' },
-                        {
-                          type: 'object',
-                          properties: {
-                            name: {
-                              type: 'string',
-                              minLength: 1
-                            },
-                            parent: {
-                              $ref: '#/definitions/3'
-                            }
-                          },
-                          required: [
-                            'name',
-                            'parent'
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  required: [
-                    'name'
-                  ]
                 },
                 child: {
                   anyOf: [
@@ -1208,11 +1179,37 @@ export default (should, M, fixtures, { Ajv }) => () => {
                 }
               },
               required: [
-                'name',
-                'parent'
+                'name'
               ]
             },
-            '3': {
+            child: {
+              anyOf: [
+                { type: 'null' },
+                {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                      minLength: 1
+                    },
+                    parent: {
+                      $ref: '#/definitions/3'
+                    }
+                  },
+                  required: [
+                    'name',
+                    'parent'
+                  ]
+                }
+              ]
+            }
+          },
+          required: [
+            'name',
+            'parent'
+          ],
+          definitions: {
+            3: {
               type: 'object',
               properties: {
                 name: {
@@ -1245,8 +1242,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
                 'name'
               ]
             }
-          },
-          $ref: '#/definitions/1'
+          }
         })
     })
   })

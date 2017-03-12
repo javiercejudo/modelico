@@ -1,11 +1,16 @@
 # Reviving polymorphic JSON
 
-The [built-in metadata](../introduction/metadata.md) covers the bulk of use cases.
-However, to deal with types whose JSON might take more than one form, you will
-need a custom reviving strategy. We are going to walk through two examples:
-first, we will revive objects based on an enumerated field that will indicate
-how the object should be revived; second, we will revive objects based on
-their shape only, without any additional fields.
+The [built-in metadata](../introduction/metadata.md) covers the bulk of use
+cases. However, to deal with types whose JSON might take more than one form,
+you will need a custom reviving strategy.
+
+We are going to walk through two examples: first, we will revive objects based
+on an enumerated field that will indicate how the object should be revived;
+second, we will revive objects based on their shape only, without any
+additional fields.
+
+To deal with fields where several subclasses of the declared type would need
+to be revived, see the ["runtime type" recipe](../recipes/runtime_type_for_subclasses.md).
 
 ## Example 1: revive based on an enumerated field
 
@@ -42,9 +47,8 @@ class NumberCollection extends M.Base {
     switch (collectionType()) {
       case CollectionType.OBJECT():
         // Note that .inner() creates a copy. For improved performance,
-        // [...collection()[M.symbols.innerOrigSymbol]().values()]
-        // could be used
-        return [...collection().inner().values()]
+        // [...collection()[M.symbols.innerOrigSymbol]().values()] is used
+        return [...collection()[M.symbols.innerOrigSymbol]().values()]
       case CollectionType.ARRAY():
         return [...collection()]
       default:
@@ -112,7 +116,7 @@ JSON.stringify(col2)
 
 First, it is worth mentioning this is not always possible, as the shape of the
 JSON representation might be ambiguous (see example in
-[Gson's RuntimeTypeAdapterFactory](https://github.com/google/gson/blob/9e6f2bab20257b6823a5b753739f047d79e9dcbd/extras/src/main/java/com/google/gson/typeadapters/RuntimeTypeAdapterFactory.java#L36)).
+[Gson's RuntimeTypeAdapterFactory](https://github.com/google/gson/blob/gson-parent-2.8.0/extras/src/main/java/com/google/gson/typeadapters/RuntimeTypeAdapterFactory.java#L36)).
 
 In this example, we are going to revive the same polymorphic JSON as the one
 above, but without an enumerated field to hint the type of the collection.

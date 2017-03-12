@@ -39,7 +39,7 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
         .be.exactly(2)
     })
 
-    it('should return an empty Maybe when setting a path beyond Modelico boundaries', () => {
+    it('should return an empty Maybe when setting a path beyond Modélico boundaries', () => {
       const maybe1 = M.Maybe.of({a: 2})
 
       const maybe2 = maybe1.setIn([[{a: 1}, 'a']], 200)
@@ -72,7 +72,7 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
       JSON.stringify(maybe2).should.be.exactly('null')
     })
 
-    it('should support arbitrary Modelico types', () => {
+    it('should support arbitrary Modélico types', () => {
       const author = M.fromJSON(Person, authorJson)
 
       const maybe1 = M.Maybe.of(author)
@@ -103,7 +103,7 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
       should(maybe3.getOrElse(0)).be.exactly(5)
     })
 
-    it('should support arbitrary Modelico types', () => {
+    it('should support arbitrary Modélico types', () => {
       const author = JSON.parse(authorJson, _(Person).reviver)
 
       const myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver)

@@ -11,6 +11,7 @@
     "mocha": "mocha test/index.js",
     "prenyc": "rm -rf coverage",
     "nyc": "nyc npm run mocha",
+    "isparta": "isparta cover --report text --report text-summary --report html mocha test/index.next.js",
     "bt": "npm run build && npm run nyc",
     "test": "npm run standard && flow && npm run nyc",
     "test-browsers": "./scripts/browser_tester.sh",
@@ -22,7 +23,7 @@
     "build-src": "npm run build-src-dev && npm run build-src-min",
     "build-src-dev": "rollup -c && rollup -c rollup.es2015.config.js",
     "build-src-min": "uglifyjs dist/modelico.js -c -m > dist/modelico.min.js && babili dist/modelico.es2015.js > dist/modelico.es2015.min.js",
-    "build-browser-spec": "rollup -c ./test/rollup.config.js",
+    "build-browser-spec": "rollup -c ./test/rollup.config.js && rollup -c ./test/rollup.es2015.config.js",
     "watch": "rollup -c -w",
     "watch-spec": "rollup  -c ./test/rollup.config.js -w",
     "version": "npm run build && git add -A dist"
@@ -60,8 +61,9 @@
   },
   "homepage": "https://github.com/javiercejudo/modelico#readme",
   "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-polyfill": "^6.20.0",
-    "babel-preset-es2015-rollup": "^3.0.0",
+    "babel-preset-env": "^1.2.1",
     "babili": "0.0.12",
     "codecov": "^1.0.1",
     "flow-bin": "^0.41.0",
