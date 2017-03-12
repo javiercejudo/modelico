@@ -287,7 +287,7 @@ var Base = (function (U, should, M, fixtures) {
         should(author1.birthday().inner().getFullYear()).be.exactly(1988);
       });
 
-      it('edge case when Modelico setIn is called with an empty path', function () {
+      it('edge case when Modélico setIn is called with an empty path', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, _(Person).reviver);
         var listOfPeople1 = M.List.of(author);
@@ -399,7 +399,7 @@ var Base = (function (U, should, M, fixtures) {
         should(Sex.MALE().toJSON()).be.exactly(author1.sex().toJSON()).and.exactly(author2.sex().toJSON());
       });
 
-      it('should work with plain classes extending Modelico', function () {
+      it('should work with plain classes extending Modélico', function () {
         var animal = JSON.parse('{"name": "Sam"}', _(Animal).reviver);
 
         animal.speak().should.be.exactly('hello');
@@ -484,7 +484,7 @@ var Base = (function (U, should, M, fixtures) {
     });
 
     describe('circular innerTypes', function () {
-      it('a Modelico type can have a key that is a Maybe of its own type', function () {
+      it('a Modélico type can have a key that is a Maybe of its own type', function () {
         var bestFriend = new Friend({
           name: 'John',
           bestFriend: M.Maybe.EMPTY
@@ -1910,7 +1910,7 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
         should(maybe5.getOrElse(2)).be.exactly(2);
       });
 
-      it('should return an empty Maybe when setting a path beyond Modelico boundaries', function () {
+      it('should return an empty Maybe when setting a path beyond Modélico boundaries', function () {
         var maybe1 = M.Maybe.of({ a: 2 });
 
         var maybe2 = maybe1.setIn([[{ a: 1 }, 'a']], 200);
@@ -1938,7 +1938,7 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
         JSON.stringify(maybe2).should.be.exactly('null');
       });
 
-      it('should support arbitrary Modelico types', function () {
+      it('should support arbitrary Modélico types', function () {
         var author = M.fromJSON(Person, authorJson);
 
         var maybe1 = M.Maybe.of(author);
@@ -1969,7 +1969,7 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
         should(maybe3.getOrElse(0)).be.exactly(5);
       });
 
-      it('should support arbitrary Modelico types', function () {
+      it('should support arbitrary Modélico types', function () {
         var author = JSON.parse(authorJson, _(Person).reviver);
 
         var myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver);
@@ -2488,7 +2488,8 @@ var featuresDeepNesting = (function (should, M, fixtures) {
 
 /* eslint-env mocha */
 
-var featuresPolymorphic = (function (should, M) {
+var featuresPolymorphic = (function (should, M, fixtures, _ref) {
+  var Ajv = _ref.Ajv;
   return function () {
     describe('Enumerated: default type field', function () {
       var CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER']);
@@ -2652,14 +2653,335 @@ var featuresPolymorphic = (function (should, M) {
       });
     });
 
-    describe('Base on value only', function () {
+    describe('Based on runtime type field', function () {
+      var _M$ajvMetadata = M.ajvMetadata(Ajv()),
+          _ = _M$ajvMetadata._,
+          base = _M$ajvMetadata.base,
+          ajvMeta = _M$ajvMetadata.ajvMeta,
+          ajvNumber = _M$ajvMetadata.ajvNumber,
+          ajvString = _M$ajvMetadata.ajvString,
+          ajvMaybe = _M$ajvMetadata.ajvMaybe;
+
+      var ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND']);
+
+      var reviver = function reviver(k, v) {
+        if (k !== '') {
+          return v;
+        }
+
+        switch (v.type) {
+          case ShapeType.CIRCLE().toJSON():
+            return new Circle(v);
+          case ShapeType.DIAMOND().toJSON():
+            return new Diamond(v);
+          default:
+            throw TypeError('Unsupported or missing shape type in the Shape reviver.');
+        }
+      };
+
+      var Shape = function (_M$Base3) {
+        inherits(Shape, _M$Base3);
+
+        function Shape() {
+          classCallCheck(this, Shape);
+          return possibleConstructorReturn(this, (Shape.__proto__ || Object.getPrototypeOf(Shape)).apply(this, arguments));
+        }
+
+        createClass(Shape, [{
+          key: 'toJSON',
+          value: function toJSON() {
+            var fields = M.fields(this);
+            var type = void 0;
+
+            switch (this[M.symbols.typeSymbol]()) {
+              case Circle:
+                type = ShapeType.CIRCLE();
+                break;
+              case Diamond:
+                type = ShapeType.DIAMOND();
+                break;
+              default:
+                throw TypeError('Unsupported Shape in the toJSON method.');
+            }
+
+            return Object.freeze(Object.assign({ type: type }, fields));
+          }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              relatedShape: ajvMaybe(_(Shape))
+            });
+          }
+        }, {
+          key: 'metadata',
+          value: function metadata() {
+            var baseMetadata = Object.assign({}, base(Shape), { reviver: reviver });
+
+            return ajvMeta(baseMetadata, {}, {}, function () {
+              return {
+                anyOf: [Circle, Diamond].map(function (x) {
+                  return M.getSchema(base(x), false);
+                })
+              };
+            });
+          }
+        }]);
+        return Shape;
+      }(M.Base);
+
+      var Circle = function (_Shape) {
+        inherits(Circle, _Shape);
+
+        function Circle(props) {
+          classCallCheck(this, Circle);
+          return possibleConstructorReturn(this, (Circle.__proto__ || Object.getPrototypeOf(Circle)).call(this, Circle, props));
+        }
+
+        createClass(Circle, [{
+          key: 'area',
+          value: function area() {
+            return Math.PI * Math.pow(this.radius(), 2);
+          }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze(Object.assign({}, get(Circle.__proto__ || Object.getPrototypeOf(Circle), 'innerTypes', this).call(this), {
+              radius: ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              })
+            }));
+          }
+        }]);
+        return Circle;
+      }(Shape);
+
+      var Diamond = function (_Shape2) {
+        inherits(Diamond, _Shape2);
+
+        function Diamond(props) {
+          classCallCheck(this, Diamond);
+          return possibleConstructorReturn(this, (Diamond.__proto__ || Object.getPrototypeOf(Diamond)).call(this, Diamond, props));
+        }
+
+        createClass(Diamond, [{
+          key: 'area',
+          value: function area() {
+            return this.width() * this.height() / 2;
+          }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze(Object.assign({}, get(Diamond.__proto__ || Object.getPrototypeOf(Diamond), 'innerTypes', this).call(this), {
+              width: ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              }),
+              height: ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              })
+            }));
+          }
+        }]);
+        return Diamond;
+      }(Shape);
+
+      var Geometer = function (_M$Base4) {
+        inherits(Geometer, _M$Base4);
+
+        function Geometer(props) {
+          classCallCheck(this, Geometer);
+          return possibleConstructorReturn(this, (Geometer.__proto__ || Object.getPrototypeOf(Geometer)).call(this, Geometer, props));
+        }
+
+        createClass(Geometer, null, [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              name: ajvString({
+                minLength: 1
+              }),
+              favouriteShape: _(Shape)
+            });
+          }
+        }]);
+        return Geometer;
+      }(M.Base);
+
+      it('should revive polymorphic JSON', function () {
+        var geometer1 = M.fromJS(Geometer, {
+          name: 'Audrey',
+          favouriteShape: {
+            type: 'DIAMOND',
+            width: 8,
+            height: 7
+          }
+        });
+
+        var geometer2 = M.fromJS(Geometer, {
+          name: 'Javier',
+          favouriteShape: {
+            type: 'CIRCLE',
+            radius: 3
+          }
+        });
+
+        var geometer3 = new Geometer({
+          name: 'Leonardo',
+          favouriteShape: new Diamond({
+            width: 4,
+            height: 12
+          })
+        });
+
+        should(geometer1.favouriteShape().area()).be.exactly(28);
+
+        should(geometer2.favouriteShape().area()).be.above(28).and.exactly(Math.PI * Math.pow(3, 2));
+
+        geometer1.toJS().should.deepEqual({
+          name: 'Audrey',
+          favouriteShape: {
+            type: 'DIAMOND',
+            relatedShape: null,
+            width: 8,
+            height: 7
+          }
+        });
+
+        geometer2.toJS().should.deepEqual({
+          name: 'Javier',
+          favouriteShape: {
+            type: 'CIRCLE',
+            relatedShape: null,
+            radius: 3
+          }
+        });
+
+        geometer3.toJS().should.deepEqual({
+          name: 'Leonardo',
+          favouriteShape: {
+            type: 'DIAMOND',
+            relatedShape: null,
+            width: 4,
+            height: 12
+          }
+        });
+      });
+
+      it('should provide its full schema', function () {
+        var expectedSchema = {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 1
+            },
+            favouriteShape: {
+              anyOf: [{
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['radius']
+              }, {
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  },
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['width', 'height']
+              }]
+            }
+          },
+          required: ['name', 'favouriteShape'],
+          definitions: {
+            3: {
+              anyOf: [{
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['radius']
+              }, {
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  },
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['width', 'height']
+              }]
+            }
+          }
+        };
+
+        var actualSchema = M.getSchema(_(Geometer));
+
+        actualSchema.should.deepEqual(expectedSchema);
+      });
+    });
+
+    describe('Based on value only', function () {
       var _M$metadata3 = M.metadata(),
           number = _M$metadata3.number,
           stringMap = _M$metadata3.stringMap,
           list = _M$metadata3.list;
 
-      var NumberCollection = function (_M$Base3) {
-        inherits(NumberCollection, _M$Base3);
+      var NumberCollection = function (_M$Base5) {
+        inherits(NumberCollection, _M$Base5);
 
         function NumberCollection(props) {
           classCallCheck(this, NumberCollection);
@@ -2695,7 +3017,7 @@ var featuresPolymorphic = (function (should, M) {
 
       it('should revive polymorphic JSON (1)', function () {
         var col1 = M.fromJS(NumberCollection, {
-          collection: { 'a': 10, 'b': 25, 'c': 4000 }
+          collection: { a: 10, b: 25, c: 4000 }
         });
 
         should(col1.sum()).be.exactly(4035);
@@ -3989,7 +4311,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             name: 'Bane',
             dimensions: [20, 55, 0]
           });
-        }).throw(/Invalid JSON at "dimensions > 2"/).and.throw(/should be > 0/);
+        }).throw(/Invalid JSON at "dimensions -> 2"/).and.throw(/should be > 0/);
       });
 
       it('should be able to return the whole schema', function () {
@@ -4010,11 +4332,10 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         });
 
         var animalMeta = ajv_(Animal);
-        var animal1Schema1 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#');
-        var animal1Schema2 = M.getSchema(animalMeta, true, 'http://json-schema.org/draft-04/schema#');
+        var animal1Schema1 = M.getSchema(animalMeta);
+        var animal1Schema2 = M.getSchema(animalMeta);
 
         animal1Schema1.should.deepEqual(animal1Schema2).and.deepEqual({
-          $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'object',
           properties: {
             name: {
@@ -4077,29 +4398,29 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       it('list', function () {
         should(function () {
           return M.ajvGenericsFromJSON(ajv_, M.List, {}, [ajvList({}, ajvList({}, ajvNumber({ minimum: 5 })))], '[[[10], [6, 7, 4]]]');
-        }).throw(/Invalid JSON at "0 > 1 > 2"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "0 -> 1 -> 2"/).and.throw(/should be >= 5/);
       });
 
       it('set', function () {
         should(function () {
           return M.genericsFromJS(M.Set, [ajvSet({}, ajvSet({}, ajvNumber({ minimum: 5 })))], [[[10], [6, 7, 9, 4]]]);
-        }).throw(/Invalid JSON at "0 > 1 > 3"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "0 -> 1 -> 3"/).and.throw(/should be >= 5/);
       });
 
       it('stringMap', function () {
         should(function () {
           return M.genericsFromJS(M.StringMap, [ajvStringMap({}, ajvStringMap({}, ajvNumber({ minimum: 5 })))], { a: { b1: { c: 10 }, b2: { d1: 6, d2: 7, d3: 4 } } });
-        }).throw(/Invalid JSON at "a > b2 > d3"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "a -> b2 -> d3"/).and.throw(/should be >= 5/);
       });
 
       it('map', function () {
         should(function () {
           return M.genericsFromJS(M.Map, [ajvString(), ajvMap({}, ajvString(), ajvNumber({ minimum: 5 }))], [['A', [['A', 6], ['B', 7], ['C', 4]]]]);
-        }).throw(/Invalid JSON at "0 > 1 > 2 > 1"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "0 -> 1 -> 2 -> 1"/).and.throw(/should be >= 5/);
 
         should(function () {
           return M.genericsFromJS(M.Map, [ajvString(), ajvMap({}, ajvString(), ajvNumber({ minimum: 5 }))], [['A', [['A', 6], ['B', 7], [2, 7]]]]);
-        }).throw(/Invalid JSON at "0 > 1 > 2 > 0"/).and.throw(/should be string/);
+        }).throw(/Invalid JSON at "0 -> 1 -> 2 -> 0"/).and.throw(/should be string/);
       });
 
       it('enumMap', function () {
@@ -4107,11 +4428,11 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         should(function () {
           return M.genericsFromJS(M.EnumMap, [ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({ minimum: 5 })))], { A: { A: { A: 10 }, B: { A: 4, B: 7 } } });
-        }).throw(/Invalid JSON at "A > B > A"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "A -> B -> A"/).and.throw(/should be >= 5/);
 
         should(function () {
           return M.genericsFromJS(M.EnumMap, [ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({ minimum: 5 })))], { A: { A: { A: 10 }, B: { D: 5, B: 7 } } });
-        }).throw(/Invalid JSON at "A > B"/).and.throw(/should NOT have additional properties/);
+        }).throw(/Invalid JSON at "A -> B"/).and.throw(/should NOT have additional properties/);
       });
     });
 
@@ -4808,7 +5129,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return M.withValidation(function (v) {
             return v.toLowerCase() === v;
           }, function (v, path) {
-            return 'string ' + v + ' at "' + path.join(' > ') + '" is not all lower case';
+            return 'string ' + v + ' at "' + path.join(' -> ') + '" is not all lower case';
           })(ajvString(schema));
         };
 
@@ -4840,7 +5161,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return M.withValidation(function (v) {
             return v.toLowerCase() === v;
           }, function (v, path) {
-            return 'string ' + v + ' at "' + path.join(' > ') + '" is not all lower case';
+            return 'string ' + v + ' at "' + path.join(' -> ') + '" is not all lower case';
           })(ajvString(schema));
         };
 
@@ -4918,7 +5239,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           value: function innerTypes() {
             return Object.freeze({
               type: ajvEnum(ScoreTypeEnum),
-              score: ajvAnyOf([[ajvString({ minLength: 1 }), ScoreTypeEnum.Numeric()], [ajvNumber({ minimum: 0 }), ScoreTypeEnum.Alphabetic()]])
+              score: ajvAnyOf([[ajvNumber({ minimum: 0 }), ScoreTypeEnum.Numeric()], [ajvString({ minLength: 1 }), ScoreTypeEnum.Alphabetic()]])
             });
           }
         }]);
@@ -4934,7 +5255,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
               enum: ['Numeric', 'Alphabetic']
             },
             score: {
-              anyOf: [{ type: 'string', minLength: 1 }, { type: 'number', minimum: 0 }]
+              anyOf: [{ type: 'number', minimum: 0 }, { type: 'string', minLength: 1 }]
             }
           },
           required: ['type', 'score']
@@ -5060,38 +5381,18 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         }(M.Base);
 
         M.getSchema(_(Person)).should.deepEqual({
-          definitions: {
-            '1': {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              minLength: 1
+            },
+            parent: {
               type: 'object',
               properties: {
                 name: {
                   type: 'string',
                   minLength: 1
-                },
-                parent: {
-                  type: 'object',
-                  properties: {
-                    name: {
-                      type: 'string',
-                      minLength: 1
-                    },
-                    child: {
-                      anyOf: [{ type: 'null' }, {
-                        type: 'object',
-                        properties: {
-                          name: {
-                            type: 'string',
-                            minLength: 1
-                          },
-                          parent: {
-                            $ref: '#/definitions/3'
-                          }
-                        },
-                        required: ['name', 'parent']
-                      }]
-                    }
-                  },
-                  required: ['name']
                 },
                 child: {
                   anyOf: [{ type: 'null' }, {
@@ -5109,9 +5410,27 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
                   }]
                 }
               },
-              required: ['name', 'parent']
+              required: ['name']
             },
-            '3': {
+            child: {
+              anyOf: [{ type: 'null' }, {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                    minLength: 1
+                  },
+                  parent: {
+                    $ref: '#/definitions/3'
+                  }
+                },
+                required: ['name', 'parent']
+              }]
+            }
+          },
+          required: ['name', 'parent'],
+          definitions: {
+            3: {
               type: 'object',
               properties: {
                 name: {
@@ -5136,8 +5455,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
               },
               required: ['name']
             }
-          },
-          $ref: '#/definitions/1'
+          }
         });
       });
     });
