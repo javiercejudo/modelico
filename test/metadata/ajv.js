@@ -1209,7 +1209,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
             'parent'
           ],
           definitions: {
-            '3': {
+            3: {
               type: 'object',
               properties: {
                 name: {

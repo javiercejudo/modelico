@@ -184,9 +184,14 @@ const getUsedDefinitions = () => {
   }, {})
 };
 
-const getSchema = (metadata, topLevel = true) => {
+const schemaDeclaration = (schema, specification) =>
+  (specification !== '')
+    ? Object.assign({'$schema': specification}, schema)
+    : schema;
+
+const getSchema = (metadata, topLevel = true, specification = '') => {
   if (metadataSchemaCache.has(metadata)) {
-    return metadataSchemaCache.get(metadata)
+    return schemaDeclaration(metadataSchemaCache.get(metadata), specification)
   }
 
   if (metadataRefCache.has(metadata)) {
@@ -218,17 +223,13 @@ const getSchema = (metadata, topLevel = true) => {
   const definitions = getUsedDefinitions();
 
   if (Object.keys(definitions).length === 0) {
-    return schema
+    return schemaDeclaration(schema, specification)
   }
 
-  if (definitions.hasOwnProperty(ref)) {
-    return {
-      definitions: Object.assign(definitions, { [ref]: schema }),
-      $ref: `#/definitions/${ref}`
-    }
-  }
-
-  return Object.assign(schema, {definitions})
+  return schemaDeclaration({
+    definitions: Object.assign(definitions, { [ref]: schema }),
+    $ref: `#/definitions/${ref}`
+  }, specification)
 };
 
 var validate = (instance, innerMetadata = []) => {
@@ -245,7 +246,7 @@ var validate = (instance, innerMetadata = []) => {
   return [true, undefined]
 };
 
-const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' -> ')}"`;
+const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' > ')}"`;
 
 var withValidation = (validateFn, errorMsgFn = defaultErrorMsgFn) => metadata => {
   const reviver = (k, v, path = []) => {
@@ -559,7 +560,7 @@ const reviverFactory$3 = enumerators => (k, v, path = []) => {
   const enumerator = enumerators[v];
 
   if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator "${v}" at "${path.join(' -> ')}"`)
+    throw TypeError(`missing enumerator "${v}" at "${path.join(' > ')}"`)
   }
 
   return enumerator
@@ -1418,7 +1419,7 @@ const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
 };
 
 const formatError = (ajv, schema, value, path = []) => [
-  'Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n',
+  'Invalid JSON at "' + path.join(' > ') + '". According to the schema\n',
   JSON.stringify(schema, null, 2) + '\n',
   'the value (data path "' + ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) + '")\n',
   JSON.stringify(value, null, 2) + '\n'
@@ -1698,7 +1699,7 @@ var anyOf = (conditionedMetas = [], enumField = 'type') => (v, path) => {
 
   const prevPath = path.slice(0, -1);
 
-  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`)
+  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' > ')}"`)
 };
 
 const internalNonMutators = ['set', 'setIn'];

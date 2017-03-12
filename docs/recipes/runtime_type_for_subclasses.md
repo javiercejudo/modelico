@@ -9,7 +9,7 @@ In fact, this example is based on [Gson's RuntimeTypeAdapterFactory](https://git
 
 We will use
 [`ajvMetadata`](../advanced/json_validation.md#majvmetadata-and-json-schema)
-to demonstrate how to get Modelico to generate complex JSON schemas. This is
+to demonstrate how to get Modélico to generate complex JSON schemas. This is
 also an example of a schema with circular references.
 
 ```js
@@ -54,7 +54,7 @@ class Shape extends M.Base {
     const fields = M.fields(this)
     let type
 
-    // the generated JSON must contain runtime type information for Modelico
+    // the generated JSON must contain runtime type information for Modélico
     // to be able to revive it later
     switch (this[M.symbols.typeSymbol]()) {
       case Circle:
@@ -196,12 +196,13 @@ Now remember how we have been using `ajvMetadata` and even enhanced the Shape
 metadata to account for its subtypes. This is going to allow us to get a very
 detailed schema that would not be easy to write by hand.
 
-_Note: some reduction might be possible, but Modelico always inlines the first
-level properties for each object since it uses it for validating during
-deserialisation. Definitions are only used when circular references appear,
-and are named with numbers to avoid collisions. In the example below, the
-definition is `3`: the reason is that `1` and `2` ware reserved in case of
-circular reference of a subschema, but were dropped eventually._
+_Note: in this example, significant reduction is possible, but Modélico always
+inlines the first level properties for each object since it uses it for
+validating during deserialisation. Definitions are only used when circular
+references appear, and are sequentially named to avoid collisions. In the
+example below, the definition is `3`: the reason is that `1` and `2` got
+reserved in case of circular reference of other entities, but were dropped
+eventually._
 
 ```js
 M.getSchema(_(Geometer))
