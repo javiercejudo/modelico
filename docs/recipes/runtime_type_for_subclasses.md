@@ -5,7 +5,7 @@ can appear.
 
 An example of this is JSON generated using
 [Gson's `TypeAdapter`](https://google.github.io/gson/apidocs/com/google/gson/TypeAdapter.html).
-In fact, this example is based on [Gson's RuntimeTypeAdapterFactory](https://github.com/google/gson/blob/gson-parent-2.8.0/extras/src/main/java/com/google/gson/typeadapters/RuntimeTypeAdapterFactory.java#L36))
+In fact, this example is based on [Gson's RuntimeTypeAdapterFactory](https://github.com/google/gson/blob/gson-parent-2.8.0/extras/src/main/java/com/google/gson/typeadapters/RuntimeTypeAdapterFactory.java#L36)
 
 We will use
 [`ajvMetadata`](../advanced/json_validation.md#majvmetadata-and-json-schema)

@@ -10,7 +10,7 @@ second, we will revive objects based on their shape only, without any
 additional fields.
 
 To deal with fields where several subclasses of the declared type would need
-to be revived, see the ["runtime type" recipe](../recipes/runtime_type.md).
+to be revived, see the ["runtime type" recipe](../recipes/runtime_type_for_subclasses.md).
 
 ## Example 1: revive based on an enumerated field
 
