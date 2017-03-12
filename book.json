@@ -10,9 +10,13 @@
       "gitbookConfigURL": "https://raw.githubusercontent.com/javiercejudo/modelico/master/book.json",
       "options": [
         {
-            "value": "https://modelico.javiercejudo.com/",
-            "text": "snapshot",
+            "value": "#",
+            "text": "- select version -",
             "selected": true
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/",
+            "text": "snapshot"
         },
         {
             "value": "https://modelico.javiercejudo.com/v/v21.4.0/",
