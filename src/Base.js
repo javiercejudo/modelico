@@ -57,15 +57,19 @@ class Base {
     return path.reduce(getPathReducer, this)
   }
 
-  set (field, value) {
-    const newFields = Object.assign({}, this[fieldsSymbol](), {[field]: value})
+  copy (fields) {
+    const newFields = Object.assign({}, this[fieldsSymbol](), fields)
 
     return new (this[typeSymbol]())(newFields)
   }
 
+  set (field, value) {
+    return this.copy({[field]: value})
+  }
+
   setIn (path, value) {
     if (path.length === 0) {
-      return new (this[typeSymbol]())(value)
+      return this.copy(value)
     }
 
     const [key, ...restPath] = path
