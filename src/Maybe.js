@@ -17,9 +17,36 @@ const reviverFactory = itemMetadata => (k, v, path) => {
   return new Maybe(revive(k, v, path))
 }
 
-class Nothing {
+let nothing
+
+export class Nothing {
+  constructor () {
+    if (!nothing) {
+      this.get = always(null)
+      nothing = this
+    }
+
+    return nothing
+  }
+
   toJSON () {
     return null
+  }
+
+  isEmpty () {
+    return true
+  }
+
+  getOrElse (v) {
+    return v
+  }
+
+  map () {
+    return this
+  }
+
+  static of () {
+    return new Nothing()
   }
 }
 
@@ -41,17 +68,31 @@ export class Just {
       ? v.toJSON()
       : v
   }
-}
 
-export const nothing = new Nothing()
+  isEmpty () {
+    return false
+  }
+
+  getOrElse (v) {
+    return this.get()
+  }
+
+  map (f) {
+    return Just.of(f(this.get()))
+  }
+
+  static of (v) {
+    return new Just(v)
+  }
+}
 
 class Maybe extends Base {
   constructor (v, nothingCheck = true) {
     super(Maybe)
 
     const inner = (nothingCheck && isNothing(v))
-      ? nothing
-      : new Just(v)
+      ? Nothing.of()
+      : Just.of(v)
 
     this.inner = always(inner)
 
@@ -111,19 +152,15 @@ class Maybe extends Base {
   }
 
   isEmpty () {
-    return (this.inner() === nothing)
+    return this.inner().isEmpty()
   }
 
   getOrElse (v) {
-    return this.isEmpty()
-      ? v
-      : this.inner().get()
+    return this.inner().getOrElse(v)
   }
 
   map (f) {
-    return this.isEmpty()
-      ? this
-      : Maybe.ofAny(f(this.inner().get()))
+    return Maybe.ofAny(this.inner().map(f).get())
   }
 
   toJSON () {
