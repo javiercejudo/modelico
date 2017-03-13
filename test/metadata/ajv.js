@@ -435,7 +435,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('enumMap', () => {
     class Side extends M.Enum {
-      // workaround for IE <=10
+      // workaround for IE <= 10
       static innerTypes () {
         return super.innerTypes()
       }
@@ -991,7 +991,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('anyOf', () => {
     class ScoreType extends M.Enum {
-      // workaround for IE <=10
+      // workaround for IE <= 10
       static innerTypes () {
         return super.innerTypes()
       }
