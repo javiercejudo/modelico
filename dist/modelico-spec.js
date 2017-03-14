@@ -174,6 +174,7 @@ var Base = (function (U, should, M, fixtures) {
 
     var _M$metadata = M.metadata(),
         _ = _M$metadata._,
+        maybe = _M$metadata.maybe,
         number = _M$metadata.number,
         string = _M$metadata.string,
         withDefault = _M$metadata.withDefault;
@@ -265,6 +266,49 @@ var Base = (function (U, should, M, fixtures) {
         should(author2 === author1).be.exactly(false);
         author2.givenName().should.be.exactly('Javi');
         author2.equals(author1).should.be.exactly(false, 'Oops, they are equal');
+      });
+
+      it('should support creating a copy with updated fields', function () {
+        var Book = function (_M$createModel) {
+          inherits(Book, _M$createModel);
+
+          function Book(fields) {
+            classCallCheck(this, Book);
+            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, fields));
+          }
+
+          // workaround for IE <= 10
+
+
+          createClass(Book, null, [{
+            key: 'innerTypes',
+            value: function innerTypes() {
+              return get(Book.__proto__ || Object.getPrototypeOf(Book), 'innerTypes', this).call(this);
+            }
+          }]);
+          return Book;
+        }(M.createModel({
+          title: string(),
+          year: maybe(number()),
+          author: withDefault(string(), 'anonymous')
+        }));
+
+        var book1 = new Book({
+          title: 'El Guitarrista',
+          year: M.Maybe.of(2002),
+          author: 'Luis Landero'
+        });
+
+        var book2 = book1.copy({
+          title: 'O Homem Duplicado',
+          author: 'José Saramago'
+        });
+
+        book1.title().should.be.exactly('El Guitarrista');
+        book2.title().should.be.exactly('O Homem Duplicado');
+
+        should(book1.year().getOrElse(2017)).be.exactly(2002);
+        should(book2.year().getOrElse(2017)).be.exactly(2002);
       });
 
       it('should set fields recursively returning a new object', function () {
@@ -501,8 +545,8 @@ var Base = (function (U, should, M, fixtures) {
 
     describe('withDefault', function () {
       it('should allow enhancing metadata to have default values', function () {
-        var Book = function (_M$createModel) {
-          inherits(Book, _M$createModel);
+        var Book = function (_M$createModel2) {
+          inherits(Book, _M$createModel2);
 
           function Book(props) {
             classCallCheck(this, Book);
@@ -542,8 +586,8 @@ var Base = (function (U, should, M, fixtures) {
 
     describe('withDefault', function () {
       it('should use the metadata to coerce the value if necessary', function () {
-        var CountryCallingCode = function (_M$createModel2) {
-          inherits(CountryCallingCode, _M$createModel2);
+        var CountryCallingCode = function (_M$createModel3) {
+          inherits(CountryCallingCode, _M$createModel3);
 
           function CountryCallingCode(props) {
             classCallCheck(this, CountryCallingCode);
@@ -571,8 +615,8 @@ var Base = (function (U, should, M, fixtures) {
 
     U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
       it('should use the metadata to coerce the value if necessary', function () {
-        var CountryCallingCode = function (_M$createModel3) {
-          inherits(CountryCallingCode, _M$createModel3);
+        var CountryCallingCode = function (_M$createModel4) {
+          inherits(CountryCallingCode, _M$createModel4);
 
           function CountryCallingCode(props) {
             classCallCheck(this, CountryCallingCode);
@@ -4189,7 +4233,6 @@ var fixerIoSpec = (function (should, M, _ref, _ref2) {
         type: 'object',
         properties: {
           base: {
-            type: 'string',
             enum: ['AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR']
           },
           date: {
@@ -4617,10 +4660,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       it('reports its full schema', function () {
         var Side = M.Enum.fromArray(['A', 'B']);
 
-        M.getSchema(ajvEnum(Side)).should.deepEqual({
-          type: 'string',
-          enum: ['A', 'B']
-        });
+        M.getSchema(ajvEnum(Side)).should.deepEqual({ enum: ['A', 'B'] });
       });
     });
 
@@ -4636,7 +4676,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         createClass(Side, null, [{
           key: 'innerTypes',
 
-          // workaround for IE <=10
+          // workaround for IE <= 10
           value: function innerTypes() {
             return get(Side.__proto__ || Object.getPrototypeOf(Side), 'innerTypes', this).call(this);
           }
@@ -5216,7 +5256,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         createClass(ScoreType, null, [{
           key: 'innerTypes',
 
-          // workaround for IE <=10
+          // workaround for IE <= 10
           value: function innerTypes() {
             return get(ScoreType.__proto__ || Object.getPrototypeOf(ScoreType), 'innerTypes', this).call(this);
           }
@@ -5251,7 +5291,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             type: {
-              type: 'string',
               enum: ['Numeric', 'Alphabetic']
             },
             score: {

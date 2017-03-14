@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "21.5.0";
+var version = "21.6.0";
 
 
 
@@ -520,17 +520,22 @@ var Base = function () {
       return path.reduce(getPathReducer, this);
     }
   }, {
-    key: 'set',
-    value: function set$$1(field, value) {
-      var newFields = Object.assign({}, this[fieldsSymbol](), defineProperty({}, field, value));
+    key: 'copy',
+    value: function copy(fields) {
+      var newFields = Object.assign({}, this[fieldsSymbol](), fields);
 
       return new (this[typeSymbol]())(newFields);
+    }
+  }, {
+    key: 'set',
+    value: function set$$1(field, value) {
+      return this.copy(defineProperty({}, field, value));
     }
   }, {
     key: 'setIn',
     value: function setIn(path, value) {
       if (path.length === 0) {
-        return new (this[typeSymbol]())(value);
+        return this.copy(value);
       }
 
       var _path = toArray(path),
@@ -2049,7 +2054,7 @@ var ajvMetadata = (function () {
     var numberMeta = Object.assign({ type: 'number' }, schema);
 
     var reviver = ensureWrapped(metadata, {
-      anyOf: [{ type: 'number' }, { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }]
+      anyOf: [{ type: 'number' }, { enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }]
     }, numberMeta);
 
     return Object.assign({}, metadata, { reviver: reviver, ownSchema: always(numberMeta), schema: always(numberMeta) });
@@ -2070,10 +2075,7 @@ var ajvMetadata = (function () {
   ajvMetadata.ajvEnum = function (Type) {
     var metadata = _(Type);
 
-    return ajvMeta(metadata, {
-      type: 'string',
-      enum: Object.keys(metadata.enumerators)
-    });
+    return ajvMeta(metadata, { enum: Object.keys(metadata.enumerators) });
   };
 
   ajvMetadata.ajvEnumMap = function (schema, keyMetadata, valueMetadata) {

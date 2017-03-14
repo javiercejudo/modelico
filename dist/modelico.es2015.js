@@ -1,4 +1,4 @@
-var version = "21.5.0";
+var version = "21.6.0";
 
 
 
@@ -316,15 +316,19 @@ class Base {
     return path.reduce(getPathReducer, this)
   }
 
-  set (field, value) {
-    const newFields = Object.assign({}, this[fieldsSymbol](), {[field]: value});
+  copy (fields) {
+    const newFields = Object.assign({}, this[fieldsSymbol](), fields);
 
     return new (this[typeSymbol]())(newFields)
   }
 
+  set (field, value) {
+    return this.copy({[field]: value})
+  }
+
   setIn (path, value) {
     if (path.length === 0) {
-      return new (this[typeSymbol]())(value)
+      return this.copy(value)
     }
 
     const [key, ...restPath] = path;
@@ -1532,7 +1536,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
     const reviver = ensureWrapped(metadata, {
       anyOf: [
         { type: 'number' },
-        { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
+        { enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
       ]
     }, numberMeta);
 
@@ -1551,10 +1555,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
   ajvMetadata.ajvEnum = Type => {
     const metadata = _(Type);
 
-    return ajvMeta(metadata, {
-      type: 'string',
-      enum: Object.keys(metadata.enumerators)
-    })
+    return ajvMeta(metadata, {enum: Object.keys(metadata.enumerators)})
   };
 
   ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {

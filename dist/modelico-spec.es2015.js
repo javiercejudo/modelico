@@ -9,7 +9,7 @@ var Base = (U, should, M, fixtures) => () => {
     Friend
   } = fixtures;
 
-  const { _, number, string, withDefault } = M.metadata();
+  const { _, maybe, number, string, withDefault } = M.metadata();
   const ModelicoDate = M.Date;
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}';
@@ -91,6 +91,40 @@ var Base = (U, should, M, fixtures) => () => {
       should(author2 === author1).be.exactly(false);
       author2.givenName().should.be.exactly('Javi');
       author2.equals(author1).should.be.exactly(false, 'Oops, they are equal');
+    });
+
+    it('should support creating a copy with updated fields', () => {
+      class Book extends M.createModel({
+        title: string(),
+        year: maybe(number()),
+        author: withDefault(string(), 'anonymous')
+      }) {
+        constructor (fields) {
+          super(Book, fields);
+        }
+
+        // workaround for IE <= 10
+        static innerTypes () {
+          return super.innerTypes()
+        }
+      }
+
+      const book1 = new Book({
+        title: 'El Guitarrista',
+        year: M.Maybe.of(2002),
+        author: 'Luis Landero'
+      });
+
+      const book2 = book1.copy({
+        title: 'O Homem Duplicado',
+        author: 'José Saramago'
+      });
+
+      book1.title().should.be.exactly('El Guitarrista');
+      book2.title().should.be.exactly('O Homem Duplicado');
+
+      should(book1.year().getOrElse(2017)).be.exactly(2002);
+      should(book2.year().getOrElse(2017)).be.exactly(2002);
     });
 
     it('should set fields recursively returning a new object', () => {
@@ -4004,7 +4038,6 @@ var fixerIoSpec = (should, M, { fixerIoFactory }, { Ajv }) => () => {
       type: 'object',
       properties: {
         base: {
-          type: 'string',
           enum: [
             'AUD',
             'BGN',
@@ -4499,16 +4532,13 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
       const Side = M.Enum.fromArray(['A', 'B']);
 
       M.getSchema(ajvEnum(Side))
-        .should.deepEqual({
-          type: 'string',
-          enum: ['A', 'B']
-        });
+        .should.deepEqual({enum: ['A', 'B']});
     });
   });
 
   describe('enumMap', () => {
     class Side extends M.Enum {
-      // workaround for IE <=10
+      // workaround for IE <= 10
       static innerTypes () {
         return super.innerTypes()
       }
@@ -5064,7 +5094,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
   describe('anyOf', () => {
     class ScoreType extends M.Enum {
-      // workaround for IE <=10
+      // workaround for IE <= 10
       static innerTypes () {
         return super.innerTypes()
       }
@@ -5093,7 +5123,6 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
         type: 'object',
         properties: {
           type: {
-            type: 'string',
             enum: [
               'Numeric',
               'Alphabetic'
