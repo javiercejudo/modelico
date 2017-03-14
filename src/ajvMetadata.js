@@ -117,7 +117,7 @@ export default (ajv = { validate: T }) => {
     const reviver = ensureWrapped(metadata, {
       anyOf: [
         { type: 'number' },
-        { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
+        { enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
       ]
     }, numberMeta)
 
@@ -136,10 +136,7 @@ export default (ajv = { validate: T }) => {
   ajvMetadata.ajvEnum = Type => {
     const metadata = _(Type)
 
-    return ajvMeta(metadata, {
-      type: 'string',
-      enum: Object.keys(metadata.enumerators)
-    })
+    return ajvMeta(metadata, {enum: Object.keys(metadata.enumerators)})
   }
 
   ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {

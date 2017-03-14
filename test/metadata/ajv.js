@@ -426,10 +426,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
       const Side = M.Enum.fromArray(['A', 'B'])
 
       M.getSchema(ajvEnum(Side))
-        .should.deepEqual({
-          type: 'string',
-          enum: ['A', 'B']
-        })
+        .should.deepEqual({enum: ['A', 'B']})
     })
   })
 
@@ -1020,7 +1017,6 @@ export default (should, M, fixtures, { Ajv }) => () => {
         type: 'object',
         properties: {
           type: {
-            type: 'string',
             enum: [
               'Numeric',
               'Alphabetic'

@@ -78,7 +78,6 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
       type: 'object',
       properties: {
         base: {
-          type: 'string',
           enum: [
             'AUD',
             'BGN',
