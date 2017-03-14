@@ -105,14 +105,14 @@ const getSchema = (metadata, topLevel = true) => {
     return schema
   }
 
-  if (definitions.hasOwnProperty(ref)) {
-    return {
-      definitions: Object.assign(definitions, { [ref]: schema }),
-      $ref: `#/definitions/${ref}`
-    }
+  if (!definitions.hasOwnProperty(ref)) {
+    return Object.assign(schema, {definitions})
   }
 
-  return Object.assign(schema, {definitions})
+  return {
+    definitions: Object.assign(definitions, { [ref]: schema }),
+    $ref: `#/definitions/${ref}`
+  }
 }
 
 export default getSchema
