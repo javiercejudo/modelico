@@ -16,7 +16,7 @@ export default (U, should, M, fixtures) => () => {
   const author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}'
 
   describe('immutability', () => {
-    U.skipIfNoObjectFreeze('must freeze wrapped input', () => {
+    it('must freeze wrapped input', () => {
       const authorFields = {
         givenName: 'Javier',
         familyName: 'Cejudo',
@@ -101,11 +101,6 @@ export default (U, should, M, fixtures) => () => {
       }) {
         constructor (fields) {
           super(Book, fields)
-        }
-
-        // workaround for IE <= 10
-        static innerTypes () {
-          return super.innerTypes()
         }
       }
 
@@ -429,7 +424,7 @@ export default (U, should, M, fixtures) => () => {
     })
   })
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should use the metadata to coerce the value if necessary', () => {
       class CountryCallingCode extends M.createModel(() => ({
         code: withDefault(number(), '34')

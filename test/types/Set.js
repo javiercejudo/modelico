@@ -197,7 +197,7 @@ export default (U, should, M, { Person }) => () => {
     })
   })
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Set.of())
         .should.be.exactly('[object ModelicoSet]')

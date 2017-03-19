@@ -431,12 +431,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
   })
 
   describe('enumMap', () => {
-    class Side extends M.Enum {
-      // workaround for IE <= 10
-      static innerTypes () {
-        return super.innerTypes()
-      }
-    }
+    class Side extends M.Enum {}
 
     const SideEnum = M.Enum.fromArray(['A', 'B'], Side, 'Side')
 
@@ -987,13 +982,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
   })
 
   describe('anyOf', () => {
-    class ScoreType extends M.Enum {
-      // workaround for IE <= 10
-      static innerTypes () {
-        return super.innerTypes()
-      }
-    }
-
+    class ScoreType extends M.Enum {}
     const ScoreTypeEnum = M.Enum.fromArray(['Numeric', 'Alphabetic'], ScoreType, 'ScoreType')
 
     class Score extends M.Base {

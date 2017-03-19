@@ -163,7 +163,7 @@ export default (U, should, M, { PartOfDay }) => () => {
     })
   })
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.EnumMap.of())
         .should.be.exactly('[object ModelicoEnumMap]')
