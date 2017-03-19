@@ -46,23 +46,6 @@ import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 import ajvMetadata from './metadata/ajv'
 import baseMetadataExample from './metadata/base'
 
-const hasObjectFreeze = (() => {
-  const a = {}
-
-  try {
-    Object.freeze(a)
-  } catch (e) {
-    return false
-  }
-
-  try {
-    a.test = 1
-    return false
-  } catch (ignore) {}
-
-  return true
-})()
-
 const hasProxies = (() => {
   try {
     return new Proxy({}, {}) && true
@@ -80,10 +63,8 @@ const hasToStringTagSymbol = (() => {
 })()
 
 const buildUtils = () => Object.freeze({
-  skipIfNoProxies: hasProxies ? it : it.skip,
-  skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-  skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
-  skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
+  skipIfNoProxies: fn => hasProxies ? fn : fn.skip,
+  skipIfNoToStringTagSymbol: fn => hasToStringTagSymbol ? fn : fn.skip,
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
 })
 
@@ -133,12 +114,12 @@ export default ({Should, Modelico: M, extensions}) => () => {
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))
 
-  U.skipDescribeIfNoProxies(
+  U.skipIfNoProxies(describe)(
     'Immutable.js examples (proxied)',
     ImmutableProxied(U, ...deps)
   )
 
-  U.skipDescribeIfNoProxies('Proxies', () => {
+  U.skipIfNoProxies(describe)('Proxies', () => {
     describe('Map', proxyMap(...deps))
     describe('List', proxyList(...deps))
     describe('Set', proxySet(...deps))

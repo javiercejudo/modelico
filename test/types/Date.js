@@ -104,7 +104,7 @@ export default (U, should, M) => () => {
     })
   })
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Date.of())
         .should.be.exactly('[object ModelicoDate]')

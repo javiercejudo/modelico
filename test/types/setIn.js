@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  U.skipIfNoObjectFreeze('should work across types', () => {
+  it('should work across types', () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This')
     const array1 = M.List.of('totally', 'immutable', hammer)
 

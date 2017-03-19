@@ -17,7 +17,8 @@ const getSchemaImpl = metadata => {
   }
 
   if (
-    !metadata.type || !metadata.type.innerTypes ||
+    !metadata.type ||
+    !metadata.type.innerTypes ||
     Object.keys(getInnerTypes([], metadata.type)).length === 0
   ) {
     return emptyObject

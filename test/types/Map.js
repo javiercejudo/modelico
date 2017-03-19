@@ -227,7 +227,7 @@ export default (U, should, M, { Person }) => () => {
     })
   })
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Map.of())
         .should.be.exactly('[object ModelicoMap]')

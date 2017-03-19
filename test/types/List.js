@@ -4,7 +4,7 @@ export default (U, should, M, { Person }) => () => {
   const { _, list, date, string, number, maybe } = M.metadata()
 
   describe('immutability', () => {
-    U.skipIfNoObjectFreeze('must freeze the input', () => {
+    it('must freeze the input', () => {
       const input = ['a', 'b', 'c']
 
       M.List.fromArray(input)
@@ -298,7 +298,7 @@ export default (U, should, M, { Person }) => () => {
     })
   })
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.List.of())
         .should.be.exactly('[object ModelicoList]')
