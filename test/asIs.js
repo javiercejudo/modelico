@@ -47,7 +47,7 @@ export default (U, should, M) => () => {
       should(asIsObject.two).be.exactly(2)
     })
 
-    U.skipIfNoObjectFreeze('should be immutable', () => {
+    it('should be immutable', () => {
       (() => { asIs().reviver = x => x }).should.throw()
     })
   })

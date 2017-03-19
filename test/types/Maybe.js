@@ -235,7 +235,7 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
     })
   })
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Maybe.of(1))
         .should.be.exactly('[object ModelicoMaybe]')
