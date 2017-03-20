@@ -1,22 +1,22 @@
-import { objToArr, reviverOrAsIs, emptyObject } from './U'
-import { default as AbstractMap, set, of, metadata } from './AbstractMap'
+import { objToArr, reviverOrAsIs, emptyObject, isFunction } from './U'
+import AbstractMap, { set, of, metadata } from './AbstractMap'
 
-const parseMapper = (keyReviver, valueReviver) => pair => [
-  keyReviver('', pair[0]),
-  valueReviver('', pair[1])
+const parseMapper = (keyReviver, valueReviver, path) => (pair, i) => [
+  keyReviver('', pair[0], path.concat(i, 0)),
+  valueReviver('', pair[1], path.concat(i, 1))
 ]
 
-const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(keyMetadata)
-  const valueReviver = reviverOrAsIs(valueMetadata)
+  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata)
+  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata)
 
   const innerMap = (v === null)
     ? null
-    : new Map(v.map(parseMapper(keyReviver, valueReviver)))
+    : new Map(v.map(parseMapper(keyReviver, valueReviver, path)))
 
   return ModelicoMap.fromMap(innerMap)
 }
@@ -32,6 +32,10 @@ class ModelicoMap extends AbstractMap {
     }
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoMap'
   }
 
   set (key, value) {

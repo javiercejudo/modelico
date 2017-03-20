@@ -4,8 +4,8 @@ export default M => {
   const { string } = M.metadata()
 
   class Animal extends M.Base {
-    constructor (fields) {
-      super(Animal, fields)
+    constructor (props) {
+      super(Animal, props)
     }
 
     speak () {

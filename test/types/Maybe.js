@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M, { Person, PartOfDay }) => () => {
+export default (U, should, M, { Person, PartOfDay }) => () => {
   const { _, number, maybe } = M.metadata()
 
   const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}'
@@ -39,7 +39,7 @@ export default (should, M, { Person, PartOfDay }) => () => {
         .be.exactly(2)
     })
 
-    it('should return an empty Maybe when setting a path beyond Modelico boundaries', () => {
+    it('should return an empty Maybe when setting a path beyond Modélico boundaries', () => {
       const maybe1 = M.Maybe.of({a: 2})
 
       const maybe2 = maybe1.setIn([[{a: 1}, 'a']], 200)
@@ -72,7 +72,7 @@ export default (should, M, { Person, PartOfDay }) => () => {
       JSON.stringify(maybe2).should.be.exactly('null')
     })
 
-    it('should support arbitrary Modelico types', () => {
+    it('should support arbitrary Modélico types', () => {
       const author = M.fromJSON(Person, authorJson)
 
       const maybe1 = M.Maybe.of(author)
@@ -98,9 +98,12 @@ export default (should, M, { Person, PartOfDay }) => () => {
 
       const maybe2 = JSON.parse('null', maybe(number()).reviver)
       maybe2.isEmpty().should.be.exactly(true)
+
+      const maybe3 = M.genericsFromJS(M.Maybe, [() => number()], 5)
+      should(maybe3.getOrElse(0)).be.exactly(5)
     })
 
-    it('should support arbitrary Modelico types', () => {
+    it('should support arbitrary Modélico types', () => {
       const author = JSON.parse(authorJson, _(Person).reviver)
 
       const myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver)
@@ -229,6 +232,13 @@ export default (should, M, { Person, PartOfDay }) => () => {
     it('should have same-value-zero semantics', () => {
       M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(true)
       M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true)
+    })
+  })
+
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Maybe.of(1))
+        .should.be.exactly('[object ModelicoMaybe]')
     })
   })
 }

@@ -1,4 +1,8 @@
-import { asIsReviver, identity } from './U'
+import { asIsReviver, identity, pipe, assertSomethingIdentity } from './U'
 
-export default (tranformer = identity) =>
-  Object.freeze({ type: tranformer, reviver: asIsReviver(tranformer) })
+export default (transformer = identity) =>
+  Object.freeze({
+    type: transformer,
+    reviver: asIsReviver(pipe(assertSomethingIdentity, transformer)),
+    maybeReviver: asIsReviver(transformer)
+  })

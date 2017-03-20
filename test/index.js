@@ -11,7 +11,7 @@ var modelicoSpec = require('../dist/modelico-spec.js')
 var Modelico = require('../dist/modelico.js')
 var ModelicoMin = require('../dist/modelico.min.js')
 
-describe('Modelico', () => {
-  describe('Modelico Dev (standard setup)', modelicoSpec({}, Should, Modelico, Immutable, { Ajv: Ajv }))
-  describe('Modelico Min (standard setup)', modelicoSpec({}, Should, ModelicoMin, Immutable, { Ajv: Ajv }))
+describe('Modélico', () => {
+  describe('Modélico Dev', modelicoSpec({Should: Should, Modelico: Modelico, extensions: {Ajv: Ajv, Immutable: Immutable}}))
+  describe('Modélico Min', modelicoSpec({Should: Should, Modelico: ModelicoMin, extensions: {Ajv: Ajv, Immutable: Immutable}}))
 })

@@ -8,6 +8,12 @@ export default (should, M) => () => {
     M.Base.factory(Animal, fields, this)
   }
 
+  Animal.innerTypes = function () {
+    return Object.freeze({
+      name: m.maybe(m.string())
+    })
+  }
+
   Animal.prototype = Object.create(M.Base.prototype)
 
   Animal.prototype.speak = function () {
@@ -18,20 +24,8 @@ export default (should, M) => () => {
       : 'My name is ' + name + '!'
   }
 
-  Animal.innerTypes = function () {
-    return Object.freeze({
-      name: m.maybe(m.string())
-    })
-  }
-
   function Person (fields) {
     M.Base.factory(Person, fields, this)
-  }
-
-  Person.prototype = Object.create(M.Base.prototype)
-
-  Person.prototype.fullName = function () {
-    return [this.givenName(), this.familyName()].join(' ').trim()
   }
 
   Person.innerTypes = function () {
@@ -40,6 +34,12 @@ export default (should, M) => () => {
       familyName: m.string(),
       pets: m.list(m.maybe(m._(Animal)))
     })
+  }
+
+  Person.prototype = Object.create(M.Base.prototype)
+
+  Person.prototype.fullName = function () {
+    return [this.givenName(), this.familyName()].join(' ').trim()
   }
 
   // use > ES5 below

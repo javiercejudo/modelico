@@ -1,11 +1,10 @@
 import {
-  always, defaultTo, isPlainObject, isSomething, getInnerTypes,
+  always, defaultTo, isPlainObject, isSomething,
   emptyObject, haveDifferentTypes, equals
 } from './U'
 
 import { typeSymbol, fieldsSymbol } from './symbols'
-
-import M from './'
+import getInnerTypes from './getInnerTypes'
 
 const getPathReducer = (result, part) => result.get(part)
 
@@ -15,49 +14,62 @@ class Base {
       throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`)
     }
 
+    // This slows down the benchmarks by a lot, but it isn't clear whether
+    // real usage would benefit from emoving it.
+    // See: https://github.com/javiercejudo/modelico-benchmarks
     Object.freeze(fields)
 
-    const emptyMaybes = {}
-    const innerTypes = getInnerTypes(0, Type)
+    const defaults = {}
+    const innerTypes = getInnerTypes([], Type)
 
     thisArg = defaultTo(this)(thisArg)
     thisArg[typeSymbol] = always(Type)
 
     Object.keys(innerTypes).forEach(key => {
       const valueCandidate = fields[key]
-      let value = M.Maybe.EMPTY
+      const defaultCandidate = innerTypes[key].default
+      let value
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate
-      } else if (innerTypes[key].type !== M.Maybe) {
-        throw TypeError(`no value for key "${key}"`)
+      } else if (isSomething(defaultCandidate)) {
+        value = innerTypes[key].default
+        defaults[key] = value
       } else {
-        emptyMaybes[key] = value
+        throw TypeError(`no value for key "${key}"`)
       }
 
       thisArg[key] = always(value)
     })
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(emptyMaybes, fields)))
+    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(defaults, fields)))
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoModel'
   }
 
   get (field) {
-    return this[field]()
+    return this[fieldsSymbol]()[field]
   }
 
   getIn (path) {
     return path.reduce(getPathReducer, this)
   }
 
-  set (field, value) {
-    const newFields = Object.assign({}, this[fieldsSymbol](), {[field]: value})
+  copy (fields) {
+    const newFields = Object.assign({}, this[fieldsSymbol](), fields)
 
     return new (this[typeSymbol]())(newFields)
   }
 
+  set (field, value) {
+    return this.copy({[field]: value})
+  }
+
   setIn (path, value) {
     if (path.length === 0) {
-      return new (this[typeSymbol]())(value)
+      return this.copy(value)
     }
 
     const [key, ...restPath] = path

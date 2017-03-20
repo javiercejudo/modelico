@@ -1,13 +1,24 @@
 import Immutable from 'immutable'
 
-import { partial, reviverOrAsIs, haveDifferentTypes, identity } from './U'
+import { always, reviverOrAsIs, haveDifferentTypes, identity, isFunction } from './U'
 
-const iterableReviverFactory = (IterableType, itemMetadata) => (k, v) => {
+const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const revive = partial(reviverOrAsIs(itemMetadata), k)
+  const isTuple = Array.isArray(itemMetadata)
+
+  if (isTuple && v.length !== itemMetadata.length) {
+    throw TypeError('tuple has missing or extra items')
+  }
+
+  const itemMetadataGetter = isTuple
+    ? i => isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
+    : isFunction(itemMetadata) ? always(itemMetadata(v, path)) : always(itemMetadata)
+
+  const revive = (x, i) => reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i))
+
   const iterable = (v === null)
     ? null
     : v.map(revive)

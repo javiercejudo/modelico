@@ -4,14 +4,14 @@ export default M => {
   const { _, string, maybe } = M.metadata()
 
   class Friend extends M.Base {
-    constructor (fields) {
-      super(Friend, fields)
+    constructor (props) {
+      super(Friend, props)
     }
 
-    static innerTypes (depth) {
+    static innerTypes () {
       return Object.freeze({
         name: string(),
-        bestFriend: maybe(_(Friend, depth))
+        bestFriend: maybe(_(Friend))
       })
     }
   }

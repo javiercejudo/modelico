@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M) => () => {
+export default (U, should, M) => () => {
   const { number } = M.metadata()
 
   describe('instantiation', () => {
@@ -135,6 +135,13 @@ export default (should, M) => () => {
     it('should have same-value-zero semantics', () => {
       M.Number.of(0).equals(M.Number.of(-0)).should.be.exactly(true)
       M.Number.of(NaN).equals(M.Number.of(NaN)).should.be.exactly(true)
+    })
+  })
+
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Number.of(1))
+        .should.be.exactly('[object ModelicoNumber]')
     })
   })
 }

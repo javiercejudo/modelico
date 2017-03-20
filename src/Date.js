@@ -24,6 +24,10 @@ class ModelicoDate extends Base {
     Object.freeze(this)
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoDate'
+  }
+
   set () {
     unsupported('Date.set is not supported')
   }

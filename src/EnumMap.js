@@ -1,5 +1,5 @@
-import { reviverOrAsIs, emptyObject } from './U'
-import { default as AbstractMap, set, of, metadata } from './AbstractMap'
+import { reviverOrAsIs, emptyObject, isFunction } from './U'
+import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1]
@@ -7,24 +7,24 @@ const stringifyReducer = (acc, pair) => {
   return acc
 }
 
-const parseMapper = (keyReviver, valueReviver, obj) => enumerator => {
-  const key = keyReviver('', enumerator)
-  const val = valueReviver('', obj[enumerator])
+const parseMapper = (keyReviver, valueReviver, obj, path) => enumerator => {
+  const key = keyReviver('', enumerator, path)
+  const val = valueReviver('', obj[enumerator], path.concat(enumerator))
 
   return [key, val]
 }
 
-const reviverFactory = (keyMetadata, valueMetadata) => (k, v) => {
+const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(keyMetadata)
-  const valueReviver = reviverOrAsIs(valueMetadata)
+  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata)
+  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata)
 
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).map(parseMapper(keyReviver, valueReviver, v)))
+    : new Map(Object.keys(v).map(parseMapper(keyReviver, valueReviver, v, path)))
 
   return new EnumMap(innerMap)
 }
@@ -40,6 +40,10 @@ class EnumMap extends AbstractMap {
     }
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoEnumMap'
   }
 
   set (enumerator, value) {

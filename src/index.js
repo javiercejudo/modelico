@@ -1,7 +1,10 @@
 import { version, author, homepage, license } from '../package.json'
 import * as symbols from './symbols'
-import { partial, always, identity } from './U'
+import { partial, always, identity, reviverOrAsIs } from './U'
 import reviverFactory from './reviverFactory'
+import getSchema from './getSchema'
+import validate from './validate'
+import withValidation from './withValidation'
 
 import Base from './Base'
 
@@ -19,6 +22,8 @@ import proxyFactory from './proxyFactory'
 import ajvMetadata from './ajvMetadata'
 
 import asIs from './asIs'
+import any from './any'
+import anyOf from './anyOf'
 
 const internalNonMutators = ['set', 'setIn']
 
@@ -42,18 +47,34 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear']
 
-const _ = function (Type, depth = 0, innerMetadata = []) {
-  if (Type.metadata) {
-    return Type.metadata(...innerMetadata)
+const metadataCache = new WeakMap()
+
+const base = Type =>
+  Object.freeze({type: Type, reviver: reviverFactory(Type)})
+
+const raw_ = (Type, innerMetadata) =>
+  Type.metadata
+    ? Type.metadata(...innerMetadata)
+    : base(Type)
+
+const _ = (Type, metadata = []) => {
+  if (metadata.length > 0) {
+    return raw_(Type, metadata)
   }
 
-  return Object.freeze({type: Type, reviver: reviverFactory(depth, Type)})
+  if (!metadataCache.has(Type)) {
+    metadataCache.set(Type, raw_(Type, metadata))
+  }
+
+  return metadataCache.get(Type)
 }
 
 const metadata = () => Object.freeze({
   _,
+  base,
   asIs,
-  any: always(asIs(identity)),
+  any,
+  anyOf,
   number: ({ wrap = false } = {}) => wrap ? ModelicoNumber.metadata() : asIs(Number),
 
   string: always(asIs(String)),
@@ -65,10 +86,34 @@ const metadata = () => Object.freeze({
   map: ModelicoMap.metadata,
   stringMap: StringMap.metadata,
   maybe: Maybe.metadata,
-  set: ModelicoSet.metadata
+  set: ModelicoSet.metadata,
+
+  withDefault: (metadata, def) => {
+    const defaultValue = reviverOrAsIs(metadata)('', def)
+
+    return Object.freeze(Object.assign({}, metadata, { default: defaultValue }))
+  }
 })
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
+const genericsFromJS = (Type, innerMetadata, js) => _(Type, innerMetadata).reviver('', js)
+const fromJS = (Type, js) => genericsFromJS(Type, [], js)
+const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js)
+const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js)
+
+const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
+  return class extends Base {
+    get [Symbol.toStringTag] () {
+      return stringTag
+    }
+
+    static innerTypes (path, Type) {
+      return (typeof innerTypes === 'function')
+        ? innerTypes(path, Type)
+        : Object.freeze(innerTypes)
+    }
+  }
+}
 
 export default {
   about: Object.freeze({ version, author, homepage, license }),
@@ -82,14 +127,22 @@ export default {
   Maybe,
   Base,
   Set: ModelicoSet,
+  createModel,
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
-  fromJSON: (Type, json) => JSON.parse(json, _(Type).reviver),
-  fromJS: (Type, js) => _(Type).reviver('', js),
-  genericsFromJSON: (Type, innerMetadata, json) => JSON.parse(json, _(Type, 0, innerMetadata).reviver),
-  genericsFromJS: (Type, innerMetadata, js) => _(Type, 0, innerMetadata).reviver('', js),
+  fromJS,
+  genericsFromJS,
+  fromJSON: (Type, json) => fromJS(Type, JSON.parse(json)),
+  genericsFromJSON: (Type, innerMetadata, json) => genericsFromJS(Type, innerMetadata, JSON.parse(json)),
+  ajvFromJS,
+  ajvGenericsFromJS,
+  ajvFromJSON: (_, Type, schema, json) => ajvFromJS(_, Type, schema, JSON.parse(json)),
+  ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) => ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
   metadata,
   ajvMetadata,
+  getSchema,
+  validate,
+  withValidation,
   proxyMap,
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,

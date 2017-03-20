@@ -9,14 +9,14 @@ export default (U, should, M, fixtures) => () => {
     Friend
   } = fixtures
 
-  const { _ } = M.metadata()
+  const { _, maybe, number, string, withDefault } = M.metadata()
   const ModelicoDate = M.Date
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
   const author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}'
 
   describe('immutability', () => {
-    U.skipIfNoObjectFreeze('must freeze wrapped input', () => {
+    it('must freeze wrapped input', () => {
       const authorFields = {
         givenName: 'Javier',
         familyName: 'Cejudo',
@@ -30,8 +30,8 @@ export default (U, should, M, fixtures) => () => {
 
       const author = new Person(authorFields)
 
-      ;(() => { authorFields.givenName = 'Javi' })
-        .should.throw()
+      should(() => { authorFields.givenName = 'Javi' })
+        .throw()
 
       author.givenName()
         .should.be.exactly('Javier')
@@ -53,11 +53,11 @@ export default (U, should, M, fixtures) => () => {
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
-      (() => M.fromJSON(Person, author2Json))
-        .should.throw();
+      should(() => M.fromJSON(Person, author2Json))
+        .throw()
 
-      (() => new Person(null))
-        .should.throw()
+      should(() => new Person(null))
+        .throw()
     })
 
     it('should set fields returning a new object', () => {
@@ -85,12 +85,41 @@ export default (U, should, M, fixtures) => () => {
       author1.givenName().should.be.exactly('Javier')
 
       JSON.stringify(author1)
-        .should.be.exactly(author1Json);
+        .should.be.exactly(author1Json)
 
       // new object checks
-      (author2 === author1).should.be.exactly(false)
+      should(author2 === author1).be.exactly(false)
       author2.givenName().should.be.exactly('Javi')
       author2.equals(author1).should.be.exactly(false, 'Oops, they are equal')
+    })
+
+    it('should support creating a copy with updated fields', () => {
+      class Book extends M.createModel({
+        title: string(),
+        year: maybe(number()),
+        author: withDefault(string(), 'anonymous')
+      }) {
+        constructor (fields) {
+          super(Book, fields)
+        }
+      }
+
+      const book1 = new Book({
+        title: 'El Guitarrista',
+        year: M.Maybe.of(2002),
+        author: 'Luis Landero'
+      })
+
+      const book2 = book1.copy({
+        title: 'O Homem Duplicado',
+        author: 'José Saramago'
+      })
+
+      book1.title().should.be.exactly('El Guitarrista')
+      book2.title().should.be.exactly('O Homem Duplicado')
+
+      should(book1.year().getOrElse(2017)).be.exactly(2002)
+      should(book2.year().getOrElse(2017)).be.exactly(2002)
     })
 
     it('should set fields recursively returning a new object', () => {
@@ -116,7 +145,7 @@ export default (U, should, M, fixtures) => () => {
         .be.exactly(1988)
     })
 
-    it('edge case when Modelico setIn is called with an empty path', () => {
+    it('edge case when Modélico setIn is called with an empty path', () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author = JSON.parse(authorJson, _(Person).reviver)
       const listOfPeople1 = M.List.of(author)
@@ -229,14 +258,14 @@ export default (U, should, M, fixtures) => () => {
 
       should(PartOfDay.EVENING().minTime)
         .be.exactly(author1.favouritePartOfDay().minTime)
-        .and.exactly(author2.favouritePartOfDay().minTime);
+        .and.exactly(author2.favouritePartOfDay().minTime)
 
-      (Sex.MALE().toJSON())
-        .should.be.exactly(author1.sex().toJSON())
+      should(Sex.MALE().toJSON())
+        .be.exactly(author1.sex().toJSON())
         .and.exactly(author2.sex().toJSON())
     })
 
-    it('should work with plain classes extending Modelico', () => {
+    it('should work with plain classes extending Modélico', () => {
       const animal = JSON.parse('{"name": "Sam"}', _(Animal).reviver)
 
       animal.speak().should.be.exactly('hello')
@@ -321,7 +350,7 @@ export default (U, should, M, fixtures) => () => {
   })
 
   describe('circular innerTypes', () => {
-    it('a Modelico type can have a key that is a Maybe of its own type', () => {
+    it('a Modélico type can have a key that is a Maybe of its own type', () => {
       const bestFriend = new Friend({
         name: 'John',
         bestFriend: M.Maybe.EMPTY
@@ -336,6 +365,99 @@ export default (U, should, M, fixtures) => () => {
         .bestFriend().getOrElse(Friend.EMPTY)
         .name()
         .should.be.exactly('John')
+    })
+  })
+
+  describe('withDefault', () => {
+    it('should allow enhancing metadata to have default values', () => {
+      class Book extends M.createModel({
+        title: string(),
+        author: withDefault(string(), 'anonymous')
+      }, 'Book') {
+        constructor (props) {
+          super(Book, props)
+        }
+
+        getTitleBy () {
+          return `"${this.title()}" by ${this.author()}`
+        }
+
+        static innerTypes () {
+          return super.innerTypes()
+        }
+      }
+
+      const lazarillo1 = M.fromJS(Book, {
+        title: 'Lazarillo de Tormes'
+      })
+
+      lazarillo1.getTitleBy()
+        .should.be.exactly('"Lazarillo de Tormes" by anonymous')
+
+      const lazarillo2 = new Book({
+        title: 'Lazarillo de Tormes'
+      })
+
+      lazarillo2.getTitleBy()
+        .should.be.exactly('"Lazarillo de Tormes" by anonymous')
+    })
+  })
+
+  describe('withDefault', () => {
+    it('should use the metadata to coerce the value if necessary', () => {
+      class CountryCallingCode extends M.createModel(() => ({
+        code: withDefault(number(), '34')
+      })) {
+        constructor (props) {
+          super(CountryCallingCode, props)
+        }
+
+        static innerTypes () {
+          return super.innerTypes()
+        }
+      }
+
+      const spain = M.fromJS(CountryCallingCode, {})
+
+      spain.code()
+        .should.be.exactly(34)
+    })
+  })
+
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
+    it('should use the metadata to coerce the value if necessary', () => {
+      class CountryCallingCode extends M.createModel(() => ({
+        code: withDefault(number(), '34')
+      })) {
+        constructor (props) {
+          super(CountryCallingCode, props)
+        }
+
+        static innerTypes () {
+          return super.innerTypes()
+        }
+      }
+
+      const spain = M.fromJS(CountryCallingCode, {})
+
+      Object.prototype.toString.call(spain)
+        .should.be.exactly('[object ModelicoModel]')
+    })
+
+    it('should implement Symbol.toStringTag', () => {
+      const author1 = new Person({
+        givenName: 'Javier',
+        familyName: 'Cejudo',
+        birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
+        favouritePartOfDay: PartOfDay.EVENING(),
+        lifeEvents: M.Map.EMPTY(),
+        importantDatesList: M.List.EMPTY(),
+        importantDatesSet: M.Set.EMPTY(),
+        sex: M.Maybe.of(Sex.MALE())
+      })
+
+      Object.prototype.toString.call(author1)
+        .should.be.exactly('[object ModelicoModel]')
     })
   })
 }

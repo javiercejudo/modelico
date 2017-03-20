@@ -1,0 +1,40 @@
+{
+  "gitbook": "^3.2.2",
+  "title": "Modélico",
+  "structure": {
+    "summary": "SUMMARY.md"
+  },
+  "plugins": ["versions", "edit-link", "prism", "-highlight", "github", "anchorjs", "advanced-emoji"],
+  "pluginsConfig": {
+    "versions": {
+      "gitbookConfigURL": "https://raw.githubusercontent.com/javiercejudo/modelico/master/book.json",
+      "options": [
+        {
+            "value": "#",
+            "text": "- select version -",
+            "selected": true
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/",
+            "text": "snapshot"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v21.4.0/",
+            "text": "21.4.0"
+        }
+      ]
+    },
+    "edit-link": {
+      "base": "https://github.com/javiercejudo/modelico/tree/master",
+      "label": ""
+    },
+    "github": {
+      "url": "https://github.com/javiercejudo/modelico/"
+    },
+    "theme-default": {
+      "styles": {
+        "website": "docs/gitbook.css"
+      }
+    }
+  }
+}

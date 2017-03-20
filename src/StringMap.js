@@ -1,5 +1,5 @@
-import { objToArr, reviverOrAsIs, emptyObject } from './U'
-import { default as AbstractMap, set, of, metadata } from './AbstractMap'
+import { objToArr, reviverOrAsIs, emptyObject, isFunction } from './U'
+import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0]] = pair[1]
@@ -7,19 +7,19 @@ const stringifyReducer = (acc, pair) => {
   return acc
 }
 
-const parseReducer = (valueReviver, obj) => (acc, key) =>
-  [...acc, [key, valueReviver('', obj[key])]]
+const parseReducer = (valueReviver, obj, path) => (acc, key) =>
+  [...acc, [key, valueReviver('', obj[key], path.concat(key))]]
 
-const reviverFactory = valueMetadata => (k, v) => {
+const reviverFactory = valueMetadata => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const valueReviver = reviverOrAsIs(valueMetadata)
+  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata)
 
   const innerMap = (v === null)
     ? null
-    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v), []))
+    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []))
 
   return StringMap.fromMap(innerMap)
 }
@@ -35,6 +35,10 @@ class StringMap extends AbstractMap {
     }
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoStringMap'
   }
 
   set (key, value) {

@@ -1,7 +1,7 @@
 import Immutable from 'immutable'
 
 import { always, isNothing, unsupported, emptyObject } from './U'
-import { iterableMetadata, iterableEquals } from './iterable'
+import { iterableMetadata, iterableEquals } from './iterableHelpers'
 import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 
@@ -24,13 +24,20 @@ class ModelicoSet extends Base {
     this[innerOrigSymbol] = always(innerSet)
     this.inner = always(innerSet)
     this.size = innerSet.size
-    this[Symbol.iterator] = () => innerSet[Symbol.iterator]()
 
     if (!EMPTY_SET && this.size === 0) {
       EMPTY_SET = this
     }
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoSet'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   has (key) {

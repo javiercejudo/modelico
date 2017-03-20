@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M, { Person }) => () => {
+export default (U, should, M, { Person }) => () => {
   const { _, date, set } = M.metadata()
 
   describe('immutability', () => {
@@ -62,10 +62,10 @@ export default (should, M, { Person }) => () => {
       const listOfSetsOfDates1 = M.List.of(modelicoDatesSet1)
       const listOfSetsOfDates2 = listOfSetsOfDates1.setIn([0], modelicoDatesSet2)
 
-      should([...[...listOfSetsOfDates1.inner()][0].inner()][0].inner().getFullYear())
+      should([...[...listOfSetsOfDates1][0]][0].inner().getFullYear())
         .be.exactly(1988)
 
-      should([...[...listOfSetsOfDates2.inner()][0].inner()][0].inner().getFullYear())
+      should([...[...listOfSetsOfDates2][0]][0].inner().getFullYear())
         .be.exactly(2016)
     })
 
@@ -110,10 +110,10 @@ export default (should, M, { Person }) => () => {
         set(date()).reviver
       )
 
-      should([...modelicoSet.inner()][0].inner().getFullYear())
+      should([...modelicoSet][0].inner().getFullYear())
         .be.exactly(1988)
 
-      should([...modelicoSet.inner()][1].inner().getMonth())
+      should([...modelicoSet][1].inner().getMonth())
         .be.exactly(11)
     })
 
@@ -121,7 +121,7 @@ export default (should, M, { Person }) => () => {
       const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"sex":"MALE"}'
       const author = JSON.parse(authorJson, _(Person).reviver)
 
-      should([...author.importantDatesSet().inner()][0].inner().getFullYear())
+      should([...author.importantDatesSet()][0].inner().getFullYear())
         .be.exactly(2013)
     })
   })
@@ -174,7 +174,7 @@ export default (should, M, { Person }) => () => {
     it('should be able to create a set from arbitrary parameters', () => {
       const modelicoSet = M.Set.of(0, 1, 1, 2, 3, 5, 8);
 
-      [...modelicoSet.inner()]
+      [...modelicoSet]
         .should.eql([0, 1, 2, 3, 5, 8])
     })
 
@@ -183,7 +183,7 @@ export default (should, M, { Person }) => () => {
 
       const modelicoSet = M.Set.fromArray(fibArray);
 
-      [...modelicoSet.inner()]
+      [...modelicoSet]
         .should.eql([0, 1, 2, 3, 5, 8])
     })
 
@@ -192,8 +192,15 @@ export default (should, M, { Person }) => () => {
 
       const modelicoSet = M.Set.fromSet(fibSet);
 
-      [...modelicoSet.inner()]
+      [...modelicoSet]
         .should.eql([0, 1, 2, 3, 5, 8])
+    })
+  })
+
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Set.of())
+        .should.be.exactly('[object ModelicoSet]')
     })
   })
 }

@@ -4,8 +4,8 @@ export default (should, M) => () => {
   const { _, any, maybe, list, string } = M.metadata()
 
   class Animal extends M.Base {
-    constructor (fields = {}) {
-      super(Animal, fields)
+    constructor (props) {
+      super(Animal, props)
     }
 
     speak () {
@@ -24,8 +24,8 @@ export default (should, M) => () => {
   }
 
   class Person extends M.Base {
-    constructor (fields) {
-      super(Person, fields)
+    constructor (props) {
+      super(Person, props)
     }
 
     fullName () {

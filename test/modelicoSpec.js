@@ -1,37 +1,5 @@
 /* eslint-env mocha */
 
-const hasObjectFreeze = (() => {
-  const a = {}
-
-  try {
-    Object.freeze(a)
-  } catch (e) {
-    return false
-  }
-
-  try {
-    a.test = 1
-    return false
-  } catch (ignore) {}
-
-  return true
-})()
-
-const hasProxies = (() => {
-  try {
-    return new Proxy({}, {}) && true
-  } catch (ignore) {}
-
-  return false
-})()
-
-const buildUtils = options => Object.freeze({
-  skipIfNoProxies: hasProxies ? it : it.skip,
-  skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-  skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
-  objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
-})
-
 import Base from './types/Base'
 import ModelicoNumber from './types/Number'
 import ModelicoDate from './types/Date'
@@ -50,6 +18,7 @@ import featuresSimple from './features/simple'
 import featuresAdvanced from './features/advanced'
 import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
+import featuresPolymorphic from './features/polymorphic'
 import ImmutableExamples from './Immutable.js/index'
 import ImmutableProxied from './Immutable.js/proxied'
 
@@ -71,10 +40,36 @@ import countryFactory from './types/fixtures/nested/Country'
 import regionFactory from './types/fixtures/nested/Region'
 import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
 
-import ajvMetadata from './metadata/ajv'
+import fixerIoFactory from './api-examples/fixer-io/index'
+import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 
-export default (options, should, M, Immutable, extensions) => () => {
-  const U = buildUtils(options)
+import ajvMetadata from './metadata/ajv'
+import baseMetadataExample from './metadata/base'
+
+const hasProxies = (() => {
+  try {
+    return new Proxy({}, {}) && true
+  } catch (ignore) {}
+
+  return false
+})()
+
+const hasToStringTagSymbol = (() => {
+  const a = {}
+
+  a[Symbol.toStringTag] = 'foo'
+
+  return (a + '') === '[object foo]'
+})()
+
+const buildUtils = () => Object.freeze({
+  skipIfNoProxies: fn => hasProxies ? fn : fn.skip,
+  skipIfNoToStringTagSymbol: fn => hasToStringTagSymbol ? fn : fn.skip,
+  objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
+})
+
+export default ({Should, Modelico: M, extensions}) => () => {
+  const U = buildUtils()
 
   const PartOfDay = partOfDayFactory(M)
   const Sex = sexFactory(M)
@@ -82,6 +77,7 @@ export default (options, should, M, Immutable, extensions) => () => {
   const fixtures = Object.freeze({
     cityFactory,
     countryFactory,
+    fixerIoFactory,
     PartOfDay,
     Sex,
     Person: personFactory(M, PartOfDay, Sex),
@@ -91,35 +87,39 @@ export default (options, should, M, Immutable, extensions) => () => {
     RegionIncompatibleNameKey: regionIncompatibleNameKeyFactory(M)
   })
 
-  const deps = [should, M, fixtures, Immutable, extensions]
+  const deps = [Should, M, fixtures, extensions]
 
   describe('Base', Base(U, ...deps))
-  describe('Number', ModelicoNumber(...deps))
-  describe('Date', ModelicoDate(...deps))
-  describe('Map', ModelicoMap(...deps))
+  describe('Number', ModelicoNumber(U, ...deps))
+  describe('Date', ModelicoDate(U, ...deps))
+  describe('Map', ModelicoMap(U, ...deps))
   describe('StringMap', ModelicoStringMap(...deps))
   describe('Enum', ModelicoEnum(...deps))
-  describe('EnumMap', ModelicoEnumMap(...deps))
-  describe('ModelicoList', ModelicoList(U, ...deps))
-  describe('ModelicoSet', ModelicoSet(...deps))
-  describe('ModelicoMaybe', ModelicoMaybe(...deps))
+  describe('EnumMap', ModelicoEnumMap(U, ...deps))
+  describe('List', ModelicoList(U, ...deps))
+  describe('Set', ModelicoSet(U, ...deps))
+  describe('Maybe', ModelicoMaybe(U, ...deps))
 
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
   describe('ajvMetadata', ajvMetadata(...deps))
+  describe('base metadata example', baseMetadataExample(...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps))
   describe('Deep nesting features', featuresDeepNesting(...deps))
+  describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
   describe('Immutable.js examples', ImmutableExamples(U, ...deps))
 
-  U.skipDescribeIfNoProxies(
+  describe('Api Example: Fixer IO', fixerIoSpec(...deps))
+
+  U.skipIfNoProxies(describe)(
     'Immutable.js examples (proxied)',
     ImmutableProxied(U, ...deps)
   )
 
-  U.skipDescribeIfNoProxies('Proxies', () => {
+  U.skipIfNoProxies(describe)('Proxies', () => {
     describe('Map', proxyMap(...deps))
     describe('List', proxyList(...deps))
     describe('Set', proxySet(...deps))

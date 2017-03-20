@@ -1,7 +1,8 @@
 import Immutable from 'immutable'
 
 import { always, isNothing, emptyObject } from './U'
-import { iterableMetadata, iterableEquals } from './iterable'
+import { iterableMetadata, iterableEquals } from './iterableHelpers'
+import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 let EMPTY_LIST
@@ -22,14 +23,22 @@ class List extends Base {
     const innerList = Immutable.List(innerListOrig)
 
     this.inner = always(innerList)
+    this[innerOrigSymbol] = this.inner
     this.size = innerList.size
-    this[Symbol.iterator] = () => innerList[Symbol.iterator]()
 
     if (!EMPTY_LIST && this.size === 0) {
       EMPTY_LIST = this
     }
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoList'
+  }
+
+  [Symbol.iterator] () {
+    return this.inner()[Symbol.iterator]()
   }
 
   includes (...args) {

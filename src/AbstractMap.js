@@ -56,7 +56,10 @@ class AbstractMap extends Base {
     this[innerOrigSymbol] = always(innerMap)
     this.inner = always(innerMap)
     this.size = innerMap.size
-    this[Symbol.iterator] = () => innerMap[Symbol.iterator]()
+  }
+
+  [Symbol.iterator] () {
+    return this[innerOrigSymbol]()[Symbol.iterator]()
   }
 
   has (key) {

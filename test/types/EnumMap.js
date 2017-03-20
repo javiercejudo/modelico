@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
-export default (should, M, { PartOfDay }) => () => {
-  const { _, any, enumMap, string } = M.metadata()
+export default (U, should, M, { PartOfDay }) => () => {
+  const { _, any, anyOf, enumMap, string } = M.metadata()
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
@@ -101,9 +101,17 @@ export default (should, M, { PartOfDay }) => () => {
   describe('parsing', () => {
     it('should parse the enum map correctly', () => {
       const greetings = JSON.parse(
-        '{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":[]}',
+        '{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":true}',
         enumMap(_(PartOfDay), any()).reviver
       )
+
+      const greetingsAlt = JSON.parse(
+        '{"MORNING":"Good morning!","AFTERNOON":1,"EVENING":true}',
+        enumMap(() => _(PartOfDay), anyOf()).reviver
+      )
+
+      greetings.equals(greetingsAlt)
+        .should.be.exactly(true)
 
       greetings.inner().get(PartOfDay.MORNING())
         .should.be.exactly('Good morning!')
@@ -124,6 +132,9 @@ export default (should, M, { PartOfDay }) => () => {
 
       M.EnumMap.EMPTY().toJSON()
         .should.eql({})
+
+      new M.EnumMap()
+        .should.be.exactly(M.EnumMap.EMPTY())
     })
 
     it('should be able to create an enum map from an even number of params', () => {
@@ -149,6 +160,13 @@ export default (should, M, { PartOfDay }) => () => {
       var enumMap = M.EnumMap.fromMap(new Map([[PartOfDay.MORNING(), 1], [PartOfDay.AFTERNOON(), 2]]))
 
       should(enumMap.inner().get(PartOfDay.AFTERNOON())).be.exactly(2)
+    })
+  })
+
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.EnumMap.of())
+        .should.be.exactly('[object ModelicoEnumMap]')
     })
   })
 }

@@ -19,7 +19,7 @@ module.exports = function (config) {
       'dist/modelico.js',
       'dist/modelico.min.js',
       'dist/modelico-spec.js',
-      'test/browser/' + (process.env.ENTRY || 'index.js')
+      'test/browser/index.js'
     ],
 
     // list of files to exclude
@@ -65,7 +65,7 @@ module.exports = function (config) {
     browsers: Object.keys(customLaunchers()),
 
     // how many browsers Karma launches in parallel
-    concurrency: 2,
+    concurrency: 3,
 
     // timeout for capturing a browser (in ms)
     captureTimeout: 0,
@@ -86,9 +86,19 @@ function customLaunchers () {
       browserName: 'chrome',
       platform: 'Windows 10'
     },
+    'SL_Chrome_30': {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      version: '30'
+    },
     'SL_Firefox': {
       base: 'SauceLabs',
       browserName: 'firefox'
+    },
+    'SL_Firefox_15': {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      version: '15'
     },
     'SL_Edge': {
       base: 'SauceLabs',
@@ -99,6 +109,11 @@ function customLaunchers () {
       base: 'SauceLabs',
       browserName: 'safari',
       platform: 'OS X 10.11'
+    },
+    'SL_Safari_6': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      version: '6'
     },
     'SL_IE_11': {
       base: 'SauceLabs',

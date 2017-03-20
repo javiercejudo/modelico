@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M, { Person }) => () => {
+export default (U, should, M, { Person }) => () => {
   const { date, map, number, string } = M.metadata()
 
   describe('immutability', () => {
@@ -103,6 +103,14 @@ export default (should, M, { Person }) => () => {
         '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]',
         map(string(), date()).reviver
       )
+
+      const modelicoMapAlt = JSON.parse(
+        '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]',
+        map(() => string(), () => date()).reviver
+      )
+
+      modelicoMap.equals(modelicoMapAlt)
+        .should.be.exactly(true)
 
       should(modelicoMap.inner().get('a').inner().getFullYear())
         .be.exactly(1988)
@@ -216,6 +224,13 @@ export default (should, M, { Person }) => () => {
       var map = M.Map.fromMap(new Map([['a', 1], ['b', 2], ['c', 3]]))
 
       should(map.inner().get('b')).be.exactly(2)
+    })
+  })
+
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
+    it('should implement Symbol.toStringTag', () => {
+      Object.prototype.toString.call(M.Map.of())
+        .should.be.exactly('[object ModelicoMap]')
     })
   })
 }

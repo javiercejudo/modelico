@@ -1,19 +1,31 @@
-import { T, identity } from './U'
+import { T, identity, always, emptyObject, isFunction } from './U'
+import getSchema from './getSchema'
 import M from './'
 
-const formatError = (ajv, schema, value) => [
-  'Invalid JSON: according to the schema' + '\n',
+const formatError = (ajv, schema, value, path = []) => [
+  'Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n',
   JSON.stringify(schema, null, 2) + '\n',
-  'the value\n',
-  JSON.stringify(value, null, 2) + '\n',
-  ajv.errors[0].message
-].join('\n')
+  'the value (data path "' + ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) + '")\n',
+  JSON.stringify(value, null, 2) + '\n'
+].concat(ajv.errors.map(error => error.message)).join('\n')
+
+const formatDefaultValueError = (ajv, schema, value) => [
+  'Invalid default value. According to the schema\n',
+  JSON.stringify(schema, null, 2) + '\n',
+  'the default value\n',
+  JSON.stringify(value, null, 2) + '\n'
+].concat(ajv.errors.map(error => error.message)).join('\n')
 
 export default (ajv = { validate: T }) => {
+  const metadata = M.metadata()
+  const ajvMetadata = {}
+
   const {
     _,
+    base,
     asIs,
     any,
+    anyOf,
     string,
     number,
     boolean,
@@ -23,21 +35,28 @@ export default (ajv = { validate: T }) => {
     map,
     stringMap,
     set,
-    maybe
-  } = M.metadata()
+    maybe,
+    withDefault
+  } = metadata
 
-  const ensure = (metadata, schema, valueTransformer = identity) => (k, value) => {
+  const ensure = (metadata, schema, valueTransformer = identity) => (k, value, path) => {
     if (k !== '') {
       return value
     }
 
-    const valid = ajv.validate(schema, valueTransformer(value))
+    const valid = (schema === emptyObject)
+      ? true
+      : ajv.validate(schema, valueTransformer(value))
 
     if (!valid) {
-      throw TypeError(formatError(ajv, schema, value))
+      throw TypeError(formatError(ajv, schema, value, path))
     }
 
-    return metadata.reviver('', value)
+    const resolvedMetadata = isFunction(metadata)
+      ? metadata(value, path)
+      : metadata
+
+    return resolvedMetadata.reviver('', value, path)
   }
 
   const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
@@ -50,86 +69,184 @@ export default (ajv = { validate: T }) => {
     return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
   }
 
-  const ajvMeta = (meta, baseSchema, mainSchema = {}) => {
-    const schema = Object.assign({}, baseSchema, mainSchema)
-    const reviver = ensure(meta, schema)
+  const ajvMeta = (metadata, baseSchema, mainSchema = emptyObject, innerSchemaGetter = always(emptyObject)) => {
+    const schemaToCheck = (baseSchema === emptyObject && mainSchema === emptyObject)
+      ? emptyObject
+      : Object.assign({}, baseSchema, mainSchema)
 
-    return Object.assign({}, meta, { reviver })
+    const reviver = ensure(metadata, schemaToCheck)
+
+    const schemaGetter = () => Object.assign({}, schemaToCheck, innerSchemaGetter())
+
+    const baseMetadata = isFunction(metadata)
+      ? { type: metadata }
+      : metadata
+
+    return Object.assign({}, baseMetadata, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
   }
 
-  const ajv_ = (Type, schema) =>
-    ajvMeta(_(Type), schema)
+  ajvMetadata.ajvMeta = ajvMeta
 
-  const ajvAsIs = (schema, transformer = identity) =>
+  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
+    const metadata = _(Type, innerMetadata)
+
+    return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata, false))
+  }
+
+  ajvMetadata.ajvBase = (Type, schema = emptyObject) => {
+    const metadata = base(Type)
+
+    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata, false))
+  }
+
+  ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
     ajvMeta(asIs(transformer), schema)
 
-  const ajvAny = schema => ajvAsIs(schema)
+  ajvMetadata.ajvAny = schema => ajvMetadata.ajvAsIs(schema)
 
-  const ajvNumber = (schema, options = {}) => {
+  ajvMetadata.ajvNumber = (schema, options = emptyObject) => {
     const { wrap = false } = options
-    const meta = number(options)
+    const metadata = number(options)
 
     if (!wrap) {
-      return ajvMeta(meta, { type: 'number' }, schema)
+      return ajvMeta(metadata, { type: 'number' }, schema)
     }
 
-    const reviver = ensureWrapped(meta, {
+    const numberMeta = Object.assign({ type: 'number' }, schema)
+
+    const reviver = ensureWrapped(metadata, {
       anyOf: [
         { type: 'number' },
-        { type: 'string', enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
+        { enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
       ]
-    }, Object.assign({}, { type: 'number' }, schema))
+    }, numberMeta)
 
-    return Object.assign({}, meta, { reviver })
+    return Object.assign({}, metadata, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
   }
 
-  const ajvString = schema =>
+  ajvMetadata.ajvString = schema =>
     ajvMeta(string(), { type: 'string' }, schema)
 
-  const ajvBoolean = schema =>
+  ajvMetadata.ajvBoolean = schema =>
     ajvMeta(boolean(), { type: 'boolean' }, schema)
 
-  const ajvDate = schema =>
+  ajvMetadata.ajvDate = schema =>
     ajvMeta(date(), { type: 'string', format: 'date-time' }, schema)
 
-  const ajvEnumMap = (schema, keyMetadata, valueMetadata) =>
-    ajvMeta(enumMap(keyMetadata, valueMetadata), {
-      type: 'object',
-      maxProperties: Object.keys(keyMetadata).length
-    }, schema)
+  ajvMetadata.ajvEnum = Type => {
+    const metadata = _(Type)
+
+    return ajvMeta(metadata, {enum: Object.keys(metadata.enumerators)})
+  }
+
+  ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {
+    const enumeratorsKeys = Object.keys(keyMetadata.enumerators)
+    const keysRegex = `^(${enumeratorsKeys.join('|')})$`
+
+    return ajvMeta(
+      enumMap(keyMetadata, valueMetadata), {
+        type: 'object',
+        maxProperties: enumeratorsKeys.length,
+        additionalProperties: false,
+        patternProperties: {
+          [keysRegex]: {}
+        }
+      },
+      schema,
+      () => ({
+        patternProperties: {
+          [keysRegex]: getSchema(valueMetadata, false)
+        }
+      })
+    )
+  }
 
   const ajvList = (schema, itemMetadata) =>
-    ajvMeta(list(itemMetadata), { type: 'array' }, schema)
+    ajvMeta(
+      list(itemMetadata),
+      { type: 'array' },
+      schema,
+      () => ({ items: getSchema(itemMetadata, false) })
+    )
 
-  const ajvMap = (schema, keyMetadata, valueMetadata) =>
-    ajvMeta(map(keyMetadata, valueMetadata), {
+  const ajvTuple = (schema, itemsMetadata) => {
+    const length = itemsMetadata.length
+
+    return ajvMeta(
+      list(itemsMetadata),
+      {
+        type: 'array',
+        minItems: length,
+        maxItems: length
+      },
+      schema,
+      () => ({ items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false)) })
+    )
+  }
+
+  ajvMetadata.ajvList = (schema, itemMetadata) => Array.isArray(itemMetadata)
+    ? ajvTuple(schema, itemMetadata)
+    : ajvList(schema, itemMetadata)
+
+  ajvMetadata.ajvMap = (schema, keyMetadata, valueMetadata) => {
+    const baseSchema = {
       type: 'array',
       items: {
         type: 'array',
         minItems: 2,
         maxItems: 2
       }
-    }, schema)
+    }
 
-  const ajvStringMap = (schema, valueMetadata) =>
-    ajvMeta(stringMap(valueMetadata), { type: 'object' }, schema)
+    const keyValueSchemaGetter = () => ({
+      items: Object.assign({
+        items: [
+          getSchema(keyMetadata, false),
+          getSchema(valueMetadata, false)
+        ]
+      }, baseSchema.items)
+    })
 
-  const ajvSet = (schema, itemMetadata) =>
-    ajvMeta(set(itemMetadata), { type: 'array', uniqueItems: true }, schema)
+    return ajvMeta(map(keyMetadata, valueMetadata), baseSchema, schema, keyValueSchemaGetter)
+  }
 
-  return Object.freeze({
-    _: ajv_,
-    asIs: ajvAsIs,
-    any: ajvAny,
-    number: ajvNumber,
-    string: ajvString,
-    boolean: ajvBoolean,
-    date: ajvDate,
-    enumMap: ajvEnumMap,
-    list: ajvList,
-    map: ajvMap,
-    stringMap: ajvStringMap,
-    set: ajvSet,
-    maybe
-  })
+  ajvMetadata.ajvStringMap = (schema, valueMetadata) =>
+    ajvMeta(
+      stringMap(valueMetadata),
+      { type: 'object' },
+      schema,
+      () => ({
+        additionalProperties: false,
+        patternProperties: { '.*': getSchema(valueMetadata, false) }
+      })
+    )
+
+  ajvMetadata.ajvSet = (schema, itemMetadata) =>
+    ajvMeta(set(itemMetadata), {
+      type: 'array',
+      uniqueItems: true
+    }, schema, () => ({ items: getSchema(itemMetadata, false) }))
+
+  ajvMetadata.ajvMaybe = (itemMetadata) =>
+    ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema(itemMetadata, false))
+
+  ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
+    const schema = getSchema(metadata, false)
+    const valid = ajv.validate(schema, defaultValue)
+
+    if (!valid) {
+      throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
+    }
+
+    return ajvMeta(withDefault(metadata, defaultValue), {
+      default: defaultValue
+    }, emptyObject, always(schema))
+  }
+
+  ajvMetadata.ajvAnyOf = (conditionedMetas, enumField) =>
+    ajvMeta(anyOf(conditionedMetas, enumField), {
+      anyOf: conditionedMetas.map(conditionMeta => getSchema(conditionMeta[0], false))
+    })
+
+  return Object.freeze(Object.assign(ajvMetadata, metadata))
 }

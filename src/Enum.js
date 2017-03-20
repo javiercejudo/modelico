@@ -1,13 +1,14 @@
 import { always, isNothing, emptyObject } from './U'
+import { typeSymbol } from './symbols'
 import Base from './Base'
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } })
 
-const reviverFactory = enumerators => (k, v) => {
+const reviverFactory = enumerators => (k, v, path = []) => {
   const enumerator = enumerators[v]
 
   if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator (${v})`)
+    throw TypeError(`missing enumerator "${v}" at "${path.join(' -> ')}"`)
   }
 
   return enumerator
@@ -29,6 +30,7 @@ class Enum extends Base {
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {
         this[enumerator] = always(enumerators[enumerator])
+        enumerators[enumerator][typeSymbol] = always(this)
         enumerators[enumerator].toJSON = always(enumerator)
         enumerators[enumerator].equals = other => (enumerators[enumerator] === other)
       })
@@ -36,6 +38,7 @@ class Enum extends Base {
     Object.defineProperty(this, 'metadata', {
       value: always(Object.freeze({
         type: Ctor,
+        enumerators,
         reviver: reviverFactory(enumerators)
       }))
     })

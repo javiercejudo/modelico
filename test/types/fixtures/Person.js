@@ -1,17 +1,15 @@
 /* eslint-env mocha */
 
 export default (M, PartOfDay, Sex) => {
-  const joinWithSpace = (...parts) => parts.filter(x => x !== null && x !== undefined).join(' ')
+  const joinWithSpace = (...parts) => parts.join(' ').trim()
 
   const { _, string, date, map, list, set, maybe } = M.metadata()
   const partOfDay = PartOfDay.metadata
   const sex = Sex.metadata
 
   class Person extends M.Base {
-    constructor (fields) {
-      super(Person, fields)
-
-      Object.freeze(this)
+    constructor (props) {
+      super(Person, props)
     }
 
     fullName () {
