@@ -16,6 +16,12 @@ export default (U, should, M) => () => {
     })
   })
 
+  describe('valueOf', () => {
+    it('must implement valueOf', () => {
+      (M.Number.of(5) + 4).should.be.exactly(9)
+    })
+  })
+
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
       (() => M.Number.of(null))

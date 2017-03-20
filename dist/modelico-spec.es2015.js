@@ -16,7 +16,7 @@ var Base = (U, should, M, fixtures) => () => {
   const author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
 
   describe('immutability', () => {
-    U.skipIfNoObjectFreeze('must freeze wrapped input', () => {
+    it('must freeze wrapped input', () => {
       const authorFields = {
         givenName: 'Javier',
         familyName: 'Cejudo',
@@ -101,11 +101,6 @@ var Base = (U, should, M, fixtures) => () => {
       }) {
         constructor (fields) {
           super(Book, fields);
-        }
-
-        // workaround for IE <= 10
-        static innerTypes () {
-          return super.innerTypes()
         }
       }
 
@@ -429,7 +424,7 @@ var Base = (U, should, M, fixtures) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should use the metadata to coerce the value if necessary', () => {
       class CountryCallingCode extends M.createModel(() => ({
         code: withDefault(number(), '34')
@@ -482,6 +477,12 @@ var ModelicoNumber = (U, should, M) => () => {
       should(new M.Number(2).inner()).be.exactly(2);
       should(new M.Number('2').inner()).be.exactly(2);
       should(new M.Number('-Infinity').inner()).be.exactly(-Infinity);
+    });
+  });
+
+  describe('valueOf', () => {
+    it('must implement valueOf', () => {
+      (M.Number.of(5) + 4).should.be.exactly(9);
     });
   });
 
@@ -607,7 +608,7 @@ var ModelicoNumber = (U, should, M) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Number.of(1))
         .should.be.exactly('[object ModelicoNumber]');
@@ -649,6 +650,17 @@ var ModelicoDate = (U, should, M) => () => {
 
     it('must be instantiated with new', () => {
       (() => M.Date()).should.throw();
+    });
+  });
+
+  describe('toPrimitive', () => {
+    it('implements Symbol.toPrimitive', () => {
+      const nativeDate = new Date();
+      const mDate = M.Date.of(nativeDate);
+
+      Number(mDate).should.be.exactly(Number(nativeDate));
+      String(mDate).should.be.exactly(String(nativeDate));
+      Boolean(mDate).should.be.exactly(Boolean(nativeDate));
     });
   });
 
@@ -721,7 +733,7 @@ var ModelicoDate = (U, should, M) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Date.of())
         .should.be.exactly('[object ModelicoDate]');
@@ -958,7 +970,7 @@ var ModelicoMap = (U, should, M, { Person }) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Map.of())
         .should.be.exactly('[object ModelicoMap]');
@@ -1330,7 +1342,7 @@ var ModelicoEnumMap = (U, should, M, { PartOfDay }) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.EnumMap.of())
         .should.be.exactly('[object ModelicoEnumMap]');
@@ -1344,7 +1356,7 @@ var ModelicoList = (U, should, M, { Person }) => () => {
   const { _, list, date, string, number, maybe } = M.metadata();
 
   describe('immutability', () => {
-    U.skipIfNoObjectFreeze('must freeze the input', () => {
+    it('must freeze the input', () => {
       const input = ['a', 'b', 'c'];
 
       M.List.fromArray(input)
@@ -1638,7 +1650,7 @@ var ModelicoList = (U, should, M, { Person }) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.List.of())
         .should.be.exactly('[object ModelicoList]');
@@ -1845,7 +1857,7 @@ var ModelicoSet = (U, should, M, { Person }) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Set.of())
         .should.be.exactly('[object ModelicoSet]');
@@ -2090,7 +2102,7 @@ var ModelicoMaybe = (U, should, M, { Person, PartOfDay }) => () => {
     });
   });
 
-  U.skipDescribeIfNoToStringTagSymbol('toStringTag', () => {
+  U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString.call(M.Maybe.of(1))
         .should.be.exactly('[object ModelicoMaybe]');
@@ -2147,7 +2159,7 @@ var asIs = (U, should, M) => () => {
       should(asIsObject.two).be.exactly(2);
     });
 
-    U.skipIfNoObjectFreeze('should be immutable', () => {
+    it('should be immutable', () => {
       (() => { asIs().reviver = x => x; }).should.throw();
     });
   });
@@ -2156,7 +2168,7 @@ var asIs = (U, should, M) => () => {
 /* eslint-env mocha */
 
 var setIn = (U, should, M) => () => {
-  U.skipIfNoObjectFreeze('should work across types', () => {
+  it('should work across types', () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This');
     const array1 = M.List.of('totally', 'immutable', hammer);(() => { array1.inner()[1] = 'I’m going to mutate you!'; })
       .should.throw();
@@ -4537,12 +4549,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
   });
 
   describe('enumMap', () => {
-    class Side extends M.Enum {
-      // workaround for IE <= 10
-      static innerTypes () {
-        return super.innerTypes()
-      }
-    }
+    class Side extends M.Enum {}
 
     const SideEnum = M.Enum.fromArray(['A', 'B'], Side, 'Side');
 
@@ -5093,13 +5100,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
   });
 
   describe('anyOf', () => {
-    class ScoreType extends M.Enum {
-      // workaround for IE <= 10
-      static innerTypes () {
-        return super.innerTypes()
-      }
-    }
-
+    class ScoreType extends M.Enum {}
     const ScoreTypeEnum = M.Enum.fromArray(['Numeric', 'Alphabetic'], ScoreType, 'ScoreType');
 
     class Score extends M.Base {
@@ -5429,23 +5430,6 @@ var baseMetadataExample = (should, M, fixtures, { Ajv }) => () => {
 
 /* eslint-env mocha */
 
-const hasObjectFreeze = (() => {
-  const a = {};
-
-  try {
-    Object.freeze(a);
-  } catch (e) {
-    return false
-  }
-
-  try {
-    a.test = 1;
-    return false
-  } catch (ignore) {}
-
-  return true
-})();
-
 const hasProxies = (() => {
   try {
     return new Proxy({}, {}) && true
@@ -5463,10 +5447,8 @@ const hasToStringTagSymbol = (() => {
 })();
 
 const buildUtils = () => Object.freeze({
-  skipIfNoProxies: hasProxies ? it : it.skip,
-  skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-  skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
-  skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
+  skipIfNoProxies: fn => hasProxies ? fn : fn.skip,
+  skipIfNoToStringTagSymbol: fn => hasToStringTagSymbol ? fn : fn.skip,
   objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
 });
 
@@ -5516,12 +5498,12 @@ var modelicoSpec = ({Should, Modelico: M, extensions}) => () => {
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps));
 
-  U.skipDescribeIfNoProxies(
+  U.skipIfNoProxies(describe)(
     'Immutable.js examples (proxied)',
     ImmutableProxied(U, ...deps)
   );
 
-  U.skipDescribeIfNoProxies('Proxies', () => {
+  U.skipIfNoProxies(describe)('Proxies', () => {
     describe('Map', proxyMap(...deps));
     describe('List', proxyList(...deps));
     describe('Set', proxySet(...deps));

@@ -35,6 +35,17 @@ export default (U, should, M) => () => {
     })
   })
 
+  describe('toPrimitive', () => {
+    it('implements Symbol.toPrimitive', () => {
+      const nativeDate = new Date()
+      const mDate = M.Date.of(nativeDate)
+
+      Number(mDate).should.be.exactly(Number(nativeDate))
+      String(mDate).should.be.exactly(String(nativeDate))
+      Boolean(mDate).should.be.exactly(Boolean(nativeDate))
+    })
+  })
+
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
       (() => M.Date.of(null))

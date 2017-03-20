@@ -185,7 +185,7 @@ var Base = (function (U, should, M, fixtures) {
     var author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
 
     describe('immutability', function () {
-      U.skipIfNoObjectFreeze('must freeze wrapped input', function () {
+      it('must freeze wrapped input', function () {
         var authorFields = {
           givenName: 'Javier',
           familyName: 'Cejudo',
@@ -277,15 +277,6 @@ var Base = (function (U, should, M, fixtures) {
             return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, fields));
           }
 
-          // workaround for IE <= 10
-
-
-          createClass(Book, null, [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return get(Book.__proto__ || Object.getPrototypeOf(Book), 'innerTypes', this).call(this);
-            }
-          }]);
           return Book;
         }(M.createModel({
           title: string(),
@@ -613,7 +604,7 @@ var Base = (function (U, should, M, fixtures) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should use the metadata to coerce the value if necessary', function () {
         var CountryCallingCode = function (_M$createModel4) {
           inherits(CountryCallingCode, _M$createModel4);
@@ -678,6 +669,12 @@ var ModelicoNumber = (function (U, should, M) {
         should(new M.Number(2).inner()).be.exactly(2);
         should(new M.Number('2').inner()).be.exactly(2);
         should(new M.Number('-Infinity').inner()).be.exactly(-Infinity);
+      });
+    });
+
+    describe('valueOf', function () {
+      it('must implement valueOf', function () {
+        (M.Number.of(5) + 4).should.be.exactly(9);
       });
     });
 
@@ -803,7 +800,7 @@ var ModelicoNumber = (function (U, should, M) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Number.of(1)).should.be.exactly('[object ModelicoNumber]');
       });
@@ -845,6 +842,17 @@ var ModelicoDate = (function (U, should, M) {
         (function () {
           return M.Date();
         }).should.throw();
+      });
+    });
+
+    describe('toPrimitive', function () {
+      it('implements Symbol.toPrimitive', function () {
+        var nativeDate = new Date();
+        var mDate = M.Date.of(nativeDate);
+
+        Number(mDate).should.be.exactly(Number(nativeDate));
+        String(mDate).should.be.exactly(String(nativeDate));
+        Boolean(mDate).should.be.exactly(Boolean(nativeDate));
       });
     });
 
@@ -917,7 +925,7 @@ var ModelicoDate = (function (U, should, M) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Date.of()).should.be.exactly('[object ModelicoDate]');
       });
@@ -1123,7 +1131,7 @@ var ModelicoMap = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Map.of()).should.be.exactly('[object ModelicoMap]');
       });
@@ -1435,7 +1443,7 @@ var ModelicoEnumMap = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.EnumMap.of()).should.be.exactly('[object ModelicoEnumMap]');
       });
@@ -1457,7 +1465,7 @@ var ModelicoList = (function (U, should, M, _ref) {
         maybe = _M$metadata.maybe;
 
     describe('immutability', function () {
-      U.skipIfNoObjectFreeze('must freeze the input', function () {
+      it('must freeze the input', function () {
         var input = ['a', 'b', 'c'];
 
         M.List.fromArray(input);(function () {
@@ -1720,7 +1728,7 @@ var ModelicoList = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.List.of()).should.be.exactly('[object ModelicoList]');
       });
@@ -1904,7 +1912,7 @@ var ModelicoSet = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Set.of()).should.be.exactly('[object ModelicoSet]');
       });
@@ -2155,7 +2163,7 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Maybe.of(1)).should.be.exactly('[object ModelicoMaybe]');
       });
@@ -2218,7 +2226,7 @@ var asIs = (function (U, should, M) {
         should(asIsObject.two).be.exactly(2);
       });
 
-      U.skipIfNoObjectFreeze('should be immutable', function () {
+      it('should be immutable', function () {
         (function () {
           asIs().reviver = function (x) {
             return x;
@@ -2233,7 +2241,7 @@ var asIs = (function (U, should, M) {
 
 var setIn = (function (U, should, M) {
   return function () {
-    U.skipIfNoObjectFreeze('should work across types', function () {
+    it('should work across types', function () {
       var hammer = M.Map.of('hammer', 'Can’t Touch This');
       var array1 = M.List.of('totally', 'immutable', hammer);(function () {
         array1.inner()[1] = 'I’m going to mutate you!';
@@ -4673,14 +4681,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return possibleConstructorReturn(this, (Side.__proto__ || Object.getPrototypeOf(Side)).apply(this, arguments));
         }
 
-        createClass(Side, null, [{
-          key: 'innerTypes',
-
-          // workaround for IE <= 10
-          value: function innerTypes() {
-            return get(Side.__proto__ || Object.getPrototypeOf(Side), 'innerTypes', this).call(this);
-          }
-        }]);
         return Side;
       }(M.Enum);
 
@@ -5253,14 +5253,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return possibleConstructorReturn(this, (ScoreType.__proto__ || Object.getPrototypeOf(ScoreType)).apply(this, arguments));
         }
 
-        createClass(ScoreType, null, [{
-          key: 'innerTypes',
-
-          // workaround for IE <= 10
-          value: function innerTypes() {
-            return get(ScoreType.__proto__ || Object.getPrototypeOf(ScoreType), 'innerTypes', this).call(this);
-          }
-        }]);
         return ScoreType;
       }(M.Enum);
 
@@ -5599,23 +5591,6 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
 
 /* eslint-env mocha */
 
-var hasObjectFreeze = function () {
-  var a = {};
-
-  try {
-    Object.freeze(a);
-  } catch (e) {
-    return false;
-  }
-
-  try {
-    a.test = 1;
-    return false;
-  } catch (ignore) {}
-
-  return true;
-}();
-
 var hasProxies = function () {
   try {
     return new Proxy({}, {}) && true;
@@ -5634,10 +5609,12 @@ var hasToStringTagSymbol = function () {
 
 var buildUtils = function buildUtils() {
   return Object.freeze({
-    skipIfNoProxies: hasProxies ? it : it.skip,
-    skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-    skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
-    skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
+    skipIfNoProxies: function skipIfNoProxies(fn) {
+      return hasProxies ? fn : fn.skip;
+    },
+    skipIfNoToStringTagSymbol: function skipIfNoToStringTagSymbol(fn) {
+      return hasToStringTagSymbol ? fn : fn.skip;
+    },
     objToArr: function objToArr(obj) {
       return Object.keys(obj).map(function (k) {
         return [k, obj[k]];
@@ -5696,9 +5673,9 @@ var modelicoSpec = (function (_ref) {
 
     describe('Api Example: Fixer IO', fixerIoSpec.apply(undefined, deps));
 
-    U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
+    U.skipIfNoProxies(describe)('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 
-    U.skipDescribeIfNoProxies('Proxies', function () {
+    U.skipIfNoProxies(describe)('Proxies', function () {
       describe('Map', proxyMap.apply(undefined, deps));
       describe('List', proxyList.apply(undefined, deps));
       describe('Set', proxySet.apply(undefined, deps));

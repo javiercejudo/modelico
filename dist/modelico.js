@@ -415,14 +415,14 @@ var getSchema = function getSchema(metadata) {
     return schema;
   }
 
-  if (definitions.hasOwnProperty(ref)) {
-    return {
-      definitions: Object.assign(definitions, defineProperty({}, ref, schema)),
-      $ref: '#/definitions/' + ref
-    };
+  if (!definitions.hasOwnProperty(ref)) {
+    return Object.assign(schema, { definitions: definitions });
   }
 
-  return Object.assign(schema, { definitions: definitions });
+  return {
+    definitions: Object.assign(definitions, defineProperty({}, ref, schema)),
+    $ref: '#/definitions/' + ref
+  };
 };
 
 var validate = (function (instance) {
@@ -1357,16 +1357,19 @@ var ModelicoNumber = function (_Base) {
   inherits(ModelicoNumber, _Base);
 
   function ModelicoNumber() {
-    var number = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var numberOrig = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     classCallCheck(this, ModelicoNumber);
 
     var _this = possibleConstructorReturn(this, (ModelicoNumber.__proto__ || Object.getPrototypeOf(ModelicoNumber)).call(this, ModelicoNumber));
 
-    if (!Number.isNaN(number) && isNothing(number)) {
+    if (!Number.isNaN(numberOrig) && isNothing(numberOrig)) {
       throw TypeError('missing number');
     }
 
-    _this.inner = always(Number(number));
+    var number = Number(numberOrig);
+
+    _this[innerOrigSymbol] = always(number);
+    _this.inner = _this[innerOrigSymbol];
 
     Object.freeze(_this);
     return _this;
@@ -1405,6 +1408,23 @@ var ModelicoNumber = function (_Base) {
       }
 
       return haveSameValues(this.inner(), other.inner());
+    }
+  }, {
+    key: Symbol.toPrimitive,
+    value: function value(hint) {
+      var innerNumber = this.inner();
+
+      return hint === 'string' ? String(innerNumber) : innerNumber;
+    }
+  }, {
+    key: 'valueOf',
+    value: function valueOf() {
+      return this.inner();
+    }
+  }, {
+    key: 'toString',
+    value: function toString() {
+      return String(this.inner());
     }
   }, {
     key: Symbol.toStringTag,
@@ -1458,6 +1478,7 @@ var ModelicoDate = function (_Base) {
 
     var date = new Date(dateOrig.getTime());
 
+    _this[innerOrigSymbol] = always(date);
     _this.inner = function () {
       return new Date(date.getTime());
     };
@@ -1497,6 +1518,22 @@ var ModelicoDate = function (_Base) {
       }
 
       return this.toJSON() === other.toJSON();
+    }
+  }, {
+    key: Symbol.toPrimitive,
+    value: function value(hint) {
+      var innerDate = this[innerOrigSymbol]();
+
+      if (hint === 'number') {
+        return Number(innerDate);
+      }
+
+      return hint === 'string' ? String(innerDate) : true;
+    }
+  }, {
+    key: 'toString',
+    value: function toString() {
+      return String(this.inner());
     }
   }, {
     key: Symbol.toStringTag,

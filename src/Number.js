@@ -1,4 +1,5 @@
 import { isNothing, unsupported, emptyObject, always, haveDifferentTypes, haveSameValues } from './U'
+import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -6,14 +7,17 @@ const reviver = (k, v) => {
 }
 
 class ModelicoNumber extends Base {
-  constructor (number = 0) {
+  constructor (numberOrig = 0) {
     super(ModelicoNumber)
 
-    if (!Number.isNaN(number) && isNothing(number)) {
+    if (!Number.isNaN(numberOrig) && isNothing(numberOrig)) {
       throw TypeError('missing number')
     }
 
-    this.inner = always(Number(number))
+    const number = Number(numberOrig)
+
+    this[innerOrigSymbol] = always(number)
+    this.inner = this[innerOrigSymbol]
 
     Object.freeze(this)
   }
@@ -54,6 +58,22 @@ class ModelicoNumber extends Base {
     }
 
     return haveSameValues(this.inner(), other.inner())
+  }
+
+  [Symbol.toPrimitive] (hint) {
+    const innerNumber = this.inner()
+
+    return (hint === 'string')
+      ? String(innerNumber)
+      : innerNumber
+  }
+
+  valueOf () {
+    return this.inner()
+  }
+
+  toString () {
+    return String(this.inner())
   }
 
   static of (number) {

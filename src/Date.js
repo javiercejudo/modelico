@@ -1,4 +1,5 @@
-import { isNothing, unsupported, emptyObject, haveDifferentTypes } from './U'
+import { always, isNothing, unsupported, emptyObject, haveDifferentTypes } from './U'
+import { innerOrigSymbol } from './symbols'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -19,6 +20,7 @@ class ModelicoDate extends Base {
 
     const date = new Date(dateOrig.getTime())
 
+    this[innerOrigSymbol] = always(date)
     this.inner = () => new Date(date.getTime())
 
     Object.freeze(this)
@@ -54,6 +56,22 @@ class ModelicoDate extends Base {
     }
 
     return this.toJSON() === other.toJSON()
+  }
+
+  [Symbol.toPrimitive] (hint) {
+    const innerDate = this[innerOrigSymbol]()
+
+    if (hint === 'number') {
+      return Number(innerDate)
+    }
+
+    return (hint === 'string')
+      ? String(innerDate)
+      : true
+  }
+
+  toString () {
+    return String(this.inner())
   }
 
   static of (date) {

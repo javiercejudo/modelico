@@ -133,7 +133,8 @@ const getSchemaImpl = metadata => {
   }
 
   if (
-    !metadata.type || !metadata.type.innerTypes ||
+    !metadata.type ||
+    !metadata.type.innerTypes ||
     Object.keys(getInnerTypes$1([], metadata.type)).length === 0
   ) {
     return emptyObject
@@ -221,14 +222,14 @@ const getSchema = (metadata, topLevel = true) => {
     return schema
   }
 
-  if (definitions.hasOwnProperty(ref)) {
-    return {
-      definitions: Object.assign(definitions, { [ref]: schema }),
-      $ref: `#/definitions/${ref}`
-    }
+  if (!definitions.hasOwnProperty(ref)) {
+    return Object.assign(schema, {definitions})
   }
 
-  return Object.assign(schema, {definitions})
+  return {
+    definitions: Object.assign(definitions, { [ref]: schema }),
+    $ref: `#/definitions/${ref}`
+  }
 };
 
 var validate = (instance, innerMetadata = []) => {
@@ -975,14 +976,17 @@ const reviver = (k, v) => {
 };
 
 class ModelicoNumber extends Base$1 {
-  constructor (number = 0) {
+  constructor (numberOrig = 0) {
     super(ModelicoNumber);
 
-    if (!Number.isNaN(number) && isNothing(number)) {
+    if (!Number.isNaN(numberOrig) && isNothing(numberOrig)) {
       throw TypeError('missing number')
     }
 
-    this.inner = always(Number(number));
+    const number = Number(numberOrig);
+
+    this[innerOrigSymbol] = always(number);
+    this.inner = this[innerOrigSymbol];
 
     Object.freeze(this);
   }
@@ -1025,6 +1029,22 @@ class ModelicoNumber extends Base$1 {
     return haveSameValues(this.inner(), other.inner())
   }
 
+  [Symbol.toPrimitive] (hint) {
+    const innerNumber = this.inner();
+
+    return (hint === 'string')
+      ? String(innerNumber)
+      : innerNumber
+  }
+
+  valueOf () {
+    return this.inner()
+  }
+
+  toString () {
+    return String(this.inner())
+  }
+
   static of (number) {
     return new ModelicoNumber(number)
   }
@@ -1063,6 +1083,7 @@ class ModelicoDate extends Base$1 {
 
     const date = new Date(dateOrig.getTime());
 
+    this[innerOrigSymbol] = always(date);
     this.inner = () => new Date(date.getTime());
 
     Object.freeze(this);
@@ -1098,6 +1119,22 @@ class ModelicoDate extends Base$1 {
     }
 
     return this.toJSON() === other.toJSON()
+  }
+
+  [Symbol.toPrimitive] (hint) {
+    const innerDate = this[innerOrigSymbol]();
+
+    if (hint === 'number') {
+      return Number(innerDate)
+    }
+
+    return (hint === 'string')
+      ? String(innerDate)
+      : true
+  }
+
+  toString () {
+    return String(this.inner())
   }
 
   static of (date) {
