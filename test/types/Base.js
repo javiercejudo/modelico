@@ -353,7 +353,7 @@ export default (U, should, M, fixtures) => () => {
     it('a Modélico type can have a key that is a Maybe of its own type', () => {
       const bestFriend = new Friend({
         name: 'John',
-        bestFriend: M.Maybe.EMPTY
+        bestFriend: M.Maybe.of()
       })
 
       const marc = new Friend({

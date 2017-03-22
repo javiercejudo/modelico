@@ -10,7 +10,7 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
       const maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver)
       const maybe2 = maybe1.set('givenName', 'Javi')
 
-      maybe2.inner().get().givenName()
+      maybe2.getOrElse('').givenName()
         .should.be.exactly('Javi')
     })
 
@@ -55,10 +55,10 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
       should(M.Maybe.ofAny(null).setIn([], 2).toJSON())
         .be.exactly(2)
 
-      should(M.Maybe.ofAny(null).set('a', 2).inner().get())
+      should(M.Maybe.ofAny(null).set('a', 2).getOrElse(''))
         .be.exactly(null)
 
-      should(M.Maybe.ofAny().set('a', 2).inner().get())
+      should(M.Maybe.ofAny().set('a', 2).getOrElse(''))
         .be.exactly(undefined)
     })
   })
@@ -107,7 +107,7 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
       const author = JSON.parse(authorJson, _(Person).reviver)
 
       const myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver)
-      myMaybe.inner().get().equals(author).should.be.exactly(true)
+      myMaybe.inner().equals(author).should.be.exactly(true)
     })
 
     it('should parse missing keys of Maybe values as Maybe with Nothing', () => {
@@ -183,11 +183,11 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
 
       const doublePlus5 = x => plus5(double(x))
 
-      should(M.Maybe.of(10).map(doublePlus5).inner().get())
-        .be.exactly(M.Maybe.of(10).map(double).map(plus5).inner().get())
+      should(M.Maybe.of(10).map(doublePlus5).inner())
+        .be.exactly(M.Maybe.of(10).map(double).map(plus5).inner())
         .and.exactly(25)
 
-      should(M.Maybe.of(10).map(x => null).map(plus5).inner().get())
+      should(M.Maybe.of(10).map(x => null).map(plus5).inner())
         .be.exactly(5)
     })
   })
@@ -219,7 +219,7 @@ export default (U, should, M, { Person, PartOfDay }) => () => {
 
     it('handles nothing well', () => {
       const modelicoMaybe1 = M.Maybe.of(M.Number.of(2))
-      const modelicoMaybe2 = M.Maybe.EMPTY
+      const modelicoMaybe2 = M.Maybe.of()
       const modelicoMaybe3 = M.Maybe.of()
 
       modelicoMaybe1.should.not.be.exactly(modelicoMaybe2)

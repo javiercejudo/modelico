@@ -18,7 +18,7 @@ export default M => {
 
   Friend.EMPTY = new Friend({
     name: '',
-    bestFriend: M.Maybe.EMPTY
+    bestFriend: M.Maybe.of()
   })
 
   return Object.freeze(Friend)
