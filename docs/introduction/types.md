@@ -109,17 +109,15 @@ It helps with optional/nullable fields. See
 details.
 
 ```js
+M.Nothing.isEmpty()         // => true
 new M.Maybe(null).isEmpty() // => true
-M.Maybe.of(null).isEmpty() // => true
+M.Maybe.of(null).isEmpty()  // => true
 
-new M.Maybe(null, true).isEmpty()
-// => false (the second parameter forces wrapping of anything)
-M.Maybe.ofAny(null).isEmpty()
-// => false (.ofAny forces wrapping of anything)
+new M.Just(2).isEmpty()   // => false
+M.Just.of(2).isEmpty()    // => false
+M.Maybe.of(2).isEmpty()   // => false
+M.Just.of(null).isEmpty() // => false (can wrap anything)
 
-new M.Maybe(2).isEmpty() // => false
-M.Maybe.of(2).isEmpty() // => false
-
-M.Maybe.of(2).map(x => 2 * x) // => M.Maybe.of(4)
-M.Maybe.of(NaN).map(x => 2 * x).isEmpty() // => true
+M.Just.of(2).map(x => 2 * x)        // => M.Just.of(4)
+M.Nothing.map(x => 2 * x).isEmpty() // => true
 ```

@@ -25,7 +25,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       }
 
       const author = new Person(authorFields)
@@ -69,7 +69,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       // sanity check
@@ -106,7 +106,7 @@ export default (U, should, M, fixtures) => () => {
 
       const book1 = new Book({
         title: 'El Guitarrista',
-        year: M.Maybe.of(2002),
+        year: M.Just.of(2002),
         author: 'Luis Landero'
       })
 
@@ -131,7 +131,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       const author2 = author1.setIn(['givenName'], 'Javi')
@@ -167,7 +167,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })).should.throw()
     })
   })
@@ -182,7 +182,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       author1.toJS().should.eql({
@@ -208,7 +208,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       M.fromJS(Person, {
@@ -234,7 +234,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       JSON.stringify(author1)
@@ -280,7 +280,7 @@ export default (U, should, M, fixtures) => () => {
         familyName: 'Cejudo',
         birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
         favouritePartOfDay: PartOfDay.EVENING(),
-        sex: M.Maybe.of(Sex.MALE()),
+        sex: M.Just.of(Sex.MALE()),
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY()
@@ -294,7 +294,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       const author3 = new Person({
@@ -305,7 +305,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       const author4 = new Person({
@@ -353,12 +353,12 @@ export default (U, should, M, fixtures) => () => {
     it('a Modélico type can have a key that is a Maybe of its own type', () => {
       const bestFriend = new Friend({
         name: 'John',
-        bestFriend: M.Maybe.of()
+        bestFriend: M.Nothing
       })
 
       const marc = new Friend({
         name: 'Marc',
-        bestFriend: M.Maybe.of(bestFriend)
+        bestFriend: M.Just.of(bestFriend)
       })
 
       marc
@@ -453,7 +453,7 @@ export default (U, should, M, fixtures) => () => {
         lifeEvents: M.Map.EMPTY(),
         importantDatesList: M.List.EMPTY(),
         importantDatesSet: M.Set.EMPTY(),
-        sex: M.Maybe.of(Sex.MALE())
+        sex: M.Just.of(Sex.MALE())
       })
 
       Object.prototype.toString.call(author1)

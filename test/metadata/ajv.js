@@ -636,11 +636,11 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
     it('maybe', () => {
       M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",1]')
-        .equals(M.List.of('a', M.Maybe.of(1)))
+        .equals(M.List.of('a', M.Just.of(1)))
         .should.be.exactly(true)
 
       M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",null]')
-        .equals(M.List.of('a', M.Maybe.of()))
+        .equals(M.List.of('a', M.Nothing))
         .should.be.exactly(true)
     })
   })

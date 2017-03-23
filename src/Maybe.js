@@ -24,10 +24,6 @@ class Maybe extends Base {
     super(Maybe)
   }
 
-  get [Symbol.toStringTag] () {
-    return 'ModelicoMaybe'
-  }
-
   get (fieldOrFallbackPair) {
     const fallback = fieldOrFallbackPair[0]
     const field = fieldOrFallbackPair[1]
@@ -76,26 +72,10 @@ class Maybe extends Base {
     return Maybe.of(inner)
   }
 
-  equals (other) {
-    if (this === other) {
-      return true
-    }
-
-    if (haveDifferentTypes(this, other)) {
-      return false
-    }
-
-    return equals(this.inner(), other.inner())
-  }
-
   static of (v) {
     return isNothing(v)
       ? new Nothing()
       : new Just(v)
-  }
-
-  static ofAny (v) {
-    return new Just(v)
   }
 
   static metadata (itemMetadata) {
@@ -128,6 +108,10 @@ class Nothing extends Maybe {
     return nothing
   }
 
+  get [Symbol.toStringTag] () {
+    return 'ModelicoNothing'
+  }
+
   toJSON () {
     return null
   }
@@ -143,6 +127,10 @@ class Nothing extends Maybe {
   map () {
     return this
   }
+
+  equals (other) {
+    return (this === other)
+  }
 }
 
 class Just extends Maybe {
@@ -152,6 +140,10 @@ class Just extends Maybe {
     this.inner = always(v)
 
     Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoJust'
   }
 
   toJSON () {
@@ -178,12 +170,26 @@ class Just extends Maybe {
     return Just.of(f(this.inner()))
   }
 
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
+    return equals(this.inner(), other.inner())
+  }
+
   static of (v) {
     return new Just(v)
   }
 }
 
-Maybe.nothing = Maybe.of()
+Just.displayName = 'Just'
+
+Maybe.Nothing = new Nothing()
 Maybe.Just = Just
 
 export default Object.freeze(Maybe)
