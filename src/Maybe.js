@@ -14,52 +14,14 @@ const reviverFactory = itemMetadata => (k, v, path) => {
     ? always(null)
     : defaultTo(metadata.reviver)(metadata.maybeReviver)
 
-  return new Maybe(revive(k, v, path))
+  const revivedValue = revive(k, v, path)
+
+  return Maybe.of(revivedValue)
 }
-
-class Nothing {
-  toJSON () {
-    return null
-  }
-}
-
-export class Just {
-  constructor (v) {
-    this.get = always(v)
-
-    Object.freeze(this)
-  }
-
-  toJSON () {
-    const v = this.get()
-
-    if (isNothing(v)) {
-      return null
-    }
-
-    return (v.toJSON)
-      ? v.toJSON()
-      : v
-  }
-}
-
-export const nothing = new Nothing()
 
 class Maybe extends Base {
-  constructor (v, nothingCheck = true) {
+  constructor () {
     super(Maybe)
-
-    const inner = (nothingCheck && isNothing(v))
-      ? nothing
-      : new Just(v)
-
-    this.inner = always(inner)
-
-    Object.freeze(this)
-  }
-
-  get [Symbol.toStringTag] () {
-    return 'ModelicoMaybe'
   }
 
   get (fieldOrFallbackPair) {
@@ -77,7 +39,7 @@ class Maybe extends Base {
       return this
     }
 
-    const item = this.inner().get()
+    const item = this.inner()
 
     if (isNothing(item)) {
       return this
@@ -87,7 +49,7 @@ class Maybe extends Base {
       ? item.set(field, v)
       : null
 
-    return new Maybe(newItem)
+    return Maybe.of(newItem)
   }
 
   setIn (path, v) {
@@ -101,7 +63,7 @@ class Maybe extends Base {
 
     const item = this.isEmpty()
       ? fallback
-      : this.inner().get()
+      : this.inner()
 
     const inner = (item.setIn)
       ? item.setIn([field, ...restPath], v)
@@ -110,51 +72,10 @@ class Maybe extends Base {
     return Maybe.of(inner)
   }
 
-  isEmpty () {
-    return (this.inner() === nothing)
-  }
-
-  getOrElse (v) {
-    return this.isEmpty()
-      ? v
-      : this.inner().get()
-  }
-
-  map (f) {
-    return this.isEmpty()
-      ? this
-      : Maybe.ofAny(f(this.inner().get()))
-  }
-
-  toJSON () {
-    return this.inner().toJSON()
-  }
-
-  equals (other) {
-    if (this === other) {
-      return true
-    }
-
-    if (haveDifferentTypes(this, other)) {
-      return false
-    }
-
-    const inner = this.inner()
-    const otherInner = other.inner()
-
-    if (this.isEmpty() || other.isEmpty()) {
-      return inner === otherInner
-    }
-
-    return equals(inner.get(), otherInner.get())
-  }
-
   static of (v) {
-    return new Maybe(v)
-  }
-
-  static ofAny (v) {
-    return new Maybe(v, false)
+    return isNothing(v)
+      ? new Nothing()
+      : new Just(v)
   }
 
   static metadata (itemMetadata) {
@@ -172,6 +93,103 @@ class Maybe extends Base {
 }
 
 Maybe.displayName = 'Maybe'
-Maybe.EMPTY = Maybe.of()
+
+let nothing
+
+class Nothing extends Maybe {
+  constructor () {
+    super()
+
+    if (!nothing) {
+      this.inner = always(TypeError('nothing holds no value'))
+      nothing = this
+    }
+
+    return nothing
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoNothing'
+  }
+
+  toJSON () {
+    return null
+  }
+
+  isEmpty () {
+    return true
+  }
+
+  getOrElse (v) {
+    return v
+  }
+
+  map () {
+    return this
+  }
+
+  equals (other) {
+    return (this === other)
+  }
+}
+
+class Just extends Maybe {
+  constructor (v) {
+    super()
+
+    this.inner = always(v)
+
+    Object.freeze(this)
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoJust'
+  }
+
+  toJSON () {
+    const v = this.inner()
+
+    if (isNothing(v)) {
+      return null
+    }
+
+    return (v.toJSON)
+      ? v.toJSON()
+      : v
+  }
+
+  isEmpty () {
+    return false
+  }
+
+  getOrElse (v) {
+    return this.inner()
+  }
+
+  map (f) {
+    return Just.of(f(this.inner()))
+  }
+
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
+    return equals(this.inner(), other.inner())
+  }
+
+  static of (v) {
+    return new Just(v)
+  }
+}
+
+Just.displayName = 'Just'
+
+Maybe.Nothing = new Nothing()
+Maybe.Just = Just
 
 export default Object.freeze(Maybe)

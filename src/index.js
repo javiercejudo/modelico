@@ -119,6 +119,8 @@ export default {
   Map: ModelicoMap,
   StringMap,
   Maybe,
+  Just: Maybe.Just,
+  Nothing: Maybe.Nothing,
   Base,
   Set: ModelicoSet,
   createModel,
