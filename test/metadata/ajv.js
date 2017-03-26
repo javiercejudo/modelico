@@ -559,7 +559,10 @@ export default (should, M, fixtures, { Ajv }) => () => {
         static innerTypes () {
           return Object.freeze({
             name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
-            dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+            dimensions: ajvList(
+              { minItems: 3, maxItems: 3 },
+              ajvNumber({ minimum: 0, exclusiveMinimum: true })
+            )
           })
         }
       }
@@ -825,7 +828,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('should validate the default value', () => {
       class CountryCode extends M.Base {
         constructor (props) {
-          if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
+          if (!ajv.validate(M.getSchema(_(CountryCode)), props)) {
             throw TypeError(ajv.errors.map(error => error.message).join('\n'))
           }
 
@@ -1086,6 +1089,17 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('indirect reference', () => {
+      const nonEmptyString = ajvString({minLength: 1})
+
+      let maybeChildMetadata
+      const maybeChild = () => {
+        if (!maybeChildMetadata) {
+          maybeChildMetadata = ajvMaybe(_(Child))
+        }
+
+        return maybeChildMetadata
+      }
+
       class Parent extends M.Base {
         constructor (props) {
           super(Parent, props)
@@ -1093,8 +1107,8 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
         static innerTypes () {
           return Object.freeze({
-            name: ajvString({minLength: 1}),
-            child: ajvMaybe(_(Child))
+            name: nonEmptyString,
+            child: maybeChild()
           })
         }
       }
@@ -1106,7 +1120,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
         static innerTypes () {
           return Object.freeze({
-            name: ajvString({minLength: 1}),
+            name: nonEmptyString,
             parent: _(Parent)
           })
         }
@@ -1119,9 +1133,9 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
         static innerTypes () {
           return Object.freeze({
-            name: ajvString({minLength: 1}),
+            name: nonEmptyString,
             parent: _(Parent),
-            child: ajvMaybe(_(Child))
+            child: maybeChild()
           })
         }
       }
@@ -1138,8 +1152,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
               type: 'object',
               properties: {
                 name: {
-                  type: 'string',
-                  minLength: 1
+                  $ref: '#/definitions/2'
                 },
                 child: {
                   anyOf: [
@@ -1148,8 +1161,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
                       type: 'object',
                       properties: {
                         name: {
-                          type: 'string',
-                          minLength: 1
+                          $ref: '#/definitions/2'
                         },
                         parent: {
                           $ref: '#/definitions/3'
@@ -1171,20 +1183,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
               anyOf: [
                 { type: 'null' },
                 {
-                  type: 'object',
-                  properties: {
-                    name: {
-                      type: 'string',
-                      minLength: 1
-                    },
-                    parent: {
-                      $ref: '#/definitions/3'
-                    }
-                  },
-                  required: [
-                    'name',
-                    'parent'
-                  ]
+                  $ref: '#/definitions/4'
                 }
               ]
             }
@@ -1194,12 +1193,15 @@ export default (should, M, fixtures, { Ajv }) => () => {
             'parent'
           ],
           definitions: {
+            2: {
+              type: 'string',
+              minLength: 1
+            },
             3: {
               type: 'object',
               properties: {
                 name: {
-                  type: 'string',
-                  minLength: 1
+                  $ref: '#/definitions/2'
                 },
                 child: {
                   anyOf: [
@@ -1208,8 +1210,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
                       type: 'object',
                       properties: {
                         name: {
-                          type: 'string',
-                          minLength: 1
+                          $ref: '#/definitions/2'
                         },
                         parent: {
                           $ref: '#/definitions/3'
@@ -1225,6 +1226,21 @@ export default (should, M, fixtures, { Ajv }) => () => {
               },
               required: [
                 'name'
+              ]
+            },
+            4: {
+              type: 'object',
+              properties: {
+                name: {
+                  $ref: '#/definitions/2'
+                },
+                parent: {
+                  $ref: '#/definitions/3'
+                }
+              },
+              required: [
+                'name',
+                'parent'
               ]
             }
           }
