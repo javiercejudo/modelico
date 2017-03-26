@@ -3,12 +3,12 @@ import { emptyObject } from './U'
 import getInnerTypes from './getInnerTypes'
 
 const metadataSchemaCache = new WeakMap()
-const metadataRefCache = new WeakMap()
 
 const state = {
   nextRef: 1,
   definitions: {},
-  usedDefinitions: new Set()
+  usedDefinitions: new Set(),
+  metadataRefCache: new WeakMap()
 }
 
 const getSchemaImpl = metadata => {
@@ -70,29 +70,29 @@ const getUsedDefinitions = () => {
 }
 
 const getSchema = (metadata, topLevel = true) => {
-  if (metadataSchemaCache.has(metadata)) {
-    return metadataSchemaCache.get(metadata)
+  if (topLevel) {
+    if (metadataSchemaCache.has(metadata)) {
+      return metadataSchemaCache.get(metadata)
+    }
+
+    state.nextRef = 1
+    state.definitions = {}
+    state.usedDefinitions = new Set()
+    state.metadataRefCache = new WeakMap()
   }
 
-  if (metadataRefCache.has(metadata)) {
-    const ref = metadataRefCache.get(metadata)
+  if (state.metadataRefCache.has(metadata)) {
+    const ref = state.metadataRefCache.get(metadata)
     state.usedDefinitions.add(ref)
     return { $ref: `#/definitions/${ref}` }
   }
 
-  if (topLevel) {
-    state.nextRef = 1
-    state.definitions = {}
-    state.usedDefinitions = new Set()
-  }
-
   const ref = state.nextRef
 
-  metadataRefCache.set(metadata, ref)
+  state.metadataRefCache.set(metadata, ref)
   state.nextRef += 1
 
   const schema = getSchemaImpl(metadata)
-  metadataSchemaCache.set(metadata, schema)
 
   Object.assign(state.definitions, { [ref]: schema })
 
@@ -102,18 +102,24 @@ const getSchema = (metadata, topLevel = true) => {
 
   const definitions = getUsedDefinitions()
 
-  if (Object.keys(definitions).length === 0) {
-    return schema
-  }
+  const finalSchema = (() => {
+    if (Object.keys(definitions).length === 0) {
+      return schema
+    }
 
-  if (!definitions.hasOwnProperty(ref)) {
-    return Object.assign(schema, {definitions})
-  }
+    if (!definitions.hasOwnProperty(ref)) {
+      return Object.assign(schema, {definitions})
+    }
 
-  return {
-    definitions: Object.assign(definitions, { [ref]: schema }),
-    $ref: `#/definitions/${ref}`
-  }
+    return {
+      definitions: Object.assign(definitions, { [ref]: schema }),
+      $ref: `#/definitions/${ref}`
+    }
+  })()
+
+  metadataSchemaCache.set(metadata, finalSchema)
+
+  return finalSchema
 }
 
 export default getSchema
