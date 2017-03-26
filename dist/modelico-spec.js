@@ -174,7 +174,6 @@ var Base = (function (U, should, M, fixtures) {
 
     var _M$metadata = M.metadata(),
         _ = _M$metadata._,
-        maybe = _M$metadata.maybe,
         number = _M$metadata.number,
         string = _M$metadata.string,
         withDefault = _M$metadata.withDefault;
@@ -185,7 +184,7 @@ var Base = (function (U, should, M, fixtures) {
     var author2Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":null,"sex":"MALE"}';
 
     describe('immutability', function () {
-      U.skipIfNoObjectFreeze('must freeze wrapped input', function () {
+      it('must freeze wrapped input', function () {
         var authorFields = {
           givenName: 'Javier',
           familyName: 'Cejudo',
@@ -194,7 +193,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         };
 
         var author = new Person(authorFields);
@@ -246,7 +245,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         // sanity check
@@ -277,25 +276,19 @@ var Base = (function (U, should, M, fixtures) {
             return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, fields));
           }
 
-          // workaround for IE <= 10
-
-
-          createClass(Book, null, [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return get(Book.__proto__ || Object.getPrototypeOf(Book), 'innerTypes', this).call(this);
-            }
-          }]);
           return Book;
-        }(M.createModel({
-          title: string(),
-          year: maybe(number()),
-          author: withDefault(string(), 'anonymous')
+        }(M.createModel(function (_ref) {
+          var m = _ref.m;
+          return {
+            title: m.string(),
+            year: m.maybe(m.number()),
+            author: m.withDefault(m.string(), 'anonymouss')
+          };
         }));
 
         var book1 = new Book({
           title: 'El Guitarrista',
-          year: M.Maybe.of(2002),
+          year: M.Just.of(2002),
           author: 'Luis Landero'
         });
 
@@ -320,7 +313,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         var author2 = author1.setIn(['givenName'], 'Javi').setIn(['birthday'], new Date('1989-04-16T00:00:00.000Z'));
@@ -354,7 +347,7 @@ var Base = (function (U, should, M, fixtures) {
             lifeEvents: M.Map.EMPTY(),
             importantDatesList: M.List.EMPTY(),
             importantDatesSet: M.Set.EMPTY(),
-            sex: M.Maybe.of(Sex.MALE())
+            sex: M.Just.of(Sex.MALE())
           });
         }).should.throw();
       });
@@ -370,7 +363,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         author1.toJS().should.eql({
@@ -396,7 +389,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         M.fromJS(Person, {
@@ -422,7 +415,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         JSON.stringify(author1).should.be.exactly(author1Json).and.exactly(author1.stringify());
@@ -458,7 +451,7 @@ var Base = (function (U, should, M, fixtures) {
           familyName: 'Cejudo',
           birthday: M.Date.of(new Date('1988-04-16T00:00:00.000Z')),
           favouritePartOfDay: PartOfDay.EVENING(),
-          sex: M.Maybe.of(Sex.MALE()),
+          sex: M.Just.of(Sex.MALE()),
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY()
@@ -472,7 +465,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         var author3 = new Person({
@@ -483,7 +476,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         var author4 = new Person({
@@ -531,12 +524,12 @@ var Base = (function (U, should, M, fixtures) {
       it('a Modélico type can have a key that is a Maybe of its own type', function () {
         var bestFriend = new Friend({
           name: 'John',
-          bestFriend: M.Maybe.EMPTY
+          bestFriend: M.Nothing
         });
 
         var marc = new Friend({
           name: 'Marc',
-          bestFriend: M.Maybe.of(bestFriend)
+          bestFriend: M.Just.of(bestFriend)
         });
 
         marc.bestFriend().getOrElse(Friend.EMPTY).name().should.be.exactly('John');
@@ -568,7 +561,7 @@ var Base = (function (U, should, M, fixtures) {
         }(M.createModel({
           title: string(),
           author: withDefault(string(), 'anonymous')
-        }, 'Book'));
+        }, { stringTag: 'Book' }));
 
         var lazarillo1 = M.fromJS(Book, {
           title: 'Lazarillo de Tormes'
@@ -613,7 +606,7 @@ var Base = (function (U, should, M, fixtures) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should use the metadata to coerce the value if necessary', function () {
         var CountryCallingCode = function (_M$createModel4) {
           inherits(CountryCallingCode, _M$createModel4);
@@ -650,7 +643,7 @@ var Base = (function (U, should, M, fixtures) {
           lifeEvents: M.Map.EMPTY(),
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY(),
-          sex: M.Maybe.of(Sex.MALE())
+          sex: M.Just.of(Sex.MALE())
         });
 
         Object.prototype.toString.call(author1).should.be.exactly('[object ModelicoModel]');
@@ -803,7 +796,7 @@ var ModelicoNumber = (function (U, should, M) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Number.of(1)).should.be.exactly('[object ModelicoNumber]');
       });
@@ -917,7 +910,7 @@ var ModelicoDate = (function (U, should, M) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Date.of()).should.be.exactly('[object ModelicoDate]');
       });
@@ -1123,7 +1116,7 @@ var ModelicoMap = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Map.of()).should.be.exactly('[object ModelicoMap]');
       });
@@ -1435,7 +1428,7 @@ var ModelicoEnumMap = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.EnumMap.of()).should.be.exactly('[object ModelicoEnumMap]');
       });
@@ -1457,7 +1450,7 @@ var ModelicoList = (function (U, should, M, _ref) {
         maybe = _M$metadata.maybe;
 
     describe('immutability', function () {
-      U.skipIfNoObjectFreeze('must freeze the input', function () {
+      it('must freeze the input', function () {
         var input = ['a', 'b', 'c'];
 
         M.List.fromArray(input);(function () {
@@ -1720,7 +1713,7 @@ var ModelicoList = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.List.of()).should.be.exactly('[object ModelicoList]');
       });
@@ -1904,7 +1897,7 @@ var ModelicoSet = (function (U, should, M, _ref) {
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Set.of()).should.be.exactly('[object ModelicoSet]');
       });
@@ -1930,7 +1923,7 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
         var maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver);
         var maybe2 = maybe1.set('givenName', 'Javi');
 
-        maybe2.inner().get().givenName().should.be.exactly('Javi');
+        maybe2.getOrElse('').givenName().should.be.exactly('Javi');
       });
 
       it('should not throw upon setting if empty', function () {
@@ -1940,8 +1933,8 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       });
 
       it('should return a new maybe with a value when the path is empty', function () {
-        var maybe1 = M.Maybe.of(21);
-        var maybe2 = M.Maybe.of(null);
+        var maybe1 = M.Just.of(21);
+        var maybe2 = M.Nothing;
 
         var maybe3 = maybe1.setIn([], 22);
         var maybe4 = maybe2.setIn([], 10);
@@ -1955,47 +1948,47 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       });
 
       it('should return an empty Maybe when setting a path beyond Modélico boundaries', function () {
-        var maybe1 = M.Maybe.of({ a: 2 });
+        var maybe1 = M.Just.of({ a: 2 });
 
         var maybe2 = maybe1.setIn([[{ a: 1 }, 'a']], 200);
 
         maybe2.isEmpty().should.be.exactly(true);
 
-        M.Maybe.of(2).set('a', 3).isEmpty().should.be.exactly(true);
+        M.Just.of(2).set('a', 3).isEmpty().should.be.exactly(true);
       });
 
       it('should support Maybe of null or undefined', function () {
-        should(M.Maybe.ofAny(null).setIn([], 2).toJSON()).be.exactly(2);
+        should(M.Just.of(null).setIn([], 2).toJSON()).be.exactly(2);
 
-        should(M.Maybe.ofAny(null).set('a', 2).inner().get()).be.exactly(null);
+        should(M.Just.of(null).set('a', 2).getOrElse('')).be.exactly(null);
 
-        should(M.Maybe.ofAny().set('a', 2).inner().get()).be.exactly(undefined);
+        should(M.Just.of().set('a', 2).getOrElse('')).be.exactly(undefined);
       });
     });
 
     describe('stringifying', function () {
       it('should stringify Maybe values correctly', function () {
-        var maybe1 = M.Maybe.of(2);
+        var maybe1 = M.Just.of(2);
         JSON.stringify(maybe1).should.be.exactly('2');
 
-        var maybe2 = M.Maybe.of(null);
+        var maybe2 = M.Nothing;
         JSON.stringify(maybe2).should.be.exactly('null');
       });
 
       it('should support arbitrary Modélico types', function () {
         var author = M.fromJSON(Person, authorJson);
 
-        var maybe1 = M.Maybe.of(author);
+        var maybe1 = M.Just.of(author);
         JSON.stringify(maybe1).should.be.exactly(authorJson);
 
-        var maybe2 = M.Maybe.of(null);
+        var maybe2 = M.Nothing;
         JSON.stringify(maybe2).should.be.exactly('null');
       });
 
       it('should support Maybe of null or undefined', function () {
-        JSON.stringify(M.Maybe.ofAny(null)).should.be.exactly('null');
+        JSON.stringify(M.Just.of(null)).should.be.exactly('null');
 
-        JSON.stringify(M.Maybe.ofAny()).should.be.exactly('null');
+        JSON.stringify(M.Just.of()).should.be.exactly('null');
       });
     });
 
@@ -2017,7 +2010,7 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
         var author = JSON.parse(authorJson, _(Person).reviver);
 
         var myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver);
-        myMaybe.inner().get().equals(author).should.be.exactly(true);
+        myMaybe.inner().equals(author).should.be.exactly(true);
       });
 
       it('should parse missing keys of Maybe values as Maybe with Nothing', function () {
@@ -2031,7 +2024,7 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
 
     describe('isEmpty', function () {
       it('should return false if there is a value', function () {
-        var maybe = M.Maybe.of(5);
+        var maybe = M.Just.of(5);
 
         maybe.isEmpty().should.be.exactly(false);
       });
@@ -2049,13 +2042,13 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
 
     describe('getOrElse', function () {
       it('should return the value if it exists', function () {
-        var maybe = M.Maybe.of(5);
+        var maybe = M.Just.of(5);
 
         should(maybe.getOrElse(7)).be.exactly(5);
       });
 
       it('should return the provided default if there is nothing', function () {
-        var maybe = M.Maybe.of(null);
+        var maybe = M.Nothing;
 
         should(maybe.getOrElse(7)).be.exactly(7);
       });
@@ -2065,8 +2058,8 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       var partOfDayFromJson = _(PartOfDay).reviver.bind(undefined, '');
 
       it('should apply a function f to the value and return another Maybe with it', function () {
-        var maybeFrom1 = M.Maybe.of(5);
-        var maybeFrom2 = M.Maybe.of('EVENING');
+        var maybeFrom1 = M.Just.of(5);
+        var maybeFrom2 = M.Just.of('EVENING');
 
         var maybeTo1 = maybeFrom1.map(function (x) {
           return 2 * x;
@@ -2078,8 +2071,8 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       });
 
       it('should return a non-empty Maybe of whatever mapped function returns', function () {
-        var maybeFrom1 = M.Maybe.of(null);
-        var maybeFrom2 = M.Maybe.of(0);
+        var maybeFrom1 = M.Nothing;
+        var maybeFrom2 = M.Just.of(0);
 
         var maybeTo1 = maybeFrom1.map(function (x) {
           return 2 * x;
@@ -2104,18 +2097,20 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
           return plus5(double(x));
         };
 
-        should(M.Maybe.of(10).map(doublePlus5).inner().get()).be.exactly(M.Maybe.of(10).map(double).map(plus5).inner().get()).and.exactly(25);
+        var just10 = M.Just.of(10);
 
-        should(M.Maybe.of(10).map(function (x) {
+        should(just10.map(doublePlus5).inner()).be.exactly(just10.map(double).map(plus5).inner()).and.exactly(25);
+
+        should(just10.map(function (x) {
           return null;
-        }).map(plus5).inner().get()).be.exactly(5);
+        }).map(plus5).inner()).be.exactly(5);
       });
     });
 
     describe('comparing', function () {
       it('should identify equal instances', function () {
-        var modelicoMaybe1 = M.Maybe.of(2);
-        var modelicoMaybe2 = M.Maybe.of(2);
+        var modelicoMaybe1 = M.Just.of(2);
+        var modelicoMaybe2 = M.Just.of(2);
 
         modelicoMaybe1.should.not.be.exactly(modelicoMaybe2);
         modelicoMaybe1.should.not.equal(modelicoMaybe2);
@@ -2125,8 +2120,8 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       });
 
       it('supports non-primitive types', function () {
-        var modelicoMaybe1 = M.Maybe.of(M.Number.of(2));
-        var modelicoMaybe2 = M.Maybe.of(M.Number.of(2));
+        var modelicoMaybe1 = M.Just.of(M.Number.of(2));
+        var modelicoMaybe2 = M.Just.of(M.Number.of(2));
 
         modelicoMaybe1.should.not.be.exactly(modelicoMaybe2);
         modelicoMaybe1.should.not.equal(modelicoMaybe2);
@@ -2138,8 +2133,8 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       });
 
       it('handles nothing well', function () {
-        var modelicoMaybe1 = M.Maybe.of(M.Number.of(2));
-        var modelicoMaybe2 = M.Maybe.EMPTY;
+        var modelicoMaybe1 = M.Just.of(M.Number.of(2));
+        var modelicoMaybe2 = M.Nothing;
         var modelicoMaybe3 = M.Maybe.of();
 
         modelicoMaybe1.should.not.be.exactly(modelicoMaybe2);
@@ -2150,14 +2145,16 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
       });
 
       it('should have same-value-zero semantics', function () {
-        M.Maybe.of(0).equals(M.Maybe.of(-0)).should.be.exactly(true);
-        M.Maybe.of(NaN).equals(M.Maybe.of(NaN)).should.be.exactly(true);
+        M.Just.of(0).equals(M.Just.of(-0)).should.be.exactly(true);
+        M.Just.of(NaN).equals(M.Just.of(NaN)).should.be.exactly(true);
       });
     });
 
-    U.skipDescribeIfNoToStringTagSymbol('toStringTag', function () {
+    U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
-        Object.prototype.toString.call(M.Maybe.of(1)).should.be.exactly('[object ModelicoMaybe]');
+        Object.prototype.toString.call(M.Just.of(1)).should.be.exactly('[object ModelicoJust]');
+
+        Object.prototype.toString.call(M.Nothing).should.be.exactly('[object ModelicoNothing]');
       });
     });
   };
@@ -2218,7 +2215,7 @@ var asIs = (function (U, should, M) {
         should(asIsObject.two).be.exactly(2);
       });
 
-      U.skipIfNoObjectFreeze('should be immutable', function () {
+      it('should be immutable', function () {
         (function () {
           asIs().reviver = function (x) {
             return x;
@@ -2233,7 +2230,7 @@ var asIs = (function (U, should, M) {
 
 var setIn = (function (U, should, M) {
   return function () {
-    U.skipIfNoObjectFreeze('should work across types', function () {
+    it('should work across types', function () {
       var hammer = M.Map.of('hammer', 'Can’t Touch This');
       var array1 = M.List.of('totally', 'immutable', hammer);(function () {
         array1.inner()[1] = 'I’m going to mutate you!';
@@ -3872,7 +3869,7 @@ var friendFactory = (function (M) {
 
   Friend.EMPTY = new Friend({
     name: '',
-    bestFriend: M.Maybe.EMPTY
+    bestFriend: M.Nothing
   });
 
   return Object.freeze(Friend);
@@ -4673,14 +4670,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return possibleConstructorReturn(this, (Side.__proto__ || Object.getPrototypeOf(Side)).apply(this, arguments));
         }
 
-        createClass(Side, null, [{
-          key: 'innerTypes',
-
-          // workaround for IE <= 10
-          value: function innerTypes() {
-            return get(Side.__proto__ || Object.getPrototypeOf(Side), 'innerTypes', this).call(this);
-          }
-        }]);
         return Side;
       }(M.Enum);
 
@@ -4869,9 +4858,9 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
 
       it('maybe', function () {
-        M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",1]').equals(M.List.of('a', M.Maybe.of(1))).should.be.exactly(true);
+        M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",1]').equals(M.List.of('a', M.Just.of(1))).should.be.exactly(true);
 
-        M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",null]').equals(M.List.of('a', M.Maybe.of())).should.be.exactly(true);
+        M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",null]').equals(M.List.of('a', M.Nothing)).should.be.exactly(true);
       });
     });
 
@@ -5051,7 +5040,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           function CountryCode(props) {
             classCallCheck(this, CountryCode);
 
-            if (!ajv.validate(ajv_(CountryCode).schema(), props)) {
+            if (!ajv.validate(M.getSchema(_(CountryCode)), props)) {
               throw TypeError(ajv.errors.map(function (error) {
                 return error.message;
               }).join('\n'));
@@ -5253,14 +5242,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return possibleConstructorReturn(this, (ScoreType.__proto__ || Object.getPrototypeOf(ScoreType)).apply(this, arguments));
         }
 
-        createClass(ScoreType, null, [{
-          key: 'innerTypes',
-
-          // workaround for IE <= 10
-          value: function innerTypes() {
-            return get(ScoreType.__proto__ || Object.getPrototypeOf(ScoreType), 'innerTypes', this).call(this);
-          }
-        }]);
         return ScoreType;
       }(M.Enum);
 
@@ -5306,27 +5287,24 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
     describe('Circular innerTypes', function () {
       it('self reference', function () {
-        var Chain = function (_M$Base9) {
-          inherits(Chain, _M$Base9);
+        var Chain = function (_M$createAjvModel) {
+          inherits(Chain, _M$createAjvModel);
 
           function Chain(props) {
             classCallCheck(this, Chain);
             return possibleConstructorReturn(this, (Chain.__proto__ || Object.getPrototypeOf(Chain)).call(this, Chain, props));
           }
 
-          createClass(Chain, null, [{
-            key: 'innerTypes',
-            value: function innerTypes() {
-              return Object.freeze({
-                description: ajvString({ minLength: 1 }),
-                previous: ajvMaybe(_(Chain)),
-                next: ajvMaybe(_(Chain)),
-                relatedChains: ajvList({}, _(Chain))
-              });
-            }
-          }]);
           return Chain;
-        }(M.Base);
+        }(M.createAjvModel(function (_ref2) {
+          var m = _ref2.m;
+          return {
+            description: m.ajvString({ minLength: 1 }),
+            previous: m.ajvMaybe(m._(Chain)),
+            next: m.ajvMaybe(m._(Chain)),
+            relatedChains: m.ajvList({}, m._(Chain))
+          };
+        }));
 
         M.getSchema(_(Chain)).should.deepEqual({
           definitions: {
@@ -5358,8 +5336,19 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       });
 
       it('indirect reference', function () {
-        var Parent = function (_M$Base10) {
-          inherits(Parent, _M$Base10);
+        var nonEmptyString = ajvString({ minLength: 1 });
+
+        var maybeChildMetadata = void 0;
+        var maybeChild = function maybeChild() {
+          if (!maybeChildMetadata) {
+            maybeChildMetadata = ajvMaybe(_(Child));
+          }
+
+          return maybeChildMetadata;
+        };
+
+        var Parent = function (_M$Base9) {
+          inherits(Parent, _M$Base9);
 
           function Parent(props) {
             classCallCheck(this, Parent);
@@ -5370,16 +5359,16 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             key: 'innerTypes',
             value: function innerTypes() {
               return Object.freeze({
-                name: ajvString({ minLength: 1 }),
-                child: ajvMaybe(_(Child))
+                name: nonEmptyString,
+                child: maybeChild()
               });
             }
           }]);
           return Parent;
         }(M.Base);
 
-        var Child = function (_M$Base11) {
-          inherits(Child, _M$Base11);
+        var Child = function (_M$Base10) {
+          inherits(Child, _M$Base10);
 
           function Child(props) {
             classCallCheck(this, Child);
@@ -5390,7 +5379,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             key: 'innerTypes',
             value: function innerTypes() {
               return Object.freeze({
-                name: ajvString({ minLength: 1 }),
+                name: nonEmptyString,
                 parent: _(Parent)
               });
             }
@@ -5398,8 +5387,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           return Child;
         }(M.Base);
 
-        var Person = function (_M$Base12) {
-          inherits(Person, _M$Base12);
+        var Person = function (_M$Base11) {
+          inherits(Person, _M$Base11);
 
           function Person(props) {
             classCallCheck(this, Person);
@@ -5410,9 +5399,9 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             key: 'innerTypes',
             value: function innerTypes() {
               return Object.freeze({
-                name: ajvString({ minLength: 1 }),
+                name: nonEmptyString,
                 parent: _(Parent),
-                child: ajvMaybe(_(Child))
+                child: maybeChild()
               });
             }
           }]);
@@ -5430,16 +5419,14 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
               type: 'object',
               properties: {
                 name: {
-                  type: 'string',
-                  minLength: 1
+                  $ref: '#/definitions/2'
                 },
                 child: {
                   anyOf: [{ type: 'null' }, {
                     type: 'object',
                     properties: {
                       name: {
-                        type: 'string',
-                        minLength: 1
+                        $ref: '#/definitions/2'
                       },
                       parent: {
                         $ref: '#/definitions/3'
@@ -5453,36 +5440,28 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             },
             child: {
               anyOf: [{ type: 'null' }, {
-                type: 'object',
-                properties: {
-                  name: {
-                    type: 'string',
-                    minLength: 1
-                  },
-                  parent: {
-                    $ref: '#/definitions/3'
-                  }
-                },
-                required: ['name', 'parent']
+                $ref: '#/definitions/4'
               }]
             }
           },
           required: ['name', 'parent'],
           definitions: {
+            2: {
+              type: 'string',
+              minLength: 1
+            },
             3: {
               type: 'object',
               properties: {
                 name: {
-                  type: 'string',
-                  minLength: 1
+                  $ref: '#/definitions/2'
                 },
                 child: {
                   anyOf: [{ type: 'null' }, {
                     type: 'object',
                     properties: {
                       name: {
-                        type: 'string',
-                        minLength: 1
+                        $ref: '#/definitions/2'
                       },
                       parent: {
                         $ref: '#/definitions/3'
@@ -5493,6 +5472,18 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
                 }
               },
               required: ['name']
+            },
+            4: {
+              type: 'object',
+              properties: {
+                name: {
+                  $ref: '#/definitions/2'
+                },
+                parent: {
+                  $ref: '#/definitions/3'
+                }
+              },
+              required: ['name', 'parent']
             }
           }
         });
@@ -5599,23 +5590,6 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
 
 /* eslint-env mocha */
 
-var hasObjectFreeze = function () {
-  var a = {};
-
-  try {
-    Object.freeze(a);
-  } catch (e) {
-    return false;
-  }
-
-  try {
-    a.test = 1;
-    return false;
-  } catch (ignore) {}
-
-  return true;
-}();
-
 var hasProxies = function () {
   try {
     return new Proxy({}, {}) && true;
@@ -5634,10 +5608,12 @@ var hasToStringTagSymbol = function () {
 
 var buildUtils = function buildUtils() {
   return Object.freeze({
-    skipIfNoProxies: hasProxies ? it : it.skip,
-    skipDescribeIfNoProxies: hasProxies ? describe : describe.skip,
-    skipDescribeIfNoToStringTagSymbol: hasToStringTagSymbol ? describe : describe.skip,
-    skipIfNoObjectFreeze: hasObjectFreeze ? it : it.skip,
+    skipIfNoProxies: function skipIfNoProxies(fn) {
+      return hasProxies ? fn : fn.skip;
+    },
+    skipIfNoToStringTagSymbol: function skipIfNoToStringTagSymbol(fn) {
+      return hasToStringTagSymbol ? fn : fn.skip;
+    },
     objToArr: function objToArr(obj) {
       return Object.keys(obj).map(function (k) {
         return [k, obj[k]];
@@ -5696,9 +5672,9 @@ var modelicoSpec = (function (_ref) {
 
     describe('Api Example: Fixer IO', fixerIoSpec.apply(undefined, deps));
 
-    U.skipDescribeIfNoProxies('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
+    U.skipIfNoProxies(describe)('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 
-    U.skipDescribeIfNoProxies('Proxies', function () {
+    U.skipIfNoProxies(describe)('Proxies', function () {
       describe('Map', proxyMap.apply(undefined, deps));
       describe('List', proxyList.apply(undefined, deps));
       describe('Set', proxySet.apply(undefined, deps));

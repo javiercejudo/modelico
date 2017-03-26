@@ -1,4 +1,4 @@
-var version = "21.6.0";
+var version = "22.0.0";
 
 
 
@@ -119,12 +119,12 @@ const reviverFactory = Type => (k, v, path = []) => {
 };
 
 const metadataSchemaCache = new WeakMap();
-const metadataRefCache = new WeakMap();
 
 const state = {
   nextRef: 1,
   definitions: {},
-  usedDefinitions: new Set()
+  usedDefinitions: new Set(),
+  metadataRefCache: new WeakMap()
 };
 
 const getSchemaImpl = metadata => {
@@ -133,7 +133,8 @@ const getSchemaImpl = metadata => {
   }
 
   if (
-    !metadata.type || !metadata.type.innerTypes ||
+    !metadata.type ||
+    !metadata.type.innerTypes ||
     Object.keys(getInnerTypes$1([], metadata.type)).length === 0
   ) {
     return emptyObject
@@ -185,29 +186,29 @@ const getUsedDefinitions = () => {
 };
 
 const getSchema = (metadata, topLevel = true) => {
-  if (metadataSchemaCache.has(metadata)) {
-    return metadataSchemaCache.get(metadata)
+  if (topLevel) {
+    if (metadataSchemaCache.has(metadata)) {
+      return metadataSchemaCache.get(metadata)
+    }
+
+    state.nextRef = 1;
+    state.definitions = {};
+    state.usedDefinitions = new Set();
+    state.metadataRefCache = new WeakMap();
   }
 
-  if (metadataRefCache.has(metadata)) {
-    const ref = metadataRefCache.get(metadata);
+  if (state.metadataRefCache.has(metadata)) {
+    const ref = state.metadataRefCache.get(metadata);
     state.usedDefinitions.add(ref);
     return { $ref: `#/definitions/${ref}` }
   }
 
-  if (topLevel) {
-    state.nextRef = 1;
-    state.definitions = {};
-    state.usedDefinitions = new Set();
-  }
-
   const ref = state.nextRef;
 
-  metadataRefCache.set(metadata, ref);
+  state.metadataRefCache.set(metadata, ref);
   state.nextRef += 1;
 
   const schema = getSchemaImpl(metadata);
-  metadataSchemaCache.set(metadata, schema);
 
   Object.assign(state.definitions, { [ref]: schema });
 
@@ -217,18 +218,24 @@ const getSchema = (metadata, topLevel = true) => {
 
   const definitions = getUsedDefinitions();
 
-  if (Object.keys(definitions).length === 0) {
-    return schema
-  }
+  const finalSchema = (() => {
+    if (Object.keys(definitions).length === 0) {
+      return schema
+    }
 
-  if (definitions.hasOwnProperty(ref)) {
+    if (!definitions.hasOwnProperty(ref)) {
+      return Object.assign(schema, {definitions})
+    }
+
     return {
       definitions: Object.assign(definitions, { [ref]: schema }),
       $ref: `#/definitions/${ref}`
     }
-  }
+  })();
 
-  return Object.assign(schema, {definitions})
+  metadataSchemaCache.set(metadata, finalSchema);
+
+  return finalSchema
 };
 
 var validate = (instance, innerMetadata = []) => {
@@ -395,52 +402,14 @@ const reviverFactory$2 = itemMetadata => (k, v, path) => {
     ? always(null)
     : defaultTo(metadata.reviver)(metadata.maybeReviver);
 
-  return new Maybe(revive(k, v, path))
+  const revivedValue = revive(k, v, path);
+
+  return Maybe.of(revivedValue)
 };
 
-class Nothing {
-  toJSON () {
-    return null
-  }
-}
-
-class Just {
-  constructor (v) {
-    this.get = always(v);
-
-    Object.freeze(this);
-  }
-
-  toJSON () {
-    const v = this.get();
-
-    if (isNothing(v)) {
-      return null
-    }
-
-    return (v.toJSON)
-      ? v.toJSON()
-      : v
-  }
-}
-
-const nothing = new Nothing();
-
 class Maybe extends Base$1 {
-  constructor (v, nothingCheck = true) {
+  constructor () {
     super(Maybe);
-
-    const inner = (nothingCheck && isNothing(v))
-      ? nothing
-      : new Just(v);
-
-    this.inner = always(inner);
-
-    Object.freeze(this);
-  }
-
-  get [Symbol.toStringTag] () {
-    return 'ModelicoMaybe'
   }
 
   get (fieldOrFallbackPair) {
@@ -458,7 +427,7 @@ class Maybe extends Base$1 {
       return this
     }
 
-    const item = this.inner().get();
+    const item = this.inner();
 
     if (isNothing(item)) {
       return this
@@ -468,7 +437,7 @@ class Maybe extends Base$1 {
       ? item.set(field, v)
       : null;
 
-    return new Maybe(newItem)
+    return Maybe.of(newItem)
   }
 
   setIn (path, v) {
@@ -482,7 +451,7 @@ class Maybe extends Base$1 {
 
     const item = this.isEmpty()
       ? fallback
-      : this.inner().get();
+      : this.inner();
 
     const inner = (item.setIn)
       ? item.setIn([field, ...restPath], v)
@@ -491,51 +460,10 @@ class Maybe extends Base$1 {
     return Maybe.of(inner)
   }
 
-  isEmpty () {
-    return (this.inner() === nothing)
-  }
-
-  getOrElse (v) {
-    return this.isEmpty()
-      ? v
-      : this.inner().get()
-  }
-
-  map (f) {
-    return this.isEmpty()
-      ? this
-      : Maybe.ofAny(f(this.inner().get()))
-  }
-
-  toJSON () {
-    return this.inner().toJSON()
-  }
-
-  equals (other) {
-    if (this === other) {
-      return true
-    }
-
-    if (haveDifferentTypes(this, other)) {
-      return false
-    }
-
-    const inner = this.inner();
-    const otherInner = other.inner();
-
-    if (this.isEmpty() || other.isEmpty()) {
-      return inner === otherInner
-    }
-
-    return equals(inner.get(), otherInner.get())
-  }
-
   static of (v) {
-    return new Maybe(v)
-  }
-
-  static ofAny (v) {
-    return new Maybe(v, false)
+    return isNothing(v)
+      ? new Nothing()
+      : new Just(v)
   }
 
   static metadata (itemMetadata) {
@@ -553,7 +481,104 @@ class Maybe extends Base$1 {
 }
 
 Maybe.displayName = 'Maybe';
-Maybe.EMPTY = Maybe.of();
+
+let nothing;
+
+class Nothing extends Maybe {
+  constructor () {
+    super();
+
+    if (!nothing) {
+      this.inner = always(TypeError('nothing holds no value'));
+      nothing = this;
+    }
+
+    return nothing
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoNothing'
+  }
+
+  toJSON () {
+    return null
+  }
+
+  isEmpty () {
+    return true
+  }
+
+  getOrElse (v) {
+    return v
+  }
+
+  map () {
+    return this
+  }
+
+  equals (other) {
+    return (this === other)
+  }
+}
+
+class Just extends Maybe {
+  constructor (v) {
+    super();
+
+    this.inner = always(v);
+
+    Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoJust'
+  }
+
+  toJSON () {
+    const v = this.inner();
+
+    if (isNothing(v)) {
+      return null
+    }
+
+    return (v.toJSON)
+      ? v.toJSON()
+      : v
+  }
+
+  isEmpty () {
+    return false
+  }
+
+  getOrElse (v) {
+    return this.inner()
+  }
+
+  map (f) {
+    return Just.of(f(this.inner()))
+  }
+
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
+    return equals(this.inner(), other.inner())
+  }
+
+  static of (v) {
+    return new Just(v)
+  }
+}
+
+Just.displayName = 'Just';
+
+Maybe.Nothing = new Nothing();
+Maybe.Just = Just;
 
 var Maybe$1 = Object.freeze(Maybe);
 
@@ -1772,7 +1797,7 @@ const fromJS = (Type, js) => genericsFromJS(Type, [], js);
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js);
 const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js);
 
-const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
+const createModel = (innerTypes, {stringTag = 'ModelicoModel', metadata: meta = metadata()} = {}) => {
   return class extends Base$1 {
     get [Symbol.toStringTag] () {
       return stringTag
@@ -1780,10 +1805,14 @@ const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
 
     static innerTypes (path, Type) {
       return (typeof innerTypes === 'function')
-        ? innerTypes(path, Type)
+        ? innerTypes({m: meta, path, Type})
         : Object.freeze(innerTypes)
     }
   }
+};
+
+const createAjvModel = (innerTypes, ajv) => {
+  return createModel(innerTypes, {metadata: ajvMetadata(ajv)})
 };
 
 var M = {
@@ -1796,9 +1825,12 @@ var M = {
   Map: ModelicoMap$1,
   StringMap: StringMap$1,
   Maybe: Maybe$1,
+  Just: Maybe$1.Just,
+  Nothing: Maybe$1.Nothing,
   Base: Base$1,
   Set: ModelicoSet$1,
   createModel,
+  createAjvModel,
   fields: x => x[fieldsSymbol](),
   symbols,
   fromJS,

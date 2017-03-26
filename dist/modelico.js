@@ -9,7 +9,7 @@
 	})();
 }(this, (function () { 'use strict';
 
-var version = "21.6.0";
+var version = "22.0.0";
 
 
 
@@ -315,12 +315,12 @@ var reviverFactory = function reviverFactory(Type) {
 };
 
 var metadataSchemaCache = new WeakMap();
-var metadataRefCache = new WeakMap();
 
 var state = {
   nextRef: 1,
   definitions: {},
-  usedDefinitions: new Set()
+  usedDefinitions: new Set(),
+  metadataRefCache: new WeakMap()
 };
 
 var getSchemaImpl = function getSchemaImpl(metadata) {
@@ -379,29 +379,29 @@ var getUsedDefinitions = function getUsedDefinitions() {
 var getSchema = function getSchema(metadata) {
   var topLevel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
-  if (metadataSchemaCache.has(metadata)) {
-    return metadataSchemaCache.get(metadata);
+  if (topLevel) {
+    if (metadataSchemaCache.has(metadata)) {
+      return metadataSchemaCache.get(metadata);
+    }
+
+    state.nextRef = 1;
+    state.definitions = {};
+    state.usedDefinitions = new Set();
+    state.metadataRefCache = new WeakMap();
   }
 
-  if (metadataRefCache.has(metadata)) {
-    var _ref = metadataRefCache.get(metadata);
+  if (state.metadataRefCache.has(metadata)) {
+    var _ref = state.metadataRefCache.get(metadata);
     state.usedDefinitions.add(_ref);
     return { $ref: '#/definitions/' + _ref };
   }
 
-  if (topLevel) {
-    state.nextRef = 1;
-    state.definitions = {};
-    state.usedDefinitions = new Set();
-  }
-
   var ref = state.nextRef;
 
-  metadataRefCache.set(metadata, ref);
+  state.metadataRefCache.set(metadata, ref);
   state.nextRef += 1;
 
   var schema = getSchemaImpl(metadata);
-  metadataSchemaCache.set(metadata, schema);
 
   Object.assign(state.definitions, defineProperty({}, ref, schema));
 
@@ -411,18 +411,24 @@ var getSchema = function getSchema(metadata) {
 
   var definitions = getUsedDefinitions();
 
-  if (Object.keys(definitions).length === 0) {
-    return schema;
-  }
+  var finalSchema = function () {
+    if (Object.keys(definitions).length === 0) {
+      return schema;
+    }
 
-  if (definitions.hasOwnProperty(ref)) {
+    if (!definitions.hasOwnProperty(ref)) {
+      return Object.assign(schema, { definitions: definitions });
+    }
+
     return {
       definitions: Object.assign(definitions, defineProperty({}, ref, schema)),
       $ref: '#/definitions/' + ref
     };
-  }
+  }();
 
-  return Object.assign(schema, { definitions: definitions });
+  metadataSchemaCache.set(metadata, finalSchema);
+
+  return finalSchema;
 };
 
 var validate = (function (instance) {
@@ -620,65 +626,18 @@ var reviverFactory$2 = function reviverFactory(itemMetadata) {
 
     var revive = v === null ? always(null) : defaultTo(metadata.reviver)(metadata.maybeReviver);
 
-    return new Maybe(revive(k, v, path));
+    var revivedValue = revive(k, v, path);
+
+    return Maybe.of(revivedValue);
   };
 };
-
-var Nothing = function () {
-  function Nothing() {
-    classCallCheck(this, Nothing);
-  }
-
-  createClass(Nothing, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return null;
-    }
-  }]);
-  return Nothing;
-}();
-
-var Just = function () {
-  function Just(v) {
-    classCallCheck(this, Just);
-
-    this.get = always(v);
-
-    Object.freeze(this);
-  }
-
-  createClass(Just, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      var v = this.get();
-
-      if (isNothing(v)) {
-        return null;
-      }
-
-      return v.toJSON ? v.toJSON() : v;
-    }
-  }]);
-  return Just;
-}();
-
-var nothing = new Nothing();
 
 var Maybe = function (_Base) {
   inherits(Maybe, _Base);
 
-  function Maybe(v) {
-    var nothingCheck = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+  function Maybe() {
     classCallCheck(this, Maybe);
-
-    var _this = possibleConstructorReturn(this, (Maybe.__proto__ || Object.getPrototypeOf(Maybe)).call(this, Maybe));
-
-    var inner = nothingCheck && isNothing(v) ? nothing : new Just(v);
-
-    _this.inner = always(inner);
-
-    Object.freeze(_this);
-    return _this;
+    return possibleConstructorReturn(this, (Maybe.__proto__ || Object.getPrototypeOf(Maybe)).call(this, Maybe));
   }
 
   createClass(Maybe, [{
@@ -697,7 +656,7 @@ var Maybe = function (_Base) {
         return this;
       }
 
-      var item = this.inner().get();
+      var item = this.inner();
 
       if (isNothing(item)) {
         return this;
@@ -705,7 +664,7 @@ var Maybe = function (_Base) {
 
       var newItem = item.set ? item.set(field, v) : null;
 
-      return new Maybe(newItem);
+      return Maybe.of(newItem);
     }
   }, {
     key: 'setIn',
@@ -721,66 +680,16 @@ var Maybe = function (_Base) {
       var fallback = fallbackOrFieldPair[0];
       var field = fallbackOrFieldPair[1];
 
-      var item = this.isEmpty() ? fallback : this.inner().get();
+      var item = this.isEmpty() ? fallback : this.inner();
 
       var inner = item.setIn ? item.setIn([field].concat(toConsumableArray(restPath)), v) : null;
 
       return Maybe.of(inner);
     }
-  }, {
-    key: 'isEmpty',
-    value: function isEmpty() {
-      return this.inner() === nothing;
-    }
-  }, {
-    key: 'getOrElse',
-    value: function getOrElse(v) {
-      return this.isEmpty() ? v : this.inner().get();
-    }
-  }, {
-    key: 'map',
-    value: function map(f) {
-      return this.isEmpty() ? this : Maybe.ofAny(f(this.inner().get()));
-    }
-  }, {
-    key: 'toJSON',
-    value: function toJSON() {
-      return this.inner().toJSON();
-    }
-  }, {
-    key: 'equals',
-    value: function equals$$1(other) {
-      if (this === other) {
-        return true;
-      }
-
-      if (haveDifferentTypes(this, other)) {
-        return false;
-      }
-
-      var inner = this.inner();
-      var otherInner = other.inner();
-
-      if (this.isEmpty() || other.isEmpty()) {
-        return inner === otherInner;
-      }
-
-      return equals(inner.get(), otherInner.get());
-    }
-  }, {
-    key: Symbol.toStringTag,
-    get: function get$$1() {
-      return 'ModelicoMaybe';
-    }
   }], [{
     key: 'of',
     value: function of(v) {
-      return new Maybe(v);
-    }
-  }, {
-    key: 'ofAny',
-    value: function ofAny(v) {
-      return new Maybe(v, false);
+      return isNothing(v) ? new Nothing() : new Just(v);
     }
   }, {
     key: 'metadata',
@@ -802,7 +711,132 @@ var Maybe = function (_Base) {
 }(Base$1);
 
 Maybe.displayName = 'Maybe';
-Maybe.EMPTY = Maybe.of();
+
+var nothing = void 0;
+
+var Nothing = function (_Maybe) {
+  inherits(Nothing, _Maybe);
+
+  function Nothing() {
+    var _ret;
+
+    classCallCheck(this, Nothing);
+
+    var _this2 = possibleConstructorReturn(this, (Nothing.__proto__ || Object.getPrototypeOf(Nothing)).call(this));
+
+    if (!nothing) {
+      _this2.inner = always(TypeError('nothing holds no value'));
+      nothing = _this2;
+    }
+
+    return _ret = nothing, possibleConstructorReturn(_this2, _ret);
+  }
+
+  createClass(Nothing, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return null;
+    }
+  }, {
+    key: 'isEmpty',
+    value: function isEmpty() {
+      return true;
+    }
+  }, {
+    key: 'getOrElse',
+    value: function getOrElse(v) {
+      return v;
+    }
+  }, {
+    key: 'map',
+    value: function map() {
+      return this;
+    }
+  }, {
+    key: 'equals',
+    value: function equals$$1(other) {
+      return this === other;
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoNothing';
+    }
+  }]);
+  return Nothing;
+}(Maybe);
+
+var Just = function (_Maybe2) {
+  inherits(Just, _Maybe2);
+
+  function Just(v) {
+    classCallCheck(this, Just);
+
+    var _this3 = possibleConstructorReturn(this, (Just.__proto__ || Object.getPrototypeOf(Just)).call(this));
+
+    _this3.inner = always(v);
+
+    Object.freeze(_this3);
+    return _this3;
+  }
+
+  createClass(Just, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      var v = this.inner();
+
+      if (isNothing(v)) {
+        return null;
+      }
+
+      return v.toJSON ? v.toJSON() : v;
+    }
+  }, {
+    key: 'isEmpty',
+    value: function isEmpty() {
+      return false;
+    }
+  }, {
+    key: 'getOrElse',
+    value: function getOrElse(v) {
+      return this.inner();
+    }
+  }, {
+    key: 'map',
+    value: function map(f) {
+      return Just.of(f(this.inner()));
+    }
+  }, {
+    key: 'equals',
+    value: function equals$$1(other) {
+      if (this === other) {
+        return true;
+      }
+
+      if (haveDifferentTypes(this, other)) {
+        return false;
+      }
+
+      return equals(this.inner(), other.inner());
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get$$1() {
+      return 'ModelicoJust';
+    }
+  }], [{
+    key: 'of',
+    value: function of(v) {
+      return new Just(v);
+    }
+  }]);
+  return Just;
+}(Maybe);
+
+Just.displayName = 'Just';
+
+Maybe.Nothing = new Nothing();
+Maybe.Just = Just;
 
 var Maybe$1 = Object.freeze(Maybe);
 
@@ -2312,7 +2346,11 @@ var ajvFromJS = function ajvFromJS(_, Type, schema, js) {
 };
 
 var createModel = function createModel(_innerTypes) {
-  var stringTag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'ModelicoModel';
+  var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref2$stringTag = _ref2.stringTag,
+      stringTag = _ref2$stringTag === undefined ? 'ModelicoModel' : _ref2$stringTag,
+      _ref2$metadata = _ref2.metadata,
+      meta = _ref2$metadata === undefined ? metadata() : _ref2$metadata;
 
   return function (_Base) {
     inherits(_class, _Base);
@@ -2330,11 +2368,15 @@ var createModel = function createModel(_innerTypes) {
     }], [{
       key: 'innerTypes',
       value: function innerTypes(path, Type) {
-        return typeof _innerTypes === 'function' ? _innerTypes(path, Type) : Object.freeze(_innerTypes);
+        return typeof _innerTypes === 'function' ? _innerTypes({ m: meta, path: path, Type: Type }) : Object.freeze(_innerTypes);
       }
     }]);
     return _class;
   }(Base$1);
+};
+
+var createAjvModel = function createAjvModel(innerTypes, ajv) {
+  return createModel(innerTypes, { metadata: ajvMetadata(ajv) });
 };
 
 var M = {
@@ -2347,9 +2389,12 @@ var M = {
   Map: ModelicoMap$1,
   StringMap: StringMap$1,
   Maybe: Maybe$1,
+  Just: Maybe$1.Just,
+  Nothing: Maybe$1.Nothing,
   Base: Base$1,
   Set: ModelicoSet$1,
   createModel: createModel,
+  createAjvModel: createAjvModel,
   fields: function fields(x) {
     return x[fieldsSymbol]();
   },
