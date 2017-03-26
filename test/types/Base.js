@@ -9,7 +9,7 @@ export default (U, should, M, fixtures) => () => {
     Friend
   } = fixtures
 
-  const { _, maybe, number, string, withDefault } = M.metadata()
+  const { _, number, string, withDefault } = M.metadata()
   const ModelicoDate = M.Date
 
   const author1Json = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
@@ -94,11 +94,11 @@ export default (U, should, M, fixtures) => () => {
     })
 
     it('should support creating a copy with updated fields', () => {
-      class Book extends M.createModel({
-        title: string(),
-        year: maybe(number()),
-        author: withDefault(string(), 'anonymous')
-      }) {
+      class Book extends M.createModel(({m}) => ({
+        title: m.string(),
+        year: m.maybe(m.number()),
+        author: m.withDefault(m.string(), 'anonymouss')
+      })) {
         constructor (fields) {
           super(Book, fields)
         }
@@ -373,7 +373,7 @@ export default (U, should, M, fixtures) => () => {
       class Book extends M.createModel({
         title: string(),
         author: withDefault(string(), 'anonymous')
-      }, 'Book') {
+      }, {stringTag: 'Book'}) {
         constructor (props) {
           super(Book, props)
         }

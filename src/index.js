@@ -95,7 +95,7 @@ const fromJS = (Type, js) => genericsFromJS(Type, [], js)
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js)
 const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js)
 
-const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
+const createModel = (innerTypes, {stringTag = 'ModelicoModel', metadata: meta = metadata()} = {}) => {
   return class extends Base {
     get [Symbol.toStringTag] () {
       return stringTag
@@ -103,10 +103,14 @@ const createModel = (innerTypes, stringTag = 'ModelicoModel') => {
 
     static innerTypes (path, Type) {
       return (typeof innerTypes === 'function')
-        ? innerTypes(path, Type)
+        ? innerTypes({m: meta, path, Type})
         : Object.freeze(innerTypes)
     }
   }
+}
+
+const createAjvModel = (innerTypes, ajv) => {
+  return createModel(innerTypes, {metadata: ajvMetadata(ajv)})
 }
 
 export default {
@@ -124,6 +128,7 @@ export default {
   Base,
   Set: ModelicoSet,
   createModel,
+  createAjvModel,
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
   fromJS,
