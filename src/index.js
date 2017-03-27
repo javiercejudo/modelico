@@ -1,10 +1,10 @@
 import { version, author, homepage, license } from '../package.json'
 import * as symbols from './symbols'
-import { partial, always, identity, reviverOrAsIs } from './U'
-import reviverFactory from './reviverFactory'
+import { partial, identity } from './U'
 import getSchema from './getSchema'
 import validate from './validate'
 import withValidation from './withValidation'
+import metadata from './metadata'
 
 import Base from './Base'
 
@@ -20,10 +20,9 @@ import List from './List'
 import ModelicoSet from './Set'
 import proxyFactory from './proxyFactory'
 import ajvMetadata from './ajvMetadata'
+import createModel from './createModel'
 
-import asIs from './asIs'
-import any from './any'
-import anyOf from './anyOf'
+const { _ } = metadata()
 
 const internalNonMutators = ['set', 'setIn']
 
@@ -41,73 +40,11 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear']
 
-const metadataCache = new WeakMap()
-
-const base = Type =>
-  Object.freeze({type: Type, reviver: reviverFactory(Type)})
-
-const raw_ = (Type, innerMetadata) =>
-  Type.metadata
-    ? Type.metadata(...innerMetadata)
-    : base(Type)
-
-const _ = (Type, metadata = []) => {
-  if (metadata.length > 0) {
-    return raw_(Type, metadata)
-  }
-
-  if (!metadataCache.has(Type)) {
-    metadataCache.set(Type, raw_(Type, metadata))
-  }
-
-  return metadataCache.get(Type)
-}
-
-const metadata = () => Object.freeze({
-  _,
-  base,
-  asIs,
-  any,
-  anyOf,
-  number: ({ wrap = false } = {}) => wrap ? ModelicoNumber.metadata() : asIs(Number),
-
-  string: always(asIs(String)),
-  boolean: always(asIs(Boolean)),
-
-  date: ModelicoDate.metadata,
-  enumMap: EnumMap.metadata,
-  list: List.metadata,
-  map: ModelicoMap.metadata,
-  stringMap: StringMap.metadata,
-  maybe: Maybe.metadata,
-  set: ModelicoSet.metadata,
-
-  withDefault: (metadata, def) => {
-    const defaultValue = reviverOrAsIs(metadata)('', def)
-
-    return Object.freeze(Object.assign({}, metadata, { default: defaultValue }))
-  }
-})
-
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
 const genericsFromJS = (Type, innerMetadata, js) => _(Type, innerMetadata).reviver('', js)
 const fromJS = (Type, js) => genericsFromJS(Type, [], js)
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js)
 const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js)
-
-const createModel = (innerTypes, {stringTag = 'ModelicoModel', metadata: meta = metadata()} = {}) => {
-  return class extends Base {
-    get [Symbol.toStringTag] () {
-      return stringTag
-    }
-
-    static innerTypes (path, Type) {
-      return (typeof innerTypes === 'function')
-        ? innerTypes({m: meta, path, Type})
-        : Object.freeze(innerTypes)
-    }
-  }
-}
 
 const createAjvModel = (innerTypes, ajv) => {
   return createModel(innerTypes, {metadata: ajvMetadata(ajv)})

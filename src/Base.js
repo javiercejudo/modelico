@@ -116,6 +116,10 @@ class Base {
     return JSON.stringify(this, null, n)
   }
 
+  static innerTypes () {
+    return emptyObject
+  }
+
   static factory (...args) {
     return new Base(...args)
   }

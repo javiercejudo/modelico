@@ -1,10 +1,6 @@
 const innerTypesCache = new WeakMap()
 
-const getInnerTypes = (path/* : Array<any> */, Type/* : Function */) => {
-  if (!Type.innerTypes) {
-    throw Error(`missing static innerTypes for ${Type.displayName || Type.name}`)
-  }
-
+const getInnerTypes = (path, Type) => {
   return Type.innerTypes(path, Type)
 }
 
