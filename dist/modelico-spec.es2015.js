@@ -38,16 +38,40 @@ var Base = (U, should, M, fixtures) => () => {
     });
   });
 
-  describe('innerTypes check', () => {
+  describe('default innerTypes', () => {
     class Country extends M.Base {
-      constructor (code) {
-        super(Country, {code});
+      constructor (props) {
+        super(Country, props);
       }
     }
 
-    it('should throw when static innerTypes are missing', () => {
-      (() => M.fromJSON(Country, '"ESP"'))
-        .should.throw(/missing static innerTypes/);
+    it('should not throw when static innerTypes are missing', () => {
+      (() => M.fromJSON(Country, '{"code": "ESP"}'))
+        .should.not.throw();
+
+      const esp = M.fromJSON(Country, '{"code": "ESP"}');
+
+      should(esp.code)
+        .be.exactly(undefined);
+
+      esp.get('code')
+        .should.be.exactly('ESP');
+    });
+
+    it('allows simple model creation without inner types (discouraged)', () => {
+      class Book extends M.createModel() {
+        constructor (props) {
+          super(Book, props);
+        }
+      }
+
+      const myBook = new Book();
+
+      JSON.stringify(myBook)
+        .should.be.exactly('{}');
+
+      JSON.stringify(myBook.set('title', 'La verdad sobre el caso Savolta'))
+        .should.be.exactly('{"title":"La verdad sobre el caso Savolta"}');
     });
   });
 

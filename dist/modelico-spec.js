@@ -206,22 +206,47 @@ var Base = (function (U, should, M, fixtures) {
       });
     });
 
-    describe('innerTypes check', function () {
+    describe('default innerTypes', function () {
       var Country = function (_M$Base) {
         inherits(Country, _M$Base);
 
-        function Country(code) {
+        function Country(props) {
           classCallCheck(this, Country);
-          return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, { code: code }));
+          return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, props));
         }
 
         return Country;
       }(M.Base);
 
-      it('should throw when static innerTypes are missing', function () {
+      it('should not throw when static innerTypes are missing', function () {
         (function () {
-          return M.fromJSON(Country, '"ESP"');
-        }).should.throw(/missing static innerTypes/);
+          return M.fromJSON(Country, '{"code": "ESP"}');
+        }).should.not.throw();
+
+        var esp = M.fromJSON(Country, '{"code": "ESP"}');
+
+        should(esp.code).be.exactly(undefined);
+
+        esp.get('code').should.be.exactly('ESP');
+      });
+
+      it('allows simple model creation without inner types (discouraged)', function () {
+        var Book = function (_M$createModel) {
+          inherits(Book, _M$createModel);
+
+          function Book(props) {
+            classCallCheck(this, Book);
+            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, props));
+          }
+
+          return Book;
+        }(M.createModel());
+
+        var myBook = new Book();
+
+        JSON.stringify(myBook).should.be.exactly('{}');
+
+        JSON.stringify(myBook.set('title', 'La verdad sobre el caso Savolta')).should.be.exactly('{"title":"La verdad sobre el caso Savolta"}');
       });
     });
 
@@ -268,8 +293,8 @@ var Base = (function (U, should, M, fixtures) {
       });
 
       it('should support creating a copy with updated fields', function () {
-        var Book = function (_M$createModel) {
-          inherits(Book, _M$createModel);
+        var Book = function (_M$createModel2) {
+          inherits(Book, _M$createModel2);
 
           function Book(fields) {
             classCallCheck(this, Book);
@@ -538,8 +563,8 @@ var Base = (function (U, should, M, fixtures) {
 
     describe('withDefault', function () {
       it('should allow enhancing metadata to have default values', function () {
-        var Book = function (_M$createModel2) {
-          inherits(Book, _M$createModel2);
+        var Book = function (_M$createModel3) {
+          inherits(Book, _M$createModel3);
 
           function Book(props) {
             classCallCheck(this, Book);
@@ -579,8 +604,8 @@ var Base = (function (U, should, M, fixtures) {
 
     describe('withDefault', function () {
       it('should use the metadata to coerce the value if necessary', function () {
-        var CountryCallingCode = function (_M$createModel3) {
-          inherits(CountryCallingCode, _M$createModel3);
+        var CountryCallingCode = function (_M$createModel4) {
+          inherits(CountryCallingCode, _M$createModel4);
 
           function CountryCallingCode(props) {
             classCallCheck(this, CountryCallingCode);
@@ -608,8 +633,8 @@ var Base = (function (U, should, M, fixtures) {
 
     U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should use the metadata to coerce the value if necessary', function () {
-        var CountryCallingCode = function (_M$createModel4) {
-          inherits(CountryCallingCode, _M$createModel4);
+        var CountryCallingCode = function (_M$createModel5) {
+          inherits(CountryCallingCode, _M$createModel5);
 
           function CountryCallingCode(props) {
             classCallCheck(this, CountryCallingCode);

@@ -1,4 +1,4 @@
-var version = "22.0.0";
+var version = "22.1.0";
 
 
 
@@ -71,11 +71,7 @@ const unsupported = (message/* : string */) => {
 
 const innerTypesCache = new WeakMap();
 
-const getInnerTypes = (path/* : Array<any> */, Type/* : Function */) => {
-  if (!Type.innerTypes) {
-    throw Error(`missing static innerTypes for ${Type.displayName || Type.name}`)
-  }
-
+const getInnerTypes = (path, Type) => {
   return Type.innerTypes(path, Type)
 };
 
@@ -85,37 +81,6 @@ var getInnerTypes$1 = (path, Type) => {
   }
 
   return innerTypesCache.get(Type)
-};
-
-const plainObjectReviverFactory = (Type, k, v, prevPath) =>
-  Object.keys(v).reduce((acc, field) => {
-    const path = prevPath.concat(field);
-    const innerTypes = getInnerTypes$1(prevPath, Type);
-
-    const metadataCandidate = innerTypes[field];
-    const metadata = isFunction(metadataCandidate)
-      ? metadataCandidate(v, path)
-      : metadataCandidate;
-
-    if (metadata) {
-      acc[field] = reviverOrAsIs(metadata)(k, v[field], path);
-    } else {
-      acc[field] = v[field];
-    }
-
-    return acc
-  }, {});
-
-const reviverFactory = Type => (k, v, path = []) => {
-  if (k !== '') {
-    return v
-  }
-
-  const fields = isPlainObject(v)
-    ? plainObjectReviverFactory(Type, k, v, path)
-    : v;
-
-  return new Type(fields)
 };
 
 const metadataSchemaCache = new WeakMap();
@@ -272,6 +237,69 @@ var withValidation = (validateFn, errorMsgFn = defaultErrorMsgFn) => metadata =>
   return Object.assign({}, metadata, { reviver })
 };
 
+var asIs = (transformer = identity) =>
+  Object.freeze({
+    type: transformer,
+    reviver: asIsReviver(pipe(assertSomethingIdentity, transformer)),
+    maybeReviver: asIsReviver(transformer)
+  });
+
+var any = always(asIs(identity));
+
+var anyOf = (conditionedMetas = [], enumField = 'type') => (v, path) => {
+  if (conditionedMetas.length === 0) {
+    return any
+  }
+
+  const Enum = conditionedMetas[0][1][typeSymbol]();
+  const enumeratorToMatch = Enum.metadata().reviver('', v[enumField]);
+
+  for (let i = 0; i < conditionedMetas.length; i += 1) {
+    const conditionedMeta = conditionedMetas[i];
+    const metadata = conditionedMeta[0];
+    const enumerator = conditionedMeta[1];
+
+    if (enumeratorToMatch === enumerator) {
+      return metadata
+    }
+  }
+
+  const prevPath = path.slice(0, -1);
+
+  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`)
+};
+
+const plainObjectReviverFactory = (Type, k, v, prevPath) =>
+  Object.keys(v).reduce((acc, field) => {
+    const path = prevPath.concat(field);
+    const innerTypes = getInnerTypes$1(prevPath, Type);
+
+    const metadataCandidate = innerTypes[field];
+    const metadata = isFunction(metadataCandidate)
+      ? metadataCandidate(v, path)
+      : metadataCandidate;
+
+    if (metadata) {
+      acc[field] = reviverOrAsIs(metadata)(k, v[field], path);
+    } else {
+      acc[field] = v[field];
+    }
+
+    return acc
+  }, {});
+
+const reviverFactory = Type => (k, v, path = []) => {
+  if (k !== '') {
+    return v
+  }
+
+  const fields = isPlainObject(v)
+    ? plainObjectReviverFactory(Type, k, v, path)
+    : v;
+
+  return new Type(fields)
+};
+
 const getPathReducer = (result, part) => result.get(part);
 
 class Base {
@@ -382,265 +410,16 @@ class Base {
     return JSON.stringify(this, null, n)
   }
 
+  static innerTypes () {
+    return emptyObject
+  }
+
   static factory (...args) {
     return new Base(...args)
   }
 }
 
 var Base$1 = Object.freeze(Base);
-
-const reviverFactory$2 = itemMetadata => (k, v, path) => {
-  if (k !== '') {
-    return v
-  }
-
-  const metadata = isFunction(itemMetadata)
-    ? itemMetadata(v, path)
-    : itemMetadata;
-
-  const revive = (v === null)
-    ? always(null)
-    : defaultTo(metadata.reviver)(metadata.maybeReviver);
-
-  const revivedValue = revive(k, v, path);
-
-  return Maybe.of(revivedValue)
-};
-
-class Maybe extends Base$1 {
-  constructor () {
-    super(Maybe);
-  }
-
-  get (fieldOrFallbackPair) {
-    const fallback = fieldOrFallbackPair[0];
-    const field = fieldOrFallbackPair[1];
-    const item = this.getOrElse(fallback);
-
-    return item.get
-      ? item.get(field)
-      : item
-  }
-
-  set (field, v) {
-    if (this.isEmpty()) {
-      return this
-    }
-
-    const item = this.inner();
-
-    if (isNothing(item)) {
-      return this
-    }
-
-    const newItem = (item.set)
-      ? item.set(field, v)
-      : null;
-
-    return Maybe.of(newItem)
-  }
-
-  setIn (path, v) {
-    if (path.length === 0) {
-      return Maybe.of(v)
-    }
-
-    const [fallbackOrFieldPair, ...restPath] = path;
-    const fallback = fallbackOrFieldPair[0];
-    const field = fallbackOrFieldPair[1];
-
-    const item = this.isEmpty()
-      ? fallback
-      : this.inner();
-
-    const inner = (item.setIn)
-      ? item.setIn([field, ...restPath], v)
-      : null;
-
-    return Maybe.of(inner)
-  }
-
-  static of (v) {
-    return isNothing(v)
-      ? new Nothing()
-      : new Just(v)
-  }
-
-  static metadata (itemMetadata) {
-    return Object.freeze({
-      type: Maybe,
-      subtypes: [itemMetadata],
-      reviver: reviverFactory$2(itemMetadata),
-      default: Maybe.of()
-    })
-  }
-
-  static innerTypes () {
-    return emptyObject
-  }
-}
-
-Maybe.displayName = 'Maybe';
-
-let nothing;
-
-class Nothing extends Maybe {
-  constructor () {
-    super();
-
-    if (!nothing) {
-      this.inner = always(TypeError('nothing holds no value'));
-      nothing = this;
-    }
-
-    return nothing
-  }
-
-  get [Symbol.toStringTag] () {
-    return 'ModelicoNothing'
-  }
-
-  toJSON () {
-    return null
-  }
-
-  isEmpty () {
-    return true
-  }
-
-  getOrElse (v) {
-    return v
-  }
-
-  map () {
-    return this
-  }
-
-  equals (other) {
-    return (this === other)
-  }
-}
-
-class Just extends Maybe {
-  constructor (v) {
-    super();
-
-    this.inner = always(v);
-
-    Object.freeze(this);
-  }
-
-  get [Symbol.toStringTag] () {
-    return 'ModelicoJust'
-  }
-
-  toJSON () {
-    const v = this.inner();
-
-    if (isNothing(v)) {
-      return null
-    }
-
-    return (v.toJSON)
-      ? v.toJSON()
-      : v
-  }
-
-  isEmpty () {
-    return false
-  }
-
-  getOrElse (v) {
-    return this.inner()
-  }
-
-  map (f) {
-    return Just.of(f(this.inner()))
-  }
-
-  equals (other) {
-    if (this === other) {
-      return true
-    }
-
-    if (haveDifferentTypes(this, other)) {
-      return false
-    }
-
-    return equals(this.inner(), other.inner())
-  }
-
-  static of (v) {
-    return new Just(v)
-  }
-}
-
-Just.displayName = 'Just';
-
-Maybe.Nothing = new Nothing();
-Maybe.Just = Just;
-
-var Maybe$1 = Object.freeze(Maybe);
-
-const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
-
-const reviverFactory$3 = enumerators => (k, v, path = []) => {
-  const enumerator = enumerators[v];
-
-  if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator "${v}" at "${path.join(' -> ')}"`)
-  }
-
-  return enumerator
-};
-
-class Enum extends Base$1 {
-  constructor (input, Ctor = Enum, displayName = Ctor.displayName) {
-    const enumerators = Array.isArray(input)
-      ? input.reduce(enumeratorsReducer, {})
-      : input;
-
-    if (Ctor !== Enum) {
-      Ctor.displayName = displayName;
-      Object.freeze(Ctor);
-    }
-
-    super(Ctor);
-
-    Object.getOwnPropertyNames(enumerators)
-      .forEach(enumerator => {
-        this[enumerator] = always(enumerators[enumerator]);
-        enumerators[enumerator][typeSymbol] = always(this);
-        enumerators[enumerator].toJSON = always(enumerator);
-        enumerators[enumerator].equals = other => (enumerators[enumerator] === other);
-      });
-
-    Object.defineProperty(this, 'metadata', {
-      value: always(Object.freeze({
-        type: Ctor,
-        enumerators,
-        reviver: reviverFactory$3(enumerators)
-      }))
-    });
-  }
-
-  static fromObject (...args) {
-    return new Enum(...args)
-  }
-
-  static fromArray (...args) {
-    return new Enum(...args)
-  }
-
-  static innerTypes () {
-    return emptyObject
-  }
-}
-
-Object.defineProperty(Enum, 'displayName', {
-  value: 'Enum',
-  writable: true
-});
 
 const set = (thisArg, Type, key, value) => {
   const newMap = thisArg.inner();
@@ -759,7 +538,7 @@ const parseMapper = (keyReviver, valueReviver, path) => (pair, i) => [
   valueReviver('', pair[1], path.concat(i, 1))
 ];
 
-const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
+const reviverFactory$2 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -816,7 +595,7 @@ class ModelicoMap extends AbstractMap$1 {
   }
 
   static metadata (keyMetadata, valueMetadata) {
-    return metadata$1(ModelicoMap, reviverFactory$4, keyMetadata, valueMetadata)
+    return metadata$1(ModelicoMap, reviverFactory$2, keyMetadata, valueMetadata)
   }
 
   static innerTypes () {
@@ -841,7 +620,7 @@ const stringifyReducer = (acc, pair) => {
 const parseReducer = (valueReviver, obj, path) => (acc, key) =>
   [...acc, [key, valueReviver('', obj[key], path.concat(key))]];
 
-const reviverFactory$5 = valueMetadata => (k, v, path = []) => {
+const reviverFactory$3 = valueMetadata => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -897,7 +676,7 @@ class StringMap extends AbstractMap$1 {
   }
 
   static metadata (valueMetadata) {
-    return metadata$1(StringMap, reviverFactory$5, valueMetadata)
+    return metadata$1(StringMap, reviverFactory$3, valueMetadata)
   }
 
   static innerTypes () {
@@ -926,7 +705,7 @@ const parseMapper$1 = (keyReviver, valueReviver, obj, path) => enumerator => {
   return [key, val]
 };
 
-const reviverFactory$6 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
+const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
@@ -979,7 +758,7 @@ class EnumMap extends AbstractMap$1 {
   }
 
   static metadata (keyMetadata, valueMetadata) {
-    return metadata$1(EnumMap, reviverFactory$6, keyMetadata, valueMetadata)
+    return metadata$1(EnumMap, reviverFactory$4, keyMetadata, valueMetadata)
   }
 
   static innerTypes () {
@@ -1392,6 +1171,307 @@ ModelicoSet.displayName = 'ModelicoSet';
 
 var ModelicoSet$1 = Object.freeze(ModelicoSet);
 
+const reviverFactory$5 = itemMetadata => (k, v, path) => {
+  if (k !== '') {
+    return v
+  }
+
+  const metadata = isFunction(itemMetadata)
+    ? itemMetadata(v, path)
+    : itemMetadata;
+
+  const revive = (v === null)
+    ? always(null)
+    : defaultTo(metadata.reviver)(metadata.maybeReviver);
+
+  const revivedValue = revive(k, v, path);
+
+  return Maybe.of(revivedValue)
+};
+
+class Maybe extends Base$1 {
+  constructor () {
+    super(Maybe);
+  }
+
+  get (fieldOrFallbackPair) {
+    const fallback = fieldOrFallbackPair[0];
+    const field = fieldOrFallbackPair[1];
+    const item = this.getOrElse(fallback);
+
+    return item.get
+      ? item.get(field)
+      : item
+  }
+
+  set (field, v) {
+    if (this.isEmpty()) {
+      return this
+    }
+
+    const item = this.inner();
+
+    if (isNothing(item)) {
+      return this
+    }
+
+    const newItem = (item.set)
+      ? item.set(field, v)
+      : null;
+
+    return Maybe.of(newItem)
+  }
+
+  setIn (path, v) {
+    if (path.length === 0) {
+      return Maybe.of(v)
+    }
+
+    const [fallbackOrFieldPair, ...restPath] = path;
+    const fallback = fallbackOrFieldPair[0];
+    const field = fallbackOrFieldPair[1];
+
+    const item = this.isEmpty()
+      ? fallback
+      : this.inner();
+
+    const inner = (item.setIn)
+      ? item.setIn([field, ...restPath], v)
+      : null;
+
+    return Maybe.of(inner)
+  }
+
+  static of (v) {
+    return isNothing(v)
+      ? new Nothing()
+      : new Just(v)
+  }
+
+  static metadata (itemMetadata) {
+    return Object.freeze({
+      type: Maybe,
+      subtypes: [itemMetadata],
+      reviver: reviverFactory$5(itemMetadata),
+      default: Maybe.of()
+    })
+  }
+
+  static innerTypes () {
+    return emptyObject
+  }
+}
+
+Maybe.displayName = 'Maybe';
+
+let nothing;
+
+class Nothing extends Maybe {
+  constructor () {
+    super();
+
+    if (!nothing) {
+      this.inner = always(TypeError('nothing holds no value'));
+      nothing = this;
+    }
+
+    return nothing
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoNothing'
+  }
+
+  toJSON () {
+    return null
+  }
+
+  isEmpty () {
+    return true
+  }
+
+  getOrElse (v) {
+    return v
+  }
+
+  map () {
+    return this
+  }
+
+  equals (other) {
+    return (this === other)
+  }
+}
+
+class Just extends Maybe {
+  constructor (v) {
+    super();
+
+    this.inner = always(v);
+
+    Object.freeze(this);
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'ModelicoJust'
+  }
+
+  toJSON () {
+    const v = this.inner();
+
+    if (isNothing(v)) {
+      return null
+    }
+
+    return (v.toJSON)
+      ? v.toJSON()
+      : v
+  }
+
+  isEmpty () {
+    return false
+  }
+
+  getOrElse (v) {
+    return this.inner()
+  }
+
+  map (f) {
+    return Just.of(f(this.inner()))
+  }
+
+  equals (other) {
+    if (this === other) {
+      return true
+    }
+
+    if (haveDifferentTypes(this, other)) {
+      return false
+    }
+
+    return equals(this.inner(), other.inner())
+  }
+
+  static of (v) {
+    return new Just(v)
+  }
+}
+
+Just.displayName = 'Just';
+
+Maybe.Nothing = new Nothing();
+Maybe.Just = Just;
+
+var Maybe$1 = Object.freeze(Maybe);
+
+const metadataCache = new WeakMap();
+
+const base = Type =>
+  Object.freeze({type: Type, reviver: reviverFactory(Type)});
+
+const raw_ = (Type, innerMetadata) =>
+  Type.metadata
+    ? Type.metadata(...innerMetadata)
+    : base(Type);
+
+const _$1 = (Type, metadata = []) => {
+  if (metadata.length > 0) {
+    return raw_(Type, metadata)
+  }
+
+  if (!metadataCache.has(Type)) {
+    metadataCache.set(Type, raw_(Type, metadata));
+  }
+
+  return metadataCache.get(Type)
+};
+
+const metadata = () => Object.freeze({
+  _: _$1,
+  base,
+  asIs,
+  any,
+  anyOf,
+  number: ({ wrap = false } = {}) => wrap ? ModelicoNumber$1.metadata() : asIs(Number),
+
+  string: always(asIs(String)),
+  boolean: always(asIs(Boolean)),
+
+  date: ModelicoDate$1.metadata,
+  enumMap: EnumMap$1.metadata,
+  list: List$1.metadata,
+  map: ModelicoMap$1.metadata,
+  stringMap: StringMap$1.metadata,
+  maybe: Maybe$1.metadata,
+  set: ModelicoSet$1.metadata,
+
+  withDefault: (metadata, def) => {
+    const defaultValue = reviverOrAsIs(metadata)('', def);
+
+    return Object.freeze(Object.assign({}, metadata, { default: defaultValue }))
+  }
+});
+
+const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
+
+const reviverFactory$6 = enumerators => (k, v, path = []) => {
+  const enumerator = enumerators[v];
+
+  if (isNothing(enumerator)) {
+    throw TypeError(`missing enumerator "${v}" at "${path.join(' -> ')}"`)
+  }
+
+  return enumerator
+};
+
+class Enum extends Base$1 {
+  constructor (input, Ctor = Enum, displayName = Ctor.displayName) {
+    const enumerators = Array.isArray(input)
+      ? input.reduce(enumeratorsReducer, {})
+      : input;
+
+    if (Ctor !== Enum) {
+      Ctor.displayName = displayName;
+      Object.freeze(Ctor);
+    }
+
+    super(Ctor);
+
+    Object.getOwnPropertyNames(enumerators)
+      .forEach(enumerator => {
+        this[enumerator] = always(enumerators[enumerator]);
+        enumerators[enumerator][typeSymbol] = always(this);
+        enumerators[enumerator].toJSON = always(enumerator);
+        enumerators[enumerator].equals = other => (enumerators[enumerator] === other);
+      });
+
+    Object.defineProperty(this, 'metadata', {
+      value: always(Object.freeze({
+        type: Ctor,
+        enumerators,
+        reviver: reviverFactory$6(enumerators)
+      }))
+    });
+  }
+
+  static fromObject (...args) {
+    return new Enum(...args)
+  }
+
+  static fromArray (...args) {
+    return new Enum(...args)
+  }
+
+  static innerTypes () {
+    return emptyObject
+  }
+}
+
+Object.defineProperty(Enum, 'displayName', {
+  value: 'Enum',
+  writable: true
+});
+
 const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   if (!nonMutators.includes(prop)) {
     return target[prop]
@@ -1695,37 +1775,26 @@ var ajvMetadata = (ajv = { validate: T }) => {
   return Object.freeze(Object.assign(ajvMetadata, metadata))
 };
 
-var asIs = (transformer = identity) =>
-  Object.freeze({
-    type: transformer,
-    reviver: asIsReviver(pipe(assertSomethingIdentity, transformer)),
-    maybeReviver: asIsReviver(transformer)
-  });
+const metadata$2 = metadata();
 
-var any = always(asIs(identity));
+const createModel = (
+  innerTypes = emptyObject,
+  {stringTag = 'ModelicoModel', metadata: m = metadata$2} = {}
+) => {
+  return class extends Base$1 {
+    get [Symbol.toStringTag] () {
+      return stringTag
+    }
 
-var anyOf = (conditionedMetas = [], enumField = 'type') => (v, path) => {
-  if (conditionedMetas.length === 0) {
-    return any
-  }
-
-  const Enum = conditionedMetas[0][1][typeSymbol]();
-  const enumeratorToMatch = Enum.metadata().reviver('', v[enumField]);
-
-  for (let i = 0; i < conditionedMetas.length; i += 1) {
-    const conditionedMeta = conditionedMetas[i];
-    const metadata = conditionedMeta[0];
-    const enumerator = conditionedMeta[1];
-
-    if (enumeratorToMatch === enumerator) {
-      return metadata
+    static innerTypes (path, Type) {
+      return isFunction(innerTypes)
+        ? innerTypes({m, path, Type})
+        : Object.freeze(innerTypes)
     }
   }
-
-  const prevPath = path.slice(0, -1);
-
-  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`)
 };
+
+const { _ } = metadata();
 
 const internalNonMutators = ['set', 'setIn'];
 
@@ -1743,73 +1812,11 @@ const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMi
   'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
   'setUTCSeconds', 'setYear'];
 
-const metadataCache = new WeakMap();
-
-const base = Type =>
-  Object.freeze({type: Type, reviver: reviverFactory(Type)});
-
-const raw_ = (Type, innerMetadata) =>
-  Type.metadata
-    ? Type.metadata(...innerMetadata)
-    : base(Type);
-
-const _ = (Type, metadata = []) => {
-  if (metadata.length > 0) {
-    return raw_(Type, metadata)
-  }
-
-  if (!metadataCache.has(Type)) {
-    metadataCache.set(Type, raw_(Type, metadata));
-  }
-
-  return metadataCache.get(Type)
-};
-
-const metadata = () => Object.freeze({
-  _,
-  base,
-  asIs,
-  any,
-  anyOf,
-  number: ({ wrap = false } = {}) => wrap ? ModelicoNumber$1.metadata() : asIs(Number),
-
-  string: always(asIs(String)),
-  boolean: always(asIs(Boolean)),
-
-  date: ModelicoDate$1.metadata,
-  enumMap: EnumMap$1.metadata,
-  list: List$1.metadata,
-  map: ModelicoMap$1.metadata,
-  stringMap: StringMap$1.metadata,
-  maybe: Maybe$1.metadata,
-  set: ModelicoSet$1.metadata,
-
-  withDefault: (metadata, def) => {
-    const defaultValue = reviverOrAsIs(metadata)('', def);
-
-    return Object.freeze(Object.assign({}, metadata, { default: defaultValue }))
-  }
-});
-
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity);
 const genericsFromJS = (Type, innerMetadata, js) => _(Type, innerMetadata).reviver('', js);
 const fromJS = (Type, js) => genericsFromJS(Type, [], js);
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js);
 const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js);
-
-const createModel = (innerTypes, {stringTag = 'ModelicoModel', metadata: meta = metadata()} = {}) => {
-  return class extends Base$1 {
-    get [Symbol.toStringTag] () {
-      return stringTag
-    }
-
-    static innerTypes (path, Type) {
-      return (typeof innerTypes === 'function')
-        ? innerTypes({m: meta, path, Type})
-        : Object.freeze(innerTypes)
-    }
-  }
-};
 
 const createAjvModel = (innerTypes, ajv) => {
   return createModel(innerTypes, {metadata: ajvMetadata(ajv)})
