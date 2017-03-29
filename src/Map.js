@@ -1,4 +1,4 @@
-import { objToArr, reviverOrAsIs, emptyObject, isFunction } from './U'
+import { objToArr, reviverOrAsIs, isFunction } from './U'
 import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const parseMapper = (keyReviver, valueReviver, path) => (pair, i) => [
@@ -64,10 +64,6 @@ class ModelicoMap extends AbstractMap {
 
   static metadata (keyMetadata, valueMetadata) {
     return metadata(ModelicoMap, reviverFactory, keyMetadata, valueMetadata)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 
   static EMPTY () {

@@ -1,4 +1,4 @@
-import { objToArr, reviverOrAsIs, emptyObject, isFunction } from './U'
+import { objToArr, reviverOrAsIs, isFunction } from './U'
 import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
@@ -67,10 +67,6 @@ class StringMap extends AbstractMap {
 
   static metadata (valueMetadata) {
     return metadata(StringMap, reviverFactory, valueMetadata)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 
   static EMPTY () {

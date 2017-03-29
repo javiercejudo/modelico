@@ -45,10 +45,6 @@ class Point extends M.Base {
     return `${x()},${y()}`
   }
 
-  static innerTypes () {
-    return Object.freeze({})
-  }
-
   static metadata () {
     return Object.freeze({ type: Point, reviver })
   }
