@@ -19,6 +19,22 @@
             "text": "snapshot"
         },
         {
+            "value": "https://modelico.javiercejudo.com/v/v22.1.0/",
+            "text": "22.1.0"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v22.0.0/",
+            "text": "22.0.0"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v21.6.0/",
+            "text": "21.6.0"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v21.5.0/",
+            "text": "21.5.0"
+        },
+        {
             "value": "https://modelico.javiercejudo.com/v/v21.4.0/",
             "text": "21.4.0"
         }
