@@ -1,4 +1,4 @@
-import { always, isNothing, emptyObject, haveDifferentTypes, equals, defaultTo, isFunction } from './U'
+import { always, isNothing, haveDifferentTypes, equals, defaultTo, isFunction } from './U'
 import Base from './Base'
 
 const reviverFactory = itemMetadata => (k, v, path) => {
@@ -83,12 +83,8 @@ class Maybe extends Base {
       type: Maybe,
       subtypes: [itemMetadata],
       reviver: reviverFactory(itemMetadata),
-      default: Maybe.of()
+      default: new Nothing()
     })
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 

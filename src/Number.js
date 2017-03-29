@@ -1,4 +1,4 @@
-import { isNothing, unsupported, emptyObject, always, haveDifferentTypes, haveSameValues } from './U'
+import { isNothing, unsupported, always, haveDifferentTypes, haveSameValues } from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -65,10 +65,6 @@ class ModelicoNumber extends Base {
       type: ModelicoNumber,
       reviver
     })
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 

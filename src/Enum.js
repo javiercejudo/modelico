@@ -1,4 +1,4 @@
-import { always, isNothing, emptyObject } from './U'
+import { always, isNothing } from './U'
 import { typeSymbol } from './symbols'
 import Base from './Base'
 
@@ -50,10 +50,6 @@ class Enum extends Base {
 
   static fromArray (...args) {
     return new Enum(...args)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 

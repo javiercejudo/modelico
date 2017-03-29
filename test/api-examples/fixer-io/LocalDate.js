@@ -23,10 +23,6 @@ export default ({M, Ajv, validationEnabled, ajvOptions}) => {
       return `${year()}-${month()}-${day()}`
     }
 
-    static innerTypes () {
-      return Object.freeze({})
-    }
-
     static metadata () {
       const baseMetadata = Object.assign({}, base(LocalDate), {reviver})
 

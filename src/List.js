@@ -1,4 +1,4 @@
-import { always, isNothing, emptyObject } from './U'
+import { always, isNothing } from './U'
 import { iterableMetadata, iterableEquals } from './iterableHelpers'
 import { innerOrigSymbol } from './symbols'
 import Base from './Base'
@@ -86,10 +86,6 @@ class List extends Base {
 
   static metadata (itemMetadata) {
     return iterableMetadata(List, itemMetadata)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 
   static EMPTY () {
