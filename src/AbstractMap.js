@@ -40,7 +40,7 @@ const copy = map => new Map(map)
 
 class AbstractMap extends Base {
   constructor (Type, innerMapOrig = new Map(), EMPTY) {
-    super(Type)
+    super(undefined, Type)
 
     if (isNothing(innerMapOrig)) {
       throw TypeError('missing map')

@@ -1,11 +1,13 @@
 /* eslint-env mocha */
 
 export default (should, M) => () => {
-  const { _, any, maybe, list, string } = M.metadata()
+  const { _ } = M.metadata()
 
-  class Animal extends M.Base {
+  class Animal extends M.createModel(m => ({
+    name: m.maybe(m.string())
+  })) {
     constructor (props) {
-      super(Animal, props)
+      super(props, Animal)
     }
 
     speak () {
@@ -15,29 +17,19 @@ export default (should, M) => () => {
         ? `I don't have a name`
         : `My name is ${name}!`
     }
-
-    static innerTypes () {
-      return Object.freeze({
-        name: maybe(string())
-      })
-    }
   }
 
-  class Person extends M.Base {
+  class Person extends M.createModel(m => ({
+    givenName: m.any(),
+    familyName: m.string(),
+    pets: m.list(m.maybe(m._(Animal)))
+  })) {
     constructor (props) {
-      super(Person, props)
+      super(props, Person)
     }
 
     fullName () {
       return [this.givenName(), this.familyName()].join(' ').trim()
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        givenName: any(),
-        familyName: string(),
-        pets: list(maybe(_(Animal)))
-      })
     }
   }
 

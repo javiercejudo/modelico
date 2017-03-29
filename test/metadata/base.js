@@ -17,7 +17,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
     class Range extends M.Base {
       constructor ({ min = -Infinity, max = Infinity } = {}) {
-        super(Range, { min, max })
+        super({ min, max }, Range)
       }
 
       length () {

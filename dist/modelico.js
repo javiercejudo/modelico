@@ -509,8 +509,9 @@ var getPathReducer = function getPathReducer(result, part) {
 };
 
 var Base = function () {
-  function Base(Type) {
-    var fields = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
+  function Base() {
+    var fields = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : emptyObject;
+    var Type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Base;
     var thisArg = arguments[2];
     classCallCheck(this, Base);
 
@@ -704,7 +705,7 @@ var AbstractMap = function (_Base) {
     var EMPTY = arguments[2];
     classCallCheck(this, AbstractMap);
 
-    var _this = possibleConstructorReturn(this, (AbstractMap.__proto__ || Object.getPrototypeOf(AbstractMap)).call(this, Type));
+    var _this = possibleConstructorReturn(this, (AbstractMap.__proto__ || Object.getPrototypeOf(AbstractMap)).call(this, undefined, Type));
 
     if (isNothing(innerMapOrig)) {
       throw TypeError('missing map');
@@ -880,11 +881,6 @@ var ModelicoMap = function (_AbstractMap) {
       return metadata$1(ModelicoMap, reviverFactory$2, keyMetadata, valueMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_MAP || ModelicoMap.of();
@@ -986,11 +982,6 @@ var StringMap = function (_AbstractMap) {
     key: 'metadata',
     value: function metadata$$1(valueMetadata) {
       return metadata$1(StringMap, reviverFactory$3, valueMetadata);
-    }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
     }
   }, {
     key: 'EMPTY',
@@ -1095,11 +1086,6 @@ var EnumMap = function (_AbstractMap) {
       return metadata$1(EnumMap, reviverFactory$4, keyMetadata, valueMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_ENUM_MAP || EnumMap.of();
@@ -1123,7 +1109,7 @@ var ModelicoNumber = function (_Base) {
     var number = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     classCallCheck(this, ModelicoNumber);
 
-    var _this = possibleConstructorReturn(this, (ModelicoNumber.__proto__ || Object.getPrototypeOf(ModelicoNumber)).call(this, ModelicoNumber));
+    var _this = possibleConstructorReturn(this, (ModelicoNumber.__proto__ || Object.getPrototypeOf(ModelicoNumber)).call(this, undefined, ModelicoNumber));
 
     if (!Number.isNaN(number) && isNothing(number)) {
       throw TypeError('missing number');
@@ -1187,11 +1173,6 @@ var ModelicoNumber = function (_Base) {
         reviver: reviver
       });
     }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
   }]);
   return ModelicoNumber;
 }(Base$1);
@@ -1213,7 +1194,7 @@ var ModelicoDate = function (_Base) {
     var dateOrig = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
     classCallCheck(this, ModelicoDate);
 
-    var _this = possibleConstructorReturn(this, (ModelicoDate.__proto__ || Object.getPrototypeOf(ModelicoDate)).call(this, ModelicoDate));
+    var _this = possibleConstructorReturn(this, (ModelicoDate.__proto__ || Object.getPrototypeOf(ModelicoDate)).call(this, undefined, ModelicoDate));
 
     if (isNothing(dateOrig)) {
       throw TypeError('missing date');
@@ -1278,11 +1259,6 @@ var ModelicoDate = function (_Base) {
         type: ModelicoDate,
         reviver: reviver$1
       });
-    }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
     }
   }]);
   return ModelicoDate;
@@ -1366,7 +1342,7 @@ var List = function (_Base) {
     var innerList = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
     classCallCheck(this, List);
 
-    var _this = possibleConstructorReturn(this, (List.__proto__ || Object.getPrototypeOf(List)).call(this, List));
+    var _this = possibleConstructorReturn(this, (List.__proto__ || Object.getPrototypeOf(List)).call(this, undefined, List));
 
     if (isNothing(innerList)) {
       throw TypeError('missing list');
@@ -1471,11 +1447,6 @@ var List = function (_Base) {
       return iterableMetadata(List, itemMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_LIST || List.of();
@@ -1501,7 +1472,7 @@ var ModelicoSet = function (_Base) {
     var innerSetOrig = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Set();
     classCallCheck(this, ModelicoSet);
 
-    var _this = possibleConstructorReturn(this, (ModelicoSet.__proto__ || Object.getPrototypeOf(ModelicoSet)).call(this, ModelicoSet));
+    var _this = possibleConstructorReturn(this, (ModelicoSet.__proto__ || Object.getPrototypeOf(ModelicoSet)).call(this, undefined, ModelicoSet));
 
     if (isNothing(innerSetOrig)) {
       throw TypeError('missing set');
@@ -1597,11 +1568,6 @@ var ModelicoSet = function (_Base) {
       return iterableMetadata(ModelicoSet, itemMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_SET || ModelicoSet.of();
@@ -1635,7 +1601,7 @@ var Maybe = function (_Base) {
 
   function Maybe() {
     classCallCheck(this, Maybe);
-    return possibleConstructorReturn(this, (Maybe.__proto__ || Object.getPrototypeOf(Maybe)).call(this, Maybe));
+    return possibleConstructorReturn(this, (Maybe.__proto__ || Object.getPrototypeOf(Maybe)).call(this, undefined, Maybe));
   }
 
   createClass(Maybe, [{
@@ -1698,11 +1664,6 @@ var Maybe = function (_Base) {
         reviver: reviverFactory$5(itemMetadata),
         default: Maybe.of()
       });
-    }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
     }
   }]);
   return Maybe;
@@ -1929,7 +1890,7 @@ var Enum = function (_Base) {
       Object.freeze(Ctor);
     }
 
-    var _this = possibleConstructorReturn(this, (Enum.__proto__ || Object.getPrototypeOf(Enum)).call(this, Ctor));
+    var _this = possibleConstructorReturn(this, (Enum.__proto__ || Object.getPrototypeOf(Enum)).call(this, undefined, Ctor));
 
     Object.getOwnPropertyNames(enumerators).forEach(function (enumerator) {
       _this[enumerator] = always(enumerators[enumerator]);
@@ -1967,11 +1928,6 @@ var Enum = function (_Base) {
       }
 
       return new (Function.prototype.bind.apply(Enum, [null].concat(args)))();
-    }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
     }
   }]);
   return Enum;
@@ -2345,7 +2301,7 @@ var createModel = function createModel() {
     }], [{
       key: 'innerTypes',
       value: function innerTypes(path, Type) {
-        return isFunction(_innerTypes) ? _innerTypes({ m: m, path: path, Type: Type }) : Object.freeze(_innerTypes);
+        return isFunction(_innerTypes) ? _innerTypes(m, { path: path, Type: Type }) : Object.freeze(_innerTypes);
       }
     }]);
     return _class;

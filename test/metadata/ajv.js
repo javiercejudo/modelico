@@ -28,7 +28,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
   describe('Animal example', () => {
     class Animal extends M.Base {
       constructor (props) {
-        super(Animal, props)
+        super(props, Animal)
       }
 
       static innerTypes () {
@@ -44,7 +44,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
     class Animal2 extends M.Base {
       constructor (props) {
-        super(Animal, props)
+        super(props, Animal)
       }
 
       static innerTypes () {
@@ -553,7 +553,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('nested modelico object', () => {
       class Animal extends M.Base {
         constructor (props) {
-          super(Animal, props)
+          super(props, Animal)
         }
 
         static innerTypes () {
@@ -807,7 +807,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('should validate the default value', () => {
       class CountryCode extends M.Base {
         constructor (props) {
-          super(CountryCode, props)
+          super(props, CountryCode)
         }
 
         static innerTypes () {
@@ -832,7 +832,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
             throw TypeError(ajv.errors.map(error => error.message).join('\n'))
           }
 
-          super(CountryCode, props)
+          super(props, CountryCode)
         }
 
         static innerTypes () {
@@ -855,7 +855,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
   describe('recipe: validation at top level', () => {
     class Animal extends M.Base {
       constructor (props) {
-        super(Animal, props)
+        super(props, Animal)
       }
 
       static innerTypes () {
@@ -958,7 +958,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       class MagicString extends M.Base {
         constructor (props) {
-          super(MagicString, props)
+          super(props, MagicString)
         }
 
         static innerTypes () {
@@ -990,7 +990,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
     class Score extends M.Base {
       constructor (props) {
-        super(Score, props)
+        super(props, Score)
       }
 
       static innerTypes () {
@@ -1034,14 +1034,14 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('Circular innerTypes', () => {
     it('self reference', () => {
-      class Chain extends M.createAjvModel(({m}) => ({
+      class Chain extends M.createAjvModel(m => ({
         description: m.ajvString({minLength: 1}),
         previous: m.ajvMaybe(m._(Chain)),
         next: m.ajvMaybe(m._(Chain)),
         relatedChains: m.ajvList({}, m._(Chain))
       })) {
         constructor (props) {
-          super(Chain, props)
+          super(props, Chain)
         }
       }
 
@@ -1098,7 +1098,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       class Parent extends M.Base {
         constructor (props) {
-          super(Parent, props)
+          super(props, Parent)
         }
 
         static innerTypes () {
@@ -1111,7 +1111,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       class Child extends M.Base {
         constructor (props) {
-          super(Parent, props)
+          super(props, Parent)
         }
 
         static innerTypes () {
@@ -1124,7 +1124,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       class Person extends M.Base {
         constructor (props) {
-          super(Parent, props)
+          super(props, Parent)
         }
 
         static innerTypes () {

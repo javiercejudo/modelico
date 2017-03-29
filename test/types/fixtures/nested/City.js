@@ -6,7 +6,7 @@ export default (M, Region, countryFactory) => {
 
   class City extends M.Base {
     constructor (props) {
-      super(City, props)
+      super(props, City)
     }
 
     static innerTypes () {

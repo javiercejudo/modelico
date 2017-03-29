@@ -1,4 +1,4 @@
-import { isNothing, unsupported, emptyObject, always, haveDifferentTypes, haveSameValues } from './U'
+import { isNothing, unsupported, always, haveDifferentTypes, haveSameValues } from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -7,7 +7,7 @@ const reviver = (k, v) => {
 
 class ModelicoNumber extends Base {
   constructor (number = 0) {
-    super(ModelicoNumber)
+    super(undefined, ModelicoNumber)
 
     if (!Number.isNaN(number) && isNothing(number)) {
       throw TypeError('missing number')
@@ -65,10 +65,6 @@ class ModelicoNumber extends Base {
       type: ModelicoNumber,
       reviver
     })
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 

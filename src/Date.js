@@ -1,4 +1,4 @@
-import { isNothing, unsupported, emptyObject, haveDifferentTypes } from './U'
+import { isNothing, unsupported, haveDifferentTypes } from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -11,7 +11,7 @@ const reviver = (k, v) => {
 
 class ModelicoDate extends Base {
   constructor (dateOrig = new Date()) {
-    super(ModelicoDate)
+    super(undefined, ModelicoDate)
 
     if (isNothing(dateOrig)) {
       throw TypeError('missing date')
@@ -65,10 +65,6 @@ class ModelicoDate extends Base {
       type: ModelicoDate,
       reviver
     })
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 

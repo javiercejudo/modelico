@@ -1,4 +1,4 @@
-import { always, isNothing, unsupported, emptyObject } from './U'
+import { always, isNothing, unsupported } from './U'
 import { iterableMetadata, iterableEquals } from './iterableHelpers'
 import { innerOrigSymbol } from './symbols'
 import Base from './Base'
@@ -9,7 +9,7 @@ const copy = set => new Set(set)
 
 class ModelicoSet extends Base {
   constructor (innerSetOrig = new Set()) {
-    super(ModelicoSet)
+    super(undefined, ModelicoSet)
 
     if (isNothing(innerSetOrig)) {
       throw TypeError('missing set')
@@ -78,10 +78,6 @@ class ModelicoSet extends Base {
 
   static metadata (itemMetadata) {
     return iterableMetadata(ModelicoSet, itemMetadata)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 
   static EMPTY () {

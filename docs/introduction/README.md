@@ -20,11 +20,12 @@ Here is how `Animal` would look like:
 
 ```js
 const M = require('modelico') // window.Modelico in the browser
-const { string } = M.metadata()
 
-class Animal extends M.Base {
+class Animal extends M.createModel(m => ({
+  name: m.string()
+})) {
   constructor (props) {
-    super(Animal, props)
+    super(props, Animal)
   }
 
   speak () {
@@ -33,12 +34,6 @@ class Animal extends M.Base {
     return (name === '')
       ? `I don't have a name`
       : `My name is ${name}!`
-  }
-
-  static innerTypes () {
-    return Object.freeze({
-      name: string()
-    })
   }
 }
 ```

@@ -7,7 +7,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     class NumberCollection extends M.Base {
       constructor (props) {
-        super(NumberCollection, props)
+        super(props, NumberCollection)
       }
 
       getNumbers () {
@@ -72,7 +72,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     class NumberCollection extends M.Base {
       constructor (props) {
-        super(NumberCollection, props)
+        super(props, NumberCollection)
       }
 
       getNumbers () {
@@ -190,7 +190,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     class Circle extends Shape {
       constructor (props) {
-        super(Circle, props)
+        super(props, Circle)
       }
 
       area () {
@@ -209,7 +209,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     class Diamond extends Shape {
       constructor (props) {
-        super(Diamond, props)
+        super(props, Diamond)
       }
 
       area () {
@@ -232,7 +232,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     class Geometer extends M.Base {
       constructor (props) {
-        super(Geometer, props)
+        super(props, Geometer)
       }
 
       static innerTypes () {
@@ -448,7 +448,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     class NumberCollection extends M.Base {
       constructor (props) {
-        super(NumberCollection, props)
+        super(props, NumberCollection)
       }
 
       getNumbers () {

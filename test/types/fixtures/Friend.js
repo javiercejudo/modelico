@@ -5,7 +5,7 @@ export default M => {
 
   class Friend extends M.Base {
     constructor (props) {
-      super(Friend, props)
+      super(props, Friend)
     }
 
     static innerTypes () {

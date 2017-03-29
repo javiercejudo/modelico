@@ -5,7 +5,7 @@ export default M => {
 
   class Code extends M.Base {
     constructor (props) {
-      super(Code, props)
+      super(props, Code)
     }
 
     static innerTypes () {
@@ -18,7 +18,7 @@ export default M => {
 
   class Region extends M.Base {
     constructor (props) {
-      super(Region, props)
+      super(props, Region)
     }
 
     customMethod () {

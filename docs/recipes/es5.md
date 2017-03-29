@@ -9,7 +9,7 @@ with ES5-style classes. In the case of the `Animal` class from the
   var m = M.metadata()
 
   function Animal (fields) {
-    M.Base.factory(Animal, fields, this)
+    M.Base.factory(fields, Animal, this)
   }
 
   Animal.prototype = Object.create(M.Base.prototype)

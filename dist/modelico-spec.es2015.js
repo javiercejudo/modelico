@@ -41,7 +41,7 @@ var Base = (U, should, M, fixtures) => () => {
   describe('default innerTypes', () => {
     class Country extends M.Base {
       constructor (props) {
-        super(Country, props);
+        super(props, Country);
       }
     }
 
@@ -61,7 +61,7 @@ var Base = (U, should, M, fixtures) => () => {
     it('allows simple model creation without inner types (discouraged)', () => {
       class Book extends M.createModel() {
         constructor (props) {
-          super(Book, props);
+          super(props, Book);
         }
       }
 
@@ -118,13 +118,13 @@ var Base = (U, should, M, fixtures) => () => {
     });
 
     it('should support creating a copy with updated fields', () => {
-      class Book extends M.createModel(({m}) => ({
+      class Book extends M.createModel(m => ({
         title: m.string(),
         year: m.maybe(m.number()),
         author: m.withDefault(m.string(), 'anonymouss')
       })) {
         constructor (fields) {
-          super(Book, fields);
+          super(fields, Book);
         }
       }
 
@@ -399,7 +399,7 @@ var Base = (U, should, M, fixtures) => () => {
         author: withDefault(string(), 'anonymous')
       }, {stringTag: 'Book'}) {
         constructor (props) {
-          super(Book, props);
+          super(props, Book);
         }
 
         getTitleBy () {
@@ -433,7 +433,7 @@ var Base = (U, should, M, fixtures) => () => {
         code: withDefault(number(), '34')
       })) {
         constructor (props) {
-          super(CountryCallingCode, props);
+          super(props, CountryCallingCode);
         }
 
         static innerTypes () {
@@ -454,7 +454,7 @@ var Base = (U, should, M, fixtures) => () => {
         code: withDefault(number(), '34')
       })) {
         constructor (props) {
-          super(CountryCallingCode, props);
+          super(props, CountryCallingCode);
         }
 
         static innerTypes () {
@@ -2210,22 +2210,21 @@ var setIn = (U, should, M) => () => {
 /* eslint-env mocha */
 
 var featuresSimple = (should, M) => () => {
-  const { _, string } = M.metadata();
+  const { _ } = M.metadata();
 
-  class Animal extends M.Base {
+  class Animal extends M.createModel(m => ({
+    name: m.string()
+  })) {
     constructor (props) {
-      super(Animal, props);
+      super(props, Animal);
     }
 
     speak () {
       const name = this.name();
-      return (name === '') ? `I don't have a name` : `My name is ${name}!`
-    }
 
-    static innerTypes () {
-      return Object.freeze({
-        name: string()
-      })
+      return (name === '')
+        ? `I don't have a name`
+        : `My name is ${name}!`
     }
   }
 
@@ -2247,11 +2246,13 @@ var featuresSimple = (should, M) => () => {
 /* eslint-env mocha */
 
 var featuresAdvanced = (should, M) => () => {
-  const { _, any, maybe, list, string } = M.metadata();
+  const { _ } = M.metadata();
 
-  class Animal extends M.Base {
+  class Animal extends M.createModel(m => ({
+    name: m.maybe(m.string())
+  })) {
     constructor (props) {
-      super(Animal, props);
+      super(props, Animal);
     }
 
     speak () {
@@ -2261,29 +2262,19 @@ var featuresAdvanced = (should, M) => () => {
         ? `I don't have a name`
         : `My name is ${name}!`
     }
-
-    static innerTypes () {
-      return Object.freeze({
-        name: maybe(string())
-      })
-    }
   }
 
-  class Person extends M.Base {
+  class Person extends M.createModel(m => ({
+    givenName: m.any(),
+    familyName: m.string(),
+    pets: m.list(m.maybe(m._(Animal)))
+  })) {
     constructor (props) {
-      super(Person, props);
+      super(props, Person);
     }
 
     fullName () {
       return [this.givenName(), this.familyName()].join(' ').trim()
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        givenName: any(),
-        familyName: string(),
-        pets: list(maybe(_(Animal)))
-      })
     }
   }
 
@@ -2349,7 +2340,7 @@ var featuresAdvancedES5 = (should, M) => () => {
   var m = M.metadata();
 
   function Animal (fields) {
-    M.Base.factory(Animal, fields, this);
+    M.Base.factory(fields, Animal, this);
   }
 
   Animal.innerTypes = function () {
@@ -2369,7 +2360,7 @@ var featuresAdvancedES5 = (should, M) => () => {
   };
 
   function Person (fields) {
-    M.Base.factory(Person, fields, this);
+    M.Base.factory(fields, Person, this);
   }
 
   Person.innerTypes = function () {
@@ -2483,7 +2474,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
 
     class NumberCollection extends M.Base {
       constructor (props) {
-        super(NumberCollection, props);
+        super(props, NumberCollection);
       }
 
       getNumbers () {
@@ -2548,7 +2539,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
 
     class NumberCollection extends M.Base {
       constructor (props) {
-        super(NumberCollection, props);
+        super(props, NumberCollection);
       }
 
       getNumbers () {
@@ -2666,7 +2657,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
 
     class Circle extends Shape {
       constructor (props) {
-        super(Circle, props);
+        super(props, Circle);
       }
 
       area () {
@@ -2685,7 +2676,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
 
     class Diamond extends Shape {
       constructor (props) {
-        super(Diamond, props);
+        super(props, Diamond);
       }
 
       area () {
@@ -2708,7 +2699,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
 
     class Geometer extends M.Base {
       constructor (props) {
-        super(Geometer, props);
+        super(props, Geometer);
       }
 
       static innerTypes () {
@@ -2924,7 +2915,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
 
     class NumberCollection extends M.Base {
       constructor (props) {
-        super(NumberCollection, props);
+        super(props, NumberCollection);
       }
 
       getNumbers () {
@@ -3602,17 +3593,10 @@ var proxyDate = (should, M) => () => {
 /* eslint-env mocha */
 
 var c51 = (should, M) => () => {
-  const { string } = M.metadata();
-
   class Country extends M.Base {
     constructor (code) {
-      super(Country, {code});
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        code: string()
-      })
+      super({code}, Country);
+      this.code = () => code;
     }
   }
 
@@ -3639,7 +3623,7 @@ var personFactory = (M, PartOfDay, Sex) => {
 
   class Person extends M.Base {
     constructor (props) {
-      super(Person, props);
+      super(props, Person);
     }
 
     fullName () {
@@ -3697,7 +3681,7 @@ var animalFactory = M => {
 
   class Animal extends M.Base {
     constructor (props) {
-      super(Animal, props);
+      super(props, Animal);
     }
 
     speak () {
@@ -3721,7 +3705,7 @@ var friendFactory = M => {
 
   class Friend extends M.Base {
     constructor (props) {
-      super(Friend, props);
+      super(props, Friend);
     }
 
     static innerTypes () {
@@ -3748,7 +3732,7 @@ var cityFactory = (M, Region, countryFactory) => {
 
   class City extends M.Base {
     constructor (props) {
-      super(City, props);
+      super(props, City);
     }
 
     static innerTypes () {
@@ -3769,7 +3753,7 @@ var countryFactory = (M, Region) => {
 
   class Country extends M.Base {
     constructor (props) {
-      super(Country, props);
+      super(props, Country);
     }
 
     static innerTypes () {
@@ -3791,7 +3775,7 @@ var regionFactory = M => {
 
   class Region extends M.Base {
     constructor (props) {
-      super(Region, props);
+      super(props, Region);
     }
 
     customMethod () {
@@ -3816,7 +3800,7 @@ var regionIncompatibleNameKeyFactory = M => {
 
   class Code extends M.Base {
     constructor (props) {
-      super(Code, props);
+      super(props, Code);
     }
 
     static innerTypes () {
@@ -3829,7 +3813,7 @@ var regionIncompatibleNameKeyFactory = M => {
 
   class Region extends M.Base {
     constructor (props) {
-      super(Region, props);
+      super(props, Region);
     }
 
     customMethod () {
@@ -3894,7 +3878,7 @@ var localDateFactory = ({M, Ajv, validationEnabled, ajvOptions}) => {
 
   class LocalDate extends M.Base {
     constructor (year, month, day) {
-      super(LocalDate, {year, month, day});
+      super({year, month, day}, LocalDate);
 
       this.year = () => year;
       this.month = () => month;
@@ -3907,10 +3891,6 @@ var localDateFactory = ({M, Ajv, validationEnabled, ajvOptions}) => {
       const { year, month, day } = this;
 
       return `${year()}-${month()}-${day()}`
-    }
-
-    static innerTypes () {
-      return Object.freeze({})
     }
 
     static metadata () {
@@ -3931,17 +3911,22 @@ var fixerIoResultFactory = (
   {M, Ajv, validationEnabled, ajvOptions},
   [Currency, LocalDate]
 ) => {
-  const {
-    _, ajvEnum, ajvEnumMap, ajvNumber
-  } = M.ajvMetadata(validationEnabled ? Ajv(ajvOptions) : undefined);
+  const ajv = validationEnabled ? Ajv(ajvOptions) : undefined;
 
-  class FixerIoResult extends M.Base {
-    constructor (fields) {
+  class FixerIoResult extends M.createAjvModel(m => ({
+    base: m.ajvEnum(Currency),
+    date: m._(LocalDate),
+    rates: m.ajvEnumMap({},
+      m.ajvEnum(Currency),
+      m.ajvNumber({minimum: 0, exclusiveMinimum: true})
+    )
+  }), ajv) {
+    constructor (props) {
       // ensure base is included in the rates
-      const rates = fields.rates.set(fields.base, 1);
-      const enhancedFields = Object.assign({}, fields, {rates});
+      const rates = props.rates.set(props.base, 1);
+      const enhancedProps = Object.assign({}, props, {rates});
 
-      super(FixerIoResult, enhancedFields);
+      super(enhancedProps, FixerIoResult);
       Object.freeze(this);
     }
 
@@ -3949,17 +3934,6 @@ var fixerIoResultFactory = (
       const rates = this.rates();
 
       return x * rates.get(to) / rates.get(from)
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        base: ajvEnum(Currency),
-        date: _(LocalDate),
-        rates: ajvEnumMap({},
-          ajvEnum(Currency),
-          ajvNumber({minimum: 0, exclusiveMinimum: true})
-        )
-      })
     }
   }
 
@@ -4158,7 +4132,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
   describe('Animal example', () => {
     class Animal extends M.Base {
       constructor (props) {
-        super(Animal, props);
+        super(props, Animal);
       }
 
       static innerTypes () {
@@ -4174,7 +4148,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
     class Animal2 extends M.Base {
       constructor (props) {
-        super(Animal, props);
+        super(props, Animal);
       }
 
       static innerTypes () {
@@ -4683,7 +4657,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
     it('nested modelico object', () => {
       class Animal extends M.Base {
         constructor (props) {
-          super(Animal, props);
+          super(props, Animal);
         }
 
         static innerTypes () {
@@ -4937,7 +4911,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
     it('should validate the default value', () => {
       class CountryCode extends M.Base {
         constructor (props) {
-          super(CountryCode, props);
+          super(props, CountryCode);
         }
 
         static innerTypes () {
@@ -4962,7 +4936,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
             throw TypeError(ajv.errors.map(error => error.message).join('\n'))
           }
 
-          super(CountryCode, props);
+          super(props, CountryCode);
         }
 
         static innerTypes () {
@@ -4985,7 +4959,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
   describe('recipe: validation at top level', () => {
     class Animal extends M.Base {
       constructor (props) {
-        super(Animal, props);
+        super(props, Animal);
       }
 
       static innerTypes () {
@@ -5088,7 +5062,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
       class MagicString extends M.Base {
         constructor (props) {
-          super(MagicString, props);
+          super(props, MagicString);
         }
 
         static innerTypes () {
@@ -5120,7 +5094,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
     class Score extends M.Base {
       constructor (props) {
-        super(Score, props);
+        super(props, Score);
       }
 
       static innerTypes () {
@@ -5164,14 +5138,14 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
   describe('Circular innerTypes', () => {
     it('self reference', () => {
-      class Chain extends M.createAjvModel(({m}) => ({
+      class Chain extends M.createAjvModel(m => ({
         description: m.ajvString({minLength: 1}),
         previous: m.ajvMaybe(m._(Chain)),
         next: m.ajvMaybe(m._(Chain)),
         relatedChains: m.ajvList({}, m._(Chain))
       })) {
         constructor (props) {
-          super(Chain, props);
+          super(props, Chain);
         }
       }
 
@@ -5228,7 +5202,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
       class Parent extends M.Base {
         constructor (props) {
-          super(Parent, props);
+          super(props, Parent);
         }
 
         static innerTypes () {
@@ -5241,7 +5215,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
       class Child extends M.Base {
         constructor (props) {
-          super(Parent, props);
+          super(props, Parent);
         }
 
         static innerTypes () {
@@ -5254,7 +5228,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
       class Person extends M.Base {
         constructor (props) {
-          super(Parent, props);
+          super(props, Parent);
         }
 
         static innerTypes () {
@@ -5394,7 +5368,7 @@ var baseMetadataExample = (should, M, fixtures, { Ajv }) => () => {
 
     class Range extends M.Base {
       constructor ({ min = -Infinity, max = Infinity } = {}) {
-        super(Range, { min, max });
+        super({ min, max }, Range);
       }
 
       length () {

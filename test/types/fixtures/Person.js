@@ -9,7 +9,7 @@ export default (M, PartOfDay, Sex) => {
 
   class Person extends M.Base {
     constructor (props) {
-      super(Person, props)
+      super(props, Person)
     }
 
     fullName () {

@@ -1,4 +1,4 @@
-import { reviverOrAsIs, emptyObject, isFunction } from './U'
+import { reviverOrAsIs, isFunction } from './U'
 import AbstractMap, { set, of, metadata } from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
@@ -68,10 +68,6 @@ class EnumMap extends AbstractMap {
 
   static metadata (keyMetadata, valueMetadata) {
     return metadata(EnumMap, reviverFactory, keyMetadata, valueMetadata)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 
   static EMPTY () {
