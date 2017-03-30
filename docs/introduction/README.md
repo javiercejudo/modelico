@@ -43,4 +43,23 @@ class Animal extends M.Base {
 }
 ```
 
+A convenient way to declare the inner types and have access to the metadata
+functions is to extend from `M.createModel(...)`:
+
+```js
+const M = require('modelico')
+
+class Animal extends M.createModel(m => ({
+  name: m.string()
+})) {
+  constructor (props) {
+    super(Animal, props)
+  }
+
+  speak () {
+    // same as above
+  }
+}
+```
+
 See the [nested types example](/docs/introduction/nested_types_example.md) to learn more.
