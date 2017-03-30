@@ -6,7 +6,7 @@ export default (should, M) => () => {
   it('length', () => {
     const list1 = p(M.List.of(1, 2, 2, 3))
 
-    ;(list1.length).should.be.exactly(4)
+    should(list1.length).be.exactly(4)
   })
 
   it('[n]', () => {
@@ -151,7 +151,7 @@ export default (should, M) => () => {
     let sum = 0
     list.forEach(x => { sum += x })
 
-    ;(sum).should.be.exactly(8)
+    should(sum).be.exactly(8)
   })
 
   it('keys() / entries() / [@@iterator]()', () => {

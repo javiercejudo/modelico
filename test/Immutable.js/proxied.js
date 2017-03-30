@@ -28,11 +28,11 @@ export default (U, should, M) => () => {
     const list3 = list2.unshift(0)
     const list4 = list1.concat([...list2], [...list3])
 
-    ;(list1.size === 2).should.be.exactly(true)
-    ;(list2.size === 5).should.be.exactly(true)
-    ;(list3.size === 6).should.be.exactly(true)
-    ;(list4.size === 13).should.be.exactly(true)
-    ;(list4.get(0) === 1).should.be.exactly(true)
+    should(list1.size === 2).be.exactly(true)
+    should(list2.size === 5).be.exactly(true)
+    should(list3.size === 6).be.exactly(true)
+    should(list4.size === 13).be.exactly(true)
+    should(list4.get(0) === 1).be.exactly(true)
   })
 
   it('JavaScript-first API (2)', () => {
@@ -80,7 +80,7 @@ export default (U, should, M) => () => {
     const map1 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}))
     const map2 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}))
 
-    ;(map1 !== map2).should.be.exactly(true)   // two different instances
+    should(map1 !== map2).be.exactly(true)   // two different instances
     map1.equals(map2).should.be.exactly(true) // have equivalent values
   })
 
@@ -93,7 +93,7 @@ export default (U, should, M) => () => {
     res.push(6)
     const list2 = _l(M.List.fromArray(res))
 
-    ;(list1.length === 3).should.be.exactly(true)
-    ;(list2.length === 6).should.be.exactly(true)
+    should(list1.length === 3).be.exactly(true)
+    should(list2.length === 6).be.exactly(true)
   })
 }

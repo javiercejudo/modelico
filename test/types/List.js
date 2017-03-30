@@ -9,8 +9,8 @@ export default (U, should, M, { Person }) => () => {
 
       M.List.fromArray(input)
 
-      ;(() => { input[1] = 'B' })
-        .should.throw()
+      should(() => { input[1] = 'B' })
+        .throw()
     })
   })
 

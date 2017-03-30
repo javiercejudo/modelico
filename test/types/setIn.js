@@ -5,8 +5,8 @@ export default (U, should, M) => () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This')
     const array1 = M.List.of('totally', 'immutable', hammer)
 
-    ;(() => { array1.inner()[1] = 'I’m going to mutate you!' })
-      .should.throw()
+    should(() => { array1.inner()[1] = 'I’m going to mutate you!' })
+      .throw()
 
     array1.get(1).should.be.exactly('immutable')
 
