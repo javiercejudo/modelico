@@ -41,7 +41,7 @@ export default (U, should, M, fixtures) => () => {
   describe('default innerTypes', () => {
     class Country extends M.Base {
       constructor (props) {
-        super(Country, props)
+        super(props, Country)
       }
     }
 
@@ -61,7 +61,7 @@ export default (U, should, M, fixtures) => () => {
     it('allows simple model creation without inner types (discouraged)', () => {
       class Book extends M.createModel() {
         constructor (props) {
-          super(Book, props)
+          super(props, Book)
         }
       }
 
@@ -124,7 +124,7 @@ export default (U, should, M, fixtures) => () => {
         author: m.withDefault(m.string(), 'anonymouss')
       })) {
         constructor (fields) {
-          super(Book, fields)
+          super(fields, Book)
         }
       }
 
@@ -399,7 +399,7 @@ export default (U, should, M, fixtures) => () => {
         author: withDefault(string(), 'anonymous')
       }, {stringTag: 'Book'}) {
         constructor (props) {
-          super(Book, props)
+          super(props, Book)
         }
 
         getTitleBy () {
@@ -433,7 +433,7 @@ export default (U, should, M, fixtures) => () => {
         code: withDefault(number(), '34')
       })) {
         constructor (props) {
-          super(CountryCallingCode, props)
+          super(props, CountryCallingCode)
         }
 
         static innerTypes () {
@@ -454,7 +454,7 @@ export default (U, should, M, fixtures) => () => {
         code: withDefault(number(), '34')
       })) {
         constructor (props) {
-          super(CountryCallingCode, props)
+          super(props, CountryCallingCode)
         }
 
         static innerTypes () {

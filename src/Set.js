@@ -9,7 +9,7 @@ const copy = set => new Set(set)
 
 class ModelicoSet extends Base {
   constructor (innerSetOrig = new Set()) {
-    super(ModelicoSet)
+    super(undefined, ModelicoSet)
 
     if (isNothing(innerSetOrig)) {
       throw TypeError('missing set')

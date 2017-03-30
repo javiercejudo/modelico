@@ -9,7 +9,7 @@ import getInnerTypes from './getInnerTypes'
 const getPathReducer = (result, part) => result.get(part)
 
 class Base {
-  constructor (Type, fields = emptyObject, thisArg) {
+  constructor (fields = emptyObject, Type = Base, thisArg) {
     if (!isPlainObject(fields)) {
       throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`)
     }

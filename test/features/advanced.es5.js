@@ -5,7 +5,7 @@ export default (should, M) => () => {
   var m = M.metadata()
 
   function Animal (fields) {
-    M.Base.factory(Animal, fields, this)
+    M.Base.factory(fields, Animal, this)
   }
 
   Animal.innerTypes = function () {
@@ -25,7 +25,7 @@ export default (should, M) => () => {
   }
 
   function Person (fields) {
-    M.Base.factory(Person, fields, this)
+    M.Base.factory(fields, Person, this)
   }
 
   Person.innerTypes = function () {

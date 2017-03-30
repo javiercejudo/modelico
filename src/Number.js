@@ -7,7 +7,7 @@ const reviver = (k, v) => {
 
 class ModelicoNumber extends Base {
   constructor (number = 0) {
-    super(ModelicoNumber)
+    super(undefined, ModelicoNumber)
 
     if (!Number.isNaN(number) && isNothing(number)) {
       throw TypeError('missing number')

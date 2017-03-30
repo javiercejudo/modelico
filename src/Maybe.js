@@ -21,7 +21,7 @@ const reviverFactory = itemMetadata => (k, v, path) => {
 
 class Maybe extends Base {
   constructor () {
-    super(Maybe)
+    super(undefined, Maybe)
   }
 
   get (fieldOrFallbackPair) {

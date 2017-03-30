@@ -5,7 +5,7 @@ export default M => {
 
   class Region extends M.Base {
     constructor (props) {
-      super(Region, props)
+      super(props, Region)
     }
 
     customMethod () {

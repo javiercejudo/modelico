@@ -2,17 +2,22 @@ export default (
   {M, Ajv, validationEnabled, ajvOptions},
   [Currency, LocalDate]
 ) => {
-  const {
-    _, ajvEnum, ajvEnumMap, ajvNumber
-  } = M.ajvMetadata(validationEnabled ? Ajv(ajvOptions) : undefined)
+  const ajv = validationEnabled ? Ajv(ajvOptions) : undefined
 
-  class FixerIoResult extends M.Base {
-    constructor (fields) {
+  class FixerIoResult extends M.createAjvModel(m => ({
+    base: m.ajvEnum(Currency),
+    date: m._(LocalDate),
+    rates: m.ajvEnumMap({},
+      m.ajvEnum(Currency),
+      m.ajvNumber({minimum: 0, exclusiveMinimum: true})
+    )
+  }), ajv) {
+    constructor (props) {
       // ensure base is included in the rates
-      const rates = fields.rates.set(fields.base, 1)
-      const enhancedFields = Object.assign({}, fields, {rates})
+      const rates = props.rates.set(props.base, 1)
+      const enhancedProps = Object.assign({}, props, {rates})
 
-      super(FixerIoResult, enhancedFields)
+      super(enhancedProps, FixerIoResult)
       Object.freeze(this)
     }
 
@@ -20,17 +25,6 @@ export default (
       const rates = this.rates()
 
       return x * rates.get(to) / rates.get(from)
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        base: ajvEnum(Currency),
-        date: _(LocalDate),
-        rates: ajvEnumMap({},
-          ajvEnum(Currency),
-          ajvNumber({minimum: 0, exclusiveMinimum: true})
-        )
-      })
     }
   }
 

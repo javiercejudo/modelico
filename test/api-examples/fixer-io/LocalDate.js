@@ -8,7 +8,7 @@ export default ({M, Ajv, validationEnabled, ajvOptions}) => {
 
   class LocalDate extends M.Base {
     constructor (year, month, day) {
-      super(LocalDate, {year, month, day})
+      super({year, month, day}, LocalDate)
 
       this.year = () => year
       this.month = () => month

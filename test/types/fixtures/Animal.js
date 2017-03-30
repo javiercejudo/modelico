@@ -5,7 +5,7 @@ export default M => {
 
   class Animal extends M.Base {
     constructor (props) {
-      super(Animal, props)
+      super(props, Animal)
     }
 
     speak () {

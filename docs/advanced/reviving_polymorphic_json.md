@@ -38,7 +38,7 @@ const { _, number, stringMap, list, anyOf } = M.metadata()
 
 class NumberCollection extends M.Base {
   constructor (props) {
-    super(NumberCollection, props)
+    super(props, NumberCollection)
   }
 
   getNumbers () {
@@ -126,7 +126,7 @@ const { number, stringMap, list } = M.metadata()
 
 class NumberCollection extends M.Base {
   constructor (props) {
-    super(NumberCollection, props)
+    super(props, NumberCollection)
   }
 
   getNumbers () {

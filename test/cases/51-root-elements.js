@@ -1,17 +1,10 @@
 /* eslint-env mocha */
 
 export default (should, M) => () => {
-  const { string } = M.metadata()
-
   class Country extends M.Base {
     constructor (code) {
-      super(Country, {code})
-    }
-
-    static innerTypes () {
-      return Object.freeze({
-        code: string()
-      })
+      super({code}, Country)
+      this.code = () => code
     }
   }
 

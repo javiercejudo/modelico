@@ -30,7 +30,7 @@ const { ajvString, ajvList, ajvNumber } = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
   constructor (fields) {
-    super(Animal, fields)
+    super(fields, Animal)
   }
 
   static innerTypes () {
@@ -64,7 +64,7 @@ const lowerCaseString = () => M.withValidation(
 
 class Animal extends M.Base {
   constructor (fields) {
-    super(Animal, fields)
+    super(fields, Animal)
   }
 
   static innerTypes () {
@@ -140,7 +140,7 @@ const customReviver = baseReviver => (k, v, path = []) => {
 
 class Range extends M.Base {
   constructor ({ min = -Infinity, max = Infinity } = {}) {
-    super(Range, { min, max })
+    super({ min, max }, Range)
   }
 
   length () {

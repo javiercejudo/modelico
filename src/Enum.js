@@ -25,7 +25,7 @@ class Enum extends Base {
       Object.freeze(Ctor)
     }
 
-    super(Ctor)
+    super(undefined, Ctor)
 
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {

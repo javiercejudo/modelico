@@ -5,7 +5,7 @@ export default (M, Region) => {
 
   class Country extends M.Base {
     constructor (props) {
-      super(Country, props)
+      super(props, Country)
     }
 
     static innerTypes () {

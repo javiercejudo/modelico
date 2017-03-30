@@ -7,7 +7,7 @@ let EMPTY_LIST
 
 class List extends Base {
   constructor (innerList = []) {
-    super(List)
+    super(undefined, List)
 
     if (isNothing(innerList)) {
       throw TypeError('missing list')

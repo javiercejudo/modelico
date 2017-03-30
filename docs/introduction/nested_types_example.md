@@ -43,7 +43,7 @@ const { _, string, list } = M.metadata()
 
 class Person extends M.Base {
   constructor (fields) {
-    super(Person, fields)
+    super(fields, Person)
   }
 
   fullName () {

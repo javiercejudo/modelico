@@ -23,7 +23,7 @@ With that, we are ready to create our `Point` class:
 ```js
 class Point extends M.Base {
   constructor (x, y) {
-    super(Point, { x, y })
+    super({ x, y }, Point)
 
     this.x = () => x
     this.y = () => y

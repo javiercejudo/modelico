@@ -303,7 +303,7 @@ const reviverFactory = Type => (k, v, path = []) => {
 const getPathReducer = (result, part) => result.get(part);
 
 class Base {
-  constructor (Type, fields = emptyObject, thisArg) {
+  constructor (fields = emptyObject, Type = Base, thisArg) {
     if (!isPlainObject(fields)) {
       throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`)
     }
@@ -459,7 +459,7 @@ const copy = map => new Map(map);
 
 class AbstractMap extends Base$1 {
   constructor (Type, innerMapOrig = new Map(), EMPTY) {
-    super(Type);
+    super(undefined, Type);
 
     if (isNothing(innerMapOrig)) {
       throw TypeError('missing map')
@@ -598,10 +598,6 @@ class ModelicoMap extends AbstractMap$1 {
     return metadata$1(ModelicoMap, reviverFactory$2, keyMetadata, valueMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
   static EMPTY () {
     return EMPTY_MAP || ModelicoMap.of()
   }
@@ -677,10 +673,6 @@ class StringMap extends AbstractMap$1 {
 
   static metadata (valueMetadata) {
     return metadata$1(StringMap, reviverFactory$3, valueMetadata)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 
   static EMPTY () {
@@ -761,10 +753,6 @@ class EnumMap extends AbstractMap$1 {
     return metadata$1(EnumMap, reviverFactory$4, keyMetadata, valueMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
   static EMPTY () {
     return EMPTY_ENUM_MAP || EnumMap.of()
   }
@@ -780,7 +768,7 @@ const reviver = (k, v) => {
 
 class ModelicoNumber extends Base$1 {
   constructor (number = 0) {
-    super(ModelicoNumber);
+    super(undefined, ModelicoNumber);
 
     if (!Number.isNaN(number) && isNothing(number)) {
       throw TypeError('missing number')
@@ -839,10 +827,6 @@ class ModelicoNumber extends Base$1 {
       reviver
     })
   }
-
-  static innerTypes () {
-    return emptyObject
-  }
 }
 
 ModelicoNumber.displayName = 'ModelicoNumber';
@@ -859,7 +843,7 @@ const reviver$1 = (k, v) => {
 
 class ModelicoDate extends Base$1 {
   constructor (dateOrig = new Date()) {
-    super(ModelicoDate);
+    super(undefined, ModelicoDate);
 
     if (isNothing(dateOrig)) {
       throw TypeError('missing date')
@@ -913,10 +897,6 @@ class ModelicoDate extends Base$1 {
       type: ModelicoDate,
       reviver: reviver$1
     })
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 
@@ -987,7 +967,7 @@ let EMPTY_LIST;
 
 class List extends Base$1 {
   constructor (innerList = []) {
-    super(List);
+    super(undefined, List);
 
     if (isNothing(innerList)) {
       throw TypeError('missing list')
@@ -1068,10 +1048,6 @@ class List extends Base$1 {
     return iterableMetadata(List, itemMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
   static EMPTY () {
     return EMPTY_LIST || List.of()
   }
@@ -1087,7 +1063,7 @@ const copy$1 = set => new Set(set);
 
 class ModelicoSet extends Base$1 {
   constructor (innerSetOrig = new Set()) {
-    super(ModelicoSet);
+    super(undefined, ModelicoSet);
 
     if (isNothing(innerSetOrig)) {
       throw TypeError('missing set')
@@ -1158,10 +1134,6 @@ class ModelicoSet extends Base$1 {
     return iterableMetadata(ModelicoSet, itemMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
   static EMPTY () {
     return EMPTY_SET || ModelicoSet.of()
   }
@@ -1191,7 +1163,7 @@ const reviverFactory$5 = itemMetadata => (k, v, path) => {
 
 class Maybe extends Base$1 {
   constructor () {
-    super(Maybe);
+    super(undefined, Maybe);
   }
 
   get (fieldOrFallbackPair) {
@@ -1255,10 +1227,6 @@ class Maybe extends Base$1 {
       reviver: reviverFactory$5(itemMetadata),
       default: Maybe.of()
     })
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 
@@ -1435,7 +1403,7 @@ class Enum extends Base$1 {
       Object.freeze(Ctor);
     }
 
-    super(Ctor);
+    super(undefined, Ctor);
 
     Object.getOwnPropertyNames(enumerators)
       .forEach(enumerator => {
@@ -1460,10 +1428,6 @@ class Enum extends Base$1 {
 
   static fromArray (...args) {
     return new Enum(...args)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 
@@ -1788,7 +1752,7 @@ const createModel = (
 
     static innerTypes (path, Type) {
       return isFunction(innerTypes)
-        ? innerTypes({m, path, Type})
+        ? innerTypes(m, {path, Type})
         : Object.freeze(innerTypes)
     }
   }

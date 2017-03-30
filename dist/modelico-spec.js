@@ -212,7 +212,7 @@ var Base = (function (U, should, M, fixtures) {
 
         function Country(props) {
           classCallCheck(this, Country);
-          return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, props));
+          return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, props, Country));
         }
 
         return Country;
@@ -236,7 +236,7 @@ var Base = (function (U, should, M, fixtures) {
 
           function Book(props) {
             classCallCheck(this, Book);
-            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, props));
+            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, props, Book));
           }
 
           return Book;
@@ -298,12 +298,11 @@ var Base = (function (U, should, M, fixtures) {
 
           function Book(fields) {
             classCallCheck(this, Book);
-            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, fields));
+            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, fields, Book));
           }
 
           return Book;
-        }(M.createModel(function (_ref) {
-          var m = _ref.m;
+        }(M.createModel(function (m) {
           return {
             title: m.string(),
             year: m.maybe(m.number()),
@@ -568,7 +567,7 @@ var Base = (function (U, should, M, fixtures) {
 
           function Book(props) {
             classCallCheck(this, Book);
-            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, props));
+            return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, props, Book));
           }
 
           createClass(Book, [{
@@ -609,7 +608,7 @@ var Base = (function (U, should, M, fixtures) {
 
           function CountryCallingCode(props) {
             classCallCheck(this, CountryCallingCode);
-            return possibleConstructorReturn(this, (CountryCallingCode.__proto__ || Object.getPrototypeOf(CountryCallingCode)).call(this, CountryCallingCode, props));
+            return possibleConstructorReturn(this, (CountryCallingCode.__proto__ || Object.getPrototypeOf(CountryCallingCode)).call(this, props, CountryCallingCode));
           }
 
           createClass(CountryCallingCode, null, [{
@@ -638,7 +637,7 @@ var Base = (function (U, should, M, fixtures) {
 
           function CountryCallingCode(props) {
             classCallCheck(this, CountryCallingCode);
-            return possibleConstructorReturn(this, (CountryCallingCode.__proto__ || Object.getPrototypeOf(CountryCallingCode)).call(this, CountryCallingCode, props));
+            return possibleConstructorReturn(this, (CountryCallingCode.__proto__ || Object.getPrototypeOf(CountryCallingCode)).call(this, props, CountryCallingCode));
           }
 
           createClass(CountryCallingCode, null, [{
@@ -2287,33 +2286,30 @@ var setIn = (function (U, should, M) {
 var featuresSimple = (function (should, M) {
   return function () {
     var _M$metadata = M.metadata(),
-        _ = _M$metadata._,
-        string = _M$metadata.string;
+        _ = _M$metadata._;
 
-    var Animal = function (_M$Base) {
-      inherits(Animal, _M$Base);
+    var Animal = function (_M$createModel) {
+      inherits(Animal, _M$createModel);
 
       function Animal(props) {
         classCallCheck(this, Animal);
-        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, props, Animal));
       }
 
       createClass(Animal, [{
         key: 'speak',
         value: function speak() {
           var name = this.name();
+
           return name === '' ? 'I don\'t have a name' : 'My name is ' + name + '!';
-        }
-      }], [{
-        key: 'innerTypes',
-        value: function innerTypes() {
-          return Object.freeze({
-            name: string()
-          });
         }
       }]);
       return Animal;
-    }(M.Base);
+    }(M.createModel(function (m) {
+      return {
+        name: m.string()
+      };
+    }));
 
     it('should showcase the main features', function () {
       var petJson = '{"name": "Robbie"}';
@@ -2335,18 +2331,14 @@ var featuresSimple = (function (should, M) {
 var featuresAdvanced = (function (should, M) {
   return function () {
     var _M$metadata = M.metadata(),
-        _ = _M$metadata._,
-        any = _M$metadata.any,
-        maybe = _M$metadata.maybe,
-        list = _M$metadata.list,
-        string = _M$metadata.string;
+        _ = _M$metadata._;
 
-    var Animal = function (_M$Base) {
-      inherits(Animal, _M$Base);
+    var Animal = function (_M$createModel) {
+      inherits(Animal, _M$createModel);
 
       function Animal(props) {
         classCallCheck(this, Animal);
-        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+        return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, props, Animal));
       }
 
       createClass(Animal, [{
@@ -2356,23 +2348,20 @@ var featuresAdvanced = (function (should, M) {
 
           return name === '' ? 'I don\'t have a name' : 'My name is ' + name + '!';
         }
-      }], [{
-        key: 'innerTypes',
-        value: function innerTypes() {
-          return Object.freeze({
-            name: maybe(string())
-          });
-        }
       }]);
       return Animal;
-    }(M.Base);
+    }(M.createModel(function (m) {
+      return {
+        name: m.maybe(m.string())
+      };
+    }));
 
-    var Person = function (_M$Base2) {
-      inherits(Person, _M$Base2);
+    var Person = function (_M$createModel2) {
+      inherits(Person, _M$createModel2);
 
       function Person(props) {
         classCallCheck(this, Person);
-        return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, props));
+        return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, props, Person));
       }
 
       createClass(Person, [{
@@ -2380,18 +2369,15 @@ var featuresAdvanced = (function (should, M) {
         value: function fullName() {
           return [this.givenName(), this.familyName()].join(' ').trim();
         }
-      }], [{
-        key: 'innerTypes',
-        value: function innerTypes() {
-          return Object.freeze({
-            givenName: any(),
-            familyName: string(),
-            pets: list(maybe(_(Animal)))
-          });
-        }
       }]);
       return Person;
-    }(M.Base);
+    }(M.createModel(function (m) {
+      return {
+        givenName: m.any(),
+        familyName: m.string(),
+        pets: m.list(m.maybe(m._(Animal)))
+      };
+    }));
 
     it('should showcase the main features', function () {
       var personJson = '{\n      "givenName": "Javier",\n      "familyName": "Cejudo",\n      "pets": [\n        {\n          "name": "Robbie"\n        },\n        null\n      ]\n    }';
@@ -2439,7 +2425,7 @@ var featuresAdvancedES5 = (function (should, M) {
     var m = M.metadata();
 
     function Animal(fields) {
-      M.Base.factory(Animal, fields, this);
+      M.Base.factory(fields, Animal, this);
     }
 
     Animal.innerTypes = function () {
@@ -2457,7 +2443,7 @@ var featuresAdvancedES5 = (function (should, M) {
     };
 
     function Person(fields) {
-      M.Base.factory(Person, fields, this);
+      M.Base.factory(fields, Person, this);
     }
 
     Person.innerTypes = function () {
@@ -2572,7 +2558,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
 
         function NumberCollection(props) {
           classCallCheck(this, NumberCollection);
-          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, NumberCollection, props));
+          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, props, NumberCollection));
         }
 
         createClass(NumberCollection, [{
@@ -2653,7 +2639,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
 
         function NumberCollection(props) {
           classCallCheck(this, NumberCollection);
-          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, NumberCollection, props));
+          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, props, NumberCollection));
         }
 
         createClass(NumberCollection, [{
@@ -2801,7 +2787,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
 
         function Circle(props) {
           classCallCheck(this, Circle);
-          return possibleConstructorReturn(this, (Circle.__proto__ || Object.getPrototypeOf(Circle)).call(this, Circle, props));
+          return possibleConstructorReturn(this, (Circle.__proto__ || Object.getPrototypeOf(Circle)).call(this, props, Circle));
         }
 
         createClass(Circle, [{
@@ -2828,7 +2814,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
 
         function Diamond(props) {
           classCallCheck(this, Diamond);
-          return possibleConstructorReturn(this, (Diamond.__proto__ || Object.getPrototypeOf(Diamond)).call(this, Diamond, props));
+          return possibleConstructorReturn(this, (Diamond.__proto__ || Object.getPrototypeOf(Diamond)).call(this, props, Diamond));
         }
 
         createClass(Diamond, [{
@@ -2859,7 +2845,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
 
         function Geometer(props) {
           classCallCheck(this, Geometer);
-          return possibleConstructorReturn(this, (Geometer.__proto__ || Object.getPrototypeOf(Geometer)).call(this, Geometer, props));
+          return possibleConstructorReturn(this, (Geometer.__proto__ || Object.getPrototypeOf(Geometer)).call(this, props, Geometer));
         }
 
         createClass(Geometer, null, [{
@@ -3051,7 +3037,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
 
         function NumberCollection(props) {
           classCallCheck(this, NumberCollection);
-          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, NumberCollection, props));
+          return possibleConstructorReturn(this, (NumberCollection.__proto__ || Object.getPrototypeOf(NumberCollection)).call(this, props, NumberCollection));
         }
 
         createClass(NumberCollection, [{
@@ -3696,25 +3682,20 @@ var proxyDate = (function (should, M) {
 
 var c51 = (function (should, M) {
   return function () {
-    var _M$metadata = M.metadata(),
-        string = _M$metadata.string;
-
     var Country = function (_M$Base) {
       inherits(Country, _M$Base);
 
       function Country(code) {
         classCallCheck(this, Country);
-        return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, { code: code }));
+
+        var _this = possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, { code: code }, Country));
+
+        _this.code = function () {
+          return code;
+        };
+        return _this;
       }
 
-      createClass(Country, null, [{
-        key: 'innerTypes',
-        value: function innerTypes() {
-          return Object.freeze({
-            code: string()
-          });
-        }
-      }]);
       return Country;
     }(M.Base);
 
@@ -3760,7 +3741,7 @@ var personFactory = (function (M, PartOfDay, Sex) {
 
     function Person(props) {
       classCallCheck(this, Person);
-      return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Person, props));
+      return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, props, Person));
     }
 
     createClass(Person, [{
@@ -3842,7 +3823,7 @@ var animalFactory = (function (M) {
 
     function Animal(props) {
       classCallCheck(this, Animal);
-      return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+      return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, props, Animal));
     }
 
     createClass(Animal, [{
@@ -3877,7 +3858,7 @@ var friendFactory = (function (M) {
 
     function Friend(props) {
       classCallCheck(this, Friend);
-      return possibleConstructorReturn(this, (Friend.__proto__ || Object.getPrototypeOf(Friend)).call(this, Friend, props));
+      return possibleConstructorReturn(this, (Friend.__proto__ || Object.getPrototypeOf(Friend)).call(this, props, Friend));
     }
 
     createClass(Friend, null, [{
@@ -3914,7 +3895,7 @@ var cityFactory = (function (M, Region, countryFactory) {
 
     function City(props) {
       classCallCheck(this, City);
-      return possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, City, props));
+      return possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, props, City));
     }
 
     createClass(City, null, [{
@@ -3944,7 +3925,7 @@ var countryFactory = (function (M, Region) {
 
     function Country(props) {
       classCallCheck(this, Country);
-      return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, Country, props));
+      return possibleConstructorReturn(this, (Country.__proto__ || Object.getPrototypeOf(Country)).call(this, props, Country));
     }
 
     createClass(Country, null, [{
@@ -3974,7 +3955,7 @@ var regionFactory = (function (M) {
 
     function Region(props) {
       classCallCheck(this, Region);
-      return possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, props));
+      return possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, props, Region));
     }
 
     createClass(Region, [{
@@ -4010,7 +3991,7 @@ var regionIncompatibleNameKeyFactory = (function (M) {
 
     function Code(props) {
       classCallCheck(this, Code);
-      return possibleConstructorReturn(this, (Code.__proto__ || Object.getPrototypeOf(Code)).call(this, Code, props));
+      return possibleConstructorReturn(this, (Code.__proto__ || Object.getPrototypeOf(Code)).call(this, props, Code));
     }
 
     createClass(Code, null, [{
@@ -4030,7 +4011,7 @@ var regionIncompatibleNameKeyFactory = (function (M) {
 
     function Region(props) {
       classCallCheck(this, Region);
-      return possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, Region, props));
+      return possibleConstructorReturn(this, (Region.__proto__ || Object.getPrototypeOf(Region)).call(this, props, Region));
     }
 
     createClass(Region, [{
@@ -4079,7 +4060,7 @@ var localDateFactory = (function (_ref) {
     function LocalDate(year, month, day) {
       classCallCheck(this, LocalDate);
 
-      var _this = possibleConstructorReturn(this, (LocalDate.__proto__ || Object.getPrototypeOf(LocalDate)).call(this, LocalDate, { year: year, month: month, day: day }));
+      var _this = possibleConstructorReturn(this, (LocalDate.__proto__ || Object.getPrototypeOf(LocalDate)).call(this, { year: year, month: month, day: day }, LocalDate));
 
       _this.year = function () {
         return year;
@@ -4106,11 +4087,6 @@ var localDateFactory = (function (_ref) {
         return year() + '-' + month() + '-' + day();
       }
     }], [{
-      key: 'innerTypes',
-      value: function innerTypes() {
-        return Object.freeze({});
-      }
-    }, {
       key: 'metadata',
       value: function metadata() {
         var baseMetadata = Object.assign({}, base(LocalDate), { reviver: reviver });
@@ -4140,23 +4116,19 @@ var fixerIoResultFactory = (function (_ref, _ref2) {
       Currency = _ref3[0],
       LocalDate = _ref3[1];
 
-  var _M$ajvMetadata = M.ajvMetadata(validationEnabled ? Ajv(ajvOptions) : undefined),
-      _ = _M$ajvMetadata._,
-      ajvEnum = _M$ajvMetadata.ajvEnum,
-      ajvEnumMap = _M$ajvMetadata.ajvEnumMap,
-      ajvNumber = _M$ajvMetadata.ajvNumber;
+  var ajv = validationEnabled ? Ajv(ajvOptions) : undefined;
 
-  var FixerIoResult = function (_M$Base) {
-    inherits(FixerIoResult, _M$Base);
+  var FixerIoResult = function (_M$createAjvModel) {
+    inherits(FixerIoResult, _M$createAjvModel);
 
-    function FixerIoResult(fields) {
+    function FixerIoResult(props) {
       classCallCheck(this, FixerIoResult);
 
       // ensure base is included in the rates
-      var rates = fields.rates.set(fields.base, 1);
-      var enhancedFields = Object.assign({}, fields, { rates: rates });
+      var rates = props.rates.set(props.base, 1);
+      var enhancedProps = Object.assign({}, props, { rates: rates });
 
-      var _this = possibleConstructorReturn(this, (FixerIoResult.__proto__ || Object.getPrototypeOf(FixerIoResult)).call(this, FixerIoResult, enhancedFields));
+      var _this = possibleConstructorReturn(this, (FixerIoResult.__proto__ || Object.getPrototypeOf(FixerIoResult)).call(this, enhancedProps, FixerIoResult));
 
       Object.freeze(_this);
       return _this;
@@ -4169,18 +4141,15 @@ var fixerIoResultFactory = (function (_ref, _ref2) {
 
         return x * rates.get(to) / rates.get(from);
       }
-    }], [{
-      key: "innerTypes",
-      value: function innerTypes() {
-        return Object.freeze({
-          base: ajvEnum(Currency),
-          date: _(LocalDate),
-          rates: ajvEnumMap({}, ajvEnum(Currency), ajvNumber({ minimum: 0, exclusiveMinimum: true }))
-        });
-      }
     }]);
     return FixerIoResult;
-  }(M.Base);
+  }(M.createAjvModel(function (m) {
+    return {
+      base: m.ajvEnum(Currency),
+      date: m._(LocalDate),
+      rates: m.ajvEnumMap({}, m.ajvEnum(Currency), m.ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+    };
+  }, ajv));
 
   return FixerIoResult;
 });
@@ -4316,7 +4285,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         function Animal(props) {
           classCallCheck(this, Animal);
-          return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+          return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, props, Animal));
         }
 
         createClass(Animal, null, [{
@@ -4336,7 +4305,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         function Animal2(props) {
           classCallCheck(this, Animal2);
-          return possibleConstructorReturn(this, (Animal2.__proto__ || Object.getPrototypeOf(Animal2)).call(this, Animal, props));
+          return possibleConstructorReturn(this, (Animal2.__proto__ || Object.getPrototypeOf(Animal2)).call(this, props, Animal));
         }
 
         createClass(Animal2, null, [{
@@ -4809,7 +4778,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
           function Animal(props) {
             classCallCheck(this, Animal);
-            return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+            return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, props, Animal));
           }
 
           createClass(Animal, null, [{
@@ -5035,7 +5004,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
           function CountryCode(props) {
             classCallCheck(this, CountryCode);
-            return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, CountryCode, props));
+            return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, props, CountryCode));
           }
 
           createClass(CountryCode, null, [{
@@ -5071,7 +5040,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
               }).join('\n'));
             }
 
-            return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, CountryCode, props));
+            return possibleConstructorReturn(this, (CountryCode.__proto__ || Object.getPrototypeOf(CountryCode)).call(this, props, CountryCode));
           }
 
           createClass(CountryCode, null, [{
@@ -5103,7 +5072,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         function Animal(props) {
           classCallCheck(this, Animal);
-          return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, Animal, props));
+          return possibleConstructorReturn(this, (Animal.__proto__ || Object.getPrototypeOf(Animal)).call(this, props, Animal));
         }
 
         createClass(Animal, null, [{
@@ -5224,7 +5193,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
           function MagicString(props) {
             classCallCheck(this, MagicString);
-            return possibleConstructorReturn(this, (MagicString.__proto__ || Object.getPrototypeOf(MagicString)).call(this, MagicString, props));
+            return possibleConstructorReturn(this, (MagicString.__proto__ || Object.getPrototypeOf(MagicString)).call(this, props, MagicString));
           }
 
           createClass(MagicString, null, [{
@@ -5277,7 +5246,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
         function Score(props) {
           classCallCheck(this, Score);
-          return possibleConstructorReturn(this, (Score.__proto__ || Object.getPrototypeOf(Score)).call(this, Score, props));
+          return possibleConstructorReturn(this, (Score.__proto__ || Object.getPrototypeOf(Score)).call(this, props, Score));
         }
 
         createClass(Score, null, [{
@@ -5317,12 +5286,11 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
           function Chain(props) {
             classCallCheck(this, Chain);
-            return possibleConstructorReturn(this, (Chain.__proto__ || Object.getPrototypeOf(Chain)).call(this, Chain, props));
+            return possibleConstructorReturn(this, (Chain.__proto__ || Object.getPrototypeOf(Chain)).call(this, props, Chain));
           }
 
           return Chain;
-        }(M.createAjvModel(function (_ref2) {
-          var m = _ref2.m;
+        }(M.createAjvModel(function (m) {
           return {
             description: m.ajvString({ minLength: 1 }),
             previous: m.ajvMaybe(m._(Chain)),
@@ -5377,7 +5345,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
           function Parent(props) {
             classCallCheck(this, Parent);
-            return possibleConstructorReturn(this, (Parent.__proto__ || Object.getPrototypeOf(Parent)).call(this, Parent, props));
+            return possibleConstructorReturn(this, (Parent.__proto__ || Object.getPrototypeOf(Parent)).call(this, props, Parent));
           }
 
           createClass(Parent, null, [{
@@ -5397,7 +5365,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
           function Child(props) {
             classCallCheck(this, Child);
-            return possibleConstructorReturn(this, (Child.__proto__ || Object.getPrototypeOf(Child)).call(this, Parent, props));
+            return possibleConstructorReturn(this, (Child.__proto__ || Object.getPrototypeOf(Child)).call(this, props, Parent));
           }
 
           createClass(Child, null, [{
@@ -5417,7 +5385,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
 
           function Person(props) {
             classCallCheck(this, Person);
-            return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, Parent, props));
+            return possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this, props, Parent));
           }
 
           createClass(Person, null, [{
@@ -5555,7 +5523,7 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
               max = _ref2$max === undefined ? Infinity : _ref2$max;
 
           classCallCheck(this, Range);
-          return possibleConstructorReturn(this, (Range.__proto__ || Object.getPrototypeOf(Range)).call(this, Range, { min: min, max: max }));
+          return possibleConstructorReturn(this, (Range.__proto__ || Object.getPrototypeOf(Range)).call(this, { min: min, max: max }, Range));
         }
 
         createClass(Range, [{

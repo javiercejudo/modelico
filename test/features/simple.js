@@ -1,22 +1,21 @@
 /* eslint-env mocha */
 
 export default (should, M) => () => {
-  const { _, string } = M.metadata()
+  const { _ } = M.metadata()
 
-  class Animal extends M.Base {
+  class Animal extends M.createModel(m => ({
+    name: m.string()
+  })) {
     constructor (props) {
-      super(Animal, props)
+      super(props, Animal)
     }
 
     speak () {
       const name = this.name()
-      return (name === '') ? `I don't have a name` : `My name is ${name}!`
-    }
 
-    static innerTypes () {
-      return Object.freeze({
-        name: string()
-      })
+      return (name === '')
+        ? `I don't have a name`
+        : `My name is ${name}!`
     }
   }
 

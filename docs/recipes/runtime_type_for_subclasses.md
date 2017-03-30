@@ -15,7 +15,7 @@ also an example of a schema with circular references.
 ```js
 class Geometer extends M.Base {
   constructor (props) {
-    super(Geometer, props)
+    super(props, Geometer)
   }
 
   static innerTypes () {
@@ -97,7 +97,7 @@ class Shape extends M.Base {
 ```js
 class Circle extends Shape {
   constructor (props) {
-    super(Circle, props)
+    super(props, Circle)
   }
 
   area () {
@@ -115,7 +115,7 @@ class Circle extends Shape {
 ```js
 class Diamond extends Shape {
   constructor (props) {
-    super(Diamond, props)
+    super(props, Diamond)
   }
 
   area () {
