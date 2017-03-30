@@ -118,7 +118,7 @@ export default (U, should, M, fixtures) => () => {
     })
 
     it('should support creating a copy with updated fields', () => {
-      class Book extends M.createModel(({m}) => ({
+      class Book extends M.createModel(m => ({
         title: m.string(),
         year: m.maybe(m.number()),
         author: m.withDefault(m.string(), 'anonymouss')

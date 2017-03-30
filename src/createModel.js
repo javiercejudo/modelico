@@ -15,7 +15,7 @@ const createModel = (
 
     static innerTypes (path, Type) {
       return isFunction(innerTypes)
-        ? innerTypes({m, path, Type})
+        ? innerTypes(m, {path, Type})
         : Object.freeze(innerTypes)
     }
   }
