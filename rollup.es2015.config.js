@@ -5,7 +5,7 @@ export default {
   entry: './index.js',
   format: 'es',
   moduleName: 'Modelico',
-  plugins: [ nodeResolve({skip: ['ajv']}), json() ],
+  plugins: [ nodeResolve(), json() ],
   external: ['ajv'],
   globals: {
     ajv: 'Ajv'
