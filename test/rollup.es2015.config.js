@@ -5,7 +5,7 @@ export default {
   entry: './test/modelicoSpec.js',
   format: 'es',
   moduleName: 'modelicoSpec',
-  plugins: [ nodeResolve({skip: ['ajv']}), json() ],
+  plugins: [ nodeResolve(), json() ],
   external: ['ajv'],
   globals: {
     ajv: 'Ajv'

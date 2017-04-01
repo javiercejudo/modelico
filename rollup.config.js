@@ -7,7 +7,7 @@ export default {
   format: 'umd',
   moduleName: 'Modelico',
   noConflict: true,
-  plugins: [ nodeResolve({skip: ['ajv']}), json(), babel() ],
+  plugins: [ nodeResolve(), json(), babel() ],
   external: ['ajv'],
   globals: {
     ajv: 'Ajv'
