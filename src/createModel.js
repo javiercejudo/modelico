@@ -6,9 +6,13 @@ const metadata = metadataFactory()
 
 const createModel = (
   innerTypes = emptyObject,
-  {stringTag = 'ModelicoModel', metadata: m = metadata} = {}
+  {
+    base = Base,
+    stringTag = 'ModelicoModel',
+    metadata: m = metadata
+  } = {}
 ) => {
-  return class extends Base {
+  return class extends base {
     get [Symbol.toStringTag] () {
       return stringTag
     }

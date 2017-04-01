@@ -46,8 +46,10 @@ const fromJS = (Type, js) => genericsFromJS(Type, [], js)
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js)
 const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js)
 
-const createAjvModel = (innerTypes, ajv) => {
-  return createModel(innerTypes, {metadata: ajvMetadata(ajv)})
+const createAjvModel = (ajv, innerTypes, options = {}) => {
+  options.metadata = ajvMetadata(ajv)
+
+  return createModel(innerTypes, options)
 }
 
 export default {

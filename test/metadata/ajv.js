@@ -1034,7 +1034,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('Circular innerTypes', () => {
     it('self reference', () => {
-      class Chain extends M.createAjvModel(m => ({
+      class Chain extends M.createAjvModel(Ajv(), m => ({
         description: m.ajvString({minLength: 1}),
         previous: m.ajvMaybe(m._(Chain)),
         next: m.ajvMaybe(m._(Chain)),

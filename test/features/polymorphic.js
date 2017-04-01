@@ -132,7 +132,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
   })
 
   describe('Based on runtime type field', () => {
-    const { _, base, ajvMeta, ajvNumber, ajvString, ajvMaybe } = M.ajvMetadata(Ajv())
+    const ajv = Ajv()
+    const { _, base, ajvMeta } = M.ajvMetadata(ajv)
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
 
@@ -151,7 +152,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    class Shape extends M.Base {
+    class Shape extends M.createAjvModel(ajv, m => ({
+      relatedShape: m.ajvMaybe(m._(Shape))
+    })) {
       toJSON () {
         const fields = M.fields(this)
         let type
@@ -170,12 +173,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
         return Object.freeze(Object.assign({type}, fields))
       }
 
-      static innerTypes () {
-        return Object.freeze({
-          relatedShape: ajvMaybe(_(Shape))
-        })
-      }
-
       static metadata () {
         const baseMetadata = Object.assign({}, base(Shape), {reviver})
 
@@ -188,7 +185,12 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    class Circle extends Shape {
+    class Circle extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
+      radius: m.ajvNumber({
+        minimum: 0,
+        exclusiveMinimum: true
+      })
+    }), {base: Shape}) {
       constructor (props) {
         super(Circle, props)
       }
@@ -196,18 +198,18 @@ export default (should, M, fixtures, {Ajv}) => () => {
       area () {
         return Math.PI * this.radius() ** 2
       }
-
-      static innerTypes () {
-        return Object.freeze(Object.assign({}, super.innerTypes(), {
-          radius: ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          })
-        }))
-      }
     }
 
-    class Diamond extends Shape {
+    class Diamond extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
+      width: m.ajvNumber({
+        minimum: 0,
+        exclusiveMinimum: true
+      }),
+      height: m.ajvNumber({
+        minimum: 0,
+        exclusiveMinimum: true
+      })
+    }), {base: Shape}) {
       constructor (props) {
         super(Diamond, props)
       }
@@ -215,33 +217,16 @@ export default (should, M, fixtures, {Ajv}) => () => {
       area () {
         return this.width() * this.height() / 2
       }
-
-      static innerTypes () {
-        return Object.freeze(Object.assign({}, super.innerTypes(), {
-          width: ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          }),
-          height: ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          })
-        }))
-      }
     }
 
-    class Geometer extends M.Base {
+    class Geometer extends M.createAjvModel(ajv, m => ({
+      name: m.ajvString({
+        minLength: 1
+      }),
+      favouriteShape: m._(Shape)
+    })) {
       constructor (props) {
         super(Geometer, props)
-      }
-
-      static innerTypes () {
-        return Object.freeze({
-          name: ajvString({
-            minLength: 1
-          }),
-          favouriteShape: _(Shape)
-        })
       }
     }
 
