@@ -46,6 +46,8 @@ import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 import ajvMetadata from './metadata/ajv'
 import baseMetadataExample from './metadata/base'
 
+import asyncReviving from './recipe/asyncReviving'
+
 const hasProxies = (() => {
   try {
     return new Proxy({}, {}) && true
@@ -113,6 +115,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
   describe('Immutable.js examples', ImmutableExamples(U, ...deps))
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))
+  describe('Async reviving', asyncReviving(...deps))
 
   U.skipIfNoProxies(describe)(
     'Immutable.js examples (proxied)',
