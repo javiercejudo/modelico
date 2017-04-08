@@ -17,3 +17,4 @@
 - [Recipes](/docs/recipes/README.md)
   - [ES5 classes](/docs/recipes/es5.md)
   - [Runtime type for subclasses](/docs/recipes/runtime_type_for_subclasses.md)
+  - [Reviving large arrays in batches](/docs/recipes/revive_large_arrays_in_batches.md)
