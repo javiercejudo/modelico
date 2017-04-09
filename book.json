@@ -4,7 +4,7 @@
   "structure": {
     "summary": "SUMMARY.md"
   },
-  "plugins": ["versions", "edit-link", "prism", "-highlight", "github", "anchorjs", "advanced-emoji"],
+  "plugins": ["versions", "edit-link", "highlight", "github", "anchorjs", "advanced-emoji"],
   "pluginsConfig": {
     "versions": {
       "gitbookConfigURL": "https://raw.githubusercontent.com/javiercejudo/modelico/master/book.json",

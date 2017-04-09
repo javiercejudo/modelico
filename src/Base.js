@@ -15,7 +15,7 @@ class Base {
     }
 
     // This slows down the benchmarks by a lot, but it isn't clear whether
-    // real usage would benefit from emoving it.
+    // real usage would benefit from removing it.
     // See: https://github.com/javiercejudo/modelico-benchmarks
     Object.freeze(fields)
 

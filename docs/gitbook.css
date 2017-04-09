@@ -1,22 +1,4 @@
-.book-summary ul.summary li span {
-  cursor: not-allowed;
-  opacity: 0.3;
-}
-
-.book-summary ul.summary li a:hover {
-  color: #008cff;
-  text-decoration: none;
-}
-
-code[class*="language-"],
-pre[class*="language-"] {
-  text-shadow: none;
-}
-
-.color-theme-2 .token.keyword {
-  color: #3ac;
-}
-
-.token.operator {
-  background: none;
+.markdown-section code,
+.markdown-section pre {
+  font-family: 'Operator Mono', 'Fira Code', 'Ubuntu Mono', 'Droid Sans Mono', 'Liberation Mono', 'Source Code Pro', Menlo, Consolas, Courier, monospace;
 }

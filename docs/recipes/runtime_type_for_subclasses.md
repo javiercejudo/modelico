@@ -197,12 +197,12 @@ metadata to account for its subtypes. This is going to allow us to get a very
 detailed schema that would not be easy to write by hand.
 
 _Note: in this example, significant reduction is possible, but Modélico always
-inlines the first level properties for each object since it uses it for
+inlines the first level properties for each object since it uses them for
 validating during deserialisation. Definitions are only used when circular
-references appear, and are sequentially named to avoid collisions. In the
-example below, the definition is `3`: the reason is that `1` and `2` got
-reserved in case of circular reference of other entities, but were dropped
-eventually._
+references appear or a subschema is used more than once, and are sequentially
+named to avoid collisions. In the example below, the definition is `3`: the
+reason is that `1` and `2` got reserved in case of circular reference of other
+entities, but were dropped eventually._
 
 ```js
 M.getSchema(_(Geometer))
