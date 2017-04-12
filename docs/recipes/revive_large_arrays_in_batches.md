@@ -35,26 +35,22 @@ const library = M.fromJS(Library, libraryObj)
 we first revive the library with an empty catalogue:
 
 ```js
-const libraryWithEmptyCatalogue = M.fromJS(
-  Library,
-  Object.assign({}, libraryObj, {catalogue: []})
-)
+const emptyLibrary = M.fromJS(Library, {...libraryObj, catalogue: []})
 ```
 
 Then, we are going to use an `asyncMap` function (see implementation below) to
 revive the catalogue, which is a `Modelico.List` of `Books`.
 
 ```js
-asyncMap(
+const library = await asyncMap(
   book => M.fromJS(Book, book),
   libraryObj.catalogue,
   { batchSize: 50 }
 )
   .then(catalogueArr => {
     const catalogue = M.List.fromArray(catalogueArr)
-    const library = libraryWithEmptyCatalogue.copy({catalogue})
 
-    return library
+    return emptyLibrary.copy({catalogue})
   })
 ```
 
