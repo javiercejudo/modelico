@@ -66,12 +66,10 @@ export default (should, M) => () => {
       }]
     }
 
-    const libraryWithEmptyCatalogue = M.fromJS(
-      Library,
-      Object.assign({}, libraryObj, {catalogue: []})
-    )
+    const emptyLibraryObj = Object.assign({}, libraryObj, {catalogue: []})
+    const emptyLibrary = M.fromJS(Library, emptyLibraryObj)
 
-    libraryWithEmptyCatalogue.catalogue().size
+    emptyLibrary.catalogue().size
       .should.be.exactly(0)
 
     return asyncMap(
@@ -81,9 +79,8 @@ export default (should, M) => () => {
     )
       .then(catalogueArr => {
         const catalogue = M.List.fromArray(catalogueArr)
-        const library = libraryWithEmptyCatalogue.copy({catalogue})
 
-        return library
+        return emptyLibrary.copy({catalogue})
       })
       .then(library => {
         const catalogue = library.catalogue()
