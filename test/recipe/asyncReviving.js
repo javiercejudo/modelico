@@ -11,22 +11,20 @@ const asyncMap = (
   fn,
   arr,
   {batchSize = arr.length} = {}
-) => {
-  return arr.reduce((acc, _, i) => {
-    if (i % batchSize !== 0) {
-      return acc
-    }
+) => arr.reduce((acc, _, i) => {
+  if (i % batchSize !== 0) {
+    return acc
+  }
 
-    return acc.then(result =>
-      new Promise(resolve => {
-        schedule(() => {
-          result.push.apply(result, arr.slice(i, i + batchSize).map(fn))
-          resolve(result)
-        })
+  return acc.then(result =>
+    new Promise(resolve => {
+      schedule(() => {
+        result.push.apply(result, arr.slice(i, i + batchSize).map(fn))
+        resolve(result)
       })
-    )
-  }, Promise.resolve([]))
-}
+    })
+  )
+}, Promise.resolve([]))
 
 export default (should, M) => () => {
   it('should revieve data asynchronously', () => {
