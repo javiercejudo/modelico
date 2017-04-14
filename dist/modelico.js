@@ -371,7 +371,14 @@ var getSchema = function getSchema(metadata) {
   Object.assign(state.definitions, defineProperty({}, ref, schema));
 
   if (!topLevel) {
-    return schema;
+    var _ref2 = state.metadataRefCache.get(metadata);
+
+    if (Object.keys(schema).length <= 1 || !_ref2) {
+      return schema;
+    }
+
+    state.usedDefinitions.add(_ref2);
+    return { $ref: '#/definitions/' + _ref2 };
   }
 
   var definitions = getUsedDefinitions();

@@ -4300,7 +4300,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
   return function () {
     var _M$ajvMetadata = M.ajvMetadata(Ajv()),
         ajv_ = _M$ajvMetadata.ajv_,
-        ajvBase = _M$ajvMetadata.ajvBase,
         ajvAsIs = _M$ajvMetadata.ajvAsIs,
         ajvAny = _M$ajvMetadata.ajvAny,
         ajvString = _M$ajvMetadata.ajvString,
@@ -4317,7 +4316,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         ajvWithDefault = _M$ajvMetadata.ajvWithDefault,
         ajvAnyOf = _M$ajvMetadata.ajvAnyOf,
         _ = _M$ajvMetadata._,
-        base = _M$ajvMetadata.base,
         number = _M$ajvMetadata.number;
 
     describe('Animal example', function () {
@@ -4406,7 +4404,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           required: ['name']
         });
 
-        var animalMeta = ajv_(Animal);
+        var animalMeta = _(Animal);
         var animal1Schema1 = M.getSchema(animalMeta);
         var animal1Schema2 = M.getSchema(animalMeta);
 
@@ -5126,59 +5124,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         }]);
         return Animal;
       }(M.Base);
-
-      var baseSchema = M.getSchema(base(Animal));
-
-      var enhancedMeta = function enhancedMeta(additionalProperties) {
-        return ajvBase(Animal, Object.assign({}, baseSchema, { additionalProperties: additionalProperties }));
-      };
-
-      it('supports additional properties unless otherwise stated', function () {
-        should(function () {
-          return ajvBase(Animal).reviver('', {
-            name: 'Bane',
-            extra: 1
-          });
-        }).not.throw();
-
-        should(function () {
-          return enhancedMeta(true).reviver('', {
-            name: 'Bane',
-            extra: 1
-          });
-        }).not.throw();
-
-        M.getSchema(enhancedMeta(true)).should.deepEqual({
-          type: 'object',
-          additionalProperties: true,
-          properties: {
-            name: {
-              type: 'string'
-            }
-          },
-          required: ['name']
-        });
-      });
-
-      it('supports failing with additional properties', function () {
-        should(function () {
-          return enhancedMeta(false).reviver('', {
-            name: 'Bane',
-            extra: 1
-          });
-        }).throw(/should NOT have additional properties/);
-
-        M.getSchema(enhancedMeta(false)).should.deepEqual({
-          type: 'object',
-          additionalProperties: false,
-          properties: {
-            name: {
-              type: 'string'
-            }
-          },
-          required: ['name']
-        });
-      });
 
       it('should allow basic validation at top level', function () {
         should(function () {

@@ -95,7 +95,14 @@ const getSchema = (metadata, topLevel = true) => {
   Object.assign(state.definitions, { [ref]: schema })
 
   if (!topLevel) {
-    return schema
+    const ref = state.metadataRefCache.get(metadata)
+
+    if (Object.keys(schema).length <= 1 || !ref) {
+      return schema
+    }
+
+    state.usedDefinitions.add(ref)
+    return { $ref: `#/definitions/${ref}` }
   }
 
   const definitions = getUsedDefinitions()
