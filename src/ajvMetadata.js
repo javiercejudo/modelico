@@ -231,7 +231,7 @@ export default (ajv = { validate: T }) => {
     ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema(itemMetadata, false))
 
   ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
-    const schema = getSchema(metadata, false)
+    const schema = getSchema(metadata)
     const valid = ajv.validate(schema, defaultValue)
 
     if (!valid) {

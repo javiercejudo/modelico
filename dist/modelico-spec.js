@@ -302,8 +302,7 @@ var Base = (function (U, should, M, fixtures) {
           }
 
           return Book;
-        }(M.createModel(function (_ref) {
-          var m = _ref.m;
+        }(M.createModel(function (m) {
           return {
             title: m.string(),
             year: m.maybe(m.number()),
@@ -1478,9 +1477,11 @@ var ModelicoList = (function (U, should, M, _ref) {
       it('must freeze the input', function () {
         var input = ['a', 'b', 'c'];
 
-        M.List.fromArray(input);(function () {
+        M.List.fromArray(input);
+
+        should(function () {
           input[1] = 'B';
-        }).should.throw();
+        }).throw();
       });
     });
 
@@ -2257,9 +2258,11 @@ var setIn = (function (U, should, M) {
   return function () {
     it('should work across types', function () {
       var hammer = M.Map.of('hammer', 'Can’t Touch This');
-      var array1 = M.List.of('totally', 'immutable', hammer);(function () {
+      var array1 = M.List.of('totally', 'immutable', hammer);
+
+      should(function () {
         array1.inner()[1] = 'I’m going to mutate you!';
-      }).should.throw();
+      }).throw();
 
       array1.get(1).should.be.exactly('immutable');
 
@@ -2720,13 +2723,12 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
     });
 
     describe('Based on runtime type field', function () {
-      var _M$ajvMetadata = M.ajvMetadata(Ajv()),
+      var ajv = Ajv();
+
+      var _M$ajvMetadata = M.ajvMetadata(ajv),
           _ = _M$ajvMetadata._,
           base = _M$ajvMetadata.base,
-          ajvMeta = _M$ajvMetadata.ajvMeta,
-          ajvNumber = _M$ajvMetadata.ajvNumber,
-          ajvString = _M$ajvMetadata.ajvString,
-          ajvMaybe = _M$ajvMetadata.ajvMaybe;
+          ajvMeta = _M$ajvMetadata.ajvMeta;
 
       var ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND']);
 
@@ -2745,8 +2747,8 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
         }
       };
 
-      var Shape = function (_M$Base3) {
-        inherits(Shape, _M$Base3);
+      var Shape = function (_M$createAjvModel) {
+        inherits(Shape, _M$createAjvModel);
 
         function Shape() {
           classCallCheck(this, Shape);
@@ -2773,13 +2775,6 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
             return Object.freeze(Object.assign({ type: type }, fields));
           }
         }], [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze({
-              relatedShape: ajvMaybe(_(Shape))
-            });
-          }
-        }, {
           key: 'metadata',
           value: function metadata() {
             var baseMetadata = Object.assign({}, base(Shape), { reviver: reviver });
@@ -2794,10 +2789,14 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           }
         }]);
         return Shape;
-      }(M.Base);
+      }(M.createAjvModel(ajv, function (m) {
+        return {
+          relatedShape: m.ajvMaybe(m._(Shape))
+        };
+      }));
 
-      var Circle = function (_Shape) {
-        inherits(Circle, _Shape);
+      var Circle = function (_M$createAjvModel2) {
+        inherits(Circle, _M$createAjvModel2);
 
         function Circle(props) {
           classCallCheck(this, Circle);
@@ -2809,22 +2808,19 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           value: function area() {
             return Math.PI * Math.pow(this.radius(), 2);
           }
-        }], [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze(Object.assign({}, get(Circle.__proto__ || Object.getPrototypeOf(Circle), 'innerTypes', this).call(this), {
-              radius: ajvNumber({
-                minimum: 0,
-                exclusiveMinimum: true
-              })
-            }));
-          }
         }]);
         return Circle;
-      }(Shape);
+      }(M.createAjvModel(ajv, function (m) {
+        return Object.assign({}, Shape.innerTypes(), {
+          radius: m.ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          })
+        });
+      }, { base: Shape }));
 
-      var Diamond = function (_Shape2) {
-        inherits(Diamond, _Shape2);
+      var Diamond = function (_M$createAjvModel3) {
+        inherits(Diamond, _M$createAjvModel3);
 
         function Diamond(props) {
           classCallCheck(this, Diamond);
@@ -2836,45 +2832,38 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           value: function area() {
             return this.width() * this.height() / 2;
           }
-        }], [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze(Object.assign({}, get(Diamond.__proto__ || Object.getPrototypeOf(Diamond), 'innerTypes', this).call(this), {
-              width: ajvNumber({
-                minimum: 0,
-                exclusiveMinimum: true
-              }),
-              height: ajvNumber({
-                minimum: 0,
-                exclusiveMinimum: true
-              })
-            }));
-          }
         }]);
         return Diamond;
-      }(Shape);
+      }(M.createAjvModel(ajv, function (m) {
+        return Object.assign({}, Shape.innerTypes(), {
+          width: m.ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          }),
+          height: m.ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          })
+        });
+      }, { base: Shape }));
 
-      var Geometer = function (_M$Base4) {
-        inherits(Geometer, _M$Base4);
+      var Geometer = function (_M$createAjvModel4) {
+        inherits(Geometer, _M$createAjvModel4);
 
         function Geometer(props) {
           classCallCheck(this, Geometer);
           return possibleConstructorReturn(this, (Geometer.__proto__ || Object.getPrototypeOf(Geometer)).call(this, Geometer, props));
         }
 
-        createClass(Geometer, null, [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze({
-              name: ajvString({
-                minLength: 1
-              }),
-              favouriteShape: _(Shape)
-            });
-          }
-        }]);
         return Geometer;
-      }(M.Base);
+      }(M.createAjvModel(ajv, function (m) {
+        return {
+          name: m.ajvString({
+            minLength: 1
+          }),
+          favouriteShape: m._(Shape)
+        };
+      }));
 
       it('should revive polymorphic JSON', function () {
         var geometer1 = M.fromJS(Geometer, {
@@ -3046,8 +3035,8 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           stringMap = _M$metadata3.stringMap,
           list = _M$metadata3.list;
 
-      var NumberCollection = function (_M$Base5) {
-        inherits(NumberCollection, _M$Base5);
+      var NumberCollection = function (_M$Base3) {
+        inherits(NumberCollection, _M$Base3);
 
         function NumberCollection(props) {
           classCallCheck(this, NumberCollection);
@@ -3132,7 +3121,13 @@ var ImmutableExamples = (function (U, should, M) {
       list3Array.unshift(0);
       var list3 = M.List.fromArray(list3Array);
 
-      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
+      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));
+
+      should(list1.size === 2).be.exactly(true);
+      should(list2.size === 5).be.exactly(true);
+      should(list3.size === 6).be.exactly(true);
+      should(list4.size === 13).be.exactly(true);
+      should(list4.get(0) === 1).be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -3175,7 +3170,9 @@ var ImmutableExamples = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
-      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });(map1 !== map2).should.be.exactly(true); // two different instances
+      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
+
+      should(map1 !== map2).be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
@@ -3183,7 +3180,10 @@ var ImmutableExamples = (function (U, should, M) {
       var list1 = M.List.of(1, 2, 3);
       var list2Array = [].concat(toConsumableArray(list1));
       list2Array.push(4, 5, 6);
-      var list2 = M.List.fromArray(list2Array);([].concat(toConsumableArray(list1)).length === 3).should.be.exactly(true);([].concat(toConsumableArray(list2)).length === 6).should.be.exactly(true);
+      var list2 = M.List.fromArray(list2Array);
+
+      should([].concat(toConsumableArray(list1)).length === 3).be.exactly(true);
+      should([].concat(toConsumableArray(list2)).length === 6).be.exactly(true);
     });
   };
 });
@@ -3217,7 +3217,13 @@ var ImmutableProxied = (function (U, should, M) {
 
       var list2 = list1.push(3, 4, 5);
       var list3 = list2.unshift(0);
-      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
+      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));
+
+      should(list1.size === 2).be.exactly(true);
+      should(list2.size === 5).be.exactly(true);
+      should(list3.size === 6).be.exactly(true);
+      should(list4.size === 13).be.exactly(true);
+      should(list4.get(0) === 1).be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -3264,7 +3270,9 @@ var ImmutableProxied = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
-      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));(map1 !== map2).should.be.exactly(true); // two different instances
+      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
+
+      should(map1 !== map2).be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
@@ -3275,7 +3283,10 @@ var ImmutableProxied = (function (U, should, M) {
       res.push(4);
       res.push(5);
       res.push(6);
-      var list2 = _l(M.List.fromArray(res));(list1.length === 3).should.be.exactly(true);(list2.length === 6).should.be.exactly(true);
+      var list2 = _l(M.List.fromArray(res));
+
+      should(list1.length === 3).be.exactly(true);
+      should(list2.length === 6).be.exactly(true);
     });
   };
 });
@@ -3351,7 +3362,9 @@ var proxyList = (function (should, M) {
     var p = M.proxyList;
 
     it('length', function () {
-      var list1 = p(M.List.of(1, 2, 2, 3));list1.length.should.be.exactly(4);
+      var list1 = p(M.List.of(1, 2, 2, 3));
+
+      should(list1.length).be.exactly(4);
     });
 
     it('[n]', function () {
@@ -3472,7 +3485,9 @@ var proxyList = (function (should, M) {
       var sum = 0;
       list.forEach(function (x) {
         sum += x;
-      });sum.should.be.exactly(8);
+      });
+
+      should(sum).be.exactly(8);
     });
 
     it('keys() / entries() / [@@iterator]()', function () {
@@ -4106,11 +4121,6 @@ var localDateFactory = (function (_ref) {
         return year() + '-' + month() + '-' + day();
       }
     }], [{
-      key: 'innerTypes',
-      value: function innerTypes() {
-        return Object.freeze({});
-      }
-    }, {
       key: 'metadata',
       value: function metadata() {
         var baseMetadata = Object.assign({}, base(LocalDate), { reviver: reviver });
@@ -5321,8 +5331,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           }
 
           return Chain;
-        }(M.createAjvModel(function (_ref2) {
-          var m = _ref2.m;
+        }(M.createAjvModel(Ajv(), function (m) {
           return {
             description: m.ajvString({ minLength: 1 }),
             previous: m.ajvMaybe(m._(Chain)),
@@ -5614,6 +5623,111 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
 });
 
 /* eslint-env mocha */
+/* global requestIdleCallback */
+
+var schedule = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : typeof setImmediate !== 'undefined' ? setImmediate : function (fn) {
+  return setTimeout(fn, 0);
+};
+
+var asyncMap = function asyncMap(fn, arr) {
+  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      _ref$batchSize = _ref.batchSize,
+      batchSize = _ref$batchSize === undefined ? arr.length : _ref$batchSize;
+
+  return arr.reduce(function (acc, _, i) {
+    if (i % batchSize !== 0) {
+      return acc;
+    }
+
+    return acc.then(function (result) {
+      return new Promise(function (resolve) {
+        schedule(function () {
+          result.push.apply(result, arr.slice(i, i + batchSize).map(fn));
+          resolve(result);
+        });
+      });
+    });
+  }, Promise.resolve([]));
+};
+
+var asyncReviving = (function (should, M) {
+  return function () {
+    it('should revieve data asynchronously', function () {
+      var Book = function (_M$createModel) {
+        inherits(Book, _M$createModel);
+
+        function Book(props) {
+          classCallCheck(this, Book);
+          return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, props));
+        }
+
+        return Book;
+      }(M.createModel(function (m) {
+        return {
+          title: m.string(),
+          author: m.string()
+        };
+      }));
+
+      var Library = function (_M$createModel2) {
+        inherits(Library, _M$createModel2);
+
+        function Library(props) {
+          classCallCheck(this, Library);
+          return possibleConstructorReturn(this, (Library.__proto__ || Object.getPrototypeOf(Library)).call(this, Library, props));
+        }
+
+        return Library;
+      }(M.createModel(function (m) {
+        return {
+          catalogue: m.list(m._(Book))
+        };
+      }));
+
+      var libraryObj = {
+        catalogue: [{
+          title: 'Madame Bovary: Mœurs de province',
+          author: 'Gustave Flaubert'
+        }, {
+          title: 'La voz a ti debida',
+          author: 'Pedro Salinas'
+        }, {
+          title: 'Et dukkehjem',
+          author: 'Henrik Ibsen'
+        }, {
+          title: 'Die Verwandlung',
+          author: 'Franz Kafka'
+        }, {
+          title: 'La colmena',
+          author: 'Camilo José Cela'
+        }]
+      };
+
+      var emptyLibraryObj = Object.assign({}, libraryObj, { catalogue: [] });
+      var emptyLibrary = M.fromJS(Library, emptyLibraryObj);
+
+      emptyLibrary.catalogue().size.should.be.exactly(0);
+
+      return asyncMap(function (book) {
+        return M.fromJS(Book, book);
+      }, libraryObj.catalogue, { batchSize: 2 }).then(function (catalogueArr) {
+        var catalogue = M.List.fromArray(catalogueArr);
+
+        return emptyLibrary.copy({ catalogue: catalogue });
+      }).then(function (library) {
+        var catalogue = library.catalogue();
+
+        catalogue.size.should.be.exactly(5);
+
+        catalogue.get(0).title().should.be.exactly('Madame Bovary: Mœurs de province');
+
+        catalogue.getIn([4, 'title']).should.be.exactly('La colmena');
+      });
+    });
+  };
+});
+
+/* eslint-env mocha */
 
 var hasProxies = function () {
   try {
@@ -5696,6 +5810,7 @@ var modelicoSpec = (function (_ref) {
     describe('Immutable.js examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
 
     describe('Api Example: Fixer IO', fixerIoSpec.apply(undefined, deps));
+    describe('Async reviving', asyncReviving.apply(undefined, deps));
 
     U.skipIfNoProxies(describe)('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 
