@@ -96,8 +96,9 @@ const getSchema = (metadata, topLevel = true) => {
 
   if (!topLevel) {
     const ref = state.metadataRefCache.get(metadata)
+    const schemaKeys = Object.keys(schema)
 
-    if (Object.keys(schema).length <= 1 || !ref) {
+    if (!ref || (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))) {
       return schema
     }
 
@@ -117,6 +118,9 @@ const getSchema = (metadata, topLevel = true) => {
     }
 
   metadataSchemaCache.set(metadata, finalSchema)
+
+  // console.log('----------------')
+  // console.log(JSON.stringify(finalSchema, null, 2))
 
   return finalSchema
 }

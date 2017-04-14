@@ -372,8 +372,9 @@ var getSchema = function getSchema(metadata) {
 
   if (!topLevel) {
     var _ref2 = state.metadataRefCache.get(metadata);
+    var schemaKeys = Object.keys(schema);
 
-    if (Object.keys(schema).length <= 1 || !_ref2) {
+    if (!_ref2 || schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]])) {
       return schema;
     }
 
@@ -389,6 +390,9 @@ var getSchema = function getSchema(metadata) {
   };
 
   metadataSchemaCache.set(metadata, finalSchema);
+
+  // console.log('----------------')
+  // console.log(JSON.stringify(finalSchema, null, 2))
 
   return finalSchema;
 };

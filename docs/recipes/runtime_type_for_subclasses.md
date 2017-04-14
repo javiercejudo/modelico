@@ -196,13 +196,10 @@ Now remember how we have been using `ajvMetadata` and even enhanced the Shape
 metadata to account for its subtypes. This is going to allow us to get a very
 detailed schema that would not be easy to write by hand.
 
-_Note: in this example, significant reduction is possible, but Modélico always
-inlines the first level properties for each object since it uses them for
-validating during deserialisation. Definitions are only used when circular
-references appear or a subschema is used more than once, and are sequentially
-named to avoid collisions. In the example below, the definition is `3`: the
-reason is that `1` and `2` got reserved in case of circular reference of other
-entities, but were dropped eventually._
+_Note: definitions are sequentially named to avoid collisions. In the example
+below, the definition number have gaps because some of them got reserved in
+case of circular reference of other entities, but were dropped eventually.
+Subschemas with less than two keys are always inlined._
 
 ```js
 M.getSchema(_(Geometer))
@@ -215,126 +212,83 @@ yields:
   type: 'object',
   properties: {
     name: {
+      $ref: '#/definitions/2'
+    },
+    favouriteShape: {
+      $ref: '#/definitions/3'
+    }
+  },
+  required: ['name', 'favouriteShape'],
+  definitions: {
+    '2': {
       type: 'string',
       minLength: 1
     },
-    favouriteShape: {
+    '3': {
       anyOf: [
         {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
-            },
-            radius: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
-          },
-          required: [
-            'radius'
-          ]
+          $ref: '#/definitions/4'
         },
         {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
-            },
-            width: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            },
-            height: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
-          },
-          required: [
-            'width',
-            'height'
-          ]
+          $ref: '#/definitions/7'
         }
       ]
-    }
-  },
-  required: [
-    'name',
-    'favouriteShape'
-  ],
-  definitions: {
-    3: {
-      anyOf: [
-        {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
+    },
+    '4': {
+      type: 'object',
+      properties: {
+        relatedShape: {
+          anyOf: [
+            {
+              type: 'null'
             },
-            radius: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
+            {
+              $ref: '#/definitions/3'
             }
-          },
-          required: [
-            'radius'
           ]
         },
-        {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
-            },
-            width: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            },
-            height: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
-          },
-          required: [
-            'width',
-            'height'
-          ]
+        radius: {
+          $ref: '#/definitions/6'
         }
-      ]
+      },
+      required: ['radius']
+    },
+    '6': {
+      type: 'number',
+      minimum: 0,
+      exclusiveMinimum: true
+    },
+    '7': {
+      type: 'object',
+      properties: {
+        relatedShape: {
+          anyOf: [
+            {
+              type: 'null'
+            },
+            {
+              $ref: '#/definitions/3'
+            }
+          ]
+        },
+        width: {
+          $ref: '#/definitions/9'
+        },
+        height: {
+          $ref: '#/definitions/10'
+        }
+      },
+      required: ['width', 'height']
+    },
+    '9': {
+      type: 'number',
+      minimum: 0,
+      exclusiveMinimum: true
+    },
+    '10': {
+      type: 'number',
+      minimum: 0,
+      exclusiveMinimum: true
     }
   }
 }
