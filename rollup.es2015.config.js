@@ -6,10 +6,14 @@ export default {
   entry: './index.js',
   format: 'es',
   moduleName: 'Modelico',
-  plugins: [nodeResolve(), json(), babel({
-    babelrc: false,
-    plugins: ['transform-flow-strip-types']
-  })],
+  plugins: [
+    nodeResolve(),
+    json(),
+    babel({
+      babelrc: false,
+      plugins: ['transform-flow-strip-types']
+    })
+  ],
   external: ['ajv'],
   globals: {
     ajv: 'Ajv'
