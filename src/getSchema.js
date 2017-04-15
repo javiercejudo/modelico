@@ -4,28 +4,30 @@ import getInnerTypes from './getInnerTypes'
 
 const metadataSchemaCache = new WeakMap()
 
-const state = {
+let state
+const defaultState = () => ({
   nextRef: 1,
   definitions: {},
   usedDefinitions: new Set(),
   metadataRefCache: new WeakMap()
-}
+})
 
 const getSchemaImpl = metadata => {
   if (metadata.schema) {
     return metadata.schema()
   }
 
-  if (
-    !metadata.type ||
-    !metadata.type.innerTypes ||
-    Object.keys(getInnerTypes([], metadata.type)).length === 0
-  ) {
+  const hasInnerTypes = (metadata.type && metadata.type.innerTypes)
+
+  const innerTypes = hasInnerTypes
+    ? getInnerTypes([], metadata.type)
+    : emptyObject
+
+  if (Object.keys(innerTypes).length === 0) {
     return emptyObject
   }
 
   const baseSchema = { type: 'object' }
-  const innerTypes = metadata.type.innerTypes()
 
   const required = []
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
@@ -70,15 +72,12 @@ const getUsedDefinitions = () => {
 }
 
 const getSchema = (metadata, topLevel = true) => {
-  if (topLevel) {
-    if (metadataSchemaCache.has(metadata)) {
-      return metadataSchemaCache.get(metadata)
-    }
+  if (metadataSchemaCache.has(metadata)) {
+    return metadataSchemaCache.get(metadata)
+  }
 
-    state.nextRef = 1
-    state.definitions = {}
-    state.usedDefinitions = new Set()
-    state.metadataRefCache = new WeakMap()
+  if (topLevel) {
+    state = defaultState()
   }
 
   if (state.metadataRefCache.has(metadata)) {
@@ -97,27 +96,32 @@ const getSchema = (metadata, topLevel = true) => {
   Object.assign(state.definitions, { [ref]: schema })
 
   if (!topLevel) {
-    return schema
+    const ref = state.metadataRefCache.get(metadata)
+    const schemaKeys = Object.keys(schema)
+
+    if (!ref || (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))) {
+      return schema
+    }
+
+    state.usedDefinitions.add(ref)
+    return { $ref: `#/definitions/${ref}` }
   }
 
   const definitions = getUsedDefinitions()
 
-  const finalSchema = (() => {
-    if (Object.keys(definitions).length === 0) {
-      return schema
-    }
-
-    if (!definitions.hasOwnProperty(ref)) {
-      return Object.assign(schema, {definitions})
-    }
-
-    return {
+  const finalSchema = (Object.keys(definitions).length === 0)
+    ? schema
+    : !definitions.hasOwnProperty(ref)
+    ? Object.assign(schema, {definitions})
+    : {
       definitions: Object.assign(definitions, { [ref]: schema }),
       $ref: `#/definitions/${ref}`
     }
-  })()
 
   metadataSchemaCache.set(metadata, finalSchema)
+
+  // console.log('----------------')
+  // console.log(JSON.stringify(finalSchema, null, 2))
 
   return finalSchema
 }

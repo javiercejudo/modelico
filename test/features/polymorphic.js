@@ -298,126 +298,83 @@ export default (should, M, fixtures, {Ajv}) => () => {
         type: 'object',
         properties: {
           name: {
+            $ref: '#/definitions/2'
+          },
+          favouriteShape: {
+            $ref: '#/definitions/3'
+          }
+        },
+        required: ['name', 'favouriteShape'],
+        definitions: {
+          '2': {
             type: 'string',
             minLength: 1
           },
-          favouriteShape: {
+          '3': {
             anyOf: [
               {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
-                  },
-                  radius: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: [
-                  'radius'
-                ]
+                $ref: '#/definitions/4'
               },
               {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
-                  },
-                  width: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  },
-                  height: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: [
-                  'width',
-                  'height'
-                ]
+                $ref: '#/definitions/7'
               }
             ]
-          }
-        },
-        required: [
-          'name',
-          'favouriteShape'
-        ],
-        definitions: {
-          3: {
-            anyOf: [
-              {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
+          },
+          '4': {
+            type: 'object',
+            properties: {
+              relatedShape: {
+                anyOf: [
+                  {
+                    type: 'null'
                   },
-                  radius: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
+                  {
+                    $ref: '#/definitions/3'
                   }
-                },
-                required: [
-                  'radius'
                 ]
               },
-              {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
-                  },
-                  width: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  },
-                  height: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: [
-                  'width',
-                  'height'
-                ]
+              radius: {
+                $ref: '#/definitions/6'
               }
-            ]
+            },
+            required: ['radius']
+          },
+          '6': {
+            type: 'number',
+            minimum: 0,
+            exclusiveMinimum: true
+          },
+          '7': {
+            type: 'object',
+            properties: {
+              relatedShape: {
+                anyOf: [
+                  {
+                    type: 'null'
+                  },
+                  {
+                    $ref: '#/definitions/3'
+                  }
+                ]
+              },
+              width: {
+                $ref: '#/definitions/9'
+              },
+              height: {
+                $ref: '#/definitions/10'
+              }
+            },
+            required: ['width', 'height']
+          },
+          '9': {
+            type: 'number',
+            minimum: 0,
+            exclusiveMinimum: true
+          },
+          '10': {
+            type: 'number',
+            minimum: 0,
+            exclusiveMinimum: true
           }
         }
       }

@@ -87,16 +87,16 @@ export default (ajv = { validate: T }) => {
 
   ajvMetadata.ajvMeta = ajvMeta
 
-  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
+  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata, topLevel = false) => {
     const metadata = _(Type, innerMetadata)
 
-    return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata, false))
+    return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata, topLevel))
   }
 
-  ajvMetadata.ajvBase = (Type, schema = emptyObject) => {
+  ajvMetadata.ajvBase = (Type, schema = emptyObject, topLevel = false) => {
     const metadata = base(Type)
 
-    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata, false))
+    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata, topLevel))
   }
 
   ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
@@ -231,7 +231,7 @@ export default (ajv = { validate: T }) => {
     ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema(itemMetadata, false))
 
   ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
-    const schema = getSchema(metadata, false)
+    const schema = getSchema(metadata)
     const valid = ajv.validate(schema, defaultValue)
 
     if (!valid) {

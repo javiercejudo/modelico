@@ -78,6 +78,18 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
       type: 'object',
       properties: {
         base: {
+          $ref: '#/definitions/2'
+        },
+        date: {
+          $ref: '#/definitions/3'
+        },
+        rates: {
+          $ref: '#/definitions/4'
+        }
+      },
+      required: ['base', 'date', 'rates'],
+      definitions: {
+        '2': {
           enum: [
             'AUD',
             'BGN',
@@ -113,28 +125,26 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
             'ZAR'
           ]
         },
-        date: {
+        '3': {
           type: 'string',
           pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
         },
-        rates: {
+        '4': {
           type: 'object',
           maxProperties: 32,
           additionalProperties: false,
           patternProperties: {
             '^(AUD|BGN|BRL|CAD|CHF|CNY|CZK|DKK|EUR|GBP|HKD|HRK|HUF|IDR|ILS|INR|JPY|KRW|MXN|MYR|NOK|NZD|PHP|PLN|RON|RUB|SEK|SGD|THB|TRY|USD|ZAR)$': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
+              $ref: '#/definitions/5'
             }
           }
+        },
+        '5': {
+          type: 'number',
+          minimum: 0,
+          exclusiveMinimum: true
         }
-      },
-      required: [
-        'base',
-        'date',
-        'rates'
-      ]
+      }
     }
 
     schema.should.deepEqual(expectedSchema)
