@@ -1,14 +1,14 @@
 /* eslint-env mocha */
 
 export default (should, M) => () => {
-  const { string } = M.metadata()
+  const {string} = M.metadata()
 
   class Country extends M.Base {
-    constructor (code) {
+    constructor(code) {
       super(Country, {code})
     }
 
-    static innerTypes () {
+    static innerTypes() {
       return Object.freeze({
         code: string()
       })
@@ -16,7 +16,6 @@ export default (should, M) => () => {
   }
 
   it('should leave root elements that are not plain objects untouched', () => {
-    M.fromJSON(Country, '"ESP"').code()
-      .should.be.exactly('ESP')
+    M.fromJSON(Country, '"ESP"').code().should.be.exactly('ESP')
   })
 }

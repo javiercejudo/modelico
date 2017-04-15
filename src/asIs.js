@@ -1,4 +1,4 @@
-import { asIsReviver, identity, pipe, assertSomethingIdentity } from './U'
+import {asIsReviver, identity, pipe, assertSomethingIdentity} from './U'
 
 export default (transformer = identity) =>
   Object.freeze({

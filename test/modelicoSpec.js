@@ -19,8 +19,8 @@ import featuresAdvanced from './features/advanced'
 import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
 import featuresPolymorphic from './features/polymorphic'
-import ImmutableExamples from './Immutable.js/index'
-import ImmutableProxied from './Immutable.js/proxied'
+import ImmutableExamples from './Immutable/index'
+import ImmutableProxied from './Immutable/proxied'
 
 import proxyMap from './proxies/proxyMap'
 import proxyList from './proxies/proxyList'
@@ -38,7 +38,8 @@ import friendFactory from './types/fixtures/Friend'
 import cityFactory from './types/fixtures/nested/City'
 import countryFactory from './types/fixtures/nested/Country'
 import regionFactory from './types/fixtures/nested/Region'
-import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
+import regionIncompatibleNameKeyFactory
+  from './types/fixtures/nested/RegionIncompatibleNameKey'
 
 import fixerIoFactory from './api-examples/fixer-io/index'
 import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
@@ -61,14 +62,15 @@ const hasToStringTagSymbol = (() => {
 
   a[Symbol.toStringTag] = 'foo'
 
-  return (a + '') === '[object foo]'
+  return a + '' === '[object foo]'
 })()
 
-const buildUtils = () => Object.freeze({
-  skipIfNoProxies: fn => hasProxies ? fn : fn.skip,
-  skipIfNoToStringTagSymbol: fn => hasToStringTagSymbol ? fn : fn.skip,
-  objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
-})
+const buildUtils = () =>
+  Object.freeze({
+    skipIfNoProxies: fn => (hasProxies ? fn : fn.skip),
+    skipIfNoToStringTagSymbol: fn => (hasToStringTagSymbol ? fn : fn.skip),
+    objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
+  })
 
 export default ({Should, Modelico: M, extensions}) => () => {
   const U = buildUtils()
@@ -112,13 +114,13 @@ export default ({Should, Modelico: M, extensions}) => () => {
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps))
   describe('Deep nesting features', featuresDeepNesting(...deps))
   describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
-  describe('Immutable.js examples', ImmutableExamples(U, ...deps))
+  describe('Immutable examples', ImmutableExamples(U, ...deps))
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))
   describe('Async reviving', asyncReviving(...deps))
 
   U.skipIfNoProxies(describe)(
-    'Immutable.js examples (proxied)',
+    'Immutable examples (proxied)',
     ImmutableProxied(U, ...deps)
   )
 

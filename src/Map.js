@@ -1,5 +1,5 @@
-import { objToArr, reviverOrAsIs, isFunction } from './U'
-import AbstractMap, { set, of, metadata } from './AbstractMap'
+import {objToArr, reviverOrAsIs, isFunction} from './U'
+import AbstractMap, {set, of, metadata} from './AbstractMap'
 
 const parseMapper = (keyReviver, valueReviver, path) => (pair, i) => [
   keyReviver('', pair[0], path.concat(i, 0)),
@@ -11,10 +11,14 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata)
-  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata)
+  const keyReviver = reviverOrAsIs(
+    isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata
+  )
+  const valueReviver = reviverOrAsIs(
+    isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata
+  )
 
-  const innerMap = (v === null)
+  const innerMap = v === null
     ? null
     : new Map(v.map(parseMapper(keyReviver, valueReviver, path)))
 
@@ -24,7 +28,7 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
 let EMPTY_MAP
 
 class ModelicoMap extends AbstractMap {
-  constructor (innerMap) {
+  constructor(innerMap) {
     super(ModelicoMap, innerMap, EMPTY_MAP)
 
     if (!EMPTY_MAP && this.size === 0) {
@@ -34,39 +38,39 @@ class ModelicoMap extends AbstractMap {
     Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoMap'
   }
 
-  set (key, value) {
+  set(key, value) {
     return set(this, ModelicoMap, key, value)
   }
 
-  toJSON () {
+  toJSON() {
     return [...this]
   }
 
-  static fromMap (map) {
+  static fromMap(map) {
     return new ModelicoMap(map)
   }
 
-  static fromArray (pairs) {
+  static fromArray(pairs) {
     return ModelicoMap.fromMap(new Map(pairs))
   }
 
-  static of (...args) {
+  static of(...args) {
     return of(ModelicoMap, args)
   }
 
-  static fromObject (obj) {
+  static fromObject(obj) {
     return ModelicoMap.fromArray(objToArr(obj))
   }
 
-  static metadata (keyMetadata, valueMetadata) {
+  static metadata(keyMetadata, valueMetadata) {
     return metadata(ModelicoMap, reviverFactory, keyMetadata, valueMetadata)
   }
 
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_MAP || ModelicoMap.of()
   }
 }

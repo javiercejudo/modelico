@@ -1,5 +1,5 @@
 import M from './'
-import { emptyObject } from './U'
+import {emptyObject} from './U'
 import getInnerTypes from './getInnerTypes'
 
 const metadataSchemaCache = new WeakMap()
@@ -17,8 +17,7 @@ const getSchemaImpl = metadata => {
     return metadata.schema()
   }
 
-  const hasInnerTypes = (metadata.type && metadata.type.innerTypes)
-
+  const hasInnerTypes = metadata.type && metadata.type.innerTypes
   const innerTypes = hasInnerTypes
     ? getInnerTypes([], metadata.type)
     : emptyObject
@@ -27,7 +26,7 @@ const getSchemaImpl = metadata => {
     return emptyObject
   }
 
-  const baseSchema = { type: 'object' }
+  const baseSchema = {type: 'object'}
 
   const required = []
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
@@ -39,18 +38,20 @@ const getSchemaImpl = metadata => {
       required.push(fieldName)
       schema = fieldSchema
     } else {
-      schema = Object.assign({
-        anyOf: [
-          { type: 'null' },
-          fieldSchema
-        ]
-      }, (fieldMetadata.type === M.Maybe) ? undefined : { default: fieldMetadata.default })
+      schema = Object.assign(
+        {
+          anyOf: [{type: 'null'}, fieldSchema]
+        },
+        fieldMetadata.type === M.Maybe
+          ? undefined
+          : {default: fieldMetadata.default}
+      )
     }
 
     return Object.assign(acc, {[fieldName]: schema})
   }, {})
 
-  const schema = Object.assign({}, baseSchema, { properties })
+  const schema = Object.assign({}, baseSchema, {properties})
 
   if (required.length > 0) {
     schema.required = required
@@ -60,7 +61,7 @@ const getSchemaImpl = metadata => {
 }
 
 const getUsedDefinitions = () => {
-  const { definitions, usedDefinitions } = state
+  const {definitions, usedDefinitions} = state
 
   return Object.keys(definitions).map(Number).reduce((acc, ref) => {
     if (usedDefinitions.has(ref)) {
@@ -83,7 +84,7 @@ const getSchema = (metadata, topLevel = true) => {
   if (state.metadataRefCache.has(metadata)) {
     const ref = state.metadataRefCache.get(metadata)
     state.usedDefinitions.add(ref)
-    return { $ref: `#/definitions/${ref}` }
+    return {$ref: `#/definitions/${ref}`}
   }
 
   const ref = state.nextRef
@@ -93,30 +94,32 @@ const getSchema = (metadata, topLevel = true) => {
 
   const schema = getSchemaImpl(metadata)
 
-  Object.assign(state.definitions, { [ref]: schema })
+  Object.assign(state.definitions, {[ref]: schema})
 
   if (!topLevel) {
     const ref = state.metadataRefCache.get(metadata)
     const schemaKeys = Object.keys(schema)
 
-    if (!ref || (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))) {
+    if (
+      !ref || (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))
+    ) {
       return schema
     }
 
     state.usedDefinitions.add(ref)
-    return { $ref: `#/definitions/${ref}` }
+    return {$ref: `#/definitions/${ref}`}
   }
 
   const definitions = getUsedDefinitions()
 
-  const finalSchema = (Object.keys(definitions).length === 0)
+  const finalSchema = Object.keys(definitions).length === 0
     ? schema
     : !definitions.hasOwnProperty(ref)
-    ? Object.assign(schema, {definitions})
-    : {
-      definitions: Object.assign(definitions, { [ref]: schema }),
-      $ref: `#/definitions/${ref}`
-    }
+        ? Object.assign(schema, {definitions})
+        : {
+            definitions: Object.assign(definitions, {[ref]: schema}),
+            $ref: `#/definitions/${ref}`
+          }
 
   metadataSchemaCache.set(metadata, finalSchema)
 

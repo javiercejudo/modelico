@@ -1,14 +1,13 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  const { asIs, any, anyOf, string, maybe } = M.metadata()
+  const {asIs, any, anyOf, string, maybe} = M.metadata()
 
   describe('toJSON', () => {
     it('should stringify the valfnue as is', () => {
       const mapOfNumbers = M.Map.of('a', 1, 'b', 2)
 
-      JSON.stringify(mapOfNumbers)
-        .should.be.exactly('[["a",1],["b",2]]')
+      JSON.stringify(mapOfNumbers).should.be.exactly('[["a",1],["b",2]]')
     })
   })
 
@@ -26,13 +25,18 @@ export default (U, should, M) => () => {
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      should(() => asIs(String).reviver('', null))
-        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+      should(() => asIs(String).reviver('', null)).throw(
+        /expected a value but got nothing \(null, undefined or NaN\)/
+      )
 
-      maybe(asIs(String)).reviver('', 'aaa').getOrElse('abc')
+      maybe(asIs(String))
+        .reviver('', 'aaa')
+        .getOrElse('abc')
         .should.be.exactly('aaa')
 
-      maybe(asIs(String)).reviver('', null).getOrElse('abc')
+      maybe(asIs(String))
+        .reviver('', null)
+        .getOrElse('abc')
         .should.be.exactly('abc')
     })
   })
@@ -48,7 +52,9 @@ export default (U, should, M) => () => {
     })
 
     it('should be immutable', () => {
-      (() => { asIs().reviver = x => x }).should.throw()
+      ;(() => {
+        asIs().reviver = x => x
+      }).should.throw()
     })
   })
 }

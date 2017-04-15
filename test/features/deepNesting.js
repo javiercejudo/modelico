@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 
 export default (should, M, fixtures) => () => {
-  const { _ } = M.metadata()
+  const {_} = M.metadata()
 
   it('should revive deeply nested JSON', () => {
-    const { Region, countryFactory } = fixtures
+    const {Region, countryFactory} = fixtures
     const City = fixtures.cityFactory(M, Region, countryFactory)
     const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":"EU"}}}`
 
@@ -17,7 +17,7 @@ export default (should, M, fixtures) => () => {
   })
 
   it('should support nested keys with different types', () => {
-    const { RegionIncompatibleNameKey: Region, countryFactory } = fixtures
+    const {RegionIncompatibleNameKey: Region, countryFactory} = fixtures
     const City = fixtures.cityFactory(M, Region, countryFactory)
     const cityJson = `{"name":"Pamplona","country":{"name":"Spain","code":"ESP","region":{"name":"Europe","code":{"id": 1,"value":"EU"}}}}`
 

@@ -50,10 +50,15 @@ export default (U, should, M) => () => {
     const obj = {d: 100, o: 200, g: 300}
 
     const map3 = M.Map.fromMap(
-      new Map([].concat([...map1.entries()], [...map2.entries()], objToArr(obj)))
+      new Map(
+        [].concat([...map1.entries()], [...map2.entries()], objToArr(obj))
+      )
     )
 
-    map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))
+    map3
+      .equals(
+        M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300})
+      )
       .should.be.exactly(true)
   })
 
@@ -61,12 +66,14 @@ export default (U, should, M) => () => {
     const map = _m(M.Map.fromObject({a: 1, b: 2, c: 3}))
 
     const res = {}
-    map.forEach((v, k) => { res[k] = v * v })
+    map.forEach((v, k) => {
+      res[k] = v * v
+    })
     res.should.eql({a: 1, b: 4, c: 9})
   })
 
   it('Accepts raw JavaScript objects. (3)', () => {
-    const obj = { 1: 'one' }
+    const obj = {1: 'one'}
     Object.keys(obj)[0].should.be.exactly('1')
     obj['1'].should.be.exactly('one')
     obj[1].should.be.exactly('one')
@@ -80,7 +87,7 @@ export default (U, should, M) => () => {
     const map1 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}))
     const map2 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}))
 
-    should(map1 !== map2).be.exactly(true)   // two different instances
+    should(map1 !== map2).be.exactly(true) // two different instances
     map1.equals(map2).should.be.exactly(true) // have equivalent values
   })
 

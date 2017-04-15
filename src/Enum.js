@@ -1,8 +1,8 @@
-import { always, isNothing } from './U'
-import { typeSymbol } from './symbols'
+import {always, isNothing} from './U'
+import {typeSymbol} from './symbols'
 import Base from './Base'
 
-const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } })
+const enumeratorsReducer = (acc, code) => Object.assign(acc, {[code]: {code}})
 
 const reviverFactory = enumerators => (k, v, path = []) => {
   const enumerator = enumerators[v]
@@ -15,7 +15,7 @@ const reviverFactory = enumerators => (k, v, path = []) => {
 }
 
 class Enum extends Base {
-  constructor (input, Ctor = Enum, displayName = Ctor.displayName) {
+  constructor(input, Ctor = Enum, displayName = Ctor.displayName) {
     const enumerators = Array.isArray(input)
       ? input.reduce(enumeratorsReducer, {})
       : input
@@ -27,28 +27,30 @@ class Enum extends Base {
 
     super(Ctor)
 
-    Object.getOwnPropertyNames(enumerators)
-      .forEach(enumerator => {
-        this[enumerator] = always(enumerators[enumerator])
-        enumerators[enumerator][typeSymbol] = always(this)
-        enumerators[enumerator].toJSON = always(enumerator)
-        enumerators[enumerator].equals = other => (enumerators[enumerator] === other)
-      })
+    Object.getOwnPropertyNames(enumerators).forEach(enumerator => {
+      this[enumerator] = always(enumerators[enumerator])
+      enumerators[enumerator][typeSymbol] = always(this)
+      enumerators[enumerator].toJSON = always(enumerator)
+      enumerators[enumerator].equals = other =>
+        enumerators[enumerator] === other
+    })
 
     Object.defineProperty(this, 'metadata', {
-      value: always(Object.freeze({
-        type: Ctor,
-        enumerators,
-        reviver: reviverFactory(enumerators)
-      }))
+      value: always(
+        Object.freeze({
+          type: Ctor,
+          enumerators,
+          reviver: reviverFactory(enumerators)
+        })
+      )
     })
   }
 
-  static fromObject (...args) {
+  static fromObject(...args) {
     return new Enum(...args)
   }
 
-  static fromArray (...args) {
+  static fromArray(...args) {
     return new Enum(...args)
   }
 }
