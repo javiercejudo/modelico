@@ -583,7 +583,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
         })
     })
 
-    it.skip('nested modelico object', () => {
+    it('nested modelico object', () => {
       class Animal extends M.Base {
         constructor (props) {
           super(Animal, props)
@@ -624,36 +624,54 @@ export default (should, M, fixtures, { Ajv }) => () => {
           minItems: 2,
           maxItems: 2,
           items: [
-            { type: 'string' },
             {
+              type: 'string'
+            },
+            {
+              $ref: '#/definitions/3'
+            }
+          ],
+          definitions: {
+            '3': {
               type: 'object',
-              required: ['dimensions'],
               properties: {
                 name: {
-                  default: 'unknown',
                   anyOf: [
-                    { type: 'null' },
                     {
-                      default: 'unknown',
-                      type: 'string',
-                      minLength: 1,
-                      maxLength: 25
+                      type: 'null'
+                    },
+                    {
+                      $ref: '#/definitions/4'
                     }
-                  ]
+                  ],
+                  default: 'unknown'
                 },
                 dimensions: {
-                  type: 'array',
-                  minItems: 3,
-                  maxItems: 3,
-                  items: {
-                    type: 'number',
-                    exclusiveMinimum: true,
-                    minimum: 0
-                  }
+                  $ref: '#/definitions/5'
                 }
+              },
+              required: ['dimensions']
+            },
+            '4': {
+              default: 'unknown',
+              type: 'string',
+              minLength: 1,
+              maxLength: 25
+            },
+            '5': {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                $ref: '#/definitions/6'
               }
+            },
+            '6': {
+              type: 'number',
+              minimum: 0,
+              exclusiveMinimum: true
             }
-          ]
+          }
         })
     })
 

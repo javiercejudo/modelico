@@ -4837,7 +4837,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         });
       });
 
-      it.skip('nested modelico object', function () {
+      it('nested modelico object', function () {
         var Animal = function (_M$Base3) {
           inherits(Animal, _M$Base3);
 
@@ -4872,31 +4872,49 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'array',
           minItems: 2,
           maxItems: 2,
-          items: [{ type: 'string' }, {
-            type: 'object',
-            required: ['dimensions'],
-            properties: {
-              name: {
-                default: 'unknown',
-                anyOf: [{ type: 'null' }, {
-                  default: 'unknown',
-                  type: 'string',
-                  minLength: 1,
-                  maxLength: 25
-                }]
-              },
-              dimensions: {
-                type: 'array',
-                minItems: 3,
-                maxItems: 3,
-                items: {
-                  type: 'number',
-                  exclusiveMinimum: true,
-                  minimum: 0
+          items: [{
+            type: 'string'
+          }, {
+            $ref: '#/definitions/3'
+          }],
+          definitions: {
+            '3': {
+              type: 'object',
+              properties: {
+                name: {
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/4'
+                  }],
+                  default: 'unknown'
+                },
+                dimensions: {
+                  $ref: '#/definitions/5'
                 }
+              },
+              required: ['dimensions']
+            },
+            '4': {
+              default: 'unknown',
+              type: 'string',
+              minLength: 1,
+              maxLength: 25
+            },
+            '5': {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                $ref: '#/definitions/6'
               }
+            },
+            '6': {
+              type: 'number',
+              minimum: 0,
+              exclusiveMinimum: true
             }
-          }]
+          }
         });
       });
 
