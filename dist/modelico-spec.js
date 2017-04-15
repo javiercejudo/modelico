@@ -4293,6 +4293,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
   return function () {
     var _M$ajvMetadata = M.ajvMetadata(Ajv()),
         ajv_ = _M$ajvMetadata.ajv_,
+        ajvBase = _M$ajvMetadata.ajvBase,
         ajvAsIs = _M$ajvMetadata.ajvAsIs,
         ajvAny = _M$ajvMetadata.ajvAny,
         ajvString = _M$ajvMetadata.ajvString,
@@ -4443,7 +4444,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           }
         });
 
-        var animalSchema2 = M.getSchema(ajv_(Animal2));
+        var animalSchema2 = M.getSchema(ajv_(Animal2, [], true));
 
         animalSchema2.should.deepEqual({
           $ref: '#/definitions/2',
@@ -5168,6 +5169,59 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         }]);
         return Animal;
       }(M.Base);
+
+      var baseSchema = M.getSchema(_(Animal));
+
+      var enhancedMeta = function enhancedMeta(additionalProperties) {
+        return ajvBase(Animal, Object.assign({}, baseSchema, { additionalProperties: additionalProperties }), true);
+      };
+
+      it('supports additional properties unless otherwise stated', function () {
+        should(function () {
+          return _(Animal).reviver('', {
+            name: 'Bane',
+            extra: 1
+          });
+        }).not.throw();
+
+        should(function () {
+          return enhancedMeta(true).reviver('', {
+            name: 'Bane',
+            extra: 1
+          });
+        }).not.throw();
+
+        M.getSchema(enhancedMeta(true)).should.deepEqual({
+          type: 'object',
+          additionalProperties: true,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        });
+      });
+
+      it('supports failing with additional properties', function () {
+        should(function () {
+          return enhancedMeta(false).reviver('', {
+            name: 'Bane',
+            extra: 1
+          });
+        }).throw(/should NOT have additional properties/);
+
+        M.getSchema(enhancedMeta(false)).should.deepEqual({
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        });
+      });
 
       it('should allow basic validation at top level', function () {
         should(function () {

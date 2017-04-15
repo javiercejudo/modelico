@@ -2104,21 +2104,23 @@ var ajvMetadata = (function () {
   ajvMetadata.ajv_ = function (Type) {
     var schema = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
     var innerMetadata = arguments[2];
+    var topLevel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
     var metadata = _(Type, innerMetadata);
 
     return ajvMeta(metadata, emptyObject, schema, function () {
-      return getSchema(metadata, false);
+      return getSchema(metadata, topLevel);
     });
   };
 
   ajvMetadata.ajvBase = function (Type) {
     var schema = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
+    var topLevel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
     var metadata = base(Type);
 
     return ajvMeta(metadata, { type: 'object' }, schema, function () {
-      return getSchema(metadata, false);
+      return getSchema(metadata, topLevel);
     });
   };
 

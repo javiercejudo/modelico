@@ -4096,7 +4096,7 @@ var fixerIoSpec = (should, M, { fixerIoFactory }, { Ajv }) => () => {
 var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
   const {
     ajv_,
-    // ajvBase,
+    ajvBase,
     ajvAsIs,
     ajvAny,
     ajvString,
@@ -4115,7 +4115,6 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
     // normal
     _,
-    // base,
     number
   } = M.ajvMetadata(Ajv());
 
@@ -4253,7 +4252,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
           }
         });
 
-      const animalSchema2 = M.getSchema(ajv_(Animal2));
+      const animalSchema2 = M.getSchema(ajv_(Animal2, [], true));
 
       animalSchema2
         .should.deepEqual({
@@ -5009,6 +5008,58 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
         })
       }
     }
+
+    const baseSchema = M.getSchema(_(Animal));
+
+    const enhancedMeta = additionalProperties =>
+      ajvBase(
+        Animal,
+        Object.assign({}, baseSchema, { additionalProperties }),
+        true
+      );
+
+    it('supports additional properties unless otherwise stated', () => {
+      should(() => _(Animal).reviver('', {
+        name: 'Bane',
+        extra: 1
+      })).not.throw();
+
+      should(() => enhancedMeta(true).reviver('', {
+        name: 'Bane',
+        extra: 1
+      })).not.throw();
+
+      M.getSchema(enhancedMeta(true))
+        .should.deepEqual({
+          type: 'object',
+          additionalProperties: true,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        });
+    });
+
+    it('supports failing with additional properties', () => {
+      should(() => enhancedMeta(false).reviver('', {
+        name: 'Bane',
+        extra: 1
+      })).throw(/should NOT have additional properties/);
+
+      M.getSchema(enhancedMeta(false))
+        .should.deepEqual({
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            name: {
+              type: 'string'
+            }
+          },
+          required: ['name']
+        });
+    });
 
     it('should allow basic validation at top level', () => {
       should(() => M.ajvFromJSON(ajv_, Animal, { maxProperties: 2 }, `{
