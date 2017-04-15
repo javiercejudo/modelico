@@ -34,6 +34,14 @@ look at their definitions:
 ```js
 const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
 
+// We are going to use this metadata in several places, so by reusing it, we
+// not only save unnecessary processing, but our generated JSON schema will
+// also be more compact.
+const greaterThanZero = ajvNumber({
+  minimum: 0,
+  exclusiveMinimum: true
+})
+
 const reviver = (k, v) => {
   if (k !== '') {
     return v
@@ -106,7 +114,7 @@ class Circle extends Shape {
 
   static innerTypes () {
     return Object.freeze(Object.assign({}, super.innerTypes(), {
-      radius: ajvNumber({minimum: 0, exclusiveMinimum: true})
+      radius: greaterThanZero
     }))
   }
 }
@@ -124,8 +132,8 @@ class Diamond extends Shape {
 
   static innerTypes () {
     return Object.freeze(Object.assign({}, super.innerTypes(), {
-      width: ajvNumber({minimum: 0, exclusiveMinimum: true}),
-      height: ajvNumber({minimum: 0, exclusiveMinimum: true})
+      width: greaterThanZero
+      height: greaterThanZero
     }))
   }
 }
@@ -197,9 +205,9 @@ metadata to account for its subtypes. This is going to allow us to get a very
 detailed schema that would not be easy to write by hand.
 
 _Note: definitions are sequentially named to avoid collisions. In the example
-below, the definition number have gaps because some of them got reserved in
-case of circular reference of other entities, but were dropped eventually.
-Subschemas with less than two keys are always inlined._
+below, the definition numbers have gaps because some of them got reserved in
+case they'd be reused. Short sub-schemas (less than 2 keys and not arrays) are
+always inlined._
 
 ```js
 M.getSchema(_(Geometer))
@@ -272,23 +280,13 @@ yields:
           ]
         },
         width: {
-          $ref: '#/definitions/9'
+          $ref: '#/definitions/6'
         },
         height: {
-          $ref: '#/definitions/10'
+          $ref: '#/definitions/6'
         }
       },
       required: ['width', 'height']
-    },
-    '9': {
-      type: 'number',
-      minimum: 0,
-      exclusiveMinimum: true
-    },
-    '10': {
-      type: 'number',
-      minimum: 0,
-      exclusiveMinimum: true
     }
   }
 }

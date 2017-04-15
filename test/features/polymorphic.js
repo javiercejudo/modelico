@@ -133,9 +133,14 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   describe('Based on runtime type field', () => {
     const ajv = Ajv()
-    const { _, base, ajvMeta } = M.ajvMetadata(ajv)
+    const { _, base, ajvMeta, ajvNumber } = M.ajvMetadata(ajv)
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
+
+    const greaterThanZero = ajvNumber({
+      minimum: 0,
+      exclusiveMinimum: true
+    })
 
     const reviver = (k, v) => {
       if (k !== '') {
@@ -186,10 +191,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     }
 
     class Circle extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
-      radius: m.ajvNumber({
-        minimum: 0,
-        exclusiveMinimum: true
-      })
+      radius: greaterThanZero
     }), {base: Shape}) {
       constructor (props) {
         super(Circle, props)
@@ -201,14 +203,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
     }
 
     class Diamond extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
-      width: m.ajvNumber({
-        minimum: 0,
-        exclusiveMinimum: true
-      }),
-      height: m.ajvNumber({
-        minimum: 0,
-        exclusiveMinimum: true
-      })
+      width: greaterThanZero,
+      height: greaterThanZero
     }), {base: Shape}) {
       constructor (props) {
         super(Diamond, props)
@@ -358,23 +354,13 @@ export default (should, M, fixtures, {Ajv}) => () => {
                 ]
               },
               width: {
-                $ref: '#/definitions/9'
+                $ref: '#/definitions/6'
               },
               height: {
-                $ref: '#/definitions/10'
+                $ref: '#/definitions/6'
               }
             },
             required: ['width', 'height']
-          },
-          '9': {
-            type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
-          },
-          '10': {
-            type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
           }
         }
       }
