@@ -295,12 +295,15 @@ var getSchemaImpl = function getSchemaImpl(metadata) {
     return metadata.schema();
   }
 
-  if (!metadata.type || !metadata.type.innerTypes || Object.keys(getInnerTypes$1([], metadata.type)).length === 0) {
+  var hasInnerTypes = metadata.type && metadata.type.innerTypes;
+
+  var innerTypes = hasInnerTypes ? getInnerTypes$1([], metadata.type) : emptyObject;
+
+  if (Object.keys(innerTypes).length === 0) {
     return emptyObject;
   }
 
   var baseSchema = { type: 'object' };
-  var innerTypes = metadata.type.innerTypes();
 
   var required = [];
   var properties = Object.keys(innerTypes).reduce(function (acc, fieldName) {

@@ -986,27 +986,41 @@ export default (should, M, fixtures, { Ajv }) => () => {
       }
     }
 
-    it.skip('reports its full schema', () => {
+    it('reports its full schema', () => {
       const expectedSchema = {
         type: 'object',
         properties: {
           type: {
-            enum: [
-              'Numeric',
-              'Alphabetic'
-            ]
+            $ref: '#/definitions/4'
           },
           score: {
-            anyOf: [
-              { type: 'number', minimum: 0 },
-              { type: 'string', minLength: 1 }
-            ]
+            $ref: '#/definitions/5'
           }
         },
-        required: [
-          'type',
-          'score'
-        ]
+        required: ['type', 'score'],
+        definitions: {
+          '2': {
+            type: 'number',
+            minimum: 0
+          },
+          '3': {
+            type: 'string',
+            minLength: 1
+          },
+          '4': {
+            enum: ['Numeric', 'Alphabetic']
+          },
+          '5': {
+            anyOf: [
+              {
+                $ref: '#/definitions/2'
+              },
+              {
+                $ref: '#/definitions/3'
+              }
+            ]
+          }
+        }
       }
 
       M.getSchema(_(Score))

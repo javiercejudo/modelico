@@ -17,16 +17,17 @@ const getSchemaImpl = metadata => {
     return metadata.schema()
   }
 
-  if (
-    !metadata.type ||
-    !metadata.type.innerTypes ||
-    Object.keys(getInnerTypes([], metadata.type)).length === 0
-  ) {
+  const hasInnerTypes = (metadata.type && metadata.type.innerTypes)
+
+  const innerTypes = hasInnerTypes
+    ? getInnerTypes([], metadata.type)
+    : emptyObject
+
+  if (Object.keys(innerTypes).length === 0) {
     return emptyObject
   }
 
   const baseSchema = { type: 'object' }
-  const innerTypes = metadata.type.innerTypes()
 
   const required = []
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
