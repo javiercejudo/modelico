@@ -1,4 +1,4 @@
-import { isPlainObject, reviverOrAsIs, isFunction } from './U'
+import {isPlainObject, reviverOrAsIs, isFunction} from './U'
 import getInnerTypes from './getInnerTypes'
 
 const plainObjectReviverFactory = (Type, k, v, prevPath) =>

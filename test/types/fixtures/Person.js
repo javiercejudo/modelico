@@ -3,20 +3,20 @@
 export default (M, PartOfDay, Sex) => {
   const joinWithSpace = (...parts) => parts.join(' ').trim()
 
-  const { _, string, date, map, list, set, maybe } = M.metadata()
+  const {_, string, date, map, list, set, maybe} = M.metadata()
   const partOfDay = PartOfDay.metadata
   const sex = Sex.metadata
 
   class Person extends M.Base {
-    constructor (props) {
+    constructor(props) {
       super(Person, props)
     }
 
-    fullName () {
+    fullName() {
       return joinWithSpace(this.givenName(), this.familyName())
     }
 
-    static innerTypes () {
+    static innerTypes() {
       return Object.freeze({
         givenName: string(),
         familyName: string(),

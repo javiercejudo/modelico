@@ -12,5 +12,8 @@
       "modules": false
     }]
   ],
-  "plugins": ["external-helpers"]
+  "plugins": [
+    "transform-flow-strip-types",
+    "external-helpers"
+  ]
 }

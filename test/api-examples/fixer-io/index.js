@@ -2,12 +2,7 @@ import currencyFactory from './Currency'
 import localDateFactory from './LocalDate'
 import fixerIoResultFactory from './FixerIoResult'
 
-export default ({
-  M,
-  Ajv,
-  ajvOptions = {},
-  validationEnabled = true
-} = {}) => {
+export default ({M, Ajv, ajvOptions = {}, validationEnabled = true} = {}) => {
   const options = {M, Ajv, ajvOptions, validationEnabled}
   const Currency = currencyFactory({M})
   const LocalDate = localDateFactory(options)

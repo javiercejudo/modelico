@@ -3,15 +3,15 @@
 export default (should, M, fixtures, {Ajv}) => () => {
   describe('Enumerated: default type field', () => {
     const CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER'])
-    const { _, number, stringMap, list, anyOf } = M.metadata()
+    const {_, number, stringMap, list, anyOf} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(NumberCollection, props)
       }
 
-      getNumbers () {
-        const { type, collection } = this
+      getNumbers() {
+        const {type, collection} = this
 
         switch (type()) {
           case CollectionType.OBJECT():
@@ -19,15 +19,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
           case CollectionType.ARRAY():
             return [...collection()]
           default:
-            throw TypeError(`Unsupported NumberCollection with type ${type().toJSON()}`)
+            throw TypeError(
+              `Unsupported NumberCollection with type ${type().toJSON()}`
+            )
         }
       }
 
-      sum () {
+      sum() {
         return this.getNumbers().reduce((acc, x) => acc + x, 0)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
           type: _(CollectionType),
           collection: anyOf([
@@ -41,11 +43,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
     it('should revive polymorphic JSON (1)', () => {
       const col1 = M.fromJS(NumberCollection, {
         type: 'OBJECT',
-        collection: {'a': 10, 'b': 25, 'c': 4000}
+        collection: {a: 10, b: 25, c: 4000}
       })
 
-      should(col1.sum())
-        .be.exactly(4035)
+      should(col1.sum()).be.exactly(4035)
     })
 
     it('should revive polymorphic JSON (2)', () => {
@@ -54,29 +55,30 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: [1, 2, 3, 4, 3]
       })
 
-      should(col2.sum())
-        .be.exactly(13)
+      should(col2.sum()).be.exactly(13)
     })
 
     it('should revive polymorphic JSON (3)', () => {
-      should(() => M.fromJS(NumberCollection, {
-        type: 'OTHER',
-        collection: '1,2,3,4,5'
-      })).throw(/unsupported enumerator "OTHER" at ""/)
+      should(() =>
+        M.fromJS(NumberCollection, {
+          type: 'OTHER',
+          collection: '1,2,3,4,5'
+        })
+      ).throw(/unsupported enumerator "OTHER" at ""/)
     })
   })
 
   describe('Enumerated: custom field', () => {
     const CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER'])
-    const { _, number, stringMap, list, anyOf } = M.metadata()
+    const {_, number, stringMap, list, anyOf} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(NumberCollection, props)
       }
 
-      getNumbers () {
-        const { collectionType, collection } = this
+      getNumbers() {
+        const {collectionType, collection} = this
 
         switch (collectionType()) {
           case CollectionType.OBJECT():
@@ -84,21 +86,26 @@ export default (should, M, fixtures, {Ajv}) => () => {
           case CollectionType.ARRAY():
             return [...collection()]
           default:
-            throw TypeError(`Unsupported NumberCollection with type ${collectionType().toJSON()}`)
+            throw TypeError(
+              `Unsupported NumberCollection with type ${collectionType().toJSON()}`
+            )
         }
       }
 
-      sum () {
+      sum() {
         return this.getNumbers().reduce((acc, x) => acc + x, 0)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
           collectionType: _(CollectionType),
-          collection: anyOf([
-            [stringMap(number()), CollectionType.OBJECT()],
-            [list(number()), CollectionType.ARRAY()]
-          ], 'collectionType')
+          collection: anyOf(
+            [
+              [stringMap(number()), CollectionType.OBJECT()],
+              [list(number()), CollectionType.ARRAY()]
+            ],
+            'collectionType'
+          )
         })
       }
     }
@@ -106,11 +113,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
     it('should revive polymorphic JSON (1)', () => {
       const col1 = M.fromJS(NumberCollection, {
         collectionType: 'OBJECT',
-        collection: {'a': 10, 'b': 25, 'c': 4000}
+        collection: {a: 10, b: 25, c: 4000}
       })
 
-      should(col1.sum())
-        .be.exactly(4035)
+      should(col1.sum()).be.exactly(4035)
     })
 
     it('should revive polymorphic JSON (2)', () => {
@@ -119,21 +125,22 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: [1, 2, 3, 4, 3]
       })
 
-      should(col2.sum())
-        .be.exactly(13)
+      should(col2.sum()).be.exactly(13)
     })
 
     it('should revive polymorphic JSON (3)', () => {
-      should(() => M.fromJS(NumberCollection, {
-        collectionType: 'OTHER',
-        collection: '1,2,3,4,5'
-      })).throw(/unsupported enumerator "OTHER" at ""/)
+      should(() =>
+        M.fromJS(NumberCollection, {
+          collectionType: 'OTHER',
+          collection: '1,2,3,4,5'
+        })
+      ).throw(/unsupported enumerator "OTHER" at ""/)
     })
   })
 
   describe('Based on runtime type field', () => {
     const ajv = Ajv()
-    const { _, base, ajvMeta, ajvNumber } = M.ajvMetadata(ajv)
+    const {_, base, ajvMeta, ajvNumber} = M.ajvMetadata(ajv)
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
 
@@ -153,14 +160,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
         case ShapeType.DIAMOND().toJSON():
           return new Diamond(v)
         default:
-          throw TypeError('Unsupported or missing shape type in the Shape reviver.')
+          throw TypeError(
+            'Unsupported or missing shape type in the Shape reviver.'
+          )
       }
     }
 
-    class Shape extends M.createAjvModel(ajv, m => ({
-      relatedShape: m.ajvMaybe(m._(Shape))
-    })) {
-      toJSON () {
+    class Shape
+      extends M.createAjvModel(ajv, m => ({
+        relatedShape: m.ajvMaybe(m._(Shape))
+      })) {
+      toJSON() {
         const fields = M.fields(this)
         let type
 
@@ -178,50 +188,60 @@ export default (should, M, fixtures, {Ajv}) => () => {
         return Object.freeze(Object.assign({type}, fields))
       }
 
-      static metadata () {
+      static metadata() {
         const baseMetadata = Object.assign({}, base(Shape), {reviver})
 
         return ajvMeta(baseMetadata, {}, {}, () => ({
-          anyOf: [
-            Circle,
-            Diamond
-          ].map(x => M.getSchema(base(x), false))
+          anyOf: [Circle, Diamond].map(x => M.getSchema(base(x), false))
         }))
       }
     }
 
-    class Circle extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
-      radius: greaterThanZero
-    }), {base: Shape}) {
-      constructor (props) {
+    class Circle
+      extends M.createAjvModel(
+        ajv,
+        m =>
+          Object.assign({}, Shape.innerTypes(), {
+            radius: greaterThanZero
+          }),
+        {base: Shape}
+      ) {
+      constructor(props) {
         super(Circle, props)
       }
 
-      area () {
+      area() {
         return Math.PI * this.radius() ** 2
       }
     }
 
-    class Diamond extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
-      width: greaterThanZero,
-      height: greaterThanZero
-    }), {base: Shape}) {
-      constructor (props) {
+    class Diamond
+      extends M.createAjvModel(
+        ajv,
+        m =>
+          Object.assign({}, Shape.innerTypes(), {
+            width: greaterThanZero,
+            height: greaterThanZero
+          }),
+        {base: Shape}
+      ) {
+      constructor(props) {
         super(Diamond, props)
       }
 
-      area () {
+      area() {
         return this.width() * this.height() / 2
       }
     }
 
-    class Geometer extends M.createAjvModel(ajv, m => ({
-      name: m.ajvString({
-        minLength: 1
-      }),
-      favouriteShape: m._(Shape)
-    })) {
-      constructor (props) {
+    class Geometer
+      extends M.createAjvModel(ajv, m => ({
+        name: m.ajvString({
+          minLength: 1
+        }),
+        favouriteShape: m._(Shape)
+      })) {
+      constructor(props) {
         super(Geometer, props)
       }
     }
@@ -252,11 +272,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
         })
       })
 
-      should(geometer1.favouriteShape().area())
-        .be.exactly(28)
+      should(geometer1.favouriteShape().area()).be.exactly(28)
 
-      should(geometer2.favouriteShape().area())
-        .be.above(28)
+      should(geometer2.favouriteShape().area()).be
+        .above(28)
         .and.exactly(Math.PI * 3 ** 2)
 
       geometer1.toJS().should.deepEqual({
@@ -372,30 +391,29 @@ export default (should, M, fixtures, {Ajv}) => () => {
   })
 
   describe('Based on value only', () => {
-    const { number, stringMap, list } = M.metadata()
+    const {number, stringMap, list} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(NumberCollection, props)
       }
 
-      getNumbers () {
+      getNumbers() {
         const collection = this.collection()
 
-        return (collection[M.symbols.typeSymbol]() === M.List)
+        return collection[M.symbols.typeSymbol]() === M.List
           ? [...collection]
           : [...collection[M.symbols.innerOrigSymbol]().values()]
       }
 
-      sum () {
+      sum() {
         return this.getNumbers().reduce((acc, x) => acc + x, 0)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
-          collection: v => Array.isArray(v.collection)
-            ? list(number())
-            : stringMap(number())
+          collection: v =>
+            (Array.isArray(v.collection) ? list(number()) : stringMap(number()))
         })
       }
     }
@@ -405,8 +423,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: {a: 10, b: 25, c: 4000}
       })
 
-      should(col1.sum())
-        .be.exactly(4035)
+      should(col1.sum()).be.exactly(4035)
     })
 
     it('should revive polymorphic JSON (2)', () => {
@@ -414,8 +431,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: [1, 2, 3, 4, 3]
       })
 
-      should(col2.sum())
-        .be.exactly(13)
+      should(col2.sum()).be.exactly(13)
     })
   })
 }

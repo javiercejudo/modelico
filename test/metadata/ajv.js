@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-export default (should, M, fixtures, { Ajv }) => () => {
+export default (should, M, fixtures, {Ajv}) => () => {
   const {
     ajv_,
     ajvBase,
@@ -26,33 +26,35 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('Animal example', () => {
     class Animal extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(Animal, props)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
-          name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
-          dimensions:
-            ajvMaybe(
-              ajvList({ minItems: 3, maxItems: 3 },
-                ajvNumber({ minimum: 0, exclusiveMinimum: true })))
+          name: ajvWithDefault(
+            ajvString({minLength: 1, maxLength: 25}),
+            'unknown'
+          ),
+          dimensions: ajvMaybe(
+            ajvList(
+              {minItems: 3, maxItems: 3},
+              ajvNumber({minimum: 0, exclusiveMinimum: true})
+            )
+          )
         })
       }
     }
 
     class Animal2 extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(Animal, props)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
-          name: ajvString({ minLength: 1, maxLength: 25 }),
-          dimensions:
-            ajvMaybe(
-              ajvList({ minItems: 3, maxItems: 3 },
-                number()))
+          name: ajvString({minLength: 1, maxLength: 25}),
+          dimensions: ajvMaybe(ajvList({minItems: 3, maxItems: 3}, number()))
         })
       }
     }
@@ -65,7 +67,10 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       bane1.name().should.be.exactly('Bane')
 
-      bane1.dimensions().getOrElse([1, 1, 1]).equals(M.List.of(20, 55, 65))
+      bane1
+        .dimensions()
+        .getOrElse([1, 1, 1])
+        .equals(M.List.of(20, 55, 65))
         .should.be.exactly(true)
     })
 
@@ -78,10 +83,12 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('should fail with invalid JSON', () => {
-      should(() => M.fromJS(Animal, {
-        name: 'Bane',
-        dimensions: [20, 55, 0]
-      }))
+      should(() =>
+        M.fromJS(Animal, {
+          name: 'Bane',
+          dimensions: [20, 55, 0]
+        })
+      )
         .throw(/Invalid JSON at "dimensions -> 2"/)
         .and.throw(/should be > 0/)
     })
@@ -95,158 +102,175 @@ export default (should, M, fixtures, { Ajv }) => () => {
       const animalNormalMeta = _(fixtures.Animal)
       const animalNormalMetaSchema = M.getSchema(animalNormalMeta)
 
-      animalNormalMetaSchema
-        .should.deepEqual({
-          type: 'object',
-          properties: {
-            name: {}
-          },
-          required: ['name']
-        })
+      animalNormalMetaSchema.should.deepEqual({
+        type: 'object',
+        properties: {
+          name: {}
+        },
+        required: ['name']
+      })
 
       const animalMeta = _(Animal)
       const animal1Schema1 = M.getSchema(animalMeta)
       const animal1Schema2 = M.getSchema(animalMeta)
 
-      animal1Schema1
-        .should.deepEqual(animal1Schema2)
-        .and.deepEqual({
-          type: 'object',
-          properties: {
-            name: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/2'
-                }
-              ],
-              default: 'unknown'
-            },
-            dimensions: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/4'
-                }
-              ]
+      animal1Schema1.should.deepEqual(animal1Schema2).and.deepEqual({
+        type: 'object',
+        properties: {
+          name: {
+            anyOf: [
+              {
+                type: 'null'
+              },
+              {
+                $ref: '#/definitions/2'
+              }
+            ],
+            default: 'unknown'
+          },
+          dimensions: {
+            anyOf: [
+              {
+                type: 'null'
+              },
+              {
+                $ref: '#/definitions/4'
+              }
+            ]
+          }
+        },
+        definitions: {
+          '2': {
+            default: 'unknown',
+            type: 'string',
+            minLength: 1,
+            maxLength: 25
+          },
+          '4': {
+            type: 'array',
+            minItems: 3,
+            maxItems: 3,
+            items: {
+              $ref: '#/definitions/5'
             }
           },
-          definitions: {
-            '2': {
-              default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            '4': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                $ref: '#/definitions/5'
-              }
-            },
-            '5': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
+          '5': {
+            type: 'number',
+            minimum: 0,
+            exclusiveMinimum: true
           }
-        })
+        }
+      })
 
       const animalSchema2 = M.getSchema(ajv_(Animal2, [], true))
 
-      animalSchema2
-        .should.deepEqual({
-          $ref: '#/definitions/2',
-          definitions: {
-            '2': {
-              type: 'object',
-              properties: {
-                name: {
-                  $ref: '#/definitions/3'
-                },
-                dimensions: {
-                  anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/5'
-                    }
-                  ]
-                }
+      animalSchema2.should.deepEqual({
+        $ref: '#/definitions/2',
+        definitions: {
+          '2': {
+            type: 'object',
+            properties: {
+              name: {
+                $ref: '#/definitions/3'
               },
-              required: ['name']
+              dimensions: {
+                anyOf: [
+                  {
+                    type: 'null'
+                  },
+                  {
+                    $ref: '#/definitions/5'
+                  }
+                ]
+              }
             },
-            '3': {
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            '5': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {}
-            }
+            required: ['name']
+          },
+          '3': {
+            type: 'string',
+            minLength: 1,
+            maxLength: 25
+          },
+          '5': {
+            type: 'array',
+            minItems: 3,
+            maxItems: 3,
+            items: {}
           }
-        })
+        }
+      })
 
       const ajv = Ajv()
 
-      ajv.validate(animal1Schema1, bane.toJS())
+      ajv.validate(animal1Schema1, bane.toJS()).should.be.exactly(true)
+
+      ajv
+        .validate(animal1Schema1, bane.set('name', 'Robbie').toJS())
         .should.be.exactly(true)
 
-      ajv.validate(animal1Schema1, bane.set('name', 'Robbie').toJS())
-        .should.be.exactly(true)
-
-      ajv.validate(animal1Schema1, bane.set('name', 2).toJS())
+      ajv
+        .validate(animal1Schema1, bane.set('name', 2).toJS())
         .should.be.exactly(false)
     })
   })
 
   describe('deeply nested error examples', () => {
     it('list', () => {
-      should(() => M.ajvGenericsFromJSON(ajv_, M.List, {}, [
-        ajvList({}, ajvList({}, ajvNumber({minimum: 5})))
-      ], '[[[10], [6, 7, 4]]]'))
+      should(() =>
+        M.ajvGenericsFromJSON(
+          ajv_,
+          M.List,
+          {},
+          [ajvList({}, ajvList({}, ajvNumber({minimum: 5})))],
+          '[[[10], [6, 7, 4]]]'
+        )
+      )
         .throw(/Invalid JSON at "0 -> 1 -> 2"/)
         .and.throw(/should be >= 5/)
     })
 
     it('set', () => {
-      should(() => M.genericsFromJS(M.Set, [
-        ajvSet({}, ajvSet({}, ajvNumber({minimum: 5})))
-      ], [[[10], [6, 7, 9, 4]]]))
+      should(() =>
+        M.genericsFromJS(
+          M.Set,
+          [ajvSet({}, ajvSet({}, ajvNumber({minimum: 5})))],
+          [[[10], [6, 7, 9, 4]]]
+        )
+      )
         .throw(/Invalid JSON at "0 -> 1 -> 3"/)
         .and.throw(/should be >= 5/)
     })
 
     it('stringMap', () => {
-      should(() => M.genericsFromJS(M.StringMap, [
-        ajvStringMap({}, ajvStringMap({}, ajvNumber({minimum: 5})))
-      ], {a: {b1: {c: 10}, b2: {d1: 6, d2: 7, d3: 4}}}))
+      should(() =>
+        M.genericsFromJS(
+          M.StringMap,
+          [ajvStringMap({}, ajvStringMap({}, ajvNumber({minimum: 5})))],
+          {a: {b1: {c: 10}, b2: {d1: 6, d2: 7, d3: 4}}}
+        )
+      )
         .throw(/Invalid JSON at "a -> b2 -> d3"/)
         .and.throw(/should be >= 5/)
     })
 
     it('map', () => {
-      should(() => M.genericsFromJS(M.Map, [
-        ajvString(),
-        ajvMap({}, ajvString(), ajvNumber({minimum: 5}))
-      ], [['A', [['A', 6], ['B', 7], ['C', 4]]]]))
+      should(() =>
+        M.genericsFromJS(
+          M.Map,
+          [ajvString(), ajvMap({}, ajvString(), ajvNumber({minimum: 5}))],
+          [['A', [['A', 6], ['B', 7], ['C', 4]]]]
+        )
+      )
         .throw(/Invalid JSON at "0 -> 1 -> 2 -> 1"/)
         .and.throw(/should be >= 5/)
 
-      should(() => M.genericsFromJS(M.Map, [
-        ajvString(),
-        ajvMap({}, ajvString(), ajvNumber({minimum: 5}))
-      ], [['A', [['A', 6], ['B', 7], [2, 7]]]]))
+      should(() =>
+        M.genericsFromJS(
+          M.Map,
+          [ajvString(), ajvMap({}, ajvString(), ajvNumber({minimum: 5}))],
+          [['A', [['A', 6], ['B', 7], [2, 7]]]]
+        )
+      )
         .throw(/Invalid JSON at "0 -> 1 -> 2 -> 0"/)
         .and.throw(/should be string/)
     })
@@ -254,76 +278,106 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('enumMap', () => {
       const SideEnum = M.Enum.fromArray(['A', 'B'])
 
-      should(() => M.genericsFromJS(M.EnumMap, [
-        ajv_(SideEnum),
-        ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5})))
-      ], {A: {A: {A: 10}, B: {A: 4, B: 7}}}))
+      should(() =>
+        M.genericsFromJS(
+          M.EnumMap,
+          [
+            ajv_(SideEnum),
+            ajvEnumMap(
+              {},
+              ajv_(SideEnum),
+              ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5}))
+            )
+          ],
+          {A: {A: {A: 10}, B: {A: 4, B: 7}}}
+        )
+      )
         .throw(/Invalid JSON at "A -> B -> A"/)
         .and.throw(/should be >= 5/)
 
-      should(() => M.genericsFromJS(M.EnumMap, [
-        ajv_(SideEnum),
-        ajvEnumMap({}, ajv_(SideEnum), ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5})))
-      ], {A: {A: {A: 10}, B: {D: 5, B: 7}}}))
+      should(() =>
+        M.genericsFromJS(
+          M.EnumMap,
+          [
+            ajv_(SideEnum),
+            ajvEnumMap(
+              {},
+              ajv_(SideEnum),
+              ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5}))
+            )
+          ],
+          {A: {A: {A: 10}, B: {D: 5, B: 7}}}
+        )
+      )
         .throw(/Invalid JSON at "A -> B"/)
         .and.throw(/should NOT have additional properties/)
     })
   })
 
   describe('togglability', () => {
-    const { ajvString: nonValidatedString } = M.ajvMetadata()
+    const {ajvString: nonValidatedString} = M.ajvMetadata()
 
     it('defaults to normal behaviour when Ajv is undefined', () => {
-      JSON.parse('"aa"', nonValidatedString({ minLength: 3 }).reviver)
-        .should.be.exactly('aa')
+      JSON.parse(
+        '"aa"',
+        nonValidatedString({minLength: 3}).reviver
+      ).should.be.exactly('aa')
 
-      should(() => JSON.parse('"aa"', ajvString({ minLength: 3 }).reviver))
-        .throw(/shorter than 3 characters/)
+      should(() => JSON.parse('"aa"', ajvString({minLength: 3}).reviver)).throw(
+        /shorter than 3 characters/
+      )
     })
   })
 
   describe('asIs', () => {
     it('supports missing schema', () => {
-      JSON.parse('"test"', ajvAsIs().reviver)
-        .should.be.exactly('test')
+      JSON.parse('"test"', ajvAsIs().reviver).should.be.exactly('test')
     })
 
     it('supports valid values with schema', () => {
-      JSON.parse('"test"', ajvAsIs({ type: 'string' }).reviver)
-        .should.be.exactly('test')
+      JSON.parse('"test"', ajvAsIs({type: 'string'}).reviver).should.be.exactly(
+        'test'
+      )
     })
 
     it('supports valid values with schema and transformer', () => {
-      JSON.parse('"test"', ajvAsIs({ type: 'string', maxLength: 5 }, x => x.repeat(2)).reviver)
-        .should.be.exactly('testtest')
+      JSON.parse(
+        '"test"',
+        ajvAsIs({type: 'string', maxLength: 5}, x => x.repeat(2)).reviver
+      ).should.be.exactly('testtest')
     })
 
     it('rejects invalid values', () => {
-      should(() => JSON.parse('1', ajvAsIs({ type: 'string' }).reviver))
-        .throw(/should be string/)
+      should(() => JSON.parse('1', ajvAsIs({type: 'string'}).reviver)).throw(
+        /should be string/
+      )
 
-      should(() => JSON.parse('"testtest"', ajvAsIs({ type: 'string', maxLength: 5 }).reviver))
-        .throw(/should NOT be longer than 5 characters/)
+      should(() =>
+        JSON.parse(
+          '"testtest"',
+          ajvAsIs({type: 'string', maxLength: 5}).reviver
+        )
+      ).throw(/should NOT be longer than 5 characters/)
     })
   })
 
   describe('any', () => {
     it('supports missing schema', () => {
-      JSON.parse('"test"', ajvAny().reviver)
-        .should.be.exactly('test')
+      JSON.parse('"test"', ajvAny().reviver).should.be.exactly('test')
 
-      should(JSON.parse('1', ajvAny().reviver))
-        .be.exactly(1)
+      should(JSON.parse('1', ajvAny().reviver)).be.exactly(1)
     })
 
     it('supports valid values with schema', () => {
-      JSON.parse('"test"', ajvAny({ type: 'string' }).reviver)
-        .should.be.exactly('test')
+      JSON.parse('"test"', ajvAny({type: 'string'}).reviver).should.be.exactly(
+        'test'
+      )
     })
 
     it('rejects invalid values', () => {
-      should(() => JSON.parse('1', ajvAny({ type: 'string' }).reviver))
-        .throw(/should be string/)
+      should(() => JSON.parse('1', ajvAny({type: 'string'}).reviver)).throw(
+        /should be string/
+      )
     })
   })
 
@@ -333,62 +387,78 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports missing schema', () => {
-      should(JSON.parse('1', ajvNumber().reviver))
-        .be.exactly(1)
+      should(JSON.parse('1', ajvNumber().reviver)).be.exactly(1)
     })
 
     it('supports valid numbers with schema', () => {
-      should(JSON.parse('4', ajvNumber({ minimum: 3 }).reviver))
-        .be.exactly(4)
+      should(JSON.parse('4', ajvNumber({minimum: 3}).reviver)).be.exactly(4)
     })
 
     it('rejects invalid numbers', () => {
-      should(() => JSON.parse('2', ajvNumber({ minimum: 3 }).reviver))
-        .throw(/should be >= 3/)
+      should(() => JSON.parse('2', ajvNumber({minimum: 3}).reviver)).throw(
+        /should be >= 3/
+      )
     })
   })
 
   describe('number: wrapped json-compatible', () => {
     it('reports the right type', () => {
-      ajvNumber({}, { wrap: true }).type.should.be.exactly(M.Number)
+      ajvNumber({}, {wrap: true}).type.should.be.exactly(M.Number)
     })
 
     it('supports missing schema', () => {
-      should(JSON.parse('1', ajvNumber({}, { wrap: true }).reviver).inner())
-        .be.exactly(1)
+      should(
+        JSON.parse('1', ajvNumber({}, {wrap: true}).reviver).inner()
+      ).be.exactly(1)
     })
 
     it('supports valid numbers with schema', () => {
-      should(JSON.parse('4', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner())
-        .be.exactly(4)
+      should(
+        JSON.parse('4', ajvNumber({minimum: 3}, {wrap: true}).reviver).inner()
+      ).be.exactly(4)
     })
 
     it('rejects invalid numbers', () => {
-      should(() => JSON.parse('2', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner())
-        .throw(/should be >= 3/)
+      should(() =>
+        JSON.parse('2', ajvNumber({minimum: 3}, {wrap: true}).reviver).inner()
+      ).throw(/should be >= 3/)
     })
   })
 
   describe('number: wrapped non-json-compatible', () => {
     it('supports missing schema', () => {
-      should(JSON.parse('"-Infinity"', ajvNumber({}, { wrap: true }).reviver).inner())
-        .be.exactly(-Infinity)
+      should(
+        JSON.parse('"-Infinity"', ajvNumber({}, {wrap: true}).reviver).inner()
+      ).be.exactly(-Infinity)
     })
 
     it('supports valid numbers with schema', () => {
-      should(JSON.parse('"Infinity"', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner())
-        .be.exactly(Infinity)
+      should(
+        JSON.parse(
+          '"Infinity"',
+          ajvNumber({minimum: 3}, {wrap: true}).reviver
+        ).inner()
+      ).be.exactly(Infinity)
     })
 
     it('rejects invalid numbers', () => {
-      should(() => JSON.parse('"-Infinity"', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner())
-        .throw(/should be >= 3/)
+      should(() =>
+        JSON.parse(
+          '"-Infinity"',
+          ajvNumber({minimum: 3}, {wrap: true}).reviver
+        ).inner()
+      ).throw(/should be >= 3/)
 
-      should(() => JSON.parse('"1"', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner())
-        .throw(/should be number/)
+      should(() =>
+        JSON.parse('"1"', ajvNumber({minimum: 3}, {wrap: true}).reviver).inner()
+      ).throw(/should be number/)
 
-      should(() => JSON.parse('{"a": 1}', ajvNumber({ minimum: 3 }, { wrap: true }).reviver).inner())
-        .throw(/should be number/)
+      should(() =>
+        JSON.parse(
+          '{"a": 1}',
+          ajvNumber({minimum: 3}, {wrap: true}).reviver
+        ).inner()
+      ).throw(/should be number/)
     })
   })
 
@@ -398,18 +468,19 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports missing schema', () => {
-      JSON.parse('"test"', ajvString().reviver)
-        .should.be.exactly('test')
+      JSON.parse('"test"', ajvString().reviver).should.be.exactly('test')
     })
 
     it('supports valid strings with schema', () => {
-      JSON.parse('"test"', ajvString({ minLength: 3 }).reviver)
-        .should.be.exactly('test')
+      JSON.parse('"test"', ajvString({minLength: 3}).reviver).should.be.exactly(
+        'test'
+      )
     })
 
     it('rejects invalid strings', () => {
-      should(() => JSON.parse('"aa"', ajvString({ minLength: 3 }).reviver))
-        .throw(/shorter than 3 characters/)
+      should(() => JSON.parse('"aa"', ajvString({minLength: 3}).reviver)).throw(
+        /shorter than 3 characters/
+      )
     })
   })
 
@@ -419,13 +490,13 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports valid booleans', () => {
-      JSON.parse('true', ajvBoolean().reviver)
-        .should.be.exactly(true)
+      JSON.parse('true', ajvBoolean().reviver).should.be.exactly(true)
     })
 
     it('rejects invalid booleans', () => {
-      should(() => JSON.parse('1', ajvBoolean().reviver))
-        .throw(/should be boolean/)
+      should(() => JSON.parse('1', ajvBoolean().reviver)).throw(
+        /should be boolean/
+      )
     })
   })
 
@@ -435,16 +506,21 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports valid dates', () => {
-      should(JSON.parse('"1988-04-16T00:00:00.000Z"', ajvDate().reviver).inner().getFullYear())
-        .be.exactly(1988)
+      should(
+        JSON.parse('"1988-04-16T00:00:00.000Z"', ajvDate().reviver)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
     })
 
     it('rejects invalid dates', () => {
-      should(() => JSON.parse('"1988-04-16T00:00:00.000"', ajvDate().reviver))
-        .throw(/should match format "date-time"/)
+      should(() =>
+        JSON.parse('"1988-04-16T00:00:00.000"', ajvDate().reviver)
+      ).throw(/should match format "date-time"/)
 
-      should(() => JSON.parse('"1988-04-16"', ajvDate().reviver))
-        .throw(/should match format "date-time"/)
+      should(() => JSON.parse('"1988-04-16"', ajvDate().reviver)).throw(
+        /should match format "date-time"/
+      )
     })
   })
 
@@ -452,8 +528,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('reports its full schema', () => {
       const Side = M.Enum.fromArray(['A', 'B'])
 
-      M.getSchema(ajvEnum(Side))
-        .should.deepEqual({enum: ['A', 'B']})
+      M.getSchema(ajvEnum(Side)).should.deepEqual({enum: ['A', 'B']})
     })
   })
 
@@ -465,29 +540,27 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('reports its full schema', () => {
       const meta = ajvEnumMap({}, ajv_(SideEnum), ajvNumber())
 
-      M.getSchema(meta)
-        .should.deepEqual({
-          type: 'object',
-          maxProperties: 2,
-          additionalProperties: false,
-          patternProperties: {
-            '^(A|B)$': {
-              type: 'number'
-            }
+      M.getSchema(meta).should.deepEqual({
+        type: 'object',
+        maxProperties: 2,
+        additionalProperties: false,
+        patternProperties: {
+          '^(A|B)$': {
+            type: 'number'
           }
-        })
+        }
+      })
 
       const meta2 = ajvEnumMap({}, ajv_(SideEnum), number())
 
-      M.getSchema(meta2)
-        .should.deepEqual({
-          type: 'object',
-          maxProperties: 2,
-          additionalProperties: false,
-          patternProperties: {
-            '^(A|B)$': {}
-          }
-        })
+      M.getSchema(meta2).should.deepEqual({
+        type: 'object',
+        maxProperties: 2,
+        additionalProperties: false,
+        patternProperties: {
+          '^(A|B)$': {}
+        }
+      })
     })
 
     it('reports the right types', () => {
@@ -499,23 +572,44 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports empty schema', () => {
-      should(JSON.parse('{"B": 100}', ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver).get(SideEnum.B()))
-        .be.exactly(100)
+      should(
+        JSON.parse(
+          '{"B": 100}',
+          ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver
+        ).get(SideEnum.B())
+      ).be.exactly(100)
     })
 
     it('supports valid enumMaps with schema', () => {
-      should(JSON.parse('{"B": 100}', ajvEnumMap({ minProperties: 1 }, ajv_(SideEnum), ajvNumber()).reviver).get(SideEnum.B()))
-        .be.exactly(100)
+      should(
+        JSON.parse(
+          '{"B": 100}',
+          ajvEnumMap({minProperties: 1}, ajv_(SideEnum), ajvNumber()).reviver
+        ).get(SideEnum.B())
+      ).be.exactly(100)
     })
 
     it('rejects invalid enumMaps', () => {
-      should(() => JSON.parse('{"A": 100}', ajvEnumMap({ minProperties: 2 }, ajv_(SideEnum), ajvNumber()).reviver))
-        .throw(/should NOT have less than 2 properties/)
+      should(() =>
+        JSON.parse(
+          '{"A": 100}',
+          ajvEnumMap({minProperties: 2}, ajv_(SideEnum), ajvNumber()).reviver
+        )
+      ).throw(/should NOT have less than 2 properties/)
 
-      should(() => JSON.parse('{"A": 100, "B": 200, "C": 300}', ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver))
-        .throw(/should NOT have more than 2 properties/)
+      should(() =>
+        JSON.parse(
+          '{"A": 100, "B": 200, "C": 300}',
+          ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver
+        )
+      ).throw(/should NOT have more than 2 properties/)
 
-      should(() => JSON.parse('{"A": 100, "B": 200, "C": 300}', ajvEnumMap({ maxProperties: 3 }, ajv_(SideEnum), ajvNumber()).reviver))
+      should(() =>
+        JSON.parse(
+          '{"A": 100, "B": 200, "C": 300}',
+          ajvEnumMap({maxProperties: 3}, ajv_(SideEnum), ajvNumber()).reviver
+        )
+      )
         .throw(/Invalid JSON at ""/)
         .and.throw(/should NOT have additional properties/)
     })
@@ -523,20 +617,21 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
   describe('list', () => {
     it('list', () => {
-      M.getSchema(ajvList({minItems: 2}, ajvNumber({minimum: 5})))
-        .should.deepEqual({
-          type: 'array',
-          minItems: 2,
-          items: {
-            $ref: '#/definitions/2'
-          },
-          definitions: {
-            '2': {
-              type: 'number',
-              minimum: 5
-            }
+      M.getSchema(
+        ajvList({minItems: 2}, ajvNumber({minimum: 5}))
+      ).should.deepEqual({
+        type: 'array',
+        minItems: 2,
+        items: {
+          $ref: '#/definitions/2'
+        },
+        definitions: {
+          '2': {
+            type: 'number',
+            minimum: 5
           }
-        })
+        }
+      })
     })
 
     it('reports the right types', () => {
@@ -551,14 +646,15 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports valid lists with schema', () => {
-      JSON.parse('[2,5]', ajvList({ maxItems: 3 }, ajvNumber()).reviver)
+      JSON.parse('[2,5]', ajvList({maxItems: 3}, ajvNumber()).reviver)
         .equals(M.List.of(2, 5))
         .should.be.exactly(true)
     })
 
     it('rejects invalid lists', () => {
-      should(() => JSON.parse('[2,5,7,1]', ajvList({ maxItems: 3 }, ajvNumber()).reviver))
-        .throw(/should NOT have more than 3 items/)
+      should(() =>
+        JSON.parse('[2,5,7,1]', ajvList({maxItems: 3}, ajvNumber()).reviver)
+      ).throw(/should NOT have more than 3 items/)
     })
   })
 
@@ -570,30 +666,29 @@ export default (should, M, fixtures, { Ajv }) => () => {
         .equals(M.List.of('a', 5))
         .should.be.exactly(true)
 
-      M.getSchema(metadata)
-        .should.deepEqual({
-          type: 'array',
-          minItems: 2,
-          maxItems: 2,
-          items: [
-            { type: 'string' },
-            { type: 'number' }
-          ]
-        })
+      M.getSchema(metadata).should.deepEqual({
+        type: 'array',
+        minItems: 2,
+        maxItems: 2,
+        items: [{type: 'string'}, {type: 'number'}]
+      })
     })
 
     it('nested modelico object', () => {
       class Animal extends M.Base {
-        constructor (props) {
+        constructor(props) {
           super(Animal, props)
         }
 
-        static innerTypes () {
+        static innerTypes() {
           return Object.freeze({
-            name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
+            name: ajvWithDefault(
+              ajvString({minLength: 1, maxLength: 25}),
+              'unknown'
+            ),
             dimensions: ajvList(
-              { minItems: 3, maxItems: 3 },
-              ajvNumber({ minimum: 0, exclusiveMinimum: true })
+              {minItems: 3, maxItems: 3},
+              ajvNumber({minimum: 0, exclusiveMinimum: true})
             )
           })
         }
@@ -601,98 +696,114 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
       const metadata = ajvList({}, [ajvString(), _(Animal)])
 
-      M.genericsFromJS(M.List, [[ajvString(), _(Animal)]], [
-        'a',
-        {
-          name: 'Bane',
-          dimensions: [20, 55, 65]
-        }
-      ]).equals(
-        M.List.of(
+      M.genericsFromJS(
+        M.List,
+        [[ajvString(), _(Animal)]],
+        [
           'a',
-          new Animal({
+          {
             name: 'Bane',
-            dimensions: M.List.of(20, 55, 65)
-          })
+            dimensions: [20, 55, 65]
+          }
+        ]
+      )
+        .equals(
+          M.List.of(
+            'a',
+            new Animal({
+              name: 'Bane',
+              dimensions: M.List.of(20, 55, 65)
+            })
+          )
         )
-      ).should.be.exactly(true)
+        .should.be.exactly(true)
 
-      M.getSchema(metadata)
-        .should.deepEqual({
-          type: 'array',
-          minItems: 2,
-          maxItems: 2,
-          items: [
-            {
-              type: 'string'
-            },
-            {
-              $ref: '#/definitions/3'
-            }
-          ],
-          definitions: {
-            '3': {
-              type: 'object',
-              properties: {
-                name: {
-                  anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/4'
-                    }
-                  ],
-                  default: 'unknown'
-                },
-                dimensions: {
-                  $ref: '#/definitions/5'
-                }
+      M.getSchema(metadata).should.deepEqual({
+        type: 'array',
+        minItems: 2,
+        maxItems: 2,
+        items: [
+          {
+            type: 'string'
+          },
+          {
+            $ref: '#/definitions/3'
+          }
+        ],
+        definitions: {
+          '3': {
+            type: 'object',
+            properties: {
+              name: {
+                anyOf: [
+                  {
+                    type: 'null'
+                  },
+                  {
+                    $ref: '#/definitions/4'
+                  }
+                ],
+                default: 'unknown'
               },
-              required: ['dimensions']
-            },
-            '4': {
-              default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            '5': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                $ref: '#/definitions/6'
+              dimensions: {
+                $ref: '#/definitions/5'
               }
             },
-            '6': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
+            required: ['dimensions']
+          },
+          '4': {
+            default: 'unknown',
+            type: 'string',
+            minLength: 1,
+            maxLength: 25
+          },
+          '5': {
+            type: 'array',
+            minItems: 3,
+            maxItems: 3,
+            items: {
+              $ref: '#/definitions/6'
             }
+          },
+          '6': {
+            type: 'number',
+            minimum: 0,
+            exclusiveMinimum: true
           }
-        })
+        }
+      })
     })
 
     it('invalid data', () => {
       const metadata = ajvList({}, [ajvString(), ajvNumber()])
 
-      should(() => JSON.parse('["a",true]', metadata.reviver))
-        .throw(/should be number/)
+      should(() => JSON.parse('["a",true]', metadata.reviver)).throw(
+        /should be number/
+      )
 
-      should(() => JSON.parse('["a"]', metadata.reviver))
-        .throw(/should NOT have less than 2 items/)
+      should(() => JSON.parse('["a"]', metadata.reviver)).throw(
+        /should NOT have less than 2 items/
+      )
 
-      should(() => JSON.parse('["a",1,2]', metadata.reviver))
-        .throw(/should NOT have more than 2 items/)
+      should(() => JSON.parse('["a",1,2]', metadata.reviver)).throw(
+        /should NOT have more than 2 items/
+      )
     })
 
     it('maybe', () => {
-      M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",1]')
+      M.genericsFromJSON(
+        M.List,
+        [[ajvString(), ajvMaybe(ajvNumber())]],
+        '["a",1]'
+      )
         .equals(M.List.of('a', M.Just.of(1)))
         .should.be.exactly(true)
 
-      M.genericsFromJSON(M.List, [[ajvString(), ajvMaybe(ajvNumber())]], '["a",null]')
+      M.genericsFromJSON(
+        M.List,
+        [[ajvString(), ajvMaybe(ajvNumber())]],
+        '["a",null]'
+      )
         .equals(M.List.of('a', M.Nothing))
         .should.be.exactly(true)
     })
@@ -702,19 +813,15 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('reports its full schema', () => {
       const meta = ajvMap({}, ajvNumber(), ajvString())
 
-      M.getSchema(meta)
-        .should.deepEqual({
+      M.getSchema(meta).should.deepEqual({
+        type: 'array',
+        items: {
           type: 'array',
-          items: {
-            type: 'array',
-            maxItems: 2,
-            minItems: 2,
-            items: [
-              { type: 'number' },
-              { type: 'string' }
-            ]
-          }
-        })
+          maxItems: 2,
+          minItems: 2,
+          items: [{type: 'number'}, {type: 'string'}]
+        }
+      })
     })
 
     it('reports the right types', () => {
@@ -726,26 +833,41 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports empty schema', () => {
-      JSON.parse('[[2, "dos"],[5, "cinco"]]', ajvMap({}, ajvNumber(), ajvString()).reviver)
+      JSON.parse(
+        '[[2, "dos"],[5, "cinco"]]',
+        ajvMap({}, ajvNumber(), ajvString()).reviver
+      )
         .equals(M.Map.of(2, 'dos', 5, 'cinco'))
         .should.be.exactly(true)
     })
 
     it('supports valid maps with schema', () => {
-      JSON.parse('[[2, "dos"],[5, "cinco"]]', ajvMap({ minItems: 2 }, ajvNumber(), ajvString()).reviver)
+      JSON.parse(
+        '[[2, "dos"],[5, "cinco"]]',
+        ajvMap({minItems: 2}, ajvNumber(), ajvString()).reviver
+      )
         .equals(M.Map.of(2, 'dos', 5, 'cinco'))
         .should.be.exactly(true)
     })
 
     it('rejects invalid maps', () => {
-      should(() => JSON.parse('[[2, "dos", "extra"]]', ajvMap({}, ajvNumber(), ajvString()).reviver))
-        .throw(/should NOT have more than 2 items/)
+      should(() =>
+        JSON.parse(
+          '[[2, "dos", "extra"]]',
+          ajvMap({}, ajvNumber(), ajvString()).reviver
+        )
+      ).throw(/should NOT have more than 2 items/)
 
-      should(() => JSON.parse('[[2]]', ajvMap({}, ajvNumber(), ajvString()).reviver))
-        .throw(/should NOT have less than 2 items/)
+      should(() =>
+        JSON.parse('[[2]]', ajvMap({}, ajvNumber(), ajvString()).reviver)
+      ).throw(/should NOT have less than 2 items/)
 
-      should(() => JSON.parse('[[1, "uno"], [2, "dos"], [3, "tres"]]', ajvMap({ minItems: 4 }, ajvNumber(), ajvString()).reviver))
-        .throw(/should NOT have less than 4 items/)
+      should(() =>
+        JSON.parse(
+          '[[1, "uno"], [2, "dos"], [3, "tres"]]',
+          ajvMap({minItems: 4}, ajvNumber(), ajvString()).reviver
+        )
+      ).throw(/should NOT have less than 4 items/)
     })
   })
 
@@ -753,16 +875,15 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('reports its full schema', () => {
       const meta = ajvStringMap({}, ajvNumber())
 
-      M.getSchema(meta)
-        .should.deepEqual({
-          type: 'object',
-          additionalProperties: false,
-          patternProperties: {
-            '.*': {
-              type: 'number'
-            }
+      M.getSchema(meta).should.deepEqual({
+        type: 'object',
+        additionalProperties: false,
+        patternProperties: {
+          '.*': {
+            type: 'number'
           }
-        })
+        }
+      })
     })
 
     it('reports the right types', () => {
@@ -773,18 +894,29 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports empty schema', () => {
-      should(JSON.parse('{"uno": 1}', ajvStringMap({}, ajvNumber()).reviver).get('uno'))
-        .be.exactly(1)
+      should(
+        JSON.parse('{"uno": 1}', ajvStringMap({}, ajvNumber()).reviver).get(
+          'uno'
+        )
+      ).be.exactly(1)
     })
 
     it('supports valid stringMaps with schema', () => {
-      should(JSON.parse('{"uno": 1}', ajvStringMap({ minProperties: 1 }, ajvNumber()).reviver).get('uno'))
-        .be.exactly(1)
+      should(
+        JSON.parse(
+          '{"uno": 1}',
+          ajvStringMap({minProperties: 1}, ajvNumber()).reviver
+        ).get('uno')
+      ).be.exactly(1)
     })
 
     it('rejects invalid stringMaps', () => {
-      should(() => JSON.parse('{"uno": 1}', ajvStringMap({ minProperties: 2 }, ajvNumber()).reviver))
-        .throw(/should NOT have less than 2 properties/)
+      should(() =>
+        JSON.parse(
+          '{"uno": 1}',
+          ajvStringMap({minProperties: 2}, ajvNumber()).reviver
+        )
+      ).throw(/should NOT have less than 2 properties/)
     })
   })
 
@@ -792,14 +924,13 @@ export default (should, M, fixtures, { Ajv }) => () => {
     it('reports its full schema', () => {
       const meta = ajvSet({}, ajvNumber())
 
-      M.getSchema(meta)
-        .should.deepEqual({
-          type: 'array',
-          uniqueItems: true,
-          items: {
-            type: 'number'
-          }
-        })
+      M.getSchema(meta).should.deepEqual({
+        type: 'array',
+        uniqueItems: true,
+        items: {
+          type: 'number'
+        }
+      })
     })
 
     it('reports the right types', () => {
@@ -814,23 +945,25 @@ export default (should, M, fixtures, { Ajv }) => () => {
     })
 
     it('supports valid sets with schema', () => {
-      JSON.parse('[2,5]', ajvSet({ maxItems: 3 }, ajvNumber()).reviver)
+      JSON.parse('[2,5]', ajvSet({maxItems: 3}, ajvNumber()).reviver)
         .equals(M.Set.of(2, 5))
         .should.be.exactly(true)
     })
 
     it('rejects invalid sets', () => {
-      should(() => JSON.parse('[2,5,7,1]', ajvSet({ maxItems: 3 }, ajvNumber()).reviver))
-        .throw(/should NOT have more than 3 items/)
+      should(() =>
+        JSON.parse('[2,5,7,1]', ajvSet({maxItems: 3}, ajvNumber()).reviver)
+      ).throw(/should NOT have more than 3 items/)
     })
 
     it('rejects duplicated values by default', () => {
-      should(() => JSON.parse('[2,5,5]', ajvSet({}, ajvNumber()).reviver))
-        .throw(/should NOT have duplicate items/)
+      should(() =>
+        JSON.parse('[2,5,5]', ajvSet({}, ajvNumber()).reviver)
+      ).throw(/should NOT have duplicate items/)
     })
 
     it('supports duplicates when explicitly told', () => {
-      JSON.parse('[2,5,5]', ajvSet({ uniqueItems: false }, ajvNumber()).reviver)
+      JSON.parse('[2,5,5]', ajvSet({uniqueItems: false}, ajvNumber()).reviver)
         .equals(M.Set.of(2, 5))
         .should.be.exactly(true)
     })
@@ -856,19 +989,23 @@ export default (should, M, fixtures, { Ajv }) => () => {
   describe('ajvWithDefault', () => {
     it('should validate the default value', () => {
       class CountryCode extends M.Base {
-        constructor (props) {
+        constructor(props) {
           super(CountryCode, props)
         }
 
-        static innerTypes () {
+        static innerTypes() {
           return Object.freeze({
-            value: ajvWithDefault(ajvString({minLength: 3, maxLength: 3}), 'SPAIN')
+            value: ajvWithDefault(
+              ajvString({minLength: 3, maxLength: 3}),
+              'SPAIN'
+            )
           })
         }
       }
 
-      (() => new CountryCode())
-        .should.throw(/should NOT be longer than 3 characters/)
+      ;(() => new CountryCode()).should.throw(
+        /should NOT be longer than 3 characters/
+      )
     })
   })
 
@@ -877,7 +1014,7 @@ export default (should, M, fixtures, { Ajv }) => () => {
 
     it('should validate the default value', () => {
       class CountryCode extends M.Base {
-        constructor (props) {
+        constructor(props) {
           if (!ajv.validate(M.getSchema(_(CountryCode)), props)) {
             throw TypeError(ajv.errors.map(error => error.message).join('\n'))
           }
@@ -885,30 +1022,35 @@ export default (should, M, fixtures, { Ajv }) => () => {
           super(CountryCode, props)
         }
 
-        static innerTypes () {
+        static innerTypes() {
           return Object.freeze({
-            value: ajvWithDefault(ajvString({minLength: 3, maxLength: 3}), 'ESP')
+            value: ajvWithDefault(
+              ajvString({minLength: 3, maxLength: 3}),
+              'ESP'
+            )
           })
         }
       }
 
-      (() => new CountryCode({value: 'SPAIN'}))
-        .should.throw(/should NOT be longer than 3 characters/)
+      ;(() => new CountryCode({value: 'SPAIN'})).should.throw(
+        /should NOT be longer than 3 characters/
+      )
 
       const australia = new CountryCode({value: 'AUS'})
 
-      should(() => australia.set('value', 'AU'))
-        .throw(/should NOT be shorter than 3 characters/)
+      should(() => australia.set('value', 'AU')).throw(
+        /should NOT be shorter than 3 characters/
+      )
     })
   })
 
   describe('recipe: validation at top level', () => {
     class Animal extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(Animal, props)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
           name: ajvString()
         })
@@ -920,131 +1062,163 @@ export default (should, M, fixtures, { Ajv }) => () => {
     const enhancedMeta = additionalProperties =>
       ajvBase(
         Animal,
-        Object.assign({}, baseSchema, { additionalProperties }),
+        Object.assign({}, baseSchema, {additionalProperties}),
         true
       )
 
     it('supports additional properties unless otherwise stated', () => {
-      should(() => _(Animal).reviver('', {
-        name: 'Bane',
-        extra: 1
-      })).not.throw()
-
-      should(() => enhancedMeta(true).reviver('', {
-        name: 'Bane',
-        extra: 1
-      })).not.throw()
-
-      M.getSchema(enhancedMeta(true))
-        .should.deepEqual({
-          type: 'object',
-          additionalProperties: true,
-          properties: {
-            name: {
-              type: 'string'
-            }
-          },
-          required: ['name']
+      should(() =>
+        _(Animal).reviver('', {
+          name: 'Bane',
+          extra: 1
         })
+      ).not.throw()
+
+      should(() =>
+        enhancedMeta(true).reviver('', {
+          name: 'Bane',
+          extra: 1
+        })
+      ).not.throw()
+
+      M.getSchema(enhancedMeta(true)).should.deepEqual({
+        type: 'object',
+        additionalProperties: true,
+        properties: {
+          name: {
+            type: 'string'
+          }
+        },
+        required: ['name']
+      })
     })
 
     it('supports failing with additional properties', () => {
-      should(() => enhancedMeta(false).reviver('', {
-        name: 'Bane',
-        extra: 1
-      })).throw(/should NOT have additional properties/)
-
-      M.getSchema(enhancedMeta(false))
-        .should.deepEqual({
-          type: 'object',
-          additionalProperties: false,
-          properties: {
-            name: {
-              type: 'string'
-            }
-          },
-          required: ['name']
+      should(() =>
+        enhancedMeta(false).reviver('', {
+          name: 'Bane',
+          extra: 1
         })
+      ).throw(/should NOT have additional properties/)
+
+      M.getSchema(enhancedMeta(false)).should.deepEqual({
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          name: {
+            type: 'string'
+          }
+        },
+        required: ['name']
+      })
     })
 
     it('should allow basic validation at top level', () => {
-      should(() => M.ajvFromJSON(ajv_, Animal, { maxProperties: 2 }, `{
+      should(() =>
+        M.ajvFromJSON(
+          ajv_,
+          Animal,
+          {maxProperties: 2},
+          `{
         "name": "Bane",
         "dimensions": [20, 55, 65],
         "extra": 1
-      }`))
-        .throw(/should NOT have more than 2 properties/)
+      }`
+        )
+      ).throw(/should NOT have more than 2 properties/)
     })
   })
 
   describe('withValidation', () => {
     it('facilitates custom validation rules', () => {
-      const lowerCaseString = schema => M.withValidation(
-        v => v.toLowerCase() === v,
-        (v, path) => `string ${v} at "${path.join(' -> ')}" is not all lower case`
-      )(ajvString(schema))
+      const lowerCaseString = schema =>
+        M.withValidation(
+          v => v.toLowerCase() === v,
+          (v, path) =>
+            `string ${v} at "${path.join(' -> ')}" is not all lower case`
+        )(ajvString(schema))
 
-      JSON.parse('"abc123"', lowerCaseString({minLength: 5}).reviver)
-        .should.be.exactly('abc123')
+      JSON.parse(
+        '"abc123"',
+        lowerCaseString({minLength: 5}).reviver
+      ).should.be.exactly('abc123')
 
-      should(() => JSON.parse('"abc"', lowerCaseString({minLength: 5}).reviver))
-        .throw(/should NOT be shorter than 5 characters/)
+      should(() =>
+        JSON.parse('"abc"', lowerCaseString({minLength: 5}).reviver)
+      ).throw(/should NOT be shorter than 5 characters/)
 
-      should(() => JSON.parse('"aBc123"', lowerCaseString({minLength: 5}).reviver))
-        .throw(/string aBc123 at "" is not all lower case/)
+      should(() =>
+        JSON.parse('"aBc123"', lowerCaseString({minLength: 5}).reviver)
+      ).throw(/string aBc123 at "" is not all lower case/)
     })
 
     it('should have a default error message', () => {
-      const lowerCaseString = schema => M.withValidation(v => v.toLowerCase() === v)(ajvString(schema))
+      const lowerCaseString = schema =>
+        M.withValidation(v => v.toLowerCase() === v)(ajvString(schema))
 
-      should(() => JSON.parse('"aBc123"', lowerCaseString({minLength: 5}).reviver))
-        .throw(/Invalid value at ""/)
+      should(() =>
+        JSON.parse('"aBc123"', lowerCaseString({minLength: 5}).reviver)
+      ).throw(/Invalid value at ""/)
     })
 
     it('should work for nested metadata', () => {
-      const lowerCaseString = schema => M.withValidation(
-        v => v.toLowerCase() === v,
-        (v, path) => `string ${v} at "${path.join(' -> ')}" is not all lower case`
-      )(ajvString(schema))
+      const lowerCaseString = schema =>
+        M.withValidation(
+          v => v.toLowerCase() === v,
+          (v, path) =>
+            `string ${v} at "${path.join(' -> ')}" is not all lower case`
+        )(ajvString(schema))
 
       class MagicString extends M.Base {
-        constructor (props) {
+        constructor(props) {
           super(MagicString, props)
         }
 
-        static innerTypes () {
+        static innerTypes() {
           return Object.freeze({
             str: lowerCaseString({minLength: 5})
           })
         }
       }
 
-      M.fromJSON(MagicString, '{"str": "abc123"}').str()
+      M.fromJSON(MagicString, '{"str": "abc123"}')
+        .str()
         .should.be.exactly('abc123')
 
-      should(() => M.fromJSON(MagicString, '{"str": "abc"}'))
-        .throw(/should NOT be shorter than 5 characters/)
+      should(() => M.fromJSON(MagicString, '{"str": "abc"}')).throw(
+        /should NOT be shorter than 5 characters/
+      )
 
-      should(() => M.fromJSON(MagicString, '{"str": "aBc123"}'))
-        .throw(/string aBc123 at "str" is not all lower case/)
+      should(() => M.fromJSON(MagicString, '{"str": "aBc123"}')).throw(
+        /string aBc123 at "str" is not all lower case/
+      )
 
-      should(() => JSON.parse(
-        '{"str": "abc123", "forceFail": true}',
-        M.withValidation(v => M.fields(v).forceFail !== true, () => 'forcibly failed')(_(MagicString)).reviver
-      )).throw(/forcibly failed/)
+      should(() =>
+        JSON.parse(
+          '{"str": "abc123", "forceFail": true}',
+          M.withValidation(
+            v => M.fields(v).forceFail !== true,
+            () => 'forcibly failed'
+          )(_(MagicString)).reviver
+        )
+      ).throw(/forcibly failed/)
     })
   })
 
   describe('anyOf', () => {
     class ScoreType extends M.Enum {}
-    const ScoreTypeEnum = M.Enum.fromArray(['Numeric', 'Alphabetic'], ScoreType, 'ScoreType')
+    const ScoreTypeEnum = M.Enum.fromArray(
+      ['Numeric', 'Alphabetic'],
+      ScoreType,
+      'ScoreType'
+    )
 
     class Score extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(Score, props)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
           type: ajvEnum(ScoreTypeEnum),
           score: ajvAnyOf([
@@ -1092,72 +1266,71 @@ export default (should, M, fixtures, { Ajv }) => () => {
         }
       }
 
-      M.getSchema(_(Score))
-        .should.deepEqual(expectedSchema)
+      M.getSchema(_(Score)).should.deepEqual(expectedSchema)
     })
   })
 
   describe('Circular innerTypes', () => {
     it('self reference', () => {
-      class Chain extends M.createAjvModel(Ajv(), m => ({
-        description: m.ajvString({minLength: 1}),
-        previous: m.ajvMaybe(m._(Chain)),
-        next: m.ajvMaybe(m._(Chain)),
-        relatedChains: m.ajvList({}, m._(Chain))
-      })) {
-        constructor (props) {
+      class Chain
+        extends M.createAjvModel(Ajv(), m => ({
+          description: m.ajvString({minLength: 1}),
+          previous: m.ajvMaybe(m._(Chain)),
+          next: m.ajvMaybe(m._(Chain)),
+          relatedChains: m.ajvList({}, m._(Chain))
+        })) {
+        constructor(props) {
           super(Chain, props)
         }
       }
 
-      M.getSchema(_(Chain))
-        .should.deepEqual({
-          definitions: {
-            '1': {
-              type: 'object',
-              properties: {
-                description: {
-                  $ref: '#/definitions/2'
-                },
-                previous: {
-                  anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/1'
-                    }
-                  ]
-                },
-                next: {
-                  anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/1'
-                    }
-                  ]
-                },
-                relatedChains: {
-                  $ref: '#/definitions/5'
-                }
+      M.getSchema(_(Chain)).should.deepEqual({
+        definitions: {
+          '1': {
+            type: 'object',
+            properties: {
+              description: {
+                $ref: '#/definitions/2'
               },
-              required: ['description', 'relatedChains']
-            },
-            '2': {
-              type: 'string',
-              minLength: 1
-            },
-            '5': {
-              type: 'array',
-              items: {
-                $ref: '#/definitions/1'
+              previous: {
+                anyOf: [
+                  {
+                    type: 'null'
+                  },
+                  {
+                    $ref: '#/definitions/1'
+                  }
+                ]
+              },
+              next: {
+                anyOf: [
+                  {
+                    type: 'null'
+                  },
+                  {
+                    $ref: '#/definitions/1'
+                  }
+                ]
+              },
+              relatedChains: {
+                $ref: '#/definitions/5'
               }
-            }
+            },
+            required: ['description', 'relatedChains']
           },
-          $ref: '#/definitions/1'
-        })
+          '2': {
+            type: 'string',
+            minLength: 1
+          },
+          '5': {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/1'
+            }
+          }
+        },
+        $ref: '#/definitions/1'
+      })
     })
 
     it('indirect reference', () => {
@@ -1173,11 +1346,11 @@ export default (should, M, fixtures, { Ajv }) => () => {
       }
 
       class Parent extends M.Base {
-        constructor (props) {
+        constructor(props) {
           super(Parent, props)
         }
 
-        static innerTypes () {
+        static innerTypes() {
           return Object.freeze({
             name: nonEmptyString,
             child: maybeChild()
@@ -1186,11 +1359,11 @@ export default (should, M, fixtures, { Ajv }) => () => {
       }
 
       class Child extends M.Base {
-        constructor (props) {
+        constructor(props) {
           super(Parent, props)
         }
 
-        static innerTypes () {
+        static innerTypes() {
           return Object.freeze({
             name: nonEmptyString,
             parent: _(Parent)
@@ -1199,11 +1372,11 @@ export default (should, M, fixtures, { Ajv }) => () => {
       }
 
       class Person extends M.Base {
-        constructor (props) {
+        constructor(props) {
           super(Parent, props)
         }
 
-        static innerTypes () {
+        static innerTypes() {
           return Object.freeze({
             name: nonEmptyString,
             parent: _(Parent),
@@ -1212,69 +1385,68 @@ export default (should, M, fixtures, { Ajv }) => () => {
         }
       }
 
-      M.getSchema(_(Person))
-        .should.deepEqual({
-          type: 'object',
-          properties: {
-            name: {
-              $ref: '#/definitions/2'
-            },
-            parent: {
-              $ref: '#/definitions/3'
-            },
-            child: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/4'
-                }
-              ]
-            }
+      M.getSchema(_(Person)).should.deepEqual({
+        type: 'object',
+        properties: {
+          name: {
+            $ref: '#/definitions/2'
           },
-          required: ['name', 'parent'],
-          definitions: {
-            '2': {
-              type: 'string',
-              minLength: 1
-            },
-            '3': {
-              type: 'object',
-              properties: {
-                name: {
-                  $ref: '#/definitions/2'
-                },
-                child: {
-                  anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/5'
-                    }
-                  ]
-                }
+          parent: {
+            $ref: '#/definitions/3'
+          },
+          child: {
+            anyOf: [
+              {
+                type: 'null'
               },
-              required: ['name']
-            },
-            '4': {
-              $ref: '#/definitions/5'
-            },
-            '5': {
-              type: 'object',
-              properties: {
-                name: {
-                  $ref: '#/definitions/2'
-                },
-                parent: {
-                  $ref: '#/definitions/3'
-                }
-              },
-              required: ['name', 'parent']
-            }
+              {
+                $ref: '#/definitions/4'
+              }
+            ]
           }
-        })
+        },
+        required: ['name', 'parent'],
+        definitions: {
+          '2': {
+            type: 'string',
+            minLength: 1
+          },
+          '3': {
+            type: 'object',
+            properties: {
+              name: {
+                $ref: '#/definitions/2'
+              },
+              child: {
+                anyOf: [
+                  {
+                    type: 'null'
+                  },
+                  {
+                    $ref: '#/definitions/5'
+                  }
+                ]
+              }
+            },
+            required: ['name']
+          },
+          '4': {
+            $ref: '#/definitions/5'
+          },
+          '5': {
+            type: 'object',
+            properties: {
+              name: {
+                $ref: '#/definitions/2'
+              },
+              parent: {
+                $ref: '#/definitions/3'
+              }
+            },
+            required: ['name', 'parent']
+          }
+        }
+      })
     })
   })
 }

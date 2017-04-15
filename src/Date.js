@@ -1,16 +1,14 @@
-import { isNothing, unsupported, haveDifferentTypes } from './U'
+import {isNothing, unsupported, haveDifferentTypes} from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
-  const date = (v === null)
-    ? null
-    : new Date(v)
+  const date = v === null ? null : new Date(v)
 
   return new ModelicoDate(date)
 }
 
 class ModelicoDate extends Base {
-  constructor (dateOrig = new Date()) {
+  constructor(dateOrig = new Date()) {
     super(ModelicoDate)
 
     if (isNothing(dateOrig)) {
@@ -24,15 +22,15 @@ class ModelicoDate extends Base {
     Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoDate'
   }
 
-  set () {
+  set() {
     unsupported('Date.set is not supported')
   }
 
-  setIn (path, date) {
+  setIn(path, date) {
     if (path.length === 0) {
       return ModelicoDate.of(date)
     }
@@ -40,11 +38,11 @@ class ModelicoDate extends Base {
     unsupported('Date.setIn is not supported for non-empty paths')
   }
 
-  toJSON () {
+  toJSON() {
     return this.inner().toISOString()
   }
 
-  equals (other) {
+  equals(other) {
     if (this === other) {
       return true
     }
@@ -56,11 +54,11 @@ class ModelicoDate extends Base {
     return this.toJSON() === other.toJSON()
   }
 
-  static of (date) {
+  static of(date) {
     return new ModelicoDate(date)
   }
 
-  static metadata () {
+  static metadata() {
     return Object.freeze({
       type: ModelicoDate,
       reviver

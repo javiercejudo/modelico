@@ -40,9 +40,9 @@ const json = `
 }
 `
 
-export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
-  const { _ } = M.metadata()
-  const { FixerIoResult, Currency } = fixerIoFactory({M, Ajv})
+export default (should, M, {fixerIoFactory}, {Ajv}) => () => {
+  const {_} = M.metadata()
+  const {FixerIoResult, Currency} = fixerIoFactory({M, Ajv})
 
   it('should parse results from fixer.io', () => {
     const fixerIoResult = M.fromJSON(FixerIoResult, json)
@@ -57,17 +57,23 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
   })
 
   it('should convert between any available currencies', () => {
-    const { GBP, USD, EUR, AUD, CNY } = Currency
+    const {GBP, USD, EUR, AUD, CNY} = Currency
 
     const fixerIoResult = M.fromJSON(FixerIoResult, json)
 
-    fixerIoResult.convert(GBP(), USD(), 7.20).toFixed(2)
+    fixerIoResult
+      .convert(GBP(), USD(), 7.20)
+      .toFixed(2)
       .should.be.exactly('8.85')
 
-    fixerIoResult.convert(EUR(), AUD(), 15).toFixed(2)
+    fixerIoResult
+      .convert(EUR(), AUD(), 15)
+      .toFixed(2)
       .should.be.exactly('20.76')
 
-    fixerIoResult.convert(CNY(), EUR(), 500).toFixed(2)
+    fixerIoResult
+      .convert(CNY(), EUR(), 500)
+      .toFixed(2)
       .should.be.exactly('69.06')
   })
 
@@ -149,7 +155,6 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
 
     schema.should.deepEqual(expectedSchema)
 
-    Ajv().validate(schema, JSON.parse(json))
-      .should.be.exactly(true)
+    Ajv().validate(schema, JSON.parse(json)).should.be.exactly(true)
   })
 }

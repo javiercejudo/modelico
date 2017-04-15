@@ -1,11 +1,11 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  const { number } = M.metadata()
+  const {number} = M.metadata()
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
-      (() => M.Number(5)).should.throw()
+      ;(() => M.Number(5)).should.throw()
     })
 
     it('should cast using Number', () => {
@@ -18,33 +18,26 @@ export default (U, should, M) => () => {
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
-      (() => M.Number.of(null))
-        .should.throw()
+      ;(() => M.Number.of(null)).should.throw()
     })
 
     it('should set numbers correctly', () => {
       const numberA = M.Number.of(2)
       const numberB = numberA.setIn([], 5)
 
-      should(numberA.inner())
-        .be.exactly(2)
+      should(numberA.inner()).be.exactly(2)
 
-      should(numberB.inner())
-        .be.exactly(5)
+      should(numberB.inner()).be.exactly(5)
     })
 
     it('should not support the set operation', () => {
-      const myNumber = M.Number.of(55);
-
-      (() => myNumber.set())
-        .should.throw()
+      const myNumber = M.Number.of(55)
+      ;(() => myNumber.set()).should.throw()
     })
 
     it('should not support the setIn operation with non-empty paths', () => {
-      const myNumber = M.Number.of(5);
-
-      (() => myNumber.setIn([0], 7))
-        .should.throw()
+      const myNumber = M.Number.of(5)
+      ;(() => myNumber.setIn([0], 7)).should.throw()
     })
   })
 
@@ -82,38 +75,35 @@ export default (U, should, M) => () => {
 
   describe('parsing', () => {
     it('should parse values correctly', () => {
-      const myNumber = JSON.parse('2', number({ wrap: true }).reviver)
+      const myNumber = JSON.parse('2', number({wrap: true}).reviver)
 
       should(myNumber.inner()).be.exactly(2)
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => JSON.parse(
-        'null',
-        number({ wrap: true }).reviver
-      )).should.throw()
+      ;(() => JSON.parse('null', number({wrap: true}).reviver)).should.throw()
     })
 
     it('should support -0', () => {
-      const myNumber = JSON.parse('"-0"', number({ wrap: true }).reviver)
+      const myNumber = JSON.parse('"-0"', number({wrap: true}).reviver)
 
       Object.is(myNumber.inner(), -0).should.be.exactly(true)
     })
 
     it('should support Infinity', () => {
-      const myNumber = JSON.parse('"Infinity"', number({ wrap: true }).reviver)
+      const myNumber = JSON.parse('"Infinity"', number({wrap: true}).reviver)
 
       Object.is(myNumber.inner(), Infinity).should.be.exactly(true)
     })
 
     it('should support -Infinity', () => {
-      const myNumber = JSON.parse('"-Infinity"', number({ wrap: true }).reviver)
+      const myNumber = JSON.parse('"-Infinity"', number({wrap: true}).reviver)
 
       Object.is(myNumber.inner(), -Infinity).should.be.exactly(true)
     })
 
     it('should support NaN', () => {
-      const myNumber = JSON.parse('"NaN"', number({ wrap: true }).reviver)
+      const myNumber = JSON.parse('"NaN"', number({wrap: true}).reviver)
 
       Object.is(myNumber.inner(), NaN).should.be.exactly(true)
     })
@@ -140,7 +130,8 @@ export default (U, should, M) => () => {
 
   U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
-      Object.prototype.toString.call(M.Number.of(1))
+      Object.prototype.toString
+        .call(M.Number.of(1))
         .should.be.exactly('[object ModelicoNumber]')
     })
   })

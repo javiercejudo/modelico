@@ -1,13 +1,12 @@
 export default ({M, Ajv, validationEnabled, ajvOptions}) => {
-  const {
-    base, ajvMeta
-  } = M.ajvMetadata(validationEnabled ? Ajv(ajvOptions) : undefined)
+  const {base, ajvMeta} = M.ajvMetadata(
+    validationEnabled ? Ajv(ajvOptions) : undefined
+  )
 
-  const reviver = (k, v) =>
-    new LocalDate(...v.split('-').map(Number))
+  const reviver = (k, v) => new LocalDate(...v.split('-').map(Number))
 
   class LocalDate extends M.Base {
-    constructor (year, month, day) {
+    constructor(year, month, day) {
       super(LocalDate, {year, month, day})
 
       this.year = () => year
@@ -17,13 +16,13 @@ export default ({M, Ajv, validationEnabled, ajvOptions}) => {
       Object.freeze(this)
     }
 
-    toJSON () {
-      const { year, month, day } = this
+    toJSON() {
+      const {year, month, day} = this
 
       return `${year()}-${month()}-${day()}`
     }
 
-    static metadata () {
+    static metadata() {
       const baseMetadata = Object.assign({}, base(LocalDate), {reviver})
 
       // baseMetadata as a function for testing purposes

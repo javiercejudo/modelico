@@ -15,5 +15,5 @@ export default (validateFn, errorMsgFn = defaultErrorMsgFn) => metadata => {
     return revivedValue
   }
 
-  return Object.assign({}, metadata, { reviver })
+  return Object.assign({}, metadata, {reviver})
 }

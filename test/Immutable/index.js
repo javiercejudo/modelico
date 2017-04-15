@@ -39,8 +39,10 @@ export default (U, should, M) => () => {
   })
 
   it('JavaScript-first API (2)', () => {
-    const alpha = M.Map.fromObject({a: 1, b: 2, c: 3, d: 4});
-    [...alpha].map(kv => kv[0].toUpperCase()).join()
+    const alpha = M.Map.fromObject({a: 1, b: 2, c: 3, d: 4})
+    ;[...alpha]
+      .map(kv => kv[0].toUpperCase())
+      .join()
       .should.be.exactly('A,B,C,D')
   })
 
@@ -54,21 +56,26 @@ export default (U, should, M) => () => {
       new Map([].concat([...map1], [...map2], objToArr(obj)))
     )
 
-    map3.equals(M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300}))
+    map3
+      .equals(
+        M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300})
+      )
       .should.be.exactly(true)
   })
 
   it('Accepts raw JavaScript objects. (2)', () => {
     const myObject = {a: 1, b: 2, c: 3}
 
-    objToArr(myObject).reduce((acc, kv) => {
-      acc[kv[0]] = Math.pow(kv[1], 2)
-      return acc
-    }, {}).should.eql({a: 1, b: 4, c: 9})
+    objToArr(myObject)
+      .reduce((acc, kv) => {
+        acc[kv[0]] = Math.pow(kv[1], 2)
+        return acc
+      }, {})
+      .should.eql({a: 1, b: 4, c: 9})
   })
 
   it('Accepts raw JavaScript objects. (3)', () => {
-    const obj = { 1: 'one' }
+    const obj = {1: 'one'}
     Object.keys(obj)[0].should.be.exactly('1')
     obj['1'].should.be.exactly('one')
     obj[1].should.be.exactly('one')

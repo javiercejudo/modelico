@@ -1,4 +1,10 @@
-import { isNothing, unsupported, always, haveDifferentTypes, haveSameValues } from './U'
+import {
+  isNothing,
+  unsupported,
+  always,
+  haveDifferentTypes,
+  haveSameValues
+} from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -6,7 +12,7 @@ const reviver = (k, v) => {
 }
 
 class ModelicoNumber extends Base {
-  constructor (number = 0) {
+  constructor(number = 0) {
     super(ModelicoNumber)
 
     if (!Number.isNaN(number) && isNothing(number)) {
@@ -18,15 +24,15 @@ class ModelicoNumber extends Base {
     Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoNumber'
   }
 
-  set () {
+  set() {
     unsupported('Number.set is not supported')
   }
 
-  setIn (path, number) {
+  setIn(path, number) {
     if (path.length === 0) {
       return ModelicoNumber.of(number)
     }
@@ -34,17 +40,17 @@ class ModelicoNumber extends Base {
     unsupported('ModelicoNumber.setIn is not supported for non-empty paths')
   }
 
-  toJSON () {
+  toJSON() {
     const v = this.inner()
 
-    return Object.is(v, -0) ? '-0'
-      : (v === Infinity) ? 'Infinity'
-      : (v === -Infinity) ? '-Infinity'
-      : Number.isNaN(v) ? 'NaN'
-      : v
+    return Object.is(v, -0)
+      ? '-0'
+      : v === Infinity
+          ? 'Infinity'
+          : v === -Infinity ? '-Infinity' : Number.isNaN(v) ? 'NaN' : v
   }
 
-  equals (other) {
+  equals(other) {
     if (this === other) {
       return true
     }
@@ -56,11 +62,11 @@ class ModelicoNumber extends Base {
     return haveSameValues(this.inner(), other.inner())
   }
 
-  static of (number) {
+  static of(number) {
     return new ModelicoNumber(number)
   }
 
-  static metadata () {
+  static metadata() {
     return Object.freeze({
       type: ModelicoNumber,
       reviver
