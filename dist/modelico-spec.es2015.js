@@ -118,7 +118,7 @@ var Base = (U, should, M, fixtures) => () => {
     });
 
     it('should support creating a copy with updated fields', () => {
-      class Book extends M.createModel(m => ({
+      class Book extends M.createModel(({m}) => ({
         title: m.string(),
         year: m.maybe(m.number()),
         author: m.withDefault(m.string(), 'anonymouss')
@@ -1366,10 +1366,10 @@ var ModelicoList = (U, should, M, { Person }) => () => {
     it('must freeze the input', () => {
       const input = ['a', 'b', 'c'];
 
-      M.List.fromArray(input);
+      M.List.fromArray(input)
 
-      should(() => { input[1] = 'B'; })
-        .throw();
+      ;(() => { input[1] = 'B'; })
+        .should.throw();
     });
   });
 
@@ -2182,10 +2182,8 @@ var asIs = (U, should, M) => () => {
 var setIn = (U, should, M) => () => {
   it('should work across types', () => {
     const hammer = M.Map.of('hammer', 'Can’t Touch This');
-    const array1 = M.List.of('totally', 'immutable', hammer);
-
-    should(() => { array1.inner()[1] = 'I’m going to mutate you!'; })
-      .throw();
+    const array1 = M.List.of('totally', 'immutable', hammer);(() => { array1.inner()[1] = 'I’m going to mutate you!'; })
+      .should.throw();
 
     array1.get(1).should.be.exactly('immutable');
 
@@ -2610,8 +2608,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
   });
 
   describe('Based on runtime type field', () => {
-    const ajv = Ajv();
-    const { _, base, ajvMeta } = M.ajvMetadata(ajv);
+    const { _, base, ajvMeta, ajvNumber, ajvString, ajvMaybe } = M.ajvMetadata(Ajv());
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND']);
 
@@ -2630,9 +2627,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
       }
     };
 
-    class Shape extends M.createAjvModel(ajv, m => ({
-      relatedShape: m.ajvMaybe(m._(Shape))
-    })) {
+    class Shape extends M.Base {
       toJSON () {
         const fields = M.fields(this);
         let type;
@@ -2651,6 +2646,12 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
         return Object.freeze(Object.assign({type}, fields))
       }
 
+      static innerTypes () {
+        return Object.freeze({
+          relatedShape: ajvMaybe(_(Shape))
+        })
+      }
+
       static metadata () {
         const baseMetadata = Object.assign({}, base(Shape), {reviver});
 
@@ -2663,12 +2664,7 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    class Circle extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
-      radius: m.ajvNumber({
-        minimum: 0,
-        exclusiveMinimum: true
-      })
-    }), {base: Shape}) {
+    class Circle extends Shape {
       constructor (props) {
         super(Circle, props);
       }
@@ -2676,18 +2672,18 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
       area () {
         return Math.PI * this.radius() ** 2
       }
+
+      static innerTypes () {
+        return Object.freeze(Object.assign({}, super.innerTypes(), {
+          radius: ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          })
+        }))
+      }
     }
 
-    class Diamond extends M.createAjvModel(ajv, m => Object.assign({}, Shape.innerTypes(), {
-      width: m.ajvNumber({
-        minimum: 0,
-        exclusiveMinimum: true
-      }),
-      height: m.ajvNumber({
-        minimum: 0,
-        exclusiveMinimum: true
-      })
-    }), {base: Shape}) {
+    class Diamond extends Shape {
       constructor (props) {
         super(Diamond, props);
       }
@@ -2695,16 +2691,33 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
       area () {
         return this.width() * this.height() / 2
       }
+
+      static innerTypes () {
+        return Object.freeze(Object.assign({}, super.innerTypes(), {
+          width: ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          }),
+          height: ajvNumber({
+            minimum: 0,
+            exclusiveMinimum: true
+          })
+        }))
+      }
     }
 
-    class Geometer extends M.createAjvModel(ajv, m => ({
-      name: m.ajvString({
-        minLength: 1
-      }),
-      favouriteShape: m._(Shape)
-    })) {
+    class Geometer extends M.Base {
       constructor (props) {
         super(Geometer, props);
+      }
+
+      static innerTypes () {
+        return Object.freeze({
+          name: ajvString({
+            minLength: 1
+          }),
+          favouriteShape: _(Shape)
+        })
       }
     }
 
@@ -2776,83 +2789,126 @@ var featuresPolymorphic = (should, M, fixtures, {Ajv}) => () => {
         type: 'object',
         properties: {
           name: {
-            $ref: '#/definitions/2'
-          },
-          favouriteShape: {
-            $ref: '#/definitions/3'
-          }
-        },
-        required: ['name', 'favouriteShape'],
-        definitions: {
-          '2': {
             type: 'string',
             minLength: 1
           },
-          '3': {
+          favouriteShape: {
             anyOf: [
               {
-                $ref: '#/definitions/4'
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
+                      {
+                        type: 'null'
+                      },
+                      {
+                        $ref: '#/definitions/3'
+                      }
+                    ]
+                  },
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: [
+                  'radius'
+                ]
               },
               {
-                $ref: '#/definitions/7'
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
+                      {
+                        type: 'null'
+                      },
+                      {
+                        $ref: '#/definitions/3'
+                      }
+                    ]
+                  },
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  },
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: [
+                  'width',
+                  'height'
+                ]
               }
             ]
-          },
-          '4': {
-            type: 'object',
-            properties: {
-              relatedShape: {
-                anyOf: [
-                  {
-                    type: 'null'
+          }
+        },
+        required: [
+          'name',
+          'favouriteShape'
+        ],
+        definitions: {
+          3: {
+            anyOf: [
+              {
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
+                      {
+                        type: 'null'
+                      },
+                      {
+                        $ref: '#/definitions/3'
+                      }
+                    ]
                   },
-                  {
-                    $ref: '#/definitions/3'
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
                   }
+                },
+                required: [
+                  'radius'
                 ]
               },
-              radius: {
-                $ref: '#/definitions/6'
-              }
-            },
-            required: ['radius']
-          },
-          '6': {
-            type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
-          },
-          '7': {
-            type: 'object',
-            properties: {
-              relatedShape: {
-                anyOf: [
-                  {
-                    type: 'null'
+              {
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [
+                      {
+                        type: 'null'
+                      },
+                      {
+                        $ref: '#/definitions/3'
+                      }
+                    ]
                   },
-                  {
-                    $ref: '#/definitions/3'
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  },
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
                   }
+                },
+                required: [
+                  'width',
+                  'height'
                 ]
-              },
-              width: {
-                $ref: '#/definitions/9'
-              },
-              height: {
-                $ref: '#/definitions/10'
               }
-            },
-            required: ['width', 'height']
-          },
-          '9': {
-            type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
-          },
-          '10': {
-            type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
+            ]
           }
         }
       };
@@ -2943,13 +2999,11 @@ var ImmutableExamples = (U, should, M) => () => {
     list3Array.unshift(0);
     const list3 = M.List.fromArray(list3Array);
 
-    const list4 = M.List.fromArray([...list1].concat([...list2], [...list3]));
-
-    should(list1.size === 2).be.exactly(true);
-    should(list2.size === 5).be.exactly(true);
-    should(list3.size === 6).be.exactly(true);
-    should(list4.size === 13).be.exactly(true);
-    should(list4.get(0) === 1).be.exactly(true);
+    const list4 = M.List.fromArray([...list1].concat([...list2], [...list3]));(list1.size === 2).should.be.exactly(true)
+    ;(list2.size === 5).should.be.exactly(true)
+    ;(list3.size === 6).should.be.exactly(true)
+    ;(list4.size === 13).should.be.exactly(true)
+    ;(list4.get(0) === 1).should.be.exactly(true);
   });
 
   it('JavaScript-first API (2)', () => {
@@ -2994,9 +3048,7 @@ var ImmutableExamples = (U, should, M) => () => {
 
   it('Equality treats Collections as Data', () => {
     const map1 = M.Map.fromObject({a: 1, b: 1, c: 1});
-    const map2 = M.Map.fromObject({a: 1, b: 1, c: 1});
-
-    should(map1 !== map2).be.exactly(true); // two different instances
+    const map2 = M.Map.fromObject({a: 1, b: 1, c: 1});(map1 !== map2).should.be.exactly(true); // two different instances
     map1.equals(map2).should.be.exactly(true); // have equivalent values
   });
 
@@ -3004,10 +3056,8 @@ var ImmutableExamples = (U, should, M) => () => {
     const list1 = M.List.of(1, 2, 3);
     const list2Array = [...list1];
     list2Array.push(4, 5, 6);
-    const list2 = M.List.fromArray(list2Array);
-
-    should([...list1].length === 3).be.exactly(true);
-    should([...list2].length === 6).be.exactly(true);
+    const list2 = M.List.fromArray(list2Array);([...list1].length === 3).should.be.exactly(true)
+    ;([...list2].length === 6).should.be.exactly(true);
   });
 };
 
@@ -3039,13 +3089,11 @@ var ImmutableProxied = (U, should, M) => () => {
 
     const list2 = list1.push(3, 4, 5);
     const list3 = list2.unshift(0);
-    const list4 = list1.concat([...list2], [...list3]);
-
-    should(list1.size === 2).be.exactly(true);
-    should(list2.size === 5).be.exactly(true);
-    should(list3.size === 6).be.exactly(true);
-    should(list4.size === 13).be.exactly(true);
-    should(list4.get(0) === 1).be.exactly(true);
+    const list4 = list1.concat([...list2], [...list3]);(list1.size === 2).should.be.exactly(true)
+    ;(list2.size === 5).should.be.exactly(true)
+    ;(list3.size === 6).should.be.exactly(true)
+    ;(list4.size === 13).should.be.exactly(true)
+    ;(list4.get(0) === 1).should.be.exactly(true);
   });
 
   it('JavaScript-first API (2)', () => {
@@ -3091,9 +3139,7 @@ var ImmutableProxied = (U, should, M) => () => {
 
   it('Equality treats Collections as Data', () => {
     const map1 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}));
-    const map2 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}));
-
-    should(map1 !== map2).be.exactly(true);   // two different instances
+    const map2 = _m(M.Map.fromObject({a: 1, b: 1, c: 1}));(map1 !== map2).should.be.exactly(true);   // two different instances
     map1.equals(map2).should.be.exactly(true); // have equivalent values
   });
 
@@ -3104,10 +3150,8 @@ var ImmutableProxied = (U, should, M) => () => {
     res.push(4);
     res.push(5);
     res.push(6);
-    const list2 = _l(M.List.fromArray(res));
-
-    should(list1.length === 3).be.exactly(true);
-    should(list2.length === 6).be.exactly(true);
+    const list2 = _l(M.List.fromArray(res));(list1.length === 3).should.be.exactly(true)
+    ;(list2.length === 6).should.be.exactly(true);
   });
 };
 
@@ -3183,9 +3227,7 @@ var proxyList = (should, M) => () => {
   const p = M.proxyList;
 
   it('length', () => {
-    const list1 = p(M.List.of(1, 2, 2, 3));
-
-    should(list1.length).be.exactly(4);
+    const list1 = p(M.List.of(1, 2, 2, 3));(list1.length).should.be.exactly(4);
   });
 
   it('[n]', () => {
@@ -3328,9 +3370,9 @@ var proxyList = (should, M) => () => {
     const list = p(M.List.of(1, 2, 2, 3));
 
     let sum = 0;
-    list.forEach(x => { sum += x; });
+    list.forEach(x => { sum += x; })
 
-    should(sum).be.exactly(8);
+    ;(sum).should.be.exactly(8);
   });
 
   it('keys() / entries() / [@@iterator]()', () => {
@@ -3867,6 +3909,10 @@ var localDateFactory = ({M, Ajv, validationEnabled, ajvOptions}) => {
       return `${year()}-${month()}-${day()}`
     }
 
+    static innerTypes () {
+      return Object.freeze({})
+    }
+
     static metadata () {
       const baseMetadata = Object.assign({}, base(LocalDate), {reviver});
 
@@ -4016,18 +4062,6 @@ var fixerIoSpec = (should, M, { fixerIoFactory }, { Ajv }) => () => {
       type: 'object',
       properties: {
         base: {
-          $ref: '#/definitions/2'
-        },
-        date: {
-          $ref: '#/definitions/3'
-        },
-        rates: {
-          $ref: '#/definitions/4'
-        }
-      },
-      required: ['base', 'date', 'rates'],
-      definitions: {
-        '2': {
           enum: [
             'AUD',
             'BGN',
@@ -4063,26 +4097,28 @@ var fixerIoSpec = (should, M, { fixerIoFactory }, { Ajv }) => () => {
             'ZAR'
           ]
         },
-        '3': {
+        date: {
           type: 'string',
           pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
         },
-        '4': {
+        rates: {
           type: 'object',
           maxProperties: 32,
           additionalProperties: false,
           patternProperties: {
             '^(AUD|BGN|BRL|CAD|CHF|CNY|CZK|DKK|EUR|GBP|HKD|HRK|HUF|IDR|ILS|INR|JPY|KRW|MXN|MYR|NOK|NZD|PHP|PLN|RON|RUB|SEK|SGD|THB|TRY|USD|ZAR)$': {
-              $ref: '#/definitions/5'
+              type: 'number',
+              minimum: 0,
+              exclusiveMinimum: true
             }
           }
-        },
-        '5': {
-          type: 'number',
-          minimum: 0,
-          exclusiveMinimum: true
         }
-      }
+      },
+      required: [
+        'base',
+        'date',
+        'rates'
+      ]
     };
 
     schema.should.deepEqual(expectedSchema);
@@ -4115,6 +4151,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
     // normal
     _,
+    base,
     number
   } = M.ajvMetadata(Ajv());
 
@@ -4198,7 +4235,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
           required: ['name']
         });
 
-      const animalMeta = _(Animal);
+      const animalMeta = ajv_(Animal);
       const animal1Schema1 = M.getSchema(animalMeta);
       const animal1Schema2 = M.getSchema(animalMeta);
 
@@ -4208,87 +4245,59 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
           type: 'object',
           properties: {
             name: {
+              default: 'unknown',
               anyOf: [
+                { type: 'null' },
                 {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/2'
+                  default: 'unknown',
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 25
                 }
-              ],
-              default: 'unknown'
+              ]
             },
             dimensions: {
               anyOf: [
+                { type: 'null' },
                 {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/4'
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {
+                    type: 'number',
+                    exclusiveMinimum: true,
+                    minimum: 0
+                  }
                 }
               ]
-            }
-          },
-          definitions: {
-            '2': {
-              default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            '4': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                $ref: '#/definitions/5'
-              }
-            },
-            '5': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
             }
           }
         });
 
-      const animalSchema2 = M.getSchema(ajv_(Animal2, [], true));
+      const animalSchema2 = M.getSchema(ajv_(Animal2));
 
       animalSchema2
         .should.deepEqual({
-          $ref: '#/definitions/2',
-          definitions: {
-            '2': {
-              type: 'object',
-              properties: {
-                name: {
-                  $ref: '#/definitions/3'
-                },
-                dimensions: {
-                  anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/5'
-                    }
-                  ]
-                }
-              },
-              required: ['name']
-            },
-            '3': {
+          type: 'object',
+          properties: {
+            name: {
               type: 'string',
               minLength: 1,
               maxLength: 25
             },
-            '5': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {}
+            dimensions: {
+              anyOf: [
+                { type: 'null' },
+                {
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {}
+                }
+              ]
             }
-          }
+          },
+          required: ['name']
         });
 
       const ajv = Ajv();
@@ -4622,13 +4631,8 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
           type: 'array',
           minItems: 2,
           items: {
-            $ref: '#/definitions/2'
-          },
-          definitions: {
-            '2': {
-              type: 'number',
-              minimum: 5
-            }
+            type: 'number',
+            minimum: 5
           }
         });
     });
@@ -4717,54 +4721,36 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
           minItems: 2,
           maxItems: 2,
           items: [
+            { type: 'string' },
             {
-              type: 'string'
-            },
-            {
-              $ref: '#/definitions/3'
-            }
-          ],
-          definitions: {
-            '3': {
               type: 'object',
+              required: ['dimensions'],
               properties: {
                 name: {
+                  default: 'unknown',
                   anyOf: [
+                    { type: 'null' },
                     {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/4'
+                      default: 'unknown',
+                      type: 'string',
+                      minLength: 1,
+                      maxLength: 25
                     }
-                  ],
-                  default: 'unknown'
+                  ]
                 },
                 dimensions: {
-                  $ref: '#/definitions/5'
+                  type: 'array',
+                  minItems: 3,
+                  maxItems: 3,
+                  items: {
+                    type: 'number',
+                    exclusiveMinimum: true,
+                    minimum: 0
+                  }
                 }
-              },
-              required: ['dimensions']
-            },
-            '4': {
-              default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            '5': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                $ref: '#/definitions/6'
               }
-            },
-            '6': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
             }
-          }
+          ]
         });
     });
 
@@ -5009,17 +4995,16 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
       }
     }
 
-    const baseSchema = M.getSchema(_(Animal));
+    const baseSchema = M.getSchema(base(Animal));
 
     const enhancedMeta = additionalProperties =>
       ajvBase(
         Animal,
-        Object.assign({}, baseSchema, { additionalProperties }),
-        true
+        Object.assign({}, baseSchema, { additionalProperties })
       );
 
     it('supports additional properties unless otherwise stated', () => {
-      should(() => _(Animal).reviver('', {
+      should(() => ajvBase(Animal).reviver('', {
         name: 'Bane',
         extra: 1
       })).not.throw();
@@ -5154,36 +5139,22 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
         type: 'object',
         properties: {
           type: {
-            $ref: '#/definitions/4'
+            enum: [
+              'Numeric',
+              'Alphabetic'
+            ]
           },
           score: {
-            $ref: '#/definitions/5'
-          }
-        },
-        required: ['type', 'score'],
-        definitions: {
-          '2': {
-            type: 'number',
-            minimum: 0
-          },
-          '3': {
-            type: 'string',
-            minLength: 1
-          },
-          '4': {
-            enum: ['Numeric', 'Alphabetic']
-          },
-          '5': {
             anyOf: [
-              {
-                $ref: '#/definitions/2'
-              },
-              {
-                $ref: '#/definitions/3'
-              }
+              { type: 'number', minimum: 0 },
+              { type: 'string', minLength: 1 }
             ]
           }
-        }
+        },
+        required: [
+          'type',
+          'score'
+        ]
       };
 
       M.getSchema(_(Score))
@@ -5193,7 +5164,7 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
 
   describe('Circular innerTypes', () => {
     it('self reference', () => {
-      class Chain extends M.createAjvModel(Ajv(), m => ({
+      class Chain extends M.createAjvModel(({m}) => ({
         description: m.ajvString({minLength: 1}),
         previous: m.ajvMaybe(m._(Chain)),
         next: m.ajvMaybe(m._(Chain)),
@@ -5211,43 +5182,32 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
               type: 'object',
               properties: {
                 description: {
-                  $ref: '#/definitions/2'
+                  type: 'string',
+                  minLength: 1
                 },
                 previous: {
                   anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/1'
-                    }
+                    { type: 'null' },
+                    { $ref: '#/definitions/1' }
                   ]
                 },
                 next: {
                   anyOf: [
-                    {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/1'
-                    }
+                    { type: 'null' },
+                    { $ref: '#/definitions/1' }
                   ]
                 },
                 relatedChains: {
-                  $ref: '#/definitions/5'
+                  type: 'array',
+                  items: {
+                    '$ref': '#/definitions/1'
+                  }
                 }
               },
-              required: ['description', 'relatedChains']
-            },
-            '2': {
-              type: 'string',
-              minLength: 1
-            },
-            '5': {
-              type: 'array',
-              items: {
-                $ref: '#/definitions/1'
-              }
+              required: [
+                'description',
+                'relatedChains'
+              ]
             }
           },
           $ref: '#/definitions/1'
@@ -5311,29 +5271,10 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
           type: 'object',
           properties: {
             name: {
-              $ref: '#/definitions/2'
-            },
-            parent: {
-              $ref: '#/definitions/3'
-            },
-            child: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/4'
-                }
-              ]
-            }
-          },
-          required: ['name', 'parent'],
-          definitions: {
-            '2': {
               type: 'string',
               minLength: 1
             },
-            '3': {
+            parent: {
               type: 'object',
               properties: {
                 name: {
@@ -5341,21 +5282,79 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
                 },
                 child: {
                   anyOf: [
+                    { type: 'null' },
                     {
-                      type: 'null'
-                    },
-                    {
-                      $ref: '#/definitions/5'
+                      type: 'object',
+                      properties: {
+                        name: {
+                          $ref: '#/definitions/2'
+                        },
+                        parent: {
+                          $ref: '#/definitions/3'
+                        }
+                      },
+                      required: [
+                        'name',
+                        'parent'
+                      ]
                     }
                   ]
                 }
               },
-              required: ['name']
+              required: [
+                'name'
+              ]
             },
-            '4': {
-              $ref: '#/definitions/5'
+            child: {
+              anyOf: [
+                { type: 'null' },
+                {
+                  $ref: '#/definitions/4'
+                }
+              ]
+            }
+          },
+          required: [
+            'name',
+            'parent'
+          ],
+          definitions: {
+            2: {
+              type: 'string',
+              minLength: 1
             },
-            '5': {
+            3: {
+              type: 'object',
+              properties: {
+                name: {
+                  $ref: '#/definitions/2'
+                },
+                child: {
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      type: 'object',
+                      properties: {
+                        name: {
+                          $ref: '#/definitions/2'
+                        },
+                        parent: {
+                          $ref: '#/definitions/3'
+                        }
+                      },
+                      required: [
+                        'name',
+                        'parent'
+                      ]
+                    }
+                  ]
+                }
+              },
+              required: [
+                'name'
+              ]
+            },
+            4: {
               type: 'object',
               properties: {
                 name: {
@@ -5365,7 +5364,10 @@ var ajvMetadata = (should, M, fixtures, { Ajv }) => () => {
                   $ref: '#/definitions/3'
                 }
               },
-              required: ['name', 'parent']
+              required: [
+                'name',
+                'parent'
+              ]
             }
           }
         });
@@ -5451,103 +5453,6 @@ var baseMetadataExample = (should, M, fixtures, { Ajv }) => () => {
 };
 
 /* eslint-env mocha */
-/* global requestIdleCallback */
-
-const schedule = (typeof requestIdleCallback !== 'undefined')
-  ? requestIdleCallback
-  : (typeof setImmediate !== 'undefined')
-  ? setImmediate
-  : fn => setTimeout(fn, 0);
-
-const asyncMap = (
-  fn,
-  arr,
-  {batchSize = arr.length} = {}
-) => arr.reduce((acc, _, i) => {
-  if (i % batchSize !== 0) {
-    return acc
-  }
-
-  return acc.then(result =>
-    new Promise(resolve => {
-      schedule(() => {
-        result.push.apply(result, arr.slice(i, i + batchSize).map(fn));
-        resolve(result);
-      });
-    })
-  )
-}, Promise.resolve([]));
-
-var asyncReviving = (should, M) => () => {
-  it('should revieve data asynchronously', () => {
-    class Book extends M.createModel(m => ({
-      title: m.string(),
-      author: m.string()
-    })) {
-      constructor (props) {
-        super(Book, props);
-      }
-    }
-
-    class Library extends M.createModel(m => ({
-      catalogue: m.list(m._(Book))
-    })) {
-      constructor (props) {
-        super(Library, props);
-      }
-    }
-
-    const libraryObj = {
-      catalogue: [{
-        title: 'Madame Bovary: Mœurs de province',
-        author: 'Gustave Flaubert'
-      }, {
-        title: 'La voz a ti debida',
-        author: 'Pedro Salinas'
-      }, {
-        title: 'Et dukkehjem',
-        author: 'Henrik Ibsen'
-      }, {
-        title: 'Die Verwandlung',
-        author: 'Franz Kafka'
-      }, {
-        title: 'La colmena',
-        author: 'Camilo José Cela'
-      }]
-    };
-
-    const emptyLibraryObj = Object.assign({}, libraryObj, {catalogue: []});
-    const emptyLibrary = M.fromJS(Library, emptyLibraryObj);
-
-    emptyLibrary.catalogue().size
-      .should.be.exactly(0);
-
-    return asyncMap(
-      book => M.fromJS(Book, book),
-      libraryObj.catalogue,
-      { batchSize: 2 }
-    )
-      .then(catalogueArr => {
-        const catalogue = M.List.fromArray(catalogueArr);
-
-        return emptyLibrary.copy({catalogue})
-      })
-      .then(library => {
-        const catalogue = library.catalogue();
-
-        catalogue.size
-          .should.be.exactly(5);
-
-        catalogue.get(0).title()
-          .should.be.exactly('Madame Bovary: Mœurs de province');
-
-        catalogue.getIn([4, 'title'])
-          .should.be.exactly('La colmena');
-      })
-  });
-};
-
-/* eslint-env mocha */
 
 const hasProxies = (() => {
   try {
@@ -5616,7 +5521,6 @@ var modelicoSpec = ({Should, Modelico: M, extensions}) => () => {
   describe('Immutable.js examples', ImmutableExamples(U, ...deps));
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps));
-  describe('Async reviving', asyncReviving(...deps));
 
   U.skipIfNoProxies(describe)(
     'Immutable.js examples (proxied)',

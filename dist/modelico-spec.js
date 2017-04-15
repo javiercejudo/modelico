@@ -302,7 +302,8 @@ var Base = (function (U, should, M, fixtures) {
           }
 
           return Book;
-        }(M.createModel(function (m) {
+        }(M.createModel(function (_ref) {
+          var m = _ref.m;
           return {
             title: m.string(),
             year: m.maybe(m.number()),
@@ -1477,11 +1478,9 @@ var ModelicoList = (function (U, should, M, _ref) {
       it('must freeze the input', function () {
         var input = ['a', 'b', 'c'];
 
-        M.List.fromArray(input);
-
-        should(function () {
+        M.List.fromArray(input);(function () {
           input[1] = 'B';
-        }).throw();
+        }).should.throw();
       });
     });
 
@@ -2258,11 +2257,9 @@ var setIn = (function (U, should, M) {
   return function () {
     it('should work across types', function () {
       var hammer = M.Map.of('hammer', 'Can’t Touch This');
-      var array1 = M.List.of('totally', 'immutable', hammer);
-
-      should(function () {
+      var array1 = M.List.of('totally', 'immutable', hammer);(function () {
         array1.inner()[1] = 'I’m going to mutate you!';
-      }).throw();
+      }).should.throw();
 
       array1.get(1).should.be.exactly('immutable');
 
@@ -2723,12 +2720,13 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
     });
 
     describe('Based on runtime type field', function () {
-      var ajv = Ajv();
-
-      var _M$ajvMetadata = M.ajvMetadata(ajv),
+      var _M$ajvMetadata = M.ajvMetadata(Ajv()),
           _ = _M$ajvMetadata._,
           base = _M$ajvMetadata.base,
-          ajvMeta = _M$ajvMetadata.ajvMeta;
+          ajvMeta = _M$ajvMetadata.ajvMeta,
+          ajvNumber = _M$ajvMetadata.ajvNumber,
+          ajvString = _M$ajvMetadata.ajvString,
+          ajvMaybe = _M$ajvMetadata.ajvMaybe;
 
       var ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND']);
 
@@ -2747,8 +2745,8 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
         }
       };
 
-      var Shape = function (_M$createAjvModel) {
-        inherits(Shape, _M$createAjvModel);
+      var Shape = function (_M$Base3) {
+        inherits(Shape, _M$Base3);
 
         function Shape() {
           classCallCheck(this, Shape);
@@ -2775,6 +2773,13 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
             return Object.freeze(Object.assign({ type: type }, fields));
           }
         }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              relatedShape: ajvMaybe(_(Shape))
+            });
+          }
+        }, {
           key: 'metadata',
           value: function metadata() {
             var baseMetadata = Object.assign({}, base(Shape), { reviver: reviver });
@@ -2789,14 +2794,10 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           }
         }]);
         return Shape;
-      }(M.createAjvModel(ajv, function (m) {
-        return {
-          relatedShape: m.ajvMaybe(m._(Shape))
-        };
-      }));
+      }(M.Base);
 
-      var Circle = function (_M$createAjvModel2) {
-        inherits(Circle, _M$createAjvModel2);
+      var Circle = function (_Shape) {
+        inherits(Circle, _Shape);
 
         function Circle(props) {
           classCallCheck(this, Circle);
@@ -2808,19 +2809,22 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           value: function area() {
             return Math.PI * Math.pow(this.radius(), 2);
           }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze(Object.assign({}, get(Circle.__proto__ || Object.getPrototypeOf(Circle), 'innerTypes', this).call(this), {
+              radius: ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              })
+            }));
+          }
         }]);
         return Circle;
-      }(M.createAjvModel(ajv, function (m) {
-        return Object.assign({}, Shape.innerTypes(), {
-          radius: m.ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          })
-        });
-      }, { base: Shape }));
+      }(Shape);
 
-      var Diamond = function (_M$createAjvModel3) {
-        inherits(Diamond, _M$createAjvModel3);
+      var Diamond = function (_Shape2) {
+        inherits(Diamond, _Shape2);
 
         function Diamond(props) {
           classCallCheck(this, Diamond);
@@ -2832,38 +2836,45 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           value: function area() {
             return this.width() * this.height() / 2;
           }
+        }], [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze(Object.assign({}, get(Diamond.__proto__ || Object.getPrototypeOf(Diamond), 'innerTypes', this).call(this), {
+              width: ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              }),
+              height: ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              })
+            }));
+          }
         }]);
         return Diamond;
-      }(M.createAjvModel(ajv, function (m) {
-        return Object.assign({}, Shape.innerTypes(), {
-          width: m.ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          }),
-          height: m.ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          })
-        });
-      }, { base: Shape }));
+      }(Shape);
 
-      var Geometer = function (_M$createAjvModel4) {
-        inherits(Geometer, _M$createAjvModel4);
+      var Geometer = function (_M$Base4) {
+        inherits(Geometer, _M$Base4);
 
         function Geometer(props) {
           classCallCheck(this, Geometer);
           return possibleConstructorReturn(this, (Geometer.__proto__ || Object.getPrototypeOf(Geometer)).call(this, Geometer, props));
         }
 
+        createClass(Geometer, null, [{
+          key: 'innerTypes',
+          value: function innerTypes() {
+            return Object.freeze({
+              name: ajvString({
+                minLength: 1
+              }),
+              favouriteShape: _(Shape)
+            });
+          }
+        }]);
         return Geometer;
-      }(M.createAjvModel(ajv, function (m) {
-        return {
-          name: m.ajvString({
-            minLength: 1
-          }),
-          favouriteShape: m._(Shape)
-        };
-      }));
+      }(M.Base);
 
       it('should revive polymorphic JSON', function () {
         var geometer1 = M.fromJS(Geometer, {
@@ -2930,74 +2941,95 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             name: {
-              $ref: '#/definitions/2'
+              type: 'string',
+              minLength: 1
             },
             favouriteShape: {
-              $ref: '#/definitions/3'
+              anyOf: [{
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['radius']
+              }, {
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  },
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['width', 'height']
+              }]
             }
           },
           required: ['name', 'favouriteShape'],
           definitions: {
-            '2': {
-              type: 'string',
-              minLength: 1
-            },
-            '3': {
+            3: {
               anyOf: [{
-                $ref: '#/definitions/4'
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  radius: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['radius']
               }, {
-                $ref: '#/definitions/7'
+                type: 'object',
+                properties: {
+                  relatedShape: {
+                    anyOf: [{
+                      type: 'null'
+                    }, {
+                      $ref: '#/definitions/3'
+                    }]
+                  },
+                  width: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  },
+                  height: {
+                    type: 'number',
+                    minimum: 0,
+                    exclusiveMinimum: true
+                  }
+                },
+                required: ['width', 'height']
               }]
-            },
-            '4': {
-              type: 'object',
-              properties: {
-                relatedShape: {
-                  anyOf: [{
-                    type: 'null'
-                  }, {
-                    $ref: '#/definitions/3'
-                  }]
-                },
-                radius: {
-                  $ref: '#/definitions/6'
-                }
-              },
-              required: ['radius']
-            },
-            '6': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            },
-            '7': {
-              type: 'object',
-              properties: {
-                relatedShape: {
-                  anyOf: [{
-                    type: 'null'
-                  }, {
-                    $ref: '#/definitions/3'
-                  }]
-                },
-                width: {
-                  $ref: '#/definitions/9'
-                },
-                height: {
-                  $ref: '#/definitions/10'
-                }
-              },
-              required: ['width', 'height']
-            },
-            '9': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            },
-            '10': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
             }
           }
         };
@@ -3014,8 +3046,8 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           stringMap = _M$metadata3.stringMap,
           list = _M$metadata3.list;
 
-      var NumberCollection = function (_M$Base3) {
-        inherits(NumberCollection, _M$Base3);
+      var NumberCollection = function (_M$Base5) {
+        inherits(NumberCollection, _M$Base5);
 
         function NumberCollection(props) {
           classCallCheck(this, NumberCollection);
@@ -3100,13 +3132,7 @@ var ImmutableExamples = (function (U, should, M) {
       list3Array.unshift(0);
       var list3 = M.List.fromArray(list3Array);
 
-      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));
-
-      should(list1.size === 2).be.exactly(true);
-      should(list2.size === 5).be.exactly(true);
-      should(list3.size === 6).be.exactly(true);
-      should(list4.size === 13).be.exactly(true);
-      should(list4.get(0) === 1).be.exactly(true);
+      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -3149,9 +3175,7 @@ var ImmutableExamples = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
-      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
-
-      should(map1 !== map2).be.exactly(true); // two different instances
+      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });(map1 !== map2).should.be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
@@ -3159,10 +3183,7 @@ var ImmutableExamples = (function (U, should, M) {
       var list1 = M.List.of(1, 2, 3);
       var list2Array = [].concat(toConsumableArray(list1));
       list2Array.push(4, 5, 6);
-      var list2 = M.List.fromArray(list2Array);
-
-      should([].concat(toConsumableArray(list1)).length === 3).be.exactly(true);
-      should([].concat(toConsumableArray(list2)).length === 6).be.exactly(true);
+      var list2 = M.List.fromArray(list2Array);([].concat(toConsumableArray(list1)).length === 3).should.be.exactly(true);([].concat(toConsumableArray(list2)).length === 6).should.be.exactly(true);
     });
   };
 });
@@ -3196,13 +3217,7 @@ var ImmutableProxied = (function (U, should, M) {
 
       var list2 = list1.push(3, 4, 5);
       var list3 = list2.unshift(0);
-      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));
-
-      should(list1.size === 2).be.exactly(true);
-      should(list2.size === 5).be.exactly(true);
-      should(list3.size === 6).be.exactly(true);
-      should(list4.size === 13).be.exactly(true);
-      should(list4.get(0) === 1).be.exactly(true);
+      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -3249,9 +3264,7 @@ var ImmutableProxied = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
-      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
-
-      should(map1 !== map2).be.exactly(true); // two different instances
+      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));(map1 !== map2).should.be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
@@ -3262,10 +3275,7 @@ var ImmutableProxied = (function (U, should, M) {
       res.push(4);
       res.push(5);
       res.push(6);
-      var list2 = _l(M.List.fromArray(res));
-
-      should(list1.length === 3).be.exactly(true);
-      should(list2.length === 6).be.exactly(true);
+      var list2 = _l(M.List.fromArray(res));(list1.length === 3).should.be.exactly(true);(list2.length === 6).should.be.exactly(true);
     });
   };
 });
@@ -3341,9 +3351,7 @@ var proxyList = (function (should, M) {
     var p = M.proxyList;
 
     it('length', function () {
-      var list1 = p(M.List.of(1, 2, 2, 3));
-
-      should(list1.length).be.exactly(4);
+      var list1 = p(M.List.of(1, 2, 2, 3));list1.length.should.be.exactly(4);
     });
 
     it('[n]', function () {
@@ -3464,9 +3472,7 @@ var proxyList = (function (should, M) {
       var sum = 0;
       list.forEach(function (x) {
         sum += x;
-      });
-
-      should(sum).be.exactly(8);
+      });sum.should.be.exactly(8);
     });
 
     it('keys() / entries() / [@@iterator]()', function () {
@@ -4100,6 +4106,11 @@ var localDateFactory = (function (_ref) {
         return year() + '-' + month() + '-' + day();
       }
     }], [{
+      key: 'innerTypes',
+      value: function innerTypes() {
+        return Object.freeze({});
+      }
+    }, {
       key: 'metadata',
       value: function metadata() {
         var baseMetadata = Object.assign({}, base(LocalDate), { reviver: reviver });
@@ -4244,40 +4255,26 @@ var fixerIoSpec = (function (should, M, _ref, _ref2) {
         type: 'object',
         properties: {
           base: {
-            $ref: '#/definitions/2'
-          },
-          date: {
-            $ref: '#/definitions/3'
-          },
-          rates: {
-            $ref: '#/definitions/4'
-          }
-        },
-        required: ['base', 'date', 'rates'],
-        definitions: {
-          '2': {
             enum: ['AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR']
           },
-          '3': {
+          date: {
             type: 'string',
             pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
           },
-          '4': {
+          rates: {
             type: 'object',
             maxProperties: 32,
             additionalProperties: false,
             patternProperties: {
               '^(AUD|BGN|BRL|CAD|CHF|CNY|CZK|DKK|EUR|GBP|HKD|HRK|HUF|IDR|ILS|INR|JPY|KRW|MXN|MYR|NOK|NZD|PHP|PLN|RON|RUB|SEK|SGD|THB|TRY|USD|ZAR)$': {
-                $ref: '#/definitions/5'
+                type: 'number',
+                minimum: 0,
+                exclusiveMinimum: true
               }
             }
-          },
-          '5': {
-            type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
           }
-        }
+        },
+        required: ['base', 'date', 'rates']
       };
 
       schema.should.deepEqual(expectedSchema);
@@ -4310,6 +4307,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         ajvWithDefault = _M$ajvMetadata.ajvWithDefault,
         ajvAnyOf = _M$ajvMetadata.ajvAnyOf,
         _ = _M$ajvMetadata._,
+        base = _M$ajvMetadata.base,
         number = _M$ajvMetadata.number;
 
     describe('Animal example', function () {
@@ -4398,7 +4396,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           required: ['name']
         });
 
-        var animalMeta = _(Animal);
+        var animalMeta = ajv_(Animal);
         var animal1Schema1 = M.getSchema(animalMeta);
         var animal1Schema2 = M.getSchema(animalMeta);
 
@@ -4406,77 +4404,49 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             name: {
-              anyOf: [{
-                type: 'null'
-              }, {
-                $ref: '#/definitions/2'
-              }],
-              default: 'unknown'
+              default: 'unknown',
+              anyOf: [{ type: 'null' }, {
+                default: 'unknown',
+                type: 'string',
+                minLength: 1,
+                maxLength: 25
+              }]
             },
             dimensions: {
-              anyOf: [{
-                type: 'null'
-              }, {
-                $ref: '#/definitions/4'
+              anyOf: [{ type: 'null' }, {
+                type: 'array',
+                minItems: 3,
+                maxItems: 3,
+                items: {
+                  type: 'number',
+                  exclusiveMinimum: true,
+                  minimum: 0
+                }
               }]
-            }
-          },
-          definitions: {
-            '2': {
-              default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            '4': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                $ref: '#/definitions/5'
-              }
-            },
-            '5': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
             }
           }
         });
 
-        var animalSchema2 = M.getSchema(ajv_(Animal2, [], true));
+        var animalSchema2 = M.getSchema(ajv_(Animal2));
 
         animalSchema2.should.deepEqual({
-          $ref: '#/definitions/2',
-          definitions: {
-            '2': {
-              type: 'object',
-              properties: {
-                name: {
-                  $ref: '#/definitions/3'
-                },
-                dimensions: {
-                  anyOf: [{
-                    type: 'null'
-                  }, {
-                    $ref: '#/definitions/5'
-                  }]
-                }
-              },
-              required: ['name']
-            },
-            '3': {
+          type: 'object',
+          properties: {
+            name: {
               type: 'string',
               minLength: 1,
               maxLength: 25
             },
-            '5': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {}
+            dimensions: {
+              anyOf: [{ type: 'null' }, {
+                type: 'array',
+                minItems: 3,
+                maxItems: 3,
+                items: {}
+              }]
             }
-          }
+          },
+          required: ['name']
         });
 
         var ajv = Ajv();
@@ -4793,13 +4763,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'array',
           minItems: 2,
           items: {
-            $ref: '#/definitions/2'
-          },
-          definitions: {
-            '2': {
-              type: 'number',
-              minimum: 5
-            }
+            type: 'number',
+            minimum: 5
           }
         });
       });
@@ -4873,49 +4838,31 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'array',
           minItems: 2,
           maxItems: 2,
-          items: [{
-            type: 'string'
-          }, {
-            $ref: '#/definitions/3'
-          }],
-          definitions: {
-            '3': {
-              type: 'object',
-              properties: {
-                name: {
-                  anyOf: [{
-                    type: 'null'
-                  }, {
-                    $ref: '#/definitions/4'
-                  }],
-                  default: 'unknown'
-                },
-                dimensions: {
-                  $ref: '#/definitions/5'
-                }
+          items: [{ type: 'string' }, {
+            type: 'object',
+            required: ['dimensions'],
+            properties: {
+              name: {
+                default: 'unknown',
+                anyOf: [{ type: 'null' }, {
+                  default: 'unknown',
+                  type: 'string',
+                  minLength: 1,
+                  maxLength: 25
+                }]
               },
-              required: ['dimensions']
-            },
-            '4': {
-              default: 'unknown',
-              type: 'string',
-              minLength: 1,
-              maxLength: 25
-            },
-            '5': {
-              type: 'array',
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                $ref: '#/definitions/6'
+              dimensions: {
+                type: 'array',
+                minItems: 3,
+                maxItems: 3,
+                items: {
+                  type: 'number',
+                  exclusiveMinimum: true,
+                  minimum: 0
+                }
               }
-            },
-            '6': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
             }
-          }
+          }]
         });
       });
 
@@ -5170,15 +5117,15 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         return Animal;
       }(M.Base);
 
-      var baseSchema = M.getSchema(_(Animal));
+      var baseSchema = M.getSchema(base(Animal));
 
       var enhancedMeta = function enhancedMeta(additionalProperties) {
-        return ajvBase(Animal, Object.assign({}, baseSchema, { additionalProperties: additionalProperties }), true);
+        return ajvBase(Animal, Object.assign({}, baseSchema, { additionalProperties: additionalProperties }));
       };
 
       it('supports additional properties unless otherwise stated', function () {
         should(function () {
-          return _(Animal).reviver('', {
+          return ajvBase(Animal).reviver('', {
             name: 'Bane',
             extra: 1
           });
@@ -5350,33 +5297,13 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             type: {
-              $ref: '#/definitions/4'
-            },
-            score: {
-              $ref: '#/definitions/5'
-            }
-          },
-          required: ['type', 'score'],
-          definitions: {
-            '2': {
-              type: 'number',
-              minimum: 0
-            },
-            '3': {
-              type: 'string',
-              minLength: 1
-            },
-            '4': {
               enum: ['Numeric', 'Alphabetic']
             },
-            '5': {
-              anyOf: [{
-                $ref: '#/definitions/2'
-              }, {
-                $ref: '#/definitions/3'
-              }]
+            score: {
+              anyOf: [{ type: 'number', minimum: 0 }, { type: 'string', minLength: 1 }]
             }
-          }
+          },
+          required: ['type', 'score']
         };
 
         M.getSchema(_(Score)).should.deepEqual(expectedSchema);
@@ -5394,7 +5321,8 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           }
 
           return Chain;
-        }(M.createAjvModel(Ajv(), function (m) {
+        }(M.createAjvModel(function (_ref2) {
+          var m = _ref2.m;
           return {
             description: m.ajvString({ minLength: 1 }),
             previous: m.ajvMaybe(m._(Chain)),
@@ -5409,37 +5337,23 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
               type: 'object',
               properties: {
                 description: {
-                  $ref: '#/definitions/2'
+                  type: 'string',
+                  minLength: 1
                 },
                 previous: {
-                  anyOf: [{
-                    type: 'null'
-                  }, {
-                    $ref: '#/definitions/1'
-                  }]
+                  anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
                 },
                 next: {
-                  anyOf: [{
-                    type: 'null'
-                  }, {
-                    $ref: '#/definitions/1'
-                  }]
+                  anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
                 },
                 relatedChains: {
-                  $ref: '#/definitions/5'
+                  type: 'array',
+                  items: {
+                    '$ref': '#/definitions/1'
+                  }
                 }
               },
               required: ['description', 'relatedChains']
-            },
-            '2': {
-              type: 'string',
-              minLength: 1
-            },
-            '5': {
-              type: 'array',
-              items: {
-                $ref: '#/definitions/1'
-              }
             }
           },
           $ref: '#/definitions/1'
@@ -5523,45 +5437,68 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             name: {
-              $ref: '#/definitions/2'
-            },
-            parent: {
-              $ref: '#/definitions/3'
-            },
-            child: {
-              anyOf: [{
-                type: 'null'
-              }, {
-                $ref: '#/definitions/4'
-              }]
-            }
-          },
-          required: ['name', 'parent'],
-          definitions: {
-            '2': {
               type: 'string',
               minLength: 1
             },
-            '3': {
+            parent: {
               type: 'object',
               properties: {
                 name: {
                   $ref: '#/definitions/2'
                 },
                 child: {
-                  anyOf: [{
-                    type: 'null'
-                  }, {
-                    $ref: '#/definitions/5'
+                  anyOf: [{ type: 'null' }, {
+                    type: 'object',
+                    properties: {
+                      name: {
+                        $ref: '#/definitions/2'
+                      },
+                      parent: {
+                        $ref: '#/definitions/3'
+                      }
+                    },
+                    required: ['name', 'parent']
                   }]
                 }
               },
               required: ['name']
             },
-            '4': {
-              $ref: '#/definitions/5'
+            child: {
+              anyOf: [{ type: 'null' }, {
+                $ref: '#/definitions/4'
+              }]
+            }
+          },
+          required: ['name', 'parent'],
+          definitions: {
+            2: {
+              type: 'string',
+              minLength: 1
             },
-            '5': {
+            3: {
+              type: 'object',
+              properties: {
+                name: {
+                  $ref: '#/definitions/2'
+                },
+                child: {
+                  anyOf: [{ type: 'null' }, {
+                    type: 'object',
+                    properties: {
+                      name: {
+                        $ref: '#/definitions/2'
+                      },
+                      parent: {
+                        $ref: '#/definitions/3'
+                      }
+                    },
+                    required: ['name', 'parent']
+                  }]
+                }
+              },
+              required: ['name']
+            },
+            4: {
               type: 'object',
               properties: {
                 name: {
@@ -5677,111 +5614,6 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
 });
 
 /* eslint-env mocha */
-/* global requestIdleCallback */
-
-var schedule = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : typeof setImmediate !== 'undefined' ? setImmediate : function (fn) {
-  return setTimeout(fn, 0);
-};
-
-var asyncMap = function asyncMap(fn, arr) {
-  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-      _ref$batchSize = _ref.batchSize,
-      batchSize = _ref$batchSize === undefined ? arr.length : _ref$batchSize;
-
-  return arr.reduce(function (acc, _, i) {
-    if (i % batchSize !== 0) {
-      return acc;
-    }
-
-    return acc.then(function (result) {
-      return new Promise(function (resolve) {
-        schedule(function () {
-          result.push.apply(result, arr.slice(i, i + batchSize).map(fn));
-          resolve(result);
-        });
-      });
-    });
-  }, Promise.resolve([]));
-};
-
-var asyncReviving = (function (should, M) {
-  return function () {
-    it('should revieve data asynchronously', function () {
-      var Book = function (_M$createModel) {
-        inherits(Book, _M$createModel);
-
-        function Book(props) {
-          classCallCheck(this, Book);
-          return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, props));
-        }
-
-        return Book;
-      }(M.createModel(function (m) {
-        return {
-          title: m.string(),
-          author: m.string()
-        };
-      }));
-
-      var Library = function (_M$createModel2) {
-        inherits(Library, _M$createModel2);
-
-        function Library(props) {
-          classCallCheck(this, Library);
-          return possibleConstructorReturn(this, (Library.__proto__ || Object.getPrototypeOf(Library)).call(this, Library, props));
-        }
-
-        return Library;
-      }(M.createModel(function (m) {
-        return {
-          catalogue: m.list(m._(Book))
-        };
-      }));
-
-      var libraryObj = {
-        catalogue: [{
-          title: 'Madame Bovary: Mœurs de province',
-          author: 'Gustave Flaubert'
-        }, {
-          title: 'La voz a ti debida',
-          author: 'Pedro Salinas'
-        }, {
-          title: 'Et dukkehjem',
-          author: 'Henrik Ibsen'
-        }, {
-          title: 'Die Verwandlung',
-          author: 'Franz Kafka'
-        }, {
-          title: 'La colmena',
-          author: 'Camilo José Cela'
-        }]
-      };
-
-      var emptyLibraryObj = Object.assign({}, libraryObj, { catalogue: [] });
-      var emptyLibrary = M.fromJS(Library, emptyLibraryObj);
-
-      emptyLibrary.catalogue().size.should.be.exactly(0);
-
-      return asyncMap(function (book) {
-        return M.fromJS(Book, book);
-      }, libraryObj.catalogue, { batchSize: 2 }).then(function (catalogueArr) {
-        var catalogue = M.List.fromArray(catalogueArr);
-
-        return emptyLibrary.copy({ catalogue: catalogue });
-      }).then(function (library) {
-        var catalogue = library.catalogue();
-
-        catalogue.size.should.be.exactly(5);
-
-        catalogue.get(0).title().should.be.exactly('Madame Bovary: Mœurs de province');
-
-        catalogue.getIn([4, 'title']).should.be.exactly('La colmena');
-      });
-    });
-  };
-});
-
-/* eslint-env mocha */
 
 var hasProxies = function () {
   try {
@@ -5864,7 +5696,6 @@ var modelicoSpec = (function (_ref) {
     describe('Immutable.js examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
 
     describe('Api Example: Fixer IO', fixerIoSpec.apply(undefined, deps));
-    describe('Async reviving', asyncReviving.apply(undefined, deps));
 
     U.skipIfNoProxies(describe)('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 

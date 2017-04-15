@@ -85,30 +85,28 @@ var getInnerTypes$1 = (path, Type) => {
 
 const metadataSchemaCache = new WeakMap();
 
-let state;
-const defaultState = () => ({
+const state = {
   nextRef: 1,
   definitions: {},
   usedDefinitions: new Set(),
   metadataRefCache: new WeakMap()
-});
+};
 
 const getSchemaImpl = metadata => {
   if (metadata.schema) {
     return metadata.schema()
   }
 
-  const hasInnerTypes = (metadata.type && metadata.type.innerTypes);
-
-  const innerTypes = hasInnerTypes
-    ? getInnerTypes$1([], metadata.type)
-    : emptyObject;
-
-  if (Object.keys(innerTypes).length === 0) {
+  if (
+    !metadata.type ||
+    !metadata.type.innerTypes ||
+    Object.keys(getInnerTypes$1([], metadata.type)).length === 0
+  ) {
     return emptyObject
   }
 
   const baseSchema = { type: 'object' };
+  const innerTypes = metadata.type.innerTypes();
 
   const required = [];
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
@@ -153,12 +151,15 @@ const getUsedDefinitions = () => {
 };
 
 const getSchema = (metadata, topLevel = true) => {
-  if (metadataSchemaCache.has(metadata)) {
-    return metadataSchemaCache.get(metadata)
-  }
-
   if (topLevel) {
-    state = defaultState();
+    if (metadataSchemaCache.has(metadata)) {
+      return metadataSchemaCache.get(metadata)
+    }
+
+    state.nextRef = 1;
+    state.definitions = {};
+    state.usedDefinitions = new Set();
+    state.metadataRefCache = new WeakMap();
   }
 
   if (state.metadataRefCache.has(metadata)) {
@@ -177,32 +178,27 @@ const getSchema = (metadata, topLevel = true) => {
   Object.assign(state.definitions, { [ref]: schema });
 
   if (!topLevel) {
-    const ref = state.metadataRefCache.get(metadata);
-    const schemaKeys = Object.keys(schema);
-
-    if (!ref || (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))) {
-      return schema
-    }
-
-    state.usedDefinitions.add(ref);
-    return { $ref: `#/definitions/${ref}` }
+    return schema
   }
 
   const definitions = getUsedDefinitions();
 
-  const finalSchema = (Object.keys(definitions).length === 0)
-    ? schema
-    : !definitions.hasOwnProperty(ref)
-    ? Object.assign(schema, {definitions})
-    : {
+  const finalSchema = (() => {
+    if (Object.keys(definitions).length === 0) {
+      return schema
+    }
+
+    if (!definitions.hasOwnProperty(ref)) {
+      return Object.assign(schema, {definitions})
+    }
+
+    return {
       definitions: Object.assign(definitions, { [ref]: schema }),
       $ref: `#/definitions/${ref}`
-    };
+    }
+  })();
 
   metadataSchemaCache.set(metadata, finalSchema);
-
-  // console.log('----------------')
-  // console.log(JSON.stringify(finalSchema, null, 2))
 
   return finalSchema
 };
@@ -313,7 +309,7 @@ class Base {
     }
 
     // This slows down the benchmarks by a lot, but it isn't clear whether
-    // real usage would benefit from removing it.
+    // real usage would benefit from emoving it.
     // See: https://github.com/javiercejudo/modelico-benchmarks
     Object.freeze(fields);
 
@@ -602,6 +598,10 @@ class ModelicoMap extends AbstractMap$1 {
     return metadata$1(ModelicoMap, reviverFactory$2, keyMetadata, valueMetadata)
   }
 
+  static innerTypes () {
+    return emptyObject
+  }
+
   static EMPTY () {
     return EMPTY_MAP || ModelicoMap.of()
   }
@@ -677,6 +677,10 @@ class StringMap extends AbstractMap$1 {
 
   static metadata (valueMetadata) {
     return metadata$1(StringMap, reviverFactory$3, valueMetadata)
+  }
+
+  static innerTypes () {
+    return emptyObject
   }
 
   static EMPTY () {
@@ -757,6 +761,10 @@ class EnumMap extends AbstractMap$1 {
     return metadata$1(EnumMap, reviverFactory$4, keyMetadata, valueMetadata)
   }
 
+  static innerTypes () {
+    return emptyObject
+  }
+
   static EMPTY () {
     return EMPTY_ENUM_MAP || EnumMap.of()
   }
@@ -831,6 +839,10 @@ class ModelicoNumber extends Base$1 {
       reviver
     })
   }
+
+  static innerTypes () {
+    return emptyObject
+  }
 }
 
 ModelicoNumber.displayName = 'ModelicoNumber';
@@ -901,6 +913,10 @@ class ModelicoDate extends Base$1 {
       type: ModelicoDate,
       reviver: reviver$1
     })
+  }
+
+  static innerTypes () {
+    return emptyObject
   }
 }
 
@@ -1052,6 +1068,10 @@ class List extends Base$1 {
     return iterableMetadata(List, itemMetadata)
   }
 
+  static innerTypes () {
+    return emptyObject
+  }
+
   static EMPTY () {
     return EMPTY_LIST || List.of()
   }
@@ -1136,6 +1156,10 @@ class ModelicoSet extends Base$1 {
 
   static metadata (itemMetadata) {
     return iterableMetadata(ModelicoSet, itemMetadata)
+  }
+
+  static innerTypes () {
+    return emptyObject
   }
 
   static EMPTY () {
@@ -1229,8 +1253,12 @@ class Maybe extends Base$1 {
       type: Maybe,
       subtypes: [itemMetadata],
       reviver: reviverFactory$5(itemMetadata),
-      default: new Nothing()
+      default: Maybe.of()
     })
+  }
+
+  static innerTypes () {
+    return emptyObject
   }
 }
 
@@ -1433,6 +1461,10 @@ class Enum extends Base$1 {
   static fromArray (...args) {
     return new Enum(...args)
   }
+
+  static innerTypes () {
+    return emptyObject
+  }
 }
 
 Object.defineProperty(Enum, 'displayName', {
@@ -1579,16 +1611,16 @@ var ajvMetadata = (ajv = { validate: T }) => {
 
   ajvMetadata.ajvMeta = ajvMeta;
 
-  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata, topLevel = false) => {
+  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
     const metadata = _(Type, innerMetadata);
 
-    return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata, topLevel))
+    return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata, false))
   };
 
-  ajvMetadata.ajvBase = (Type, schema = emptyObject, topLevel = false) => {
+  ajvMetadata.ajvBase = (Type, schema = emptyObject) => {
     const metadata = base(Type);
 
-    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata, topLevel))
+    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata, false))
   };
 
   ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
@@ -1723,7 +1755,7 @@ var ajvMetadata = (ajv = { validate: T }) => {
     ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema(itemMetadata, false));
 
   ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
-    const schema = getSchema(metadata);
+    const schema = getSchema(metadata, false);
     const valid = ajv.validate(schema, defaultValue);
 
     if (!valid) {
@@ -1747,20 +1779,16 @@ const metadata$2 = metadata();
 
 const createModel = (
   innerTypes = emptyObject,
-  {
-    base = Base$1,
-    stringTag = 'ModelicoModel',
-    metadata: m = metadata$2
-  } = {}
+  {stringTag = 'ModelicoModel', metadata: m = metadata$2} = {}
 ) => {
-  return class extends base {
+  return class extends Base$1 {
     get [Symbol.toStringTag] () {
       return stringTag
     }
 
     static innerTypes (path, Type) {
       return isFunction(innerTypes)
-        ? innerTypes(m, {path, Type})
+        ? innerTypes({m, path, Type})
         : Object.freeze(innerTypes)
     }
   }
@@ -1790,10 +1818,8 @@ const fromJS = (Type, js) => genericsFromJS(Type, [], js);
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js);
 const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js);
 
-const createAjvModel = (ajv, innerTypes, options = {}) => {
-  options.metadata = ajvMetadata(ajv);
-
-  return createModel(innerTypes, options)
+const createAjvModel = (innerTypes, ajv) => {
+  return createModel(innerTypes, {metadata: ajvMetadata(ajv)})
 };
 
 var M = {
