@@ -10,7 +10,9 @@ export default (
     constructor(fields) {
       // ensure base is included in the rates
       const rates = fields.rates.set(fields.base, 1)
-      const enhancedFields = Object.assign({}, fields, {rates})
+      const enhancedFields = Object.assign({}, fields, {
+        rates
+      })
 
       super(FixerIoResult, enhancedFields)
       Object.freeze(this)

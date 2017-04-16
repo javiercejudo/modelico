@@ -39,7 +39,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
           dimensions: ajvMaybe(
             ajvList(
               {minItems: 3, maxItems: 3},
-              ajvNumber({minimum: 0, exclusiveMinimum: true})
+              ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              })
             )
           )
         })
@@ -528,7 +531,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
     it('reports its full schema', () => {
       const Side = M.Enum.fromArray(['A', 'B'])
 
-      M.getSchema(ajvEnum(Side)).should.deepEqual({enum: ['A', 'B']})
+      M.getSchema(ajvEnum(Side)).should.deepEqual({
+        enum: ['A', 'B']
+      })
     })
   })
 
@@ -688,7 +693,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
             ),
             dimensions: ajvList(
               {minItems: 3, maxItems: 3},
-              ajvNumber({minimum: 0, exclusiveMinimum: true})
+              ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              })
             )
           })
         }
@@ -1062,7 +1070,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
     const enhancedMeta = additionalProperties =>
       ajvBase(
         Animal,
-        Object.assign({}, baseSchema, {additionalProperties}),
+        Object.assign({}, baseSchema, {
+          additionalProperties
+        }),
         true
       )
 

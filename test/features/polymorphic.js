@@ -200,10 +200,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
     class Circle
       extends M.createAjvModel(
         ajv,
-        m =>
-          Object.assign({}, Shape.innerTypes(), {
-            radius: greaterThanZero
-          }),
+        Object.assign({}, Shape.innerTypes(), {
+          radius: greaterThanZero
+        }),
         {base: Shape}
       ) {
       constructor(props) {
@@ -218,11 +217,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
     class Diamond
       extends M.createAjvModel(
         ajv,
-        m =>
-          Object.assign({}, Shape.innerTypes(), {
-            width: greaterThanZero,
-            height: greaterThanZero
-          }),
+        Object.assign({}, Shape.innerTypes(), {
+          width: greaterThanZero,
+          height: greaterThanZero
+        }),
         {base: Shape}
       ) {
       constructor(props) {

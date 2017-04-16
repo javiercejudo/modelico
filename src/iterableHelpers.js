@@ -1,3 +1,5 @@
+// @flow
+
 import {
   always,
   reviverOrAsIs,
@@ -6,7 +8,9 @@ import {
   isFunction
 } from './U'
 
-const iterableReviverFactory = (IterableType, itemMetadata) => (
+type Path = Array<string | number>
+
+const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
   k,
   v,
   path = []
@@ -38,7 +42,10 @@ const iterableReviverFactory = (IterableType, itemMetadata) => (
   return new IterableType(iterable)
 }
 
-export const iterableMetadata = (IterableType, itemMetadata) => {
+export const iterableMetadata = (
+  IterableType: any,
+  itemMetadata: Object | ((v: any, path: Path) => Object)
+) => {
   return Object.freeze({
     type: IterableType,
     subtypes: Object.freeze([itemMetadata]),
@@ -46,7 +53,11 @@ export const iterableMetadata = (IterableType, itemMetadata) => {
   })
 }
 
-export const iterableEquals = (thisArg, other, asUnordered = false) => {
+export const iterableEquals = (
+  thisArg: any,
+  other: any,
+  asUnordered: boolean = false
+) => {
   if (thisArg === other) {
     return true
   }

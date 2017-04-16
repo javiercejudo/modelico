@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-/* global requestIdleCallback */
+/* global requestIdleCallback, setImmediate, setTimeout */
 
 const schedule = typeof requestIdleCallback !== 'undefined'
   ? requestIdleCallback

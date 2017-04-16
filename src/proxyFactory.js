@@ -1,3 +1,5 @@
+// @flow
+
 const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   if (!nonMutators.includes(prop)) {
     return target[prop]
@@ -41,7 +43,12 @@ const proxyToInner = (
   }
 }
 
-const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
+const proxyFactory = (
+  nonMutators: Array<string>,
+  mutators: Array<string>,
+  innerCloner: any,
+  obj: any
+) => {
   const get = (target, prop) => {
     if (prop in target) {
       return proxyToSelf(nonMutators, mutators, innerCloner, target, prop)

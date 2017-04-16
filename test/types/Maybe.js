@@ -139,7 +139,7 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
       should(just10.map(doublePlus5).inner()).be
         .exactly(just10.map(double).map(plus5).inner())
         .and.exactly(25)
-      should(just10.map(x => null).map(plus5).inner()).be.exactly(5)
+      should(just10.map(() => null).map(plus5).inner()).be.exactly(5)
     })
   })
   describe('comparing', () => {

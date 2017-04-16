@@ -153,7 +153,7 @@ class Just extends Maybe {
     return false
   }
 
-  getOrElse(v) {
+  getOrElse() {
     return this.inner()
   }
 

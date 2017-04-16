@@ -1,3 +1,5 @@
+// @flow
+
 import {always, identity} from './U'
 import asIs from './asIs'
 

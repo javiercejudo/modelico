@@ -58,7 +58,15 @@ export default (U, should, M) => () => {
 
     map3
       .equals(
-        M.Map.fromObject({a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300})
+        M.Map.fromObject({
+          a: 20,
+          b: 2,
+          c: 10,
+          d: 100,
+          t: 30,
+          o: 200,
+          g: 300
+        })
       )
       .should.be.exactly(true)
   })
