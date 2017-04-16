@@ -1,0 +1,25 @@
+{
+  "extends": [
+    "plugin:flowtype/recommended",
+    "prettier",
+    "prettier/flowtype",
+    "standard"
+  ],
+  "plugins": [
+    "flowtype",
+    "prettier"
+  ],
+  "rules": {
+    "strict": 0,
+    "prettier/prettier": ["error", {
+      "semi": false,
+      "singleQuote": true,
+      "bracketSpacing": false,
+      "parser": "flow",
+      "printWidth": 80
+    }],
+    "space-before-function-paren": ["error", "never"]
+  },
+  "env": {"es6": true},
+  "parser": "babel-eslint"
+}

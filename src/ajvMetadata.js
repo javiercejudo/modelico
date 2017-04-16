@@ -173,7 +173,9 @@ export default (ajv = {validate: T}) => {
   ajvMetadata.ajvEnum = Type => {
     const metadata = _(Type)
 
-    return ajvMeta(metadata, {enum: Object.keys(metadata.enumerators)})
+    return ajvMeta(metadata, {
+      enum: Object.keys(metadata.enumerators)
+    })
   }
 
   ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {
@@ -259,7 +261,9 @@ export default (ajv = {validate: T}) => {
   ajvMetadata.ajvStringMap = (schema, valueMetadata) =>
     ajvMeta(stringMap(valueMetadata), {type: 'object'}, schema, () => ({
       additionalProperties: false,
-      patternProperties: {'.*': getSchema(valueMetadata, false)}
+      patternProperties: {
+        '.*': getSchema(valueMetadata, false)
+      }
     }))
 
   ajvMetadata.ajvSet = (schema, itemMetadata) =>

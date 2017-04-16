@@ -156,65 +156,56 @@ var toConsumableArray = function (arr) {
   }
 };
 
-// @flow
-
-var get$$1 = function get$$1(field /* : string */) {
-  return function (obj /* : Object */) {
+var get$$1 = function get$$1(field) {
+  return function (obj) {
     return obj[field];
   };
 };
-var pipe2 = function pipe2(f /* : Function */, g /* : Function */) {
+var pipe2 = function pipe2(f, g) {
   return function () {
-    return (/* : Array<mixed> */g(f.apply(undefined, arguments))
-    );
+    return g(f.apply(undefined, arguments));
   };
 };
-var not = function not(x /* : boolean */) {
-  return (/* : boolean */!x
-  );
+var not = function not(x) {
+  return !x;
 };
 
 var T = function T() {
   return true;
 };
-var identity = /* :: <T> */function identity(x /* : T */) {
-  return (/* : T */x
-  );
+var identity = function identity(x) {
+  return x;
 };
 var pipe = function pipe() {
   for (var _len = arguments.length, fns = Array(_len), _key = 0; _key < _len; _key++) {
     fns[_key] = arguments[_key];
   }
 
-  return (/* : Array<Function> */[].concat(fns, [identity]).reduce(pipe2)
-  );
+  return [].concat(fns, [identity]).reduce(pipe2);
 };
-var partial = function partial(fn /* : Function */) {
+var partial = function partial(fn) {
   for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
     args[_key2 - 1] = arguments[_key2];
   }
 
-  return (/* : Array<mixed> */fn.bind.apply(fn, [undefined].concat(args))
-  );
+  return fn.bind.apply(fn, [undefined].concat(args));
 };
-var asIsReviver = function asIsReviver(transform /* : Function */) {
-  return function (k /* : string */, v /* : mixed */) {
+var asIsReviver = function asIsReviver(transform) {
+  return function (k, v) {
     return transform(v);
   };
 };
-var always = /* :: <T> */function always(x /* : T */) {
+var always = function always(x) {
   return function () {
-    return (/* : T */x
-    );
+    return x;
   };
 };
-var isNothing = function isNothing(v /* : mixed */) {
-  return (/* : boolean */v == null || Number.isNaN(v)
-  );
+var isNothing = function isNothing(v) {
+  return v == null || Number.isNaN(v);
 };
 var isSomething = pipe2(isNothing, not);
 
-var assertSomethingIdentity = /* :: <T> */function assertSomethingIdentity(x /* : T */) /* : T */{
+var assertSomethingIdentity = function assertSomethingIdentity(x) {
   if (isNothing(x)) {
     throw TypeError('expected a value but got nothing (null, undefined or NaN)');
   }
@@ -222,45 +213,40 @@ var assertSomethingIdentity = /* :: <T> */function assertSomethingIdentity(x /* 
   return x;
 };
 
-var defaultTo = function defaultTo(d /* : mixed */) {
-  return function (v /* : mixed */) {
+var defaultTo = function defaultTo(d) {
+  return function (v) {
     return isNothing(v) ? d : v;
   };
 };
-var objToArr = function objToArr(obj /* : Object */) {
+var objToArr = function objToArr(obj) {
   return Object.keys(obj).map(function (k) {
     return [k, obj[k]];
   });
 };
 var reviverOrAsIs = pipe2(get$$1('reviver'), defaultTo(asIsReviver(assertSomethingIdentity)));
-var isPlainObject = function isPlainObject(x /* : mixed */) {
-  return (/* : boolean */(typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x
-  );
+var isPlainObject = function isPlainObject(x) {
+  return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object' && !!x;
 };
-var isFunction = function isFunction(x /* : mixed */) {
-  return (/* : boolean */typeof x === 'function'
-  );
+var isFunction = function isFunction(x) {
+  return typeof x === 'function';
 };
 var emptyObject = Object.freeze({});
 
-var haveSameValues = function haveSameValues(a /* : any */, b /* : any */) {
-  return (/* : boolean */a === b || Object.is(a, b)
-  );
+var haveSameValues = function haveSameValues(a, b) {
+  return a === b || Object.is(a, b);
 };
 
-var haveSameType = function haveSameType(a /* : any */, b /* : any */) {
-  return (/* : boolean */a == null || b == null ? a === b : a.constructor === b.constructor
-  );
+var haveSameType = function haveSameType(a, b) {
+  return a == null || b == null ? a === b : a.constructor === b.constructor;
 };
 
 var haveDifferentTypes = pipe2(haveSameType, not);
 
-var equals = function equals(a /* : any */, b /* : any */) {
-  return (/* : boolean */isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b)
-  );
+var equals = function equals(a, b) {
+  return isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b);
 };
 
-var unsupported = function unsupported(message /* : string */) {
+var unsupported = function unsupported(message) {
   throw Error(message);
 };
 
@@ -275,16 +261,19 @@ var getInnerTypes$1 = (function (path, Type) {
     innerTypesCache.set(Type, getInnerTypes(path, Type));
   }
 
-  return innerTypesCache.get(Type);
+  return innerTypesCache.get(Type) || emptyObject;
 });
 
 var metadataSchemaCache = new WeakMap();
 
-var state = {
-  nextRef: 1,
-  definitions: {},
-  usedDefinitions: new Set(),
-  metadataRefCache: new WeakMap()
+var state = void 0;
+var defaultState = function defaultState() {
+  return {
+    nextRef: 1,
+    definitions: {},
+    usedDefinitions: new Set(),
+    metadataRefCache: new WeakMap()
+  };
 };
 
 var getSchemaImpl = function getSchemaImpl(metadata) {
@@ -292,12 +281,15 @@ var getSchemaImpl = function getSchemaImpl(metadata) {
     return metadata.schema();
   }
 
-  if (!metadata.type || !metadata.type.innerTypes || Object.keys(getInnerTypes$1([], metadata.type)).length === 0) {
+  var hasInnerTypes = metadata.type && metadata.type.innerTypes;
+
+  var innerTypes = hasInnerTypes ? getInnerTypes$1([], metadata.type) : emptyObject;
+
+  if (Object.keys(innerTypes).length === 0) {
     return emptyObject;
   }
 
   var baseSchema = { type: 'object' };
-  var innerTypes = metadata.type.innerTypes();
 
   var required = [];
   var properties = Object.keys(innerTypes).reduce(function (acc, fieldName) {
@@ -309,7 +301,7 @@ var getSchemaImpl = function getSchemaImpl(metadata) {
       required.push(fieldName);
       schema = fieldSchema;
     } else {
-      schema = Object.assign({
+      schema = Object.assign({}, {
         anyOf: [{ type: 'null' }, fieldSchema]
       }, fieldMetadata.type === M.Maybe ? undefined : { default: fieldMetadata.default });
     }
@@ -327,8 +319,9 @@ var getSchemaImpl = function getSchemaImpl(metadata) {
 };
 
 var getUsedDefinitions = function getUsedDefinitions() {
-  var definitions = state.definitions,
-      usedDefinitions = state.usedDefinitions;
+  var _state = state,
+      definitions = _state.definitions,
+      usedDefinitions = _state.usedDefinitions;
 
 
   return Object.keys(definitions).map(Number).reduce(function (acc, ref) {
@@ -343,19 +336,16 @@ var getUsedDefinitions = function getUsedDefinitions() {
 var getSchema = function getSchema(metadata) {
   var topLevel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
-  if (topLevel) {
-    if (metadataSchemaCache.has(metadata)) {
-      return metadataSchemaCache.get(metadata);
-    }
+  if (metadataSchemaCache.has(metadata)) {
+    return metadataSchemaCache.get(metadata);
+  }
 
-    state.nextRef = 1;
-    state.definitions = {};
-    state.usedDefinitions = new Set();
-    state.metadataRefCache = new WeakMap();
+  if (topLevel) {
+    state = defaultState();
   }
 
   if (state.metadataRefCache.has(metadata)) {
-    var _ref = state.metadataRefCache.get(metadata);
+    var _ref = state.metadataRefCache.get(metadata) || state.nextRef;
     state.usedDefinitions.add(_ref);
     return { $ref: '#/definitions/' + _ref };
   }
@@ -370,25 +360,30 @@ var getSchema = function getSchema(metadata) {
   Object.assign(state.definitions, defineProperty({}, ref, schema));
 
   if (!topLevel) {
-    return schema;
-  }
+    var _ref2 = state.metadataRefCache.get(metadata);
+    var schemaKeys = Object.keys(schema);
 
-  var definitions = getUsedDefinitions();
-
-  var finalSchema = function () {
-    if (Object.keys(definitions).length === 0) {
+    if (!_ref2 || schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]])) {
       return schema;
     }
 
-    if (!definitions.hasOwnProperty(ref)) {
-      return Object.assign(schema, { definitions: definitions });
-    }
+    state.usedDefinitions.add(_ref2);
+    return { $ref: '#/definitions/' + _ref2 };
+  }
 
-    return {
+  var definitions = getUsedDefinitions();
+  var finalSchema = void 0;
+
+  if (Object.keys(definitions).length === 0) {
+    finalSchema = schema;
+  } else if (!definitions.hasOwnProperty(ref)) {
+    finalSchema = Object.assign({}, schema, { definitions: definitions });
+  } else {
+    finalSchema = {
       definitions: Object.assign(definitions, defineProperty({}, ref, schema)),
       $ref: '#/definitions/' + ref
     };
-  }();
+  }
 
   metadataSchemaCache.set(metadata, finalSchema);
 
@@ -519,7 +514,7 @@ var Base = function () {
     }
 
     // This slows down the benchmarks by a lot, but it isn't clear whether
-    // real usage would benefit from emoving it.
+    // real usage would benefit from removing it.
     // See: https://github.com/javiercejudo/modelico-benchmarks
     Object.freeze(fields);
 
@@ -880,11 +875,6 @@ var ModelicoMap = function (_AbstractMap) {
       return metadata$1(ModelicoMap, reviverFactory$2, keyMetadata, valueMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_MAP || ModelicoMap.of();
@@ -986,11 +976,6 @@ var StringMap = function (_AbstractMap) {
     key: 'metadata',
     value: function metadata$$1(valueMetadata) {
       return metadata$1(StringMap, reviverFactory$3, valueMetadata);
-    }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
     }
   }, {
     key: 'EMPTY',
@@ -1095,11 +1080,6 @@ var EnumMap = function (_AbstractMap) {
       return metadata$1(EnumMap, reviverFactory$4, keyMetadata, valueMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_ENUM_MAP || EnumMap.of();
@@ -1187,11 +1167,6 @@ var ModelicoNumber = function (_Base) {
         reviver: reviver
       });
     }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
   }]);
   return ModelicoNumber;
 }(Base$1);
@@ -1278,11 +1253,6 @@ var ModelicoDate = function (_Base) {
         type: ModelicoDate,
         reviver: reviver$1
       });
-    }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
     }
   }]);
   return ModelicoDate;
@@ -1471,11 +1441,6 @@ var List = function (_Base) {
       return iterableMetadata(List, itemMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_LIST || List.of();
@@ -1597,11 +1562,6 @@ var ModelicoSet = function (_Base) {
       return iterableMetadata(ModelicoSet, itemMetadata);
     }
   }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
-  }, {
     key: 'EMPTY',
     value: function EMPTY() {
       return EMPTY_SET || ModelicoSet.of();
@@ -1696,13 +1656,8 @@ var Maybe = function (_Base) {
         type: Maybe,
         subtypes: [itemMetadata],
         reviver: reviverFactory$5(itemMetadata),
-        default: Maybe.of()
+        default: new Nothing()
       });
-    }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
     }
   }]);
   return Maybe;
@@ -1796,7 +1751,7 @@ var Just = function (_Maybe2) {
     }
   }, {
     key: 'getOrElse',
-    value: function getOrElse(v) {
+    value: function getOrElse() {
       return this.inner();
     }
   }, {
@@ -1968,11 +1923,6 @@ var Enum = function (_Base) {
 
       return new (Function.prototype.bind.apply(Enum, [null].concat(args)))();
     }
-  }, {
-    key: 'innerTypes',
-    value: function innerTypes() {
-      return emptyObject;
-    }
   }]);
   return Enum;
 }(Base$1);
@@ -2136,7 +2086,11 @@ var ajvMetadata = (function () {
 
     var baseMetadata = isFunction(metadata) ? { type: metadata } : metadata;
 
-    return Object.assign({}, baseMetadata, { reviver: reviver, ownSchema: always(schemaToCheck), schema: schemaGetter });
+    return Object.assign({}, baseMetadata, {
+      reviver: reviver,
+      ownSchema: always(schemaToCheck),
+      schema: schemaGetter
+    });
   };
 
   ajvMetadata.ajvMeta = ajvMeta;
@@ -2144,21 +2098,23 @@ var ajvMetadata = (function () {
   ajvMetadata.ajv_ = function (Type) {
     var schema = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
     var innerMetadata = arguments[2];
+    var topLevel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
     var metadata = _(Type, innerMetadata);
 
     return ajvMeta(metadata, emptyObject, schema, function () {
-      return getSchema(metadata, false);
+      return getSchema(metadata, topLevel);
     });
   };
 
   ajvMetadata.ajvBase = function (Type) {
     var schema = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyObject;
+    var topLevel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
     var metadata = base(Type);
 
     return ajvMeta(metadata, { type: 'object' }, schema, function () {
-      return getSchema(metadata, false);
+      return getSchema(metadata, topLevel);
     });
   };
 
@@ -2188,7 +2144,11 @@ var ajvMetadata = (function () {
       anyOf: [{ type: 'number' }, { enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }]
     }, numberMeta);
 
-    return Object.assign({}, metadata, { reviver: reviver, ownSchema: always(numberMeta), schema: always(numberMeta) });
+    return Object.assign({}, metadata, {
+      reviver: reviver,
+      ownSchema: always(numberMeta),
+      schema: always(numberMeta)
+    });
   };
 
   ajvMetadata.ajvString = function (schema) {
@@ -2206,7 +2166,9 @@ var ajvMetadata = (function () {
   ajvMetadata.ajvEnum = function (Type) {
     var metadata = _(Type);
 
-    return ajvMeta(metadata, { enum: Object.keys(metadata.enumerators) });
+    return ajvMeta(metadata, {
+      enum: Object.keys(metadata.enumerators)
+    });
   };
 
   ajvMetadata.ajvEnumMap = function (schema, keyMetadata, valueMetadata) {
@@ -2227,7 +2189,9 @@ var ajvMetadata = (function () {
 
   var ajvList = function ajvList(schema, itemMetadata) {
     return ajvMeta(list(itemMetadata), { type: 'array' }, schema, function () {
-      return { items: getSchema(itemMetadata, false) };
+      return {
+        items: getSchema(itemMetadata, false)
+      };
     });
   };
 
@@ -2239,9 +2203,11 @@ var ajvMetadata = (function () {
       minItems: length,
       maxItems: length
     }, schema, function () {
-      return { items: itemsMetadata.map(function (itemMetadata) {
+      return {
+        items: itemsMetadata.map(function (itemMetadata) {
           return getSchema(itemMetadata, false);
-        }) };
+        })
+      };
     });
   };
 
@@ -2274,7 +2240,9 @@ var ajvMetadata = (function () {
     return ajvMeta(stringMap(valueMetadata), { type: 'object' }, schema, function () {
       return {
         additionalProperties: false,
-        patternProperties: { '.*': getSchema(valueMetadata, false) }
+        patternProperties: {
+          '.*': getSchema(valueMetadata, false)
+        }
       };
     });
   };
@@ -2295,7 +2263,7 @@ var ajvMetadata = (function () {
   };
 
   ajvMetadata.ajvWithDefault = function (metadata, defaultValue) {
-    var schema = getSchema(metadata, false);
+    var schema = getSchema(metadata);
     var valid = ajv.validate(schema, defaultValue);
 
     if (!valid) {
@@ -2324,13 +2292,15 @@ var createModel = function createModel() {
   var _innerTypes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : emptyObject;
 
   var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$base = _ref.base,
+      base = _ref$base === undefined ? Base$1 : _ref$base,
       _ref$stringTag = _ref.stringTag,
       stringTag = _ref$stringTag === undefined ? 'ModelicoModel' : _ref$stringTag,
       _ref$metadata = _ref.metadata,
       m = _ref$metadata === undefined ? metadata$2 : _ref$metadata;
 
-  return function (_Base) {
-    inherits(_class, _Base);
+  return function (_base) {
+    inherits(_class, _base);
 
     function _class() {
       classCallCheck(this, _class);
@@ -2345,11 +2315,11 @@ var createModel = function createModel() {
     }], [{
       key: 'innerTypes',
       value: function innerTypes(path, Type) {
-        return isFunction(_innerTypes) ? _innerTypes({ m: m, path: path, Type: Type }) : Object.freeze(_innerTypes);
+        return isFunction(_innerTypes) ? _innerTypes(m, { path: path, Type: Type }) : Object.freeze(_innerTypes);
       }
     }]);
     return _class;
-  }(Base$1);
+  }(base);
 };
 
 var _metadata = metadata();
@@ -2383,12 +2353,21 @@ var ajvFromJS = function ajvFromJS(_, Type, schema, js) {
   return ajvGenericsFromJS(_, Type, schema, [], js);
 };
 
-var createAjvModel = function createAjvModel(innerTypes, ajv) {
-  return createModel(innerTypes, { metadata: ajvMetadata(ajv) });
+var createAjvModel = function createAjvModel(ajv, innerTypes) {
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+  options.metadata = ajvMetadata(ajv);
+
+  return createModel(innerTypes, options);
 };
 
 var M = {
-  about: Object.freeze({ version: version, author: author, homepage: homepage, license: license }),
+  about: Object.freeze({
+    version: version,
+    author: author,
+    homepage: homepage,
+    license: license
+  }),
   Number: ModelicoNumber$1,
   Date: ModelicoDate$1,
   Enum: Enum,

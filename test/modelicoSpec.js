@@ -52,7 +52,9 @@ import asyncReviving from './recipe/asyncReviving'
 const hasProxies = (() => {
   try {
     return new Proxy({}, {}) && true
-  } catch (ignore) {}
+  } catch (ignore) {
+    // ignore
+  }
 
   return false
 })()

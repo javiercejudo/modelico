@@ -1,4 +1,5 @@
 /* eslint-env mocha */
+/* global require */
 
 'use strict'
 

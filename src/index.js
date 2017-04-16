@@ -85,7 +85,12 @@ const createAjvModel = (ajv, innerTypes, options = {}) => {
 }
 
 export default {
-  about: Object.freeze({version, author, homepage, license}),
+  about: Object.freeze({
+    version,
+    author,
+    homepage,
+    license
+  }),
   Number: ModelicoNumber,
   Date: ModelicoDate,
   Enum,

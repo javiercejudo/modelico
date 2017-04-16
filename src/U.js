@@ -33,7 +33,7 @@ export const reviverOrAsIs = pipe2(
 )
 export const isPlainObject = (x: mixed): boolean => typeof x === 'object' && !!x
 export const isFunction = (x: mixed): boolean => typeof x === 'function'
-export const emptyObject = Object.freeze({})
+export const emptyObject: Object = Object.freeze({})
 
 export const haveSameValues = (a: any, b: any): boolean =>
   a === b || Object.is(a, b)

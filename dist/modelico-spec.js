@@ -302,8 +302,7 @@ var Base = (function (U, should, M, fixtures) {
           }
 
           return Book;
-        }(M.createModel(function (_ref) {
-          var m = _ref.m;
+        }(M.createModel(function (m) {
           return {
             title: m.string(),
             year: m.maybe(m.number()),
@@ -321,14 +320,11 @@ var Base = (function (U, should, M, fixtures) {
           title: 'O Homem Duplicado',
           author: 'José Saramago'
         });
-
         book1.title().should.be.exactly('El Guitarrista');
         book2.title().should.be.exactly('O Homem Duplicado');
-
         should(book1.year().getOrElse(2017)).be.exactly(2002);
         should(book2.year().getOrElse(2017)).be.exactly(2002);
       });
-
       it('should set fields recursively returning a new object', function () {
         var author1 = new Person({
           givenName: 'Javier',
@@ -340,28 +336,20 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Just.of(Sex.MALE())
         });
-
         var author2 = author1.setIn(['givenName'], 'Javi').setIn(['birthday'], new Date('1989-04-16T00:00:00.000Z'));
-
-        should(author2.birthday().inner().getFullYear()).be.exactly(1989);
-
-        // verify that the original author1 was not mutated
+        should(author2.birthday().inner().getFullYear()).be.exactly(1989); // verify that the original author1 was not mutated
         should(author1.birthday().inner().getFullYear()).be.exactly(1988);
       });
-
       it('edge case when Modélico setIn is called with an empty path', function () {
         var authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, _(Person).reviver);
         var listOfPeople1 = M.List.of(author);
-
         var listOfPeople2 = listOfPeople1.setIn([0, 'givenName'], 'Javi');
         var listOfPeople3 = listOfPeople2.setIn([0], M.fields(author));
-
         listOfPeople1.get(0).givenName().should.be.exactly('Javier');
         listOfPeople2.get(0).givenName().should.be.exactly('Javi');
         listOfPeople3.get(0).givenName().should.be.exactly('Javier');
       });
-
       it('should not support null (wrap with Maybe)', function () {
         (function () {
           return new Person({
@@ -377,7 +365,6 @@ var Base = (function (U, should, M, fixtures) {
         }).should.throw();
       });
     });
-
     describe('toJS', function () {
       it('should return as primitives or arrays or objects only', function () {
         var author1 = new Person({
@@ -390,7 +377,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Just.of(Sex.MALE())
         });
-
         author1.toJS().should.eql({
           birthday: '1988-04-16T00:00:00.000Z',
           familyName: 'Cejudo',
@@ -403,7 +389,6 @@ var Base = (function (U, should, M, fixtures) {
         });
       });
     });
-
     describe('fromJS', function () {
       it('should parse from primitives, arrays or objects only', function () {
         var author1 = new Person({
@@ -416,7 +401,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Just.of(Sex.MALE())
         });
-
         M.fromJS(Person, {
           givenName: 'Javier',
           familyName: 'Cejudo',
@@ -429,7 +413,6 @@ var Base = (function (U, should, M, fixtures) {
         }).equals(author1).should.be.exactly(true);
       });
     });
-
     describe('stringifying', function () {
       it('should stringify types correctly', function () {
         var author1 = new Person({
@@ -442,33 +425,24 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Just.of(Sex.MALE())
         });
-
         JSON.stringify(author1).should.be.exactly(author1Json).and.exactly(author1.stringify());
       });
     });
-
     describe('parsing', function () {
       it('should parse types correctly', function () {
         var author1 = M.fromJSON(Person, author1Json);
         var author2 = JSON.parse(author1Json, _(Person).reviver);
-
         'Javier Cejudo'.should.be.exactly(author1.fullName()).and.exactly(author2.fullName());
-
         should(1988).be.exactly(author1.birthday().inner().getFullYear()).and.exactly(author2.birthday().inner().getFullYear());
-
         should(PartOfDay.EVENING().minTime).be.exactly(author1.favouritePartOfDay().minTime).and.exactly(author2.favouritePartOfDay().minTime);
-
         should(Sex.MALE().toJSON()).be.exactly(author1.sex().toJSON()).and.exactly(author2.sex().toJSON());
       });
-
       it('should work with plain classes extending Modélico', function () {
         var animal = JSON.parse('{"name": "Sam"}', _(Animal).reviver);
-
         animal.speak().should.be.exactly('hello');
         animal.name().should.be.exactly('Sam');
       });
     });
-
     describe('comparing', function () {
       it('should identify equal instances', function () {
         var author1 = new Person({
@@ -481,7 +455,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY()
         });
-
         var author2 = new Person({
           familyName: 'Cejudo',
           givenName: 'Javier',
@@ -492,7 +465,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Just.of(Sex.MALE())
         });
-
         var author3 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo Goñi',
@@ -503,7 +475,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Just.of(Sex.MALE())
         });
-
         var author4 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
@@ -513,7 +484,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesList: M.List.EMPTY(),
           importantDatesSet: M.Set.EMPTY()
         });
-
         var author5 = new Person({
           givenName: 'Javier',
           familyName: 'Cejudo',
@@ -524,43 +494,35 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           extra: 1
         });
-
         author1.equals(author1).should.be.exactly(true);
         author1.equals(author2).should.be.exactly(true);
         author1.equals(author3).should.be.exactly(false);
         author1.equals(author4).should.be.exactly(false);
         author1.equals(author5).should.be.exactly(false);
         author1.equals(2).should.be.exactly(false);
-
         author1.should.not.be.exactly(author2);
       });
     });
-
     describe('fields', function () {
       it('preserves undeclared properties', function () {
         var authorJson = '{"undeclaredField":"something","givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}';
         var author = JSON.parse(authorJson, _(Person).reviver);
-
         JSON.stringify(author).should.be.exactly('{"undeclaredField":"something","givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}');
       });
     });
-
     describe('circular innerTypes', function () {
       it('a Modélico type can have a key that is a Maybe of its own type', function () {
         var bestFriend = new Friend({
           name: 'John',
           bestFriend: M.Nothing
         });
-
         var marc = new Friend({
           name: 'Marc',
           bestFriend: M.Just.of(bestFriend)
         });
-
         marc.bestFriend().getOrElse(Friend.EMPTY).name().should.be.exactly('John');
       });
     });
-
     describe('withDefault', function () {
       it('should allow enhancing metadata to have default values', function () {
         var Book = function (_M$createModel3) {
@@ -586,22 +548,20 @@ var Base = (function (U, should, M, fixtures) {
         }(M.createModel({
           title: string(),
           author: withDefault(string(), 'anonymous')
-        }, { stringTag: 'Book' }));
+        }, {
+          stringTag: 'Book'
+        }));
 
         var lazarillo1 = M.fromJS(Book, {
           title: 'Lazarillo de Tormes'
         });
-
         lazarillo1.getTitleBy().should.be.exactly('"Lazarillo de Tormes" by anonymous');
-
         var lazarillo2 = new Book({
           title: 'Lazarillo de Tormes'
         });
-
         lazarillo2.getTitleBy().should.be.exactly('"Lazarillo de Tormes" by anonymous');
       });
     });
-
     describe('withDefault', function () {
       it('should use the metadata to coerce the value if necessary', function () {
         var CountryCallingCode = function (_M$createModel4) {
@@ -626,11 +586,9 @@ var Base = (function (U, should, M, fixtures) {
         }));
 
         var spain = M.fromJS(CountryCallingCode, {});
-
         spain.code().should.be.exactly(34);
       });
     });
-
     U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should use the metadata to coerce the value if necessary', function () {
         var CountryCallingCode = function (_M$createModel5) {
@@ -655,10 +613,8 @@ var Base = (function (U, should, M, fixtures) {
         }));
 
         var spain = M.fromJS(CountryCallingCode, {});
-
         Object.prototype.toString.call(spain).should.be.exactly('[object ModelicoModel]');
       });
-
       it('should implement Symbol.toStringTag', function () {
         var author1 = new Person({
           givenName: 'Javier',
@@ -670,7 +626,6 @@ var Base = (function (U, should, M, fixtures) {
           importantDatesSet: M.Set.EMPTY(),
           sex: M.Just.of(Sex.MALE())
         });
-
         Object.prototype.toString.call(author1).should.be.exactly('[object ModelicoModel]');
       });
     });
@@ -716,17 +671,13 @@ var ModelicoNumber = (function (U, should, M) {
       });
 
       it('should not support the set operation', function () {
-        var myNumber = M.Number.of(55);
-
-        (function () {
+        var myNumber = M.Number.of(55);(function () {
           return myNumber.set();
         }).should.throw();
       });
 
       it('should not support the setIn operation with non-empty paths', function () {
-        var myNumber = M.Number.of(5);
-
-        (function () {
+        var myNumber = M.Number.of(5);(function () {
           return myNumber.setIn([0], 7);
         }).should.throw();
       });
@@ -883,17 +834,13 @@ var ModelicoDate = (function (U, should, M) {
       });
 
       it('should not support the set operation', function () {
-        var myDate = M.Date.of(new Date());
-
-        (function () {
+        var myDate = M.Date.of(new Date());(function () {
           return myDate.set();
         }).should.throw();
       });
 
       it('should not support the setIn operation with non-empty paths', function () {
-        var myDate = M.Date.of(new Date());
-
-        (function () {
+        var myDate = M.Date.of(new Date());(function () {
           return myDate.setIn([0], new Date());
         }).should.throw();
       });
@@ -968,9 +915,7 @@ var ModelicoMap = (function (U, should, M, _ref) {
 
     describe('setting', function () {
       it('should implement Symbol.iterator', function () {
-        var map = M.Map.fromObject({ a: 1, b: 2, c: 3 });
-
-        [].concat(toConsumableArray(map)).should.eql([['a', 1], ['b', 2], ['c', 3]]);
+        var map = M.Map.fromObject({ a: 1, b: 2, c: 3 });[].concat(toConsumableArray(map)).should.eql([['a', 1], ['b', 2], ['c', 3]]);
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -1115,9 +1060,7 @@ var ModelicoMap = (function (U, should, M, _ref) {
       it('should be able to create a map from an even number of params', function () {
         var map = M.Map.of('a', 1, 'b', 2, 'c', 3);
 
-        should(map.inner().get('b')).be.exactly(2);
-
-        (function () {
+        should(map.inner().get('b')).be.exactly(2);(function () {
           return M.Map.of('a', 1, 'b', 2, 'c', 3, 'd');
         }).should.throw();
       });
@@ -1274,9 +1217,7 @@ var ModelicoStringMap = (function (should, M, _ref) {
       it('should be able to create a map from an even number of params', function () {
         var map = M.StringMap.of('a', 1, 'b', 2, 'c', 3);
 
-        should(map.inner().get('b')).be.exactly(2);
-
-        (function () {
+        should(map.inner().get('b')).be.exactly(2);(function () {
           return M.StringMap.of('a', 1, 'b', 2, 'c', 3, 'd');
         }).should.throw();
       });
@@ -1433,9 +1374,7 @@ var ModelicoEnumMap = (function (U, should, M, _ref) {
       it('should be able to create an enum map from an even number of params', function () {
         var map = M.EnumMap.of(PartOfDay.MORNING(), 1, PartOfDay.AFTERNOON(), 2, PartOfDay.EVENING(), 3);
 
-        should(map.inner().get(PartOfDay.AFTERNOON())).be.exactly(2);
-
-        (function () {
+        should(map.inner().get(PartOfDay.AFTERNOON())).be.exactly(2);(function () {
           return M.EnumMap.of(PartOfDay.MORNING(), 1, PartOfDay.AFTERNOON());
         }).should.throw();
       });
@@ -1478,9 +1417,11 @@ var ModelicoList = (function (U, should, M, _ref) {
       it('must freeze the input', function () {
         var input = ['a', 'b', 'c'];
 
-        M.List.fromArray(input);(function () {
+        M.List.fromArray(input);
+
+        should(function () {
           input[1] = 'B';
-        }).should.throw();
+        }).throw();
       });
     });
 
@@ -1769,9 +1710,7 @@ var ModelicoSet = (function (U, should, M, _ref) {
 
     describe('setting', function () {
       it('should implement Symbol.iterator', function () {
-        var set$$1 = M.Set.fromArray([1, 2, 2, 4]);
-
-        [].concat(toConsumableArray(set$$1)).should.eql([1, 2, 4]);
+        var set$$1 = M.Set.fromArray([1, 2, 2, 4]);[].concat(toConsumableArray(set$$1)).should.eql([1, 2, 4]);
       });
 
       it('should not support null (wrap with Maybe)', function () {
@@ -1812,17 +1751,13 @@ var ModelicoSet = (function (U, should, M, _ref) {
       });
 
       it('should not support the set operation', function () {
-        var mySet = M.Set.of(1, 2);
-
-        (function () {
+        var mySet = M.Set.of(1, 2);(function () {
           return mySet.set(0, 3);
         }).should.throw();
       });
 
       it('should not support the setIn operation with non-empty paths', function () {
-        var mySet = M.Set.of(1, 2);
-
-        (function () {
+        var mySet = M.Set.of(1, 2);(function () {
           return mySet.setIn([0], 3);
         }).should.throw();
       });
@@ -1900,25 +1835,19 @@ var ModelicoSet = (function (U, should, M, _ref) {
       });
 
       it('should be able to create a set from arbitrary parameters', function () {
-        var modelicoSet = M.Set.of(0, 1, 1, 2, 3, 5, 8);
-
-        [].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
+        var modelicoSet = M.Set.of(0, 1, 1, 2, 3, 5, 8);[].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
       });
 
       it('should be able to create a set from an array', function () {
         var fibArray = [0, 1, 1, 2, 3, 5, 8];
 
-        var modelicoSet = M.Set.fromArray(fibArray);
-
-        [].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
+        var modelicoSet = M.Set.fromArray(fibArray);[].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
       });
 
       it('should be able to create a set from a native set', function () {
         var fibSet = new Set([0, 1, 1, 2, 3, 5, 8]);
 
-        var modelicoSet = M.Set.fromSet(fibSet);
-
-        [].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
+        var modelicoSet = M.Set.fromSet(fibSet);[].concat(toConsumableArray(modelicoSet)).should.eql([0, 1, 2, 3, 5, 8]);
       });
     });
 
@@ -1974,142 +1903,105 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
 
       it('should return an empty Maybe when setting a path beyond Modélico boundaries', function () {
         var maybe1 = M.Just.of({ a: 2 });
-
         var maybe2 = maybe1.setIn([[{ a: 1 }, 'a']], 200);
-
         maybe2.isEmpty().should.be.exactly(true);
-
         M.Just.of(2).set('a', 3).isEmpty().should.be.exactly(true);
       });
-
       it('should support Maybe of null or undefined', function () {
         should(M.Just.of(null).setIn([], 2).toJSON()).be.exactly(2);
-
         should(M.Just.of(null).set('a', 2).getOrElse('')).be.exactly(null);
-
         should(M.Just.of().set('a', 2).getOrElse('')).be.exactly(undefined);
       });
     });
-
     describe('stringifying', function () {
       it('should stringify Maybe values correctly', function () {
         var maybe1 = M.Just.of(2);
         JSON.stringify(maybe1).should.be.exactly('2');
-
         var maybe2 = M.Nothing;
         JSON.stringify(maybe2).should.be.exactly('null');
       });
-
       it('should support arbitrary Modélico types', function () {
         var author = M.fromJSON(Person, authorJson);
-
         var maybe1 = M.Just.of(author);
         JSON.stringify(maybe1).should.be.exactly(authorJson);
-
         var maybe2 = M.Nothing;
         JSON.stringify(maybe2).should.be.exactly('null');
       });
-
       it('should support Maybe of null or undefined', function () {
         JSON.stringify(M.Just.of(null)).should.be.exactly('null');
-
         JSON.stringify(M.Just.of()).should.be.exactly('null');
       });
     });
-
     describe('parsing', function () {
       it('should parse Maybe values correctly', function () {
         var maybe1 = JSON.parse('2', maybe(number()).reviver);
         should(maybe1.getOrElse(10)).be.exactly(2);
-
         var maybe2 = JSON.parse('null', maybe(number()).reviver);
         maybe2.isEmpty().should.be.exactly(true);
-
         var maybe3 = M.genericsFromJS(M.Maybe, [function () {
           return number();
         }], 5);
         should(maybe3.getOrElse(0)).be.exactly(5);
       });
-
       it('should support arbitrary Modélico types', function () {
         var author = JSON.parse(authorJson, _(Person).reviver);
-
         var myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver);
         myMaybe.inner().equals(author).should.be.exactly(true);
       });
-
       it('should parse missing keys of Maybe values as Maybe with Nothing', function () {
         var authorJsonWithMissinMaybe = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}';
-
         var author = JSON.parse(authorJsonWithMissinMaybe, _(Person).reviver);
-
         author.sex().isEmpty().should.be.exactly(true);
       });
     });
-
     describe('isEmpty', function () {
       it('should return false if there is a value', function () {
         var maybe = M.Just.of(5);
-
         maybe.isEmpty().should.be.exactly(false);
       });
-
       it('should return true if there is nothing', function () {
         var maybe1 = M.Maybe.of(null);
         var maybe2 = M.Maybe.of(undefined);
         var maybe3 = M.Maybe.of(NaN);
-
         maybe1.isEmpty().should.be.exactly(true);
         maybe2.isEmpty().should.be.exactly(true);
         maybe3.isEmpty().should.be.exactly(true);
       });
     });
-
     describe('getOrElse', function () {
       it('should return the value if it exists', function () {
         var maybe = M.Just.of(5);
-
         should(maybe.getOrElse(7)).be.exactly(5);
       });
-
       it('should return the provided default if there is nothing', function () {
         var maybe = M.Nothing;
-
         should(maybe.getOrElse(7)).be.exactly(7);
       });
     });
-
     describe('map', function () {
       var partOfDayFromJson = _(PartOfDay).reviver.bind(undefined, '');
-
       it('should apply a function f to the value and return another Maybe with it', function () {
         var maybeFrom1 = M.Just.of(5);
         var maybeFrom2 = M.Just.of('EVENING');
-
         var maybeTo1 = maybeFrom1.map(function (x) {
           return 2 * x;
         });
         var maybeTo2 = maybeFrom2.map(partOfDayFromJson);
-
         should(maybeTo1.getOrElse(0)).be.exactly(10);
         should(maybeTo2.getOrElse(PartOfDay.MORNING())).be.exactly(PartOfDay.EVENING());
       });
-
       it('should return a non-empty Maybe of whatever mapped function returns', function () {
         var maybeFrom1 = M.Nothing;
         var maybeFrom2 = M.Just.of(0);
-
         var maybeTo1 = maybeFrom1.map(function (x) {
           return 2 * x;
         });
         var maybeTo2 = maybeFrom2.map(function (x) {
           return x / x;
         });
-
         maybeTo1.isEmpty().should.be.exactly(true);
         maybeTo2.isEmpty().should.be.exactly(false);
       });
-
       it('should compose well', function () {
         var double = function double(x) {
           return x === null ? 0 : 2 * x;
@@ -2117,68 +2009,52 @@ var ModelicoMaybe = (function (U, should, M, _ref) {
         var plus5 = function plus5(x) {
           return x === null ? 5 : 5 + x;
         };
-
         var doublePlus5 = function doublePlus5(x) {
           return plus5(double(x));
         };
-
         var just10 = M.Just.of(10);
-
         should(just10.map(doublePlus5).inner()).be.exactly(just10.map(double).map(plus5).inner()).and.exactly(25);
-
-        should(just10.map(function (x) {
+        should(just10.map(function () {
           return null;
         }).map(plus5).inner()).be.exactly(5);
       });
     });
-
     describe('comparing', function () {
       it('should identify equal instances', function () {
         var modelicoMaybe1 = M.Just.of(2);
         var modelicoMaybe2 = M.Just.of(2);
-
         modelicoMaybe1.should.not.be.exactly(modelicoMaybe2);
         modelicoMaybe1.should.not.equal(modelicoMaybe2);
-
         modelicoMaybe1.equals(modelicoMaybe1).should.be.exactly(true);
         modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(true);
       });
-
       it('supports non-primitive types', function () {
         var modelicoMaybe1 = M.Just.of(M.Number.of(2));
         var modelicoMaybe2 = M.Just.of(M.Number.of(2));
-
         modelicoMaybe1.should.not.be.exactly(modelicoMaybe2);
         modelicoMaybe1.should.not.equal(modelicoMaybe2);
-
         modelicoMaybe1.equals(modelicoMaybe1).should.be.exactly(true);
         modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(true);
         modelicoMaybe1.equals(null).should.be.exactly(false);
         modelicoMaybe1.equals().should.be.exactly(false);
       });
-
       it('handles nothing well', function () {
         var modelicoMaybe1 = M.Just.of(M.Number.of(2));
         var modelicoMaybe2 = M.Nothing;
         var modelicoMaybe3 = M.Maybe.of();
-
         modelicoMaybe1.should.not.be.exactly(modelicoMaybe2);
         modelicoMaybe1.should.not.equal(modelicoMaybe2);
-
         modelicoMaybe1.equals(modelicoMaybe2).should.be.exactly(false);
         modelicoMaybe2.equals(modelicoMaybe3).should.be.exactly(true);
       });
-
       it('should have same-value-zero semantics', function () {
         M.Just.of(0).equals(M.Just.of(-0)).should.be.exactly(true);
         M.Just.of(NaN).equals(M.Just.of(NaN)).should.be.exactly(true);
       });
     });
-
     U.skipIfNoToStringTagSymbol(describe)('toStringTag', function () {
       it('should implement Symbol.toStringTag', function () {
         Object.prototype.toString.call(M.Just.of(1)).should.be.exactly('[object ModelicoJust]');
-
         Object.prototype.toString.call(M.Nothing).should.be.exactly('[object ModelicoNothing]');
       });
     });
@@ -2257,26 +2133,23 @@ var setIn = (function (U, should, M) {
   return function () {
     it('should work across types', function () {
       var hammer = M.Map.of('hammer', 'Can’t Touch This');
-      var array1 = M.List.of('totally', 'immutable', hammer);(function () {
+      var array1 = M.List.of('totally', 'immutable', hammer);
+      should(function () {
         array1.inner()[1] = 'I’m going to mutate you!';
-      }).should.throw();
-
+      }).throw();
       array1.get(1).should.be.exactly('immutable');
-
       array1.setIn([2, 'hammer'], 'hm, surely I can mutate this nested object...');
-
       array1.get(2).inner().get('hammer').should.be.exactly('Can’t Touch This');
     });
-
     it('should work across types (2)', function () {
       var list = M.List.of('totally', 'immutable');
-      var hammer1 = M.Map.fromObject({ hammer: 'Can’t Touch This', list: list });
-
+      var hammer1 = M.Map.fromObject({
+        hammer: 'Can’t Touch This',
+        list: list
+      });
       hammer1.inner().set('hammer', 'I’m going to mutate you!');
       hammer1.inner().get('hammer').should.be.exactly('Can’t Touch This');
-
       hammer1.setIn(['list', 1], 'hm, surely I can mutate this nested object...');
-
       hammer1.inner().get('list').get(1).should.be.exactly('immutable');
     });
   };
@@ -2613,7 +2486,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
       it('should revive polymorphic JSON (1)', function () {
         var col1 = M.fromJS(NumberCollection, {
           type: 'OBJECT',
-          collection: { 'a': 10, 'b': 25, 'c': 4000 }
+          collection: { a: 10, b: 25, c: 4000 }
         });
 
         should(col1.sum()).be.exactly(4035);
@@ -2694,7 +2567,7 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
       it('should revive polymorphic JSON (1)', function () {
         var col1 = M.fromJS(NumberCollection, {
           collectionType: 'OBJECT',
-          collection: { 'a': 10, 'b': 25, 'c': 4000 }
+          collection: { a: 10, b: 25, c: 4000 }
         });
 
         should(col1.sum()).be.exactly(4035);
@@ -2720,15 +2593,20 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
     });
 
     describe('Based on runtime type field', function () {
-      var _M$ajvMetadata = M.ajvMetadata(Ajv()),
+      var ajv = Ajv();
+
+      var _M$ajvMetadata = M.ajvMetadata(ajv),
           _ = _M$ajvMetadata._,
           base = _M$ajvMetadata.base,
           ajvMeta = _M$ajvMetadata.ajvMeta,
-          ajvNumber = _M$ajvMetadata.ajvNumber,
-          ajvString = _M$ajvMetadata.ajvString,
-          ajvMaybe = _M$ajvMetadata.ajvMaybe;
+          ajvNumber = _M$ajvMetadata.ajvNumber;
 
       var ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND']);
+
+      var greaterThanZero = ajvNumber({
+        minimum: 0,
+        exclusiveMinimum: true
+      });
 
       var reviver = function reviver(k, v) {
         if (k !== '') {
@@ -2745,8 +2623,8 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
         }
       };
 
-      var Shape = function (_M$Base3) {
-        inherits(Shape, _M$Base3);
+      var Shape = function (_M$createAjvModel) {
+        inherits(Shape, _M$createAjvModel);
 
         function Shape() {
           classCallCheck(this, Shape);
@@ -2773,13 +2651,6 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
             return Object.freeze(Object.assign({ type: type }, fields));
           }
         }], [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze({
-              relatedShape: ajvMaybe(_(Shape))
-            });
-          }
-        }, {
           key: 'metadata',
           value: function metadata() {
             var baseMetadata = Object.assign({}, base(Shape), { reviver: reviver });
@@ -2794,10 +2665,14 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           }
         }]);
         return Shape;
-      }(M.Base);
+      }(M.createAjvModel(ajv, function (m) {
+        return {
+          relatedShape: m.ajvMaybe(m._(Shape))
+        };
+      }));
 
-      var Circle = function (_Shape) {
-        inherits(Circle, _Shape);
+      var Circle = function (_M$createAjvModel2) {
+        inherits(Circle, _M$createAjvModel2);
 
         function Circle(props) {
           classCallCheck(this, Circle);
@@ -2809,22 +2684,14 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           value: function area() {
             return Math.PI * Math.pow(this.radius(), 2);
           }
-        }], [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze(Object.assign({}, get(Circle.__proto__ || Object.getPrototypeOf(Circle), 'innerTypes', this).call(this), {
-              radius: ajvNumber({
-                minimum: 0,
-                exclusiveMinimum: true
-              })
-            }));
-          }
         }]);
         return Circle;
-      }(Shape);
+      }(M.createAjvModel(ajv, Object.assign({}, Shape.innerTypes(), {
+        radius: greaterThanZero
+      }), { base: Shape }));
 
-      var Diamond = function (_Shape2) {
-        inherits(Diamond, _Shape2);
+      var Diamond = function (_M$createAjvModel3) {
+        inherits(Diamond, _M$createAjvModel3);
 
         function Diamond(props) {
           classCallCheck(this, Diamond);
@@ -2836,45 +2703,30 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           value: function area() {
             return this.width() * this.height() / 2;
           }
-        }], [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze(Object.assign({}, get(Diamond.__proto__ || Object.getPrototypeOf(Diamond), 'innerTypes', this).call(this), {
-              width: ajvNumber({
-                minimum: 0,
-                exclusiveMinimum: true
-              }),
-              height: ajvNumber({
-                minimum: 0,
-                exclusiveMinimum: true
-              })
-            }));
-          }
         }]);
         return Diamond;
-      }(Shape);
+      }(M.createAjvModel(ajv, Object.assign({}, Shape.innerTypes(), {
+        width: greaterThanZero,
+        height: greaterThanZero
+      }), { base: Shape }));
 
-      var Geometer = function (_M$Base4) {
-        inherits(Geometer, _M$Base4);
+      var Geometer = function (_M$createAjvModel4) {
+        inherits(Geometer, _M$createAjvModel4);
 
         function Geometer(props) {
           classCallCheck(this, Geometer);
           return possibleConstructorReturn(this, (Geometer.__proto__ || Object.getPrototypeOf(Geometer)).call(this, Geometer, props));
         }
 
-        createClass(Geometer, null, [{
-          key: 'innerTypes',
-          value: function innerTypes() {
-            return Object.freeze({
-              name: ajvString({
-                minLength: 1
-              }),
-              favouriteShape: _(Shape)
-            });
-          }
-        }]);
         return Geometer;
-      }(M.Base);
+      }(M.createAjvModel(ajv, function (m) {
+        return {
+          name: m.ajvString({
+            minLength: 1
+          }),
+          favouriteShape: m._(Shape)
+        };
+      }));
 
       it('should revive polymorphic JSON', function () {
         var geometer1 = M.fromJS(Geometer, {
@@ -2941,95 +2793,64 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             name: {
-              type: 'string',
-              minLength: 1
+              $ref: '#/definitions/2'
             },
             favouriteShape: {
-              anyOf: [{
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [{
-                      type: 'null'
-                    }, {
-                      $ref: '#/definitions/3'
-                    }]
-                  },
-                  radius: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: ['radius']
-              }, {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [{
-                      type: 'null'
-                    }, {
-                      $ref: '#/definitions/3'
-                    }]
-                  },
-                  width: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  },
-                  height: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: ['width', 'height']
-              }]
+              $ref: '#/definitions/3'
             }
           },
           required: ['name', 'favouriteShape'],
           definitions: {
-            3: {
+            '2': {
+              type: 'string',
+              minLength: 1
+            },
+            '3': {
               anyOf: [{
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [{
-                      type: 'null'
-                    }, {
-                      $ref: '#/definitions/3'
-                    }]
-                  },
-                  radius: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: ['radius']
+                $ref: '#/definitions/4'
               }, {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [{
-                      type: 'null'
-                    }, {
-                      $ref: '#/definitions/3'
-                    }]
-                  },
-                  width: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  },
-                  height: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: ['width', 'height']
+                $ref: '#/definitions/7'
               }]
+            },
+            '4': {
+              type: 'object',
+              properties: {
+                relatedShape: {
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/3'
+                  }]
+                },
+                radius: {
+                  $ref: '#/definitions/6'
+                }
+              },
+              required: ['radius']
+            },
+            '6': {
+              type: 'number',
+              minimum: 0,
+              exclusiveMinimum: true
+            },
+            '7': {
+              type: 'object',
+              properties: {
+                relatedShape: {
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/3'
+                  }]
+                },
+                width: {
+                  $ref: '#/definitions/6'
+                },
+                height: {
+                  $ref: '#/definitions/6'
+                }
+              },
+              required: ['width', 'height']
             }
           }
         };
@@ -3046,8 +2867,8 @@ var featuresPolymorphic = (function (should, M, fixtures, _ref) {
           stringMap = _M$metadata3.stringMap,
           list = _M$metadata3.list;
 
-      var NumberCollection = function (_M$Base5) {
-        inherits(NumberCollection, _M$Base5);
+      var NumberCollection = function (_M$Base3) {
+        inherits(NumberCollection, _M$Base3);
 
         function NumberCollection(props) {
           classCallCheck(this, NumberCollection);
@@ -3132,12 +2953,17 @@ var ImmutableExamples = (function (U, should, M) {
       list3Array.unshift(0);
       var list3 = M.List.fromArray(list3Array);
 
-      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
+      var list4 = M.List.fromArray([].concat(toConsumableArray(list1)).concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3))));
+
+      should(list1.size === 2).be.exactly(true);
+      should(list2.size === 5).be.exactly(true);
+      should(list3.size === 6).be.exactly(true);
+      should(list4.size === 13).be.exactly(true);
+      should(list4.get(0) === 1).be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
-      var alpha = M.Map.fromObject({ a: 1, b: 2, c: 3, d: 4 });
-      [].concat(toConsumableArray(alpha)).map(function (kv) {
+      var alpha = M.Map.fromObject({ a: 1, b: 2, c: 3, d: 4 });[].concat(toConsumableArray(alpha)).map(function (kv) {
         return kv[0].toUpperCase();
       }).join().should.be.exactly('A,B,C,D');
     });
@@ -3150,7 +2976,15 @@ var ImmutableExamples = (function (U, should, M) {
 
       var map3 = M.Map.fromMap(new Map([].concat([].concat(toConsumableArray(map1)), [].concat(toConsumableArray(map2)), objToArr(obj))));
 
-      map3.equals(M.Map.fromObject({ a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300 })).should.be.exactly(true);
+      map3.equals(M.Map.fromObject({
+        a: 20,
+        b: 2,
+        c: 10,
+        d: 100,
+        t: 30,
+        o: 200,
+        g: 300
+      })).should.be.exactly(true);
     });
 
     it('Accepts raw JavaScript objects. (2)', function () {
@@ -3175,7 +3009,9 @@ var ImmutableExamples = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
-      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });(map1 !== map2).should.be.exactly(true); // two different instances
+      var map2 = M.Map.fromObject({ a: 1, b: 1, c: 1 });
+
+      should(map1 !== map2).be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
@@ -3183,7 +3019,10 @@ var ImmutableExamples = (function (U, should, M) {
       var list1 = M.List.of(1, 2, 3);
       var list2Array = [].concat(toConsumableArray(list1));
       list2Array.push(4, 5, 6);
-      var list2 = M.List.fromArray(list2Array);([].concat(toConsumableArray(list1)).length === 3).should.be.exactly(true);([].concat(toConsumableArray(list2)).length === 6).should.be.exactly(true);
+      var list2 = M.List.fromArray(list2Array);
+
+      should([].concat(toConsumableArray(list1)).length === 3).be.exactly(true);
+      should([].concat(toConsumableArray(list2)).length === 6).be.exactly(true);
     });
   };
 });
@@ -3217,7 +3056,13 @@ var ImmutableProxied = (function (U, should, M) {
 
       var list2 = list1.push(3, 4, 5);
       var list3 = list2.unshift(0);
-      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));(list1.size === 2).should.be.exactly(true);(list2.size === 5).should.be.exactly(true);(list3.size === 6).should.be.exactly(true);(list4.size === 13).should.be.exactly(true);(list4.get(0) === 1).should.be.exactly(true);
+      var list4 = list1.concat([].concat(toConsumableArray(list2)), [].concat(toConsumableArray(list3)));
+
+      should(list1.size === 2).be.exactly(true);
+      should(list2.size === 5).be.exactly(true);
+      should(list3.size === 6).be.exactly(true);
+      should(list4.size === 13).be.exactly(true);
+      should(list4.get(0) === 1).be.exactly(true);
     });
 
     it('JavaScript-first API (2)', function () {
@@ -3238,7 +3083,15 @@ var ImmutableProxied = (function (U, should, M) {
 
       var map3 = M.Map.fromMap(new Map([].concat([].concat(toConsumableArray(map1.entries())), [].concat(toConsumableArray(map2.entries())), objToArr(obj))));
 
-      map3.equals(M.Map.fromObject({ a: 20, b: 2, c: 10, d: 100, t: 30, o: 200, g: 300 })).should.be.exactly(true);
+      map3.equals(M.Map.fromObject({
+        a: 20,
+        b: 2,
+        c: 10,
+        d: 100,
+        t: 30,
+        o: 200,
+        g: 300
+      })).should.be.exactly(true);
     });
 
     it('Accepts raw JavaScript objects. (2)', function () {
@@ -3264,7 +3117,9 @@ var ImmutableProxied = (function (U, should, M) {
 
     it('Equality treats Collections as Data', function () {
       var map1 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
-      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));(map1 !== map2).should.be.exactly(true); // two different instances
+      var map2 = _m(M.Map.fromObject({ a: 1, b: 1, c: 1 }));
+
+      should(map1 !== map2).be.exactly(true); // two different instances
       map1.equals(map2).should.be.exactly(true); // have equivalent values
     });
 
@@ -3275,7 +3130,10 @@ var ImmutableProxied = (function (U, should, M) {
       res.push(4);
       res.push(5);
       res.push(6);
-      var list2 = _l(M.List.fromArray(res));(list1.length === 3).should.be.exactly(true);(list2.length === 6).should.be.exactly(true);
+      var list2 = _l(M.List.fromArray(res));
+
+      should(list1.length === 3).be.exactly(true);
+      should(list2.length === 6).be.exactly(true);
     });
   };
 });
@@ -3312,19 +3170,11 @@ var proxyMap = (function (should, M) {
     });
 
     it('entries()', function () {
-      var map = p(M.Map.fromObject({ a: 1, b: 2, c: 3 }));
-
-      [].concat(toConsumableArray(map.entries())).should.eql([['a', 1], ['b', 2], ['c', 3]]);
+      var map = p(M.Map.fromObject({ a: 1, b: 2, c: 3 }));[].concat(toConsumableArray(map.entries())).should.eql([['a', 1], ['b', 2], ['c', 3]]);
     });
 
     it('values() / keys() / [@@iterator]()', function () {
-      var map = p(M.Map.fromObject({ a: 1, b: 2, c: 3 }));
-
-      [].concat(toConsumableArray(map.values())).should.eql([1, 2, 3]);
-
-      [].concat(toConsumableArray(map.keys())).should.eql(['a', 'b', 'c']);
-
-      [].concat(toConsumableArray(map[Symbol.iterator]())).should.eql([['a', 1], ['b', 2], ['c', 3]]);
+      var map = p(M.Map.fromObject({ a: 1, b: 2, c: 3 }));[].concat(toConsumableArray(map.values())).should.eql([1, 2, 3]);[].concat(toConsumableArray(map.keys())).should.eql(['a', 'b', 'c']);[].concat(toConsumableArray(map[Symbol.iterator]())).should.eql([['a', 1], ['b', 2], ['c', 3]]);
     });
 
     it('forEach()', function () {
@@ -3351,7 +3201,9 @@ var proxyList = (function (should, M) {
     var p = M.proxyList;
 
     it('length', function () {
-      var list1 = p(M.List.of(1, 2, 2, 3));list1.length.should.be.exactly(4);
+      var list1 = p(M.List.of(1, 2, 2, 3));
+
+      should(list1.length).be.exactly(4);
     });
 
     it('[n]', function () {
@@ -3472,7 +3324,9 @@ var proxyList = (function (should, M) {
       var sum = 0;
       list.forEach(function (x) {
         sum += x;
-      });sum.should.be.exactly(8);
+      });
+
+      should(sum).be.exactly(8);
     });
 
     it('keys() / entries() / [@@iterator]()', function () {
@@ -3641,19 +3495,11 @@ var proxySet = (function (should, M) {
     });
 
     it('entries()', function () {
-      var set$$1 = p(M.Set.of(1, 2, 2, 3));
-
-      [].concat(toConsumableArray(set$$1.entries())).should.eql([[1, 1], [2, 2], [3, 3]]);
+      var set$$1 = p(M.Set.of(1, 2, 2, 3));[].concat(toConsumableArray(set$$1.entries())).should.eql([[1, 1], [2, 2], [3, 3]]);
     });
 
     it('values() / keys() / [@@iterator]()', function () {
-      var set$$1 = p(M.Set.of(1, 2, 2, 3));
-
-      [].concat(toConsumableArray(set$$1.values())).should.eql([1, 2, 3]);
-
-      [].concat(toConsumableArray(set$$1.keys())).should.eql([1, 2, 3]);
-
-      [].concat(toConsumableArray(set$$1[Symbol.iterator]())).should.eql([1, 2, 3]);
+      var set$$1 = p(M.Set.of(1, 2, 2, 3));[].concat(toConsumableArray(set$$1.values())).should.eql([1, 2, 3]);[].concat(toConsumableArray(set$$1.keys())).should.eql([1, 2, 3]);[].concat(toConsumableArray(set$$1[Symbol.iterator]())).should.eql([1, 2, 3]);
     });
 
     it('forEach()', function () {
@@ -4106,11 +3952,6 @@ var localDateFactory = (function (_ref) {
         return year() + '-' + month() + '-' + day();
       }
     }], [{
-      key: 'innerTypes',
-      value: function innerTypes() {
-        return Object.freeze({});
-      }
-    }, {
       key: 'metadata',
       value: function metadata() {
         var baseMetadata = Object.assign({}, base(LocalDate), { reviver: reviver });
@@ -4154,7 +3995,9 @@ var fixerIoResultFactory = (function (_ref, _ref2) {
 
       // ensure base is included in the rates
       var rates = fields.rates.set(fields.base, 1);
-      var enhancedFields = Object.assign({}, fields, { rates: rates });
+      var enhancedFields = Object.assign({}, fields, {
+        rates: rates
+      });
 
       var _this = possibleConstructorReturn(this, (FixerIoResult.__proto__ || Object.getPrototypeOf(FixerIoResult)).call(this, FixerIoResult, enhancedFields));
 
@@ -4255,26 +4098,40 @@ var fixerIoSpec = (function (should, M, _ref, _ref2) {
         type: 'object',
         properties: {
           base: {
-            enum: ['AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR']
+            $ref: '#/definitions/2'
           },
           date: {
+            $ref: '#/definitions/3'
+          },
+          rates: {
+            $ref: '#/definitions/4'
+          }
+        },
+        required: ['base', 'date', 'rates'],
+        definitions: {
+          '2': {
+            enum: ['AUD', 'BGN', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HRK', 'HUF', 'IDR', 'ILS', 'INR', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RON', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR']
+          },
+          '3': {
             type: 'string',
             pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
           },
-          rates: {
+          '4': {
             type: 'object',
             maxProperties: 32,
             additionalProperties: false,
             patternProperties: {
               '^(AUD|BGN|BRL|CAD|CHF|CNY|CZK|DKK|EUR|GBP|HKD|HRK|HUF|IDR|ILS|INR|JPY|KRW|MXN|MYR|NOK|NZD|PHP|PLN|RON|RUB|SEK|SGD|THB|TRY|USD|ZAR)$': {
-                type: 'number',
-                minimum: 0,
-                exclusiveMinimum: true
+                $ref: '#/definitions/5'
               }
             }
+          },
+          '5': {
+            type: 'number',
+            minimum: 0,
+            exclusiveMinimum: true
           }
-        },
-        required: ['base', 'date', 'rates']
+        }
       };
 
       schema.should.deepEqual(expectedSchema);
@@ -4307,7 +4164,6 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         ajvWithDefault = _M$ajvMetadata.ajvWithDefault,
         ajvAnyOf = _M$ajvMetadata.ajvAnyOf,
         _ = _M$ajvMetadata._,
-        base = _M$ajvMetadata.base,
         number = _M$ajvMetadata.number;
 
     describe('Animal example', function () {
@@ -4324,7 +4180,10 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           value: function innerTypes() {
             return Object.freeze({
               name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
-              dimensions: ajvMaybe(ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true })))
+              dimensions: ajvMaybe(ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({
+                minimum: 0,
+                exclusiveMinimum: true
+              })))
             });
           }
         }]);
@@ -4396,7 +4255,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           required: ['name']
         });
 
-        var animalMeta = ajv_(Animal);
+        var animalMeta = _(Animal);
         var animal1Schema1 = M.getSchema(animalMeta);
         var animal1Schema2 = M.getSchema(animalMeta);
 
@@ -4404,49 +4263,77 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             name: {
-              default: 'unknown',
-              anyOf: [{ type: 'null' }, {
-                default: 'unknown',
-                type: 'string',
-                minLength: 1,
-                maxLength: 25
-              }]
+              anyOf: [{
+                type: 'null'
+              }, {
+                $ref: '#/definitions/2'
+              }],
+              default: 'unknown'
             },
             dimensions: {
-              anyOf: [{ type: 'null' }, {
-                type: 'array',
-                minItems: 3,
-                maxItems: 3,
-                items: {
-                  type: 'number',
-                  exclusiveMinimum: true,
-                  minimum: 0
-                }
+              anyOf: [{
+                type: 'null'
+              }, {
+                $ref: '#/definitions/4'
               }]
             }
-          }
-        });
-
-        var animalSchema2 = M.getSchema(ajv_(Animal2));
-
-        animalSchema2.should.deepEqual({
-          type: 'object',
-          properties: {
-            name: {
+          },
+          definitions: {
+            '2': {
+              default: 'unknown',
               type: 'string',
               minLength: 1,
               maxLength: 25
             },
-            dimensions: {
-              anyOf: [{ type: 'null' }, {
-                type: 'array',
-                minItems: 3,
-                maxItems: 3,
-                items: {}
-              }]
+            '4': {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                $ref: '#/definitions/5'
+              }
+            },
+            '5': {
+              type: 'number',
+              minimum: 0,
+              exclusiveMinimum: true
             }
-          },
-          required: ['name']
+          }
+        });
+
+        var animalSchema2 = M.getSchema(ajv_(Animal2, [], true));
+
+        animalSchema2.should.deepEqual({
+          $ref: '#/definitions/2',
+          definitions: {
+            '2': {
+              type: 'object',
+              properties: {
+                name: {
+                  $ref: '#/definitions/3'
+                },
+                dimensions: {
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/5'
+                  }]
+                }
+              },
+              required: ['name']
+            },
+            '3': {
+              type: 'string',
+              minLength: 1,
+              maxLength: 25
+            },
+            '5': {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {}
+            }
+          }
         });
 
         var ajv = Ajv();
@@ -4682,7 +4569,9 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
       it('reports its full schema', function () {
         var Side = M.Enum.fromArray(['A', 'B']);
 
-        M.getSchema(ajvEnum(Side)).should.deepEqual({ enum: ['A', 'B'] });
+        M.getSchema(ajvEnum(Side)).should.deepEqual({
+          enum: ['A', 'B']
+        });
       });
     });
 
@@ -4763,8 +4652,13 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'array',
           minItems: 2,
           items: {
-            type: 'number',
-            minimum: 5
+            $ref: '#/definitions/2'
+          },
+          definitions: {
+            '2': {
+              type: 'number',
+              minimum: 5
+            }
           }
         });
       });
@@ -4817,7 +4711,10 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
             value: function innerTypes() {
               return Object.freeze({
                 name: ajvWithDefault(ajvString({ minLength: 1, maxLength: 25 }), 'unknown'),
-                dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+                dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({
+                  minimum: 0,
+                  exclusiveMinimum: true
+                }))
               });
             }
           }]);
@@ -4838,31 +4735,49 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'array',
           minItems: 2,
           maxItems: 2,
-          items: [{ type: 'string' }, {
-            type: 'object',
-            required: ['dimensions'],
-            properties: {
-              name: {
-                default: 'unknown',
-                anyOf: [{ type: 'null' }, {
-                  default: 'unknown',
-                  type: 'string',
-                  minLength: 1,
-                  maxLength: 25
-                }]
-              },
-              dimensions: {
-                type: 'array',
-                minItems: 3,
-                maxItems: 3,
-                items: {
-                  type: 'number',
-                  exclusiveMinimum: true,
-                  minimum: 0
+          items: [{
+            type: 'string'
+          }, {
+            $ref: '#/definitions/3'
+          }],
+          definitions: {
+            '3': {
+              type: 'object',
+              properties: {
+                name: {
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/4'
+                  }],
+                  default: 'unknown'
+                },
+                dimensions: {
+                  $ref: '#/definitions/5'
                 }
+              },
+              required: ['dimensions']
+            },
+            '4': {
+              default: 'unknown',
+              type: 'string',
+              minLength: 1,
+              maxLength: 25
+            },
+            '5': {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                $ref: '#/definitions/6'
               }
+            },
+            '6': {
+              type: 'number',
+              minimum: 0,
+              exclusiveMinimum: true
             }
-          }]
+          }
         });
       });
 
@@ -5117,15 +5032,17 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
         return Animal;
       }(M.Base);
 
-      var baseSchema = M.getSchema(base(Animal));
+      var baseSchema = M.getSchema(_(Animal));
 
       var enhancedMeta = function enhancedMeta(additionalProperties) {
-        return ajvBase(Animal, Object.assign({}, baseSchema, { additionalProperties: additionalProperties }));
+        return ajvBase(Animal, Object.assign({}, baseSchema, {
+          additionalProperties: additionalProperties
+        }), true);
       };
 
       it('supports additional properties unless otherwise stated', function () {
         should(function () {
-          return ajvBase(Animal).reviver('', {
+          return _(Animal).reviver('', {
             name: 'Bane',
             extra: 1
           });
@@ -5297,13 +5214,33 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             type: {
-              enum: ['Numeric', 'Alphabetic']
+              $ref: '#/definitions/4'
             },
             score: {
-              anyOf: [{ type: 'number', minimum: 0 }, { type: 'string', minLength: 1 }]
+              $ref: '#/definitions/5'
             }
           },
-          required: ['type', 'score']
+          required: ['type', 'score'],
+          definitions: {
+            '2': {
+              type: 'number',
+              minimum: 0
+            },
+            '3': {
+              type: 'string',
+              minLength: 1
+            },
+            '4': {
+              enum: ['Numeric', 'Alphabetic']
+            },
+            '5': {
+              anyOf: [{
+                $ref: '#/definitions/2'
+              }, {
+                $ref: '#/definitions/3'
+              }]
+            }
+          }
         };
 
         M.getSchema(_(Score)).should.deepEqual(expectedSchema);
@@ -5321,8 +5258,7 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           }
 
           return Chain;
-        }(M.createAjvModel(function (_ref2) {
-          var m = _ref2.m;
+        }(M.createAjvModel(Ajv(), function (m) {
           return {
             description: m.ajvString({ minLength: 1 }),
             previous: m.ajvMaybe(m._(Chain)),
@@ -5337,23 +5273,37 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
               type: 'object',
               properties: {
                 description: {
-                  type: 'string',
-                  minLength: 1
+                  $ref: '#/definitions/2'
                 },
                 previous: {
-                  anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/1'
+                  }]
                 },
                 next: {
-                  anyOf: [{ type: 'null' }, { $ref: '#/definitions/1' }]
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/1'
+                  }]
                 },
                 relatedChains: {
-                  type: 'array',
-                  items: {
-                    '$ref': '#/definitions/1'
-                  }
+                  $ref: '#/definitions/5'
                 }
               },
               required: ['description', 'relatedChains']
+            },
+            '2': {
+              type: 'string',
+              minLength: 1
+            },
+            '5': {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/1'
+              }
             }
           },
           $ref: '#/definitions/1'
@@ -5437,68 +5387,45 @@ var ajvMetadata = (function (should, M, fixtures, _ref) {
           type: 'object',
           properties: {
             name: {
-              type: 'string',
-              minLength: 1
+              $ref: '#/definitions/2'
             },
             parent: {
-              type: 'object',
-              properties: {
-                name: {
-                  $ref: '#/definitions/2'
-                },
-                child: {
-                  anyOf: [{ type: 'null' }, {
-                    type: 'object',
-                    properties: {
-                      name: {
-                        $ref: '#/definitions/2'
-                      },
-                      parent: {
-                        $ref: '#/definitions/3'
-                      }
-                    },
-                    required: ['name', 'parent']
-                  }]
-                }
-              },
-              required: ['name']
+              $ref: '#/definitions/3'
             },
             child: {
-              anyOf: [{ type: 'null' }, {
+              anyOf: [{
+                type: 'null'
+              }, {
                 $ref: '#/definitions/4'
               }]
             }
           },
           required: ['name', 'parent'],
           definitions: {
-            2: {
+            '2': {
               type: 'string',
               minLength: 1
             },
-            3: {
+            '3': {
               type: 'object',
               properties: {
                 name: {
                   $ref: '#/definitions/2'
                 },
                 child: {
-                  anyOf: [{ type: 'null' }, {
-                    type: 'object',
-                    properties: {
-                      name: {
-                        $ref: '#/definitions/2'
-                      },
-                      parent: {
-                        $ref: '#/definitions/3'
-                      }
-                    },
-                    required: ['name', 'parent']
+                  anyOf: [{
+                    type: 'null'
+                  }, {
+                    $ref: '#/definitions/5'
                   }]
                 }
               },
               required: ['name']
             },
-            4: {
+            '4': {
+              $ref: '#/definitions/5'
+            },
+            '5': {
               type: 'object',
               properties: {
                 name: {
@@ -5577,7 +5504,9 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
             var baseMetadata = base(Range);
             var baseReviver = baseMetadata.reviver;
 
-            return Object.assign({}, baseMetadata, { reviver: customReviver(baseReviver) });
+            return Object.assign({}, baseMetadata, {
+              reviver: customReviver(baseReviver)
+            });
           }
         }]);
         return Range;
@@ -5614,11 +5543,117 @@ var baseMetadataExample = (function (should, M, fixtures, _ref) {
 });
 
 /* eslint-env mocha */
+/* global requestIdleCallback, setImmediate, setTimeout */
+
+var schedule = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : typeof setImmediate !== 'undefined' ? setImmediate : function (fn) {
+  return setTimeout(fn, 0);
+};
+
+var asyncMap = function asyncMap(fn, arr) {
+  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      _ref$batchSize = _ref.batchSize,
+      batchSize = _ref$batchSize === undefined ? arr.length : _ref$batchSize;
+
+  return arr.reduce(function (acc, _, i) {
+    if (i % batchSize !== 0) {
+      return acc;
+    }
+
+    return acc.then(function (result) {
+      return new Promise(function (resolve) {
+        schedule(function () {
+          result.push.apply(result, arr.slice(i, i + batchSize).map(fn));
+          resolve(result);
+        });
+      });
+    });
+  }, Promise.resolve([]));
+};
+
+var asyncReviving = (function (should, M) {
+  return function () {
+    it('should revieve data asynchronously', function () {
+      var Book = function (_M$createModel) {
+        inherits(Book, _M$createModel);
+
+        function Book(props) {
+          classCallCheck(this, Book);
+          return possibleConstructorReturn(this, (Book.__proto__ || Object.getPrototypeOf(Book)).call(this, Book, props));
+        }
+
+        return Book;
+      }(M.createModel(function (m) {
+        return {
+          title: m.string(),
+          author: m.string()
+        };
+      }));
+
+      var Library = function (_M$createModel2) {
+        inherits(Library, _M$createModel2);
+
+        function Library(props) {
+          classCallCheck(this, Library);
+          return possibleConstructorReturn(this, (Library.__proto__ || Object.getPrototypeOf(Library)).call(this, Library, props));
+        }
+
+        return Library;
+      }(M.createModel(function (m) {
+        return {
+          catalogue: m.list(m._(Book))
+        };
+      }));
+
+      var libraryObj = {
+        catalogue: [{
+          title: 'Madame Bovary: Mœurs de province',
+          author: 'Gustave Flaubert'
+        }, {
+          title: 'La voz a ti debida',
+          author: 'Pedro Salinas'
+        }, {
+          title: 'Et dukkehjem',
+          author: 'Henrik Ibsen'
+        }, {
+          title: 'Die Verwandlung',
+          author: 'Franz Kafka'
+        }, {
+          title: 'La colmena',
+          author: 'Camilo José Cela'
+        }]
+      };
+      var emptyLibraryObj = Object.assign({}, libraryObj, {
+        catalogue: []
+      });
+      var emptyLibrary = M.fromJS(Library, emptyLibraryObj);
+      emptyLibrary.catalogue().size.should.be.exactly(0);
+      return asyncMap(function (book) {
+        return M.fromJS(Book, book);
+      }, libraryObj.catalogue, {
+        batchSize: 2
+      }).then(function (catalogueArr) {
+        var catalogue = M.List.fromArray(catalogueArr);
+        return emptyLibrary.copy({
+          catalogue: catalogue
+        });
+      }).then(function (library) {
+        var catalogue = library.catalogue();
+        catalogue.size.should.be.exactly(5);
+        catalogue.get(0).title().should.be.exactly('Madame Bovary: Mœurs de province');
+        catalogue.getIn([4, 'title']).should.be.exactly('La colmena');
+      });
+    });
+  };
+});
+
+/* eslint-env mocha */
 
 var hasProxies = function () {
   try {
     return new Proxy({}, {}) && true;
-  } catch (ignore) {}
+  } catch (ignore) {
+    // ignore
+  }
 
   return false;
 }();
@@ -5693,11 +5728,12 @@ var modelicoSpec = (function (_ref) {
     describe('Readme advanced features ES5', featuresAdvancedES5.apply(undefined, deps));
     describe('Deep nesting features', featuresDeepNesting.apply(undefined, deps));
     describe('Reviving polymrphic JSON', featuresPolymorphic.apply(undefined, deps));
-    describe('Immutable.js examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
+    describe('Immutable examples', ImmutableExamples.apply(undefined, [U].concat(deps)));
 
     describe('Api Example: Fixer IO', fixerIoSpec.apply(undefined, deps));
+    describe('Async reviving', asyncReviving.apply(undefined, deps));
 
-    U.skipIfNoProxies(describe)('Immutable.js examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
+    U.skipIfNoProxies(describe)('Immutable examples (proxied)', ImmutableProxied.apply(undefined, [U].concat(deps)));
 
     U.skipIfNoProxies(describe)('Proxies', function () {
       describe('Map', proxyMap.apply(undefined, deps));
