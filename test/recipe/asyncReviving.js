@@ -23,7 +23,7 @@ const asyncMap = (fn, arr, {batchSize = arr.length} = {}) =>
   }, Promise.resolve([]))
 
 export default (should, M) => () => {
-  it('should revieve data asynchronously', () => {
+  it('should revive data asynchronously', () => {
     class Book
       extends M.createModel(m => ({
         title: m.string(),
