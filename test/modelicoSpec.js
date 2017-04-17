@@ -48,6 +48,7 @@ import ajvMetadata from './metadata/ajv'
 import baseMetadataExample from './metadata/base'
 
 import asyncReviving from './recipe/asyncReviving'
+import binaryTree from './recipe/binaryTree'
 
 const hasProxies = (() => {
   try {
@@ -120,6 +121,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))
   describe('Async reviving', asyncReviving(...deps))
+  describe('Binary tree', binaryTree(...deps))
 
   U.skipIfNoProxies(describe)(
     'Immutable examples (proxied)',
