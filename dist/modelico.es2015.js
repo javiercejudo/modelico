@@ -1,207 +1,211 @@
-var version = "22.1.0";
+var version = '23.0.0'
 
+var author =
+  'Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)'
+var license = 'MIT'
 
+var homepage = 'https://github.com/javiercejudo/modelico#readme'
 
-
-
-
-var author = "Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)";
-var license = "MIT";
-
-var homepage = "https://github.com/javiercejudo/modelico#readme";
-
-const typeSymbol = Symbol('type');
-const fieldsSymbol = Symbol('fields');
-const innerOrigSymbol = Symbol('innerOrig');
-
+const typeSymbol = Symbol('type')
+const fieldsSymbol = Symbol('fields')
+const innerOrigSymbol = Symbol('innerOrig')
 
 var symbols = Object.freeze({
-	typeSymbol: typeSymbol,
-	fieldsSymbol: fieldsSymbol,
-	innerOrigSymbol: innerOrigSymbol
-});
+  typeSymbol: typeSymbol,
+  fieldsSymbol: fieldsSymbol,
+  innerOrigSymbol: innerOrigSymbol
+})
 
-// @flow
+const get = field => obj => obj[field]
+const pipe2 = (f, g) => (...args) => g(f(...args))
+const not = x => !x
 
-const get = (field/* : string */) => (obj/* : Object */) => obj[field];
-const pipe2 = (f/* : Function */, g/* : Function */) => (...args/* : Array<mixed> */) => g(f(...args));
-const not = (x/* : boolean */)/* : boolean */ => !x;
+const T = () => true
+const identity = x => x
+const pipe = (...fns) => [...fns, identity].reduce(pipe2)
+const partial = (fn, ...args) => fn.bind(undefined, ...args)
+const asIsReviver = transform => (k, v) => transform(v)
+const always = x => () => x
+const isNothing = v => v == null || Number.isNaN(v)
+const isSomething = pipe2(isNothing, not)
 
-const T = () => true;
-const identity = /* :: <T> */(x/* : T */)/* : T */ => x;
-const pipe = (...fns/* : Array<Function> */) => [...fns, identity].reduce(pipe2);
-const partial = (fn/* : Function */, ...args/* : Array<mixed> */) => fn.bind(undefined, ...args);
-const asIsReviver = (transform/* : Function */) => (k/* : string */, v/* : mixed */) => transform(v);
-const always = /* :: <T> */(x/* : T */) => ()/* : T */ => x;
-const isNothing = (v/* : mixed */)/* : boolean */ => v == null || Number.isNaN(v);
-const isSomething = pipe2(isNothing, not);
-
-const assertSomethingIdentity = /* :: <T> */(x/* : T */)/* : T */ => {
+const assertSomethingIdentity = x => {
   if (isNothing(x)) {
     throw TypeError(`expected a value but got nothing (null, undefined or NaN)`)
   }
 
   return x
-};
+}
 
-const defaultTo = (d/* : mixed */) => (v/* : mixed */) => isNothing(v) ? d : v;
-const objToArr = (obj/* : Object */) => Object.keys(obj).map(k => [k, obj[k]]);
-const reviverOrAsIs = pipe2(get('reviver'), defaultTo(asIsReviver(assertSomethingIdentity)));
-const isPlainObject = (x/* : mixed */)/* : boolean */ => typeof x === 'object' && !!x;
-const isFunction = (x/* : mixed */)/* : boolean */ => typeof x === 'function';
-const emptyObject = Object.freeze({});
+const defaultTo = d => v => (isNothing(v) ? d : v)
+const objToArr = obj => Object.keys(obj).map(k => [k, obj[k]])
+const reviverOrAsIs = pipe2(
+  get('reviver'),
+  defaultTo(asIsReviver(assertSomethingIdentity))
+)
+const isPlainObject = x => typeof x === 'object' && !!x
+const isFunction = x => typeof x === 'function'
+const emptyObject = Object.freeze({})
 
-const haveSameValues = (a/* : any */, b/* : any */)/* : boolean */ =>
-  (a === b) || Object.is(a, b);
+const haveSameValues = (a, b) => a === b || Object.is(a, b)
 
-const haveSameType = (a/* : any */, b/* : any */)/* : boolean */ => (a == null || b == null)
-  ? a === b
-  : a.constructor === b.constructor;
+const haveSameType = (a, b) =>
+  (a == null || b == null ? a === b : a.constructor === b.constructor)
 
-const haveDifferentTypes = pipe2(haveSameType, not);
+const haveDifferentTypes = pipe2(haveSameType, not)
 
-const equals = (a/* : any */, b/* : any */)/* : boolean */ =>
-  (isSomething(a) && a.equals)
-    ? a.equals(b)
-    : haveSameValues(a, b);
+const equals = (a, b) =>
+  (isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b))
 
-const unsupported = (message/* : string */) => {
+const unsupported = message => {
   throw Error(message)
-};
+}
 
-const innerTypesCache = new WeakMap();
+const innerTypesCache = new WeakMap()
 
 const getInnerTypes = (path, Type) => {
   return Type.innerTypes(path, Type)
-};
+}
 
 var getInnerTypes$1 = (path, Type) => {
   if (!innerTypesCache.has(Type)) {
-    innerTypesCache.set(Type, getInnerTypes(path, Type));
+    innerTypesCache.set(Type, getInnerTypes(path, Type))
   }
 
-  return innerTypesCache.get(Type)
-};
+  return innerTypesCache.get(Type) || emptyObject
+}
 
-const metadataSchemaCache = new WeakMap();
+const metadataSchemaCache = new WeakMap()
 
-const state = {
+let state
+const defaultState = () => ({
   nextRef: 1,
   definitions: {},
   usedDefinitions: new Set(),
   metadataRefCache: new WeakMap()
-};
+})
 
 const getSchemaImpl = metadata => {
   if (metadata.schema) {
     return metadata.schema()
   }
 
-  if (
-    !metadata.type ||
-    !metadata.type.innerTypes ||
-    Object.keys(getInnerTypes$1([], metadata.type)).length === 0
-  ) {
+  const hasInnerTypes = metadata.type && metadata.type.innerTypes
+
+  const innerTypes = hasInnerTypes
+    ? getInnerTypes$1([], metadata.type)
+    : emptyObject
+
+  if (Object.keys(innerTypes).length === 0) {
     return emptyObject
   }
 
-  const baseSchema = { type: 'object' };
-  const innerTypes = metadata.type.innerTypes();
+  const baseSchema = {type: 'object'}
 
-  const required = [];
+  const required = []
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
-    const fieldMetadata = innerTypes[fieldName];
-    const fieldSchema = getSchema(fieldMetadata, false);
-    let schema;
+    const fieldMetadata = innerTypes[fieldName]
+    const fieldSchema = getSchema(fieldMetadata, false)
+    let schema
 
     if (fieldMetadata.default === undefined) {
-      required.push(fieldName);
-      schema = fieldSchema;
+      required.push(fieldName)
+      schema = fieldSchema
     } else {
-      schema = Object.assign({
-        anyOf: [
-          { type: 'null' },
-          fieldSchema
-        ]
-      }, (fieldMetadata.type === M.Maybe) ? undefined : { default: fieldMetadata.default });
+      schema = Object.assign(
+        {},
+        {
+          anyOf: [{type: 'null'}, fieldSchema]
+        },
+        fieldMetadata.type === M.Maybe
+          ? undefined
+          : {default: fieldMetadata.default}
+      )
     }
 
     return Object.assign(acc, {[fieldName]: schema})
-  }, {});
+  }, {})
 
-  const schema = Object.assign({}, baseSchema, { properties });
+  const schema = Object.assign({}, baseSchema, {properties})
 
   if (required.length > 0) {
-    schema.required = required;
+    schema.required = required
   }
 
   return schema
-};
+}
 
 const getUsedDefinitions = () => {
-  const { definitions, usedDefinitions } = state;
+  const {definitions, usedDefinitions} = state
 
   return Object.keys(definitions).map(Number).reduce((acc, ref) => {
     if (usedDefinitions.has(ref)) {
-      acc[ref] = definitions[ref];
+      acc[ref] = definitions[ref]
     }
 
     return acc
   }, {})
-};
+}
 
 const getSchema = (metadata, topLevel = true) => {
-  if (topLevel) {
-    if (metadataSchemaCache.has(metadata)) {
-      return metadataSchemaCache.get(metadata)
-    }
+  if (metadataSchemaCache.has(metadata)) {
+    return metadataSchemaCache.get(metadata)
+  }
 
-    state.nextRef = 1;
-    state.definitions = {};
-    state.usedDefinitions = new Set();
-    state.metadataRefCache = new WeakMap();
+  if (topLevel) {
+    state = defaultState()
   }
 
   if (state.metadataRefCache.has(metadata)) {
-    const ref = state.metadataRefCache.get(metadata);
-    state.usedDefinitions.add(ref);
-    return { $ref: `#/definitions/${ref}` }
+    const ref = state.metadataRefCache.get(metadata) || state.nextRef
+    state.usedDefinitions.add(ref)
+    return {$ref: `#/definitions/${ref}`}
   }
 
-  const ref = state.nextRef;
+  const ref = state.nextRef
 
-  state.metadataRefCache.set(metadata, ref);
-  state.nextRef += 1;
+  state.metadataRefCache.set(metadata, ref)
+  state.nextRef += 1
 
-  const schema = getSchemaImpl(metadata);
+  const schema = getSchemaImpl(metadata)
 
-  Object.assign(state.definitions, { [ref]: schema });
+  Object.assign(state.definitions, {[ref]: schema})
 
   if (!topLevel) {
-    return schema
-  }
+    const ref = state.metadataRefCache.get(metadata)
+    const schemaKeys = Object.keys(schema)
 
-  const definitions = getUsedDefinitions();
-
-  const finalSchema = (() => {
-    if (Object.keys(definitions).length === 0) {
+    if (
+      !ref ||
+      (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))
+    ) {
       return schema
     }
 
-    if (!definitions.hasOwnProperty(ref)) {
-      return Object.assign(schema, {definitions})
-    }
+    state.usedDefinitions.add(ref)
+    return {$ref: `#/definitions/${ref}`}
+  }
 
-    return {
-      definitions: Object.assign(definitions, { [ref]: schema }),
+  const definitions = getUsedDefinitions()
+  let finalSchema
+
+  if (Object.keys(definitions).length === 0) {
+    finalSchema = schema
+  } else if (!definitions.hasOwnProperty(ref)) {
+    finalSchema = Object.assign({}, schema, {definitions})
+  } else {
+    finalSchema = {
+      definitions: Object.assign(definitions, {
+        [ref]: schema
+      }),
       $ref: `#/definitions/${ref}`
     }
-  })();
+  }
 
-  metadataSchemaCache.set(metadata, finalSchema);
+  metadataSchemaCache.set(metadata, finalSchema)
 
   return finalSchema
-};
+}
 
 var validate = (instance, innerMetadata = []) => {
   try {
@@ -209,84 +213,89 @@ var validate = (instance, innerMetadata = []) => {
       instance[M.symbols.typeSymbol](),
       innerMetadata,
       JSON.stringify(instance)
-    );
+    )
   } catch (e) {
     return [false, e]
   }
 
   return [true, undefined]
-};
+}
 
-const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' -> ')}"`;
+const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' -> ')}"`
 
-var withValidation = (validateFn, errorMsgFn = defaultErrorMsgFn) => metadata => {
+var withValidation = (
+  validateFn,
+  errorMsgFn = defaultErrorMsgFn
+) => metadata => {
   const reviver = (k, v, path = []) => {
     if (k !== '') {
       return v
     }
 
-    const revivedValue = metadata.reviver('', v, path);
+    const revivedValue = metadata.reviver('', v, path)
 
     if (!validateFn(revivedValue)) {
       throw TypeError(errorMsgFn(revivedValue, path))
     }
 
     return revivedValue
-  };
+  }
 
-  return Object.assign({}, metadata, { reviver })
-};
+  return Object.assign({}, metadata, {reviver})
+}
 
 var asIs = (transformer = identity) =>
   Object.freeze({
     type: transformer,
     reviver: asIsReviver(pipe(assertSomethingIdentity, transformer)),
     maybeReviver: asIsReviver(transformer)
-  });
+  })
 
-var any = always(asIs(identity));
+var any = always(asIs(identity))
 
 var anyOf = (conditionedMetas = [], enumField = 'type') => (v, path) => {
   if (conditionedMetas.length === 0) {
     return any
   }
 
-  const Enum = conditionedMetas[0][1][typeSymbol]();
-  const enumeratorToMatch = Enum.metadata().reviver('', v[enumField]);
+  const Enum = conditionedMetas[0][1][typeSymbol]()
+  const enumeratorToMatch = Enum.metadata().reviver('', v[enumField])
 
   for (let i = 0; i < conditionedMetas.length; i += 1) {
-    const conditionedMeta = conditionedMetas[i];
-    const metadata = conditionedMeta[0];
-    const enumerator = conditionedMeta[1];
+    const conditionedMeta = conditionedMetas[i]
+    const metadata = conditionedMeta[0]
+    const enumerator = conditionedMeta[1]
 
     if (enumeratorToMatch === enumerator) {
       return metadata
     }
   }
 
-  const prevPath = path.slice(0, -1);
+  const prevPath = path.slice(0, -1)
 
-  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`)
-};
+  throw TypeError(
+    `unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`
+  )
+}
 
 const plainObjectReviverFactory = (Type, k, v, prevPath) =>
   Object.keys(v).reduce((acc, field) => {
-    const path = prevPath.concat(field);
-    const innerTypes = getInnerTypes$1(prevPath, Type);
+    const path = prevPath.concat(field)
+    const innerTypes = getInnerTypes$1(prevPath, Type)
 
-    const metadataCandidate = innerTypes[field];
+    const metadataCandidate = innerTypes[field]
     const metadata = isFunction(metadataCandidate)
       ? metadataCandidate(v, path)
-      : metadataCandidate;
+      : metadataCandidate
 
     if (metadata) {
-      acc[field] = reviverOrAsIs(metadata)(k, v[field], path);
+      acc[field] = reviverOrAsIs(metadata)(k, v[field], path)
     } else {
-      acc[field] = v[field];
+      acc[field] = v[field]
     }
 
     return acc
-  }, {});
+  }, {})
 
 const reviverFactory = Type => (k, v, path = []) => {
   if (k !== '') {
@@ -295,79 +304,83 @@ const reviverFactory = Type => (k, v, path = []) => {
 
   const fields = isPlainObject(v)
     ? plainObjectReviverFactory(Type, k, v, path)
-    : v;
+    : v
 
   return new Type(fields)
-};
+}
 
-const getPathReducer = (result, part) => result.get(part);
+const getPathReducer = (result, part) => result.get(part)
 
 class Base {
-  constructor (Type, fields = emptyObject, thisArg) {
+  constructor(Type, fields = emptyObject, thisArg) {
     if (!isPlainObject(fields)) {
-      throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`)
+      throw TypeError(
+        `expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`
+      )
     }
 
     // This slows down the benchmarks by a lot, but it isn't clear whether
-    // real usage would benefit from emoving it.
+    // real usage would benefit from removing it.
     // See: https://github.com/javiercejudo/modelico-benchmarks
-    Object.freeze(fields);
+    Object.freeze(fields)
 
-    const defaults = {};
-    const innerTypes = getInnerTypes$1([], Type);
+    const defaults = {}
+    const innerTypes = getInnerTypes$1([], Type)
 
-    thisArg = defaultTo(this)(thisArg);
-    thisArg[typeSymbol] = always(Type);
+    thisArg = defaultTo(this)(thisArg)
+    thisArg[typeSymbol] = always(Type)
 
     Object.keys(innerTypes).forEach(key => {
-      const valueCandidate = fields[key];
-      const defaultCandidate = innerTypes[key].default;
-      let value;
+      const valueCandidate = fields[key]
+      const defaultCandidate = innerTypes[key].default
+      let value
 
       if (isSomething(valueCandidate)) {
-        value = valueCandidate;
+        value = valueCandidate
       } else if (isSomething(defaultCandidate)) {
-        value = innerTypes[key].default;
-        defaults[key] = value;
+        value = innerTypes[key].default
+        defaults[key] = value
       } else {
         throw TypeError(`no value for key "${key}"`)
       }
 
-      thisArg[key] = always(value);
-    });
+      thisArg[key] = always(value)
+    })
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(defaults, fields)));
+    thisArg[fieldsSymbol] = always(
+      Object.freeze(Object.assign(defaults, fields))
+    )
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoModel'
   }
 
-  get (field) {
+  get(field) {
     return this[fieldsSymbol]()[field]
   }
 
-  getIn (path) {
+  getIn(path) {
     return path.reduce(getPathReducer, this)
   }
 
-  copy (fields) {
-    const newFields = Object.assign({}, this[fieldsSymbol](), fields);
+  copy(fields) {
+    const newFields = Object.assign({}, this[fieldsSymbol](), fields)
 
     return new (this[typeSymbol]())(newFields)
   }
 
-  set (field, value) {
+  set(field, value) {
     return this.copy({[field]: value})
   }
 
-  setIn (path, value) {
+  setIn(path, value) {
     if (path.length === 0) {
       return this.copy(value)
     }
 
-    const [key, ...restPath] = path;
-    const item = this[key]();
+    const [key, ...restPath] = path
+    const item = this[key]()
 
     if (!item.setIn) {
       return this.set(key, value)
@@ -376,7 +389,7 @@ class Base {
     return this.set(key, item.setIn(restPath, value))
   }
 
-  equals (other) {
+  equals(other) {
     if (this === other) {
       return true
     }
@@ -385,11 +398,11 @@ class Base {
       return false
     }
 
-    const thisFields = this[fieldsSymbol]();
-    const otherFields = other[fieldsSymbol]();
+    const thisFields = this[fieldsSymbol]()
+    const otherFields = other[fieldsSymbol]()
 
-    const thisKeys = Object.keys(thisFields);
-    const otherKeys = Object.keys(otherFields);
+    const thisKeys = Object.keys(thisFields)
+    const otherKeys = Object.keys(otherFields)
 
     if (thisKeys.length !== otherKeys.length) {
       return false
@@ -398,51 +411,53 @@ class Base {
     return thisKeys.every(key => equals(thisFields[key], otherFields[key]))
   }
 
-  toJSON () {
+  toJSON() {
     return this[fieldsSymbol]()
   }
 
-  toJS () {
+  toJS() {
     return JSON.parse(JSON.stringify(this))
   }
 
-  stringify (n) {
+  stringify(n) {
     return JSON.stringify(this, null, n)
   }
 
-  static innerTypes () {
+  static innerTypes() {
     return emptyObject
   }
 
-  static factory (...args) {
+  static factory(...args) {
     return new Base(...args)
   }
 }
 
-var Base$1 = Object.freeze(Base);
+var Base$1 = Object.freeze(Base)
 
 const set = (thisArg, Type, key, value) => {
-  const newMap = thisArg.inner();
-  newMap.set(key, value);
+  const newMap = thisArg.inner()
+  newMap.set(key, value)
 
   return Type.fromMap(newMap)
-};
+}
 
 const of = (Type, args) => {
-  const len = args.length;
+  const len = args.length
 
   if (len % 2 === 1) {
-    throw TypeError(`${Type.displayName}.of requires an even number of arguments`)
+    throw TypeError(
+      `${Type.displayName}.of requires an even number of arguments`
+    )
   }
 
-  const map = new Map();
+  const map = new Map()
 
   for (let i = 0; i < len; i += 2) {
-    map.set(args[i], args[i + 1]);
+    map.set(args[i], args[i + 1])
   }
 
   return Type.fromMap(map)
-};
+}
 
 const metadata$1 = (Type, reviverFactory, keyMetadata, valueMetadata) => {
   return Object.freeze({
@@ -450,16 +465,16 @@ const metadata$1 = (Type, reviverFactory, keyMetadata, valueMetadata) => {
     subtypes: Object.freeze([keyMetadata, valueMetadata]),
     reviver: reviverFactory(keyMetadata, valueMetadata)
   })
-};
+}
 
 const equalPairs = (pairA, pairB) =>
-  pairA.every((pairPart, index) => equals(pairPart, pairB[index]));
+  pairA.every((pairPart, index) => equals(pairPart, pairB[index]))
 
-const copy = map => new Map(map);
+const copy = map => new Map(map)
 
 class AbstractMap extends Base$1 {
-  constructor (Type, innerMapOrig = new Map(), EMPTY) {
-    super(Type);
+  constructor(Type, innerMapOrig = new Map(), EMPTY) {
+    super(Type)
 
     if (isNothing(innerMapOrig)) {
       throw TypeError('missing map')
@@ -469,32 +484,32 @@ class AbstractMap extends Base$1 {
       return EMPTY
     }
 
-    const innerMap = copy(innerMapOrig);
+    const innerMap = copy(innerMapOrig)
 
-    this[innerOrigSymbol] = always(innerMap);
-    this.inner = () => copy(innerMap);
-    this.size = innerMap.size;
+    this[innerOrigSymbol] = always(innerMap)
+    this.inner = () => copy(innerMap)
+    this.size = innerMap.size
   }
 
-  [Symbol.iterator] () {
+  [Symbol.iterator]() {
     return this[innerOrigSymbol]()[Symbol.iterator]()
   }
 
-  has (key) {
+  has(key) {
     return this[innerOrigSymbol]().has(key)
   }
 
-  get (key) {
+  get(key) {
     return this[innerOrigSymbol]().get(key)
   }
 
-  setIn (path, value) {
+  setIn(path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
 
-    const [key, ...restPath] = path;
-    const item = this[innerOrigSymbol]().get(key);
+    const [key, ...restPath] = path
+    const item = this[innerOrigSymbol]().get(key)
 
     if (!item.setIn) {
       return this.set(key, value)
@@ -503,7 +518,7 @@ class AbstractMap extends Base$1 {
     return this.set(key, item.setIn(restPath, value))
   }
 
-  equals (other, asUnordered = false) {
+  equals(other, asUnordered = false) {
     if (this === other) {
       return true
     }
@@ -512,15 +527,15 @@ class AbstractMap extends Base$1 {
       return false
     }
 
-    const thisIter = this[Symbol.iterator]();
-    const otherIter = other[Symbol.iterator]();
+    const thisIter = this[Symbol.iterator]()
+    const otherIter = other[Symbol.iterator]()
 
     for (let i = 0; i < this.size; i += 1) {
-      const pair = thisIter.next().value;
+      const pair = thisIter.next().value
 
       const areEqual = asUnordered
         ? other.has(pair[0]) && equals(pair[1], other.get(pair[0]))
-        : equalPairs(pair, otherIter.next().value);
+        : equalPairs(pair, otherIter.next().value)
 
       if (!areEqual) {
         return false
@@ -531,293 +546,295 @@ class AbstractMap extends Base$1 {
   }
 }
 
-var AbstractMap$1 = Object.freeze(AbstractMap);
+var AbstractMap$1 = Object.freeze(AbstractMap)
 
 const parseMapper = (keyReviver, valueReviver, path) => (pair, i) => [
   keyReviver('', pair[0], path.concat(i, 0)),
   valueReviver('', pair[1], path.concat(i, 1))
-];
+]
 
 const reviverFactory$2 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata);
-  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
+  const keyReviver = reviverOrAsIs(
+    isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata
+  )
+  const valueReviver = reviverOrAsIs(
+    isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata
+  )
 
-  const innerMap = (v === null)
+  const innerMap = v === null
     ? null
-    : new Map(v.map(parseMapper(keyReviver, valueReviver, path)));
+    : new Map(v.map(parseMapper(keyReviver, valueReviver, path)))
 
   return ModelicoMap.fromMap(innerMap)
-};
+}
 
-let EMPTY_MAP;
+let EMPTY_MAP
 
 class ModelicoMap extends AbstractMap$1 {
-  constructor (innerMap) {
-    super(ModelicoMap, innerMap, EMPTY_MAP);
+  constructor(innerMap) {
+    super(ModelicoMap, innerMap, EMPTY_MAP)
 
     if (!EMPTY_MAP && this.size === 0) {
-      EMPTY_MAP = this;
+      EMPTY_MAP = this
     }
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoMap'
   }
 
-  set (key, value) {
+  set(key, value) {
     return set(this, ModelicoMap, key, value)
   }
 
-  toJSON () {
+  toJSON() {
     return [...this]
   }
 
-  static fromMap (map) {
+  static fromMap(map) {
     return new ModelicoMap(map)
   }
 
-  static fromArray (pairs) {
+  static fromArray(pairs) {
     return ModelicoMap.fromMap(new Map(pairs))
   }
 
-  static of (...args) {
+  static of(...args) {
     return of(ModelicoMap, args)
   }
 
-  static fromObject (obj) {
+  static fromObject(obj) {
     return ModelicoMap.fromArray(objToArr(obj))
   }
 
-  static metadata (keyMetadata, valueMetadata) {
+  static metadata(keyMetadata, valueMetadata) {
     return metadata$1(ModelicoMap, reviverFactory$2, keyMetadata, valueMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_MAP || ModelicoMap.of()
   }
 }
 
-ModelicoMap.displayName = 'ModelicoMap';
+ModelicoMap.displayName = 'ModelicoMap'
 
-var ModelicoMap$1 = Object.freeze(ModelicoMap);
+var ModelicoMap$1 = Object.freeze(ModelicoMap)
 
 const stringifyReducer = (acc, pair) => {
-  acc[pair[0]] = pair[1];
+  acc[pair[0]] = pair[1]
 
   return acc
-};
+}
 
-const parseReducer = (valueReviver, obj, path) => (acc, key) =>
-  [...acc, [key, valueReviver('', obj[key], path.concat(key))]];
+const parseReducer = (valueReviver, obj, path) => (acc, key) => [
+  ...acc,
+  [key, valueReviver('', obj[key], path.concat(key))]
+]
 
 const reviverFactory$3 = valueMetadata => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
+  const valueReviver = reviverOrAsIs(
+    isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata
+  )
 
-  const innerMap = (v === null)
+  const innerMap = v === null
     ? null
-    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []));
+    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []))
 
   return StringMap.fromMap(innerMap)
-};
+}
 
-let EMPTY_STRING_MAP;
+let EMPTY_STRING_MAP
 
 class StringMap extends AbstractMap$1 {
-  constructor (innerMap) {
-    super(StringMap, innerMap, EMPTY_STRING_MAP);
+  constructor(innerMap) {
+    super(StringMap, innerMap, EMPTY_STRING_MAP)
 
     if (!EMPTY_STRING_MAP && this.size === 0) {
-      EMPTY_STRING_MAP = this;
+      EMPTY_STRING_MAP = this
     }
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoStringMap'
   }
 
-  set (key, value) {
+  set(key, value) {
     return set(this, StringMap, key, value)
   }
 
-  toJSON () {
+  toJSON() {
     return [...this].reduce(stringifyReducer, {})
   }
 
-  static fromMap (map) {
+  static fromMap(map) {
     return new StringMap(map)
   }
 
-  static fromArray (pairs) {
+  static fromArray(pairs) {
     return StringMap.fromMap(new Map(pairs))
   }
 
-  static of (...args) {
+  static of(...args) {
     return of(StringMap, args)
   }
 
-  static fromObject (obj) {
+  static fromObject(obj) {
     return StringMap.fromArray(objToArr(obj))
   }
 
-  static metadata (valueMetadata) {
+  static metadata(valueMetadata) {
     return metadata$1(StringMap, reviverFactory$3, valueMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_STRING_MAP || StringMap.of()
   }
 }
 
-StringMap.displayName = 'StringMap';
+StringMap.displayName = 'StringMap'
 
-var StringMap$1 = Object.freeze(StringMap);
+var StringMap$1 = Object.freeze(StringMap)
 
 const stringifyReducer$1 = (acc, pair) => {
-  acc[pair[0].toJSON()] = pair[1];
+  acc[pair[0].toJSON()] = pair[1]
 
   return acc
-};
+}
 
 const parseMapper$1 = (keyReviver, valueReviver, obj, path) => enumerator => {
-  const key = keyReviver('', enumerator, path);
-  const val = valueReviver('', obj[enumerator], path.concat(enumerator));
+  const key = keyReviver('', enumerator, path)
+  const val = valueReviver('', obj[enumerator], path.concat(enumerator))
 
   return [key, val]
-};
+}
 
 const reviverFactory$4 = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   if (k !== '') {
     return v
   }
 
-  const keyReviver = reviverOrAsIs(isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata);
-  const valueReviver = reviverOrAsIs(isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata);
+  const keyReviver = reviverOrAsIs(
+    isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata
+  )
+  const valueReviver = reviverOrAsIs(
+    isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata
+  )
 
-  const innerMap = (v === null)
+  const innerMap = v === null
     ? null
-    : new Map(Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v, path)));
+    : new Map(
+        Object.keys(v).map(parseMapper$1(keyReviver, valueReviver, v, path))
+      )
 
   return new EnumMap(innerMap)
-};
+}
 
-let EMPTY_ENUM_MAP;
+let EMPTY_ENUM_MAP
 
 class EnumMap extends AbstractMap$1 {
-  constructor (innerMap) {
-    super(EnumMap, innerMap, EMPTY_ENUM_MAP);
+  constructor(innerMap) {
+    super(EnumMap, innerMap, EMPTY_ENUM_MAP)
 
     if (!EMPTY_ENUM_MAP && this.size === 0) {
-      EMPTY_ENUM_MAP = this;
+      EMPTY_ENUM_MAP = this
     }
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoEnumMap'
   }
 
-  set (enumerator, value) {
+  set(enumerator, value) {
     return set(this, EnumMap, enumerator, value)
   }
 
-  toJSON () {
+  toJSON() {
     return [...this].reduce(stringifyReducer$1, {})
   }
 
-  static fromMap (map) {
+  static fromMap(map) {
     return new EnumMap(map)
   }
 
-  static fromArray (pairs) {
+  static fromArray(pairs) {
     return EnumMap.fromMap(new Map(pairs))
   }
 
-  static of (...args) {
+  static of(...args) {
     return of(EnumMap, args)
   }
 
-  static metadata (keyMetadata, valueMetadata) {
+  static metadata(keyMetadata, valueMetadata) {
     return metadata$1(EnumMap, reviverFactory$4, keyMetadata, valueMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_ENUM_MAP || EnumMap.of()
   }
 }
 
-EnumMap.displayName = 'EnumMap';
+EnumMap.displayName = 'EnumMap'
 
-var EnumMap$1 = Object.freeze(EnumMap);
+var EnumMap$1 = Object.freeze(EnumMap)
 
 const reviver = (k, v) => {
   return ModelicoNumber.of(v)
-};
+}
 
 class ModelicoNumber extends Base$1 {
-  constructor (number = 0) {
-    super(ModelicoNumber);
+  constructor(number = 0) {
+    super(ModelicoNumber)
 
     if (!Number.isNaN(number) && isNothing(number)) {
       throw TypeError('missing number')
     }
 
-    this.inner = always(Number(number));
+    this.inner = always(Number(number))
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoNumber'
   }
 
-  set () {
-    unsupported('Number.set is not supported');
+  set() {
+    unsupported('Number.set is not supported')
   }
 
-  setIn (path, number) {
+  setIn(path, number) {
     if (path.length === 0) {
       return ModelicoNumber.of(number)
     }
 
-    unsupported('ModelicoNumber.setIn is not supported for non-empty paths');
+    unsupported('ModelicoNumber.setIn is not supported for non-empty paths')
   }
 
-  toJSON () {
-    const v = this.inner();
+  toJSON() {
+    const v = this.inner()
 
-    return Object.is(v, -0) ? '-0'
-      : (v === Infinity) ? 'Infinity'
-      : (v === -Infinity) ? '-Infinity'
-      : Number.isNaN(v) ? 'NaN'
-      : v
+    return Object.is(v, -0)
+      ? '-0'
+      : v === Infinity
+          ? 'Infinity'
+          : v === -Infinity ? '-Infinity' : Number.isNaN(v) ? 'NaN' : v
   }
 
-  equals (other) {
+  equals(other) {
     if (this === other) {
       return true
     }
@@ -829,70 +846,64 @@ class ModelicoNumber extends Base$1 {
     return haveSameValues(this.inner(), other.inner())
   }
 
-  static of (number) {
+  static of(number) {
     return new ModelicoNumber(number)
   }
 
-  static metadata () {
+  static metadata() {
     return Object.freeze({
       type: ModelicoNumber,
       reviver
     })
   }
-
-  static innerTypes () {
-    return emptyObject
-  }
 }
 
-ModelicoNumber.displayName = 'ModelicoNumber';
+ModelicoNumber.displayName = 'ModelicoNumber'
 
-var ModelicoNumber$1 = Object.freeze(ModelicoNumber);
+var ModelicoNumber$1 = Object.freeze(ModelicoNumber)
 
 const reviver$1 = (k, v) => {
-  const date = (v === null)
-    ? null
-    : new Date(v);
+  const date = v === null ? null : new Date(v)
 
   return new ModelicoDate(date)
-};
+}
 
 class ModelicoDate extends Base$1 {
-  constructor (dateOrig = new Date()) {
-    super(ModelicoDate);
+  constructor(dateOrig = new Date()) {
+    super(ModelicoDate)
 
     if (isNothing(dateOrig)) {
       throw TypeError('missing date')
     }
 
-    const date = new Date(dateOrig.getTime());
+    const date = new Date(dateOrig.getTime())
 
-    this.inner = () => new Date(date.getTime());
+    this.inner = () => new Date(date.getTime())
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoDate'
   }
 
-  set () {
-    unsupported('Date.set is not supported');
+  set() {
+    unsupported('Date.set is not supported')
   }
 
-  setIn (path, date) {
+  setIn(path, date) {
     if (path.length === 0) {
       return ModelicoDate.of(date)
     }
 
-    unsupported('Date.setIn is not supported for non-empty paths');
+    unsupported('Date.setIn is not supported for non-empty paths')
   }
 
-  toJSON () {
+  toJSON() {
     return this.inner().toISOString()
   }
 
-  equals (other) {
+  equals(other) {
     if (this === other) {
       return true
     }
@@ -904,49 +915,53 @@ class ModelicoDate extends Base$1 {
     return this.toJSON() === other.toJSON()
   }
 
-  static of (date) {
+  static of(date) {
     return new ModelicoDate(date)
   }
 
-  static metadata () {
+  static metadata() {
     return Object.freeze({
       type: ModelicoDate,
       reviver: reviver$1
     })
   }
-
-  static innerTypes () {
-    return emptyObject
-  }
 }
 
-ModelicoDate.displayName = 'ModelicoDate';
+ModelicoDate.displayName = 'ModelicoDate'
 
-var ModelicoDate$1 = Object.freeze(ModelicoDate);
+var ModelicoDate$1 = Object.freeze(ModelicoDate)
 
-const iterableReviverFactory = (IterableType, itemMetadata) => (k, v, path = []) => {
+const iterableReviverFactory = (IterableType, itemMetadata) => (
+  k,
+  v,
+  path = []
+) => {
   if (k !== '') {
     return v
   }
 
-  const isTuple = Array.isArray(itemMetadata);
+  const isTuple = Array.isArray(itemMetadata)
 
   if (isTuple && v.length !== itemMetadata.length) {
     throw TypeError('tuple has missing or extra items')
   }
 
   const itemMetadataGetter = isTuple
-    ? i => isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
-    : isFunction(itemMetadata) ? always(itemMetadata(v, path)) : always(itemMetadata);
+    ? i =>
+        (isFunction(itemMetadata[i])
+          ? itemMetadata[i](v, path)
+          : itemMetadata[i])
+    : isFunction(itemMetadata)
+        ? always(itemMetadata(v, path))
+        : always(itemMetadata)
 
-  const revive = (x, i) => reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i));
+  const revive = (x, i) =>
+    reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i))
 
-  const iterable = (v === null)
-    ? null
-    : v.map(revive);
+  const iterable = v === null ? null : v.map(revive)
 
   return new IterableType(iterable)
-};
+}
 
 const iterableMetadata = (IterableType, itemMetadata) => {
   return Object.freeze({
@@ -954,7 +969,7 @@ const iterableMetadata = (IterableType, itemMetadata) => {
     subtypes: Object.freeze([itemMetadata]),
     reviver: iterableReviverFactory(IterableType, itemMetadata)
   })
-};
+}
 
 const iterableEquals = (thisArg, other, asUnordered = false) => {
   if (thisArg === other) {
@@ -965,11 +980,11 @@ const iterableEquals = (thisArg, other, asUnordered = false) => {
     return false
   }
 
-  const thisIter = thisArg[Symbol.iterator]();
-  const otherIter = other[Symbol.iterator]();
+  const thisIter = thisArg[Symbol.iterator]()
+  const otherIter = other[Symbol.iterator]()
 
   for (let i = 0; i < thisArg.size; i += 1) {
-    const item = thisIter.next().value;
+    const item = thisIter.next().value
 
     if (asUnordered) {
       if (!other.has(item)) {
@@ -981,13 +996,13 @@ const iterableEquals = (thisArg, other, asUnordered = false) => {
   }
 
   return true
-};
+}
 
-let EMPTY_LIST;
+let EMPTY_LIST
 
 class List extends Base$1 {
-  constructor (innerList = []) {
-    super(List);
+  constructor(innerList = []) {
+    super(List)
 
     if (isNothing(innerList)) {
       throw TypeError('missing list')
@@ -997,49 +1012,49 @@ class List extends Base$1 {
       return EMPTY_LIST
     }
 
-    Object.freeze(innerList);
+    Object.freeze(innerList)
 
-    this.inner = always(innerList);
-    this[innerOrigSymbol] = this.inner;
-    this.size = innerList.length;
+    this.inner = always(innerList)
+    this[innerOrigSymbol] = this.inner
+    this.size = innerList.length
 
     if (!EMPTY_LIST && this.size === 0) {
-      EMPTY_LIST = this;
+      EMPTY_LIST = this
     }
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoList'
   }
 
-  [Symbol.iterator] () {
+  [Symbol.iterator]() {
     return this.inner()[Symbol.iterator]()
   }
 
-  includes (...args) {
+  includes(...args) {
     return this.inner().includes(...args)
   }
 
-  get (index) {
+  get(index) {
     return this.inner()[index]
   }
 
-  set (index, value) {
-    const newList = [...this];
-    newList[index] = value;
+  set(index, value) {
+    const newList = [...this]
+    newList[index] = value
 
     return List.fromArray(newList)
   }
 
-  setIn (path, value) {
+  setIn(path, value) {
     if (path.length === 0) {
       return List.fromArray(value)
     }
 
-    const [key, ...restPath] = path;
-    const item = this.inner()[key];
+    const [key, ...restPath] = path
+    const item = this.inner()[key]
 
     if (!item.setIn) {
       return this.set(key, value)
@@ -1048,46 +1063,42 @@ class List extends Base$1 {
     return this.set(key, item.setIn(restPath, value))
   }
 
-  toJSON () {
+  toJSON() {
     return this.inner()
   }
 
-  equals (other) {
+  equals(other) {
     return iterableEquals(this, other)
   }
 
-  static fromArray (arr) {
+  static fromArray(arr) {
     return new List(arr)
   }
 
-  static of (...arr) {
+  static of(...arr) {
     return List.fromArray(arr)
   }
 
-  static metadata (itemMetadata) {
+  static metadata(itemMetadata) {
     return iterableMetadata(List, itemMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_LIST || List.of()
   }
 }
 
-List.displayName = 'List';
+List.displayName = 'List'
 
-var List$1 = Object.freeze(List);
+var List$1 = Object.freeze(List)
 
-let EMPTY_SET;
+let EMPTY_SET
 
-const copy$1 = set => new Set(set);
+const copy$1 = set => new Set(set)
 
 class ModelicoSet extends Base$1 {
-  constructor (innerSetOrig = new Set()) {
-    super(ModelicoSet);
+  constructor(innerSetOrig = new Set()) {
+    super(ModelicoSet)
 
     if (isNothing(innerSetOrig)) {
       throw TypeError('missing set')
@@ -1097,79 +1108,75 @@ class ModelicoSet extends Base$1 {
       return EMPTY_SET
     }
 
-    const innerSet = copy$1(innerSetOrig);
+    const innerSet = copy$1(innerSetOrig)
 
-    this[innerOrigSymbol] = always(innerSet);
-    this.inner = () => copy$1(innerSet);
-    this.size = innerSet.size;
+    this[innerOrigSymbol] = always(innerSet)
+    this.inner = () => copy$1(innerSet)
+    this.size = innerSet.size
 
     if (!EMPTY_SET && this.size === 0) {
-      EMPTY_SET = this;
+      EMPTY_SET = this
     }
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoSet'
   }
 
-  [Symbol.iterator] () {
+  [Symbol.iterator]() {
     return this.inner()[Symbol.iterator]()
   }
 
-  has (key) {
+  has(key) {
     return this[innerOrigSymbol]().has(key)
   }
 
-  set () {
-    unsupported('Set.set is not supported');
+  set() {
+    unsupported('Set.set is not supported')
   }
 
-  setIn (path, set) {
+  setIn(path, set) {
     if (path.length === 0) {
       return new ModelicoSet(set)
     }
 
-    unsupported('Set.setIn is not supported for non-empty paths');
+    unsupported('Set.setIn is not supported for non-empty paths')
   }
 
-  toJSON () {
+  toJSON() {
     return [...this]
   }
 
-  equals (...args) {
+  equals(...args) {
     return iterableEquals(this, ...args)
   }
 
-  static fromSet (set) {
+  static fromSet(set) {
     return new ModelicoSet(set)
   }
 
-  static fromArray (arr) {
+  static fromArray(arr) {
     return ModelicoSet.fromSet(new Set(arr))
   }
 
-  static of (...arr) {
+  static of(...arr) {
     return ModelicoSet.fromArray(arr)
   }
 
-  static metadata (itemMetadata) {
+  static metadata(itemMetadata) {
     return iterableMetadata(ModelicoSet, itemMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_SET || ModelicoSet.of()
   }
 }
 
-ModelicoSet.displayName = 'ModelicoSet';
+ModelicoSet.displayName = 'ModelicoSet'
 
-var ModelicoSet$1 = Object.freeze(ModelicoSet);
+var ModelicoSet$1 = Object.freeze(ModelicoSet)
 
 const reviverFactory$5 = itemMetadata => (k, v, path) => {
   if (k !== '') {
@@ -1178,169 +1185,153 @@ const reviverFactory$5 = itemMetadata => (k, v, path) => {
 
   const metadata = isFunction(itemMetadata)
     ? itemMetadata(v, path)
-    : itemMetadata;
+    : itemMetadata
 
-  const revive = (v === null)
+  const revive = v === null
     ? always(null)
-    : defaultTo(metadata.reviver)(metadata.maybeReviver);
+    : defaultTo(metadata.reviver)(metadata.maybeReviver)
 
-  const revivedValue = revive(k, v, path);
+  const revivedValue = revive(k, v, path)
 
   return Maybe.of(revivedValue)
-};
+}
 
 class Maybe extends Base$1 {
-  constructor () {
-    super(Maybe);
+  constructor() {
+    super(Maybe)
   }
 
-  get (fieldOrFallbackPair) {
-    const fallback = fieldOrFallbackPair[0];
-    const field = fieldOrFallbackPair[1];
-    const item = this.getOrElse(fallback);
+  get(fieldOrFallbackPair) {
+    const fallback = fieldOrFallbackPair[0]
+    const field = fieldOrFallbackPair[1]
+    const item = this.getOrElse(fallback)
 
-    return item.get
-      ? item.get(field)
-      : item
+    return item.get ? item.get(field) : item
   }
 
-  set (field, v) {
+  set(field, v) {
     if (this.isEmpty()) {
       return this
     }
 
-    const item = this.inner();
+    const item = this.inner()
 
     if (isNothing(item)) {
       return this
     }
 
-    const newItem = (item.set)
-      ? item.set(field, v)
-      : null;
+    const newItem = item.set ? item.set(field, v) : null
 
     return Maybe.of(newItem)
   }
 
-  setIn (path, v) {
+  setIn(path, v) {
     if (path.length === 0) {
       return Maybe.of(v)
     }
 
-    const [fallbackOrFieldPair, ...restPath] = path;
-    const fallback = fallbackOrFieldPair[0];
-    const field = fallbackOrFieldPair[1];
+    const [fallbackOrFieldPair, ...restPath] = path
+    const fallback = fallbackOrFieldPair[0]
+    const field = fallbackOrFieldPair[1]
 
-    const item = this.isEmpty()
-      ? fallback
-      : this.inner();
+    const item = this.isEmpty() ? fallback : this.inner()
 
-    const inner = (item.setIn)
-      ? item.setIn([field, ...restPath], v)
-      : null;
+    const inner = item.setIn ? item.setIn([field, ...restPath], v) : null
 
     return Maybe.of(inner)
   }
 
-  static of (v) {
-    return isNothing(v)
-      ? new Nothing()
-      : new Just(v)
+  static of(v) {
+    return isNothing(v) ? new Nothing() : new Just(v)
   }
 
-  static metadata (itemMetadata) {
+  static metadata(itemMetadata) {
     return Object.freeze({
       type: Maybe,
       subtypes: [itemMetadata],
       reviver: reviverFactory$5(itemMetadata),
-      default: Maybe.of()
+      default: new Nothing()
     })
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 
-Maybe.displayName = 'Maybe';
+Maybe.displayName = 'Maybe'
 
-let nothing;
+let nothing
 
 class Nothing extends Maybe {
-  constructor () {
-    super();
+  constructor() {
+    super()
 
     if (!nothing) {
-      this.inner = always(TypeError('nothing holds no value'));
-      nothing = this;
+      this.inner = always(TypeError('nothing holds no value'))
+      nothing = this
     }
 
     return nothing
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoNothing'
   }
 
-  toJSON () {
+  toJSON() {
     return null
   }
 
-  isEmpty () {
+  isEmpty() {
     return true
   }
 
-  getOrElse (v) {
+  getOrElse(v) {
     return v
   }
 
-  map () {
+  map() {
     return this
   }
 
-  equals (other) {
-    return (this === other)
+  equals(other) {
+    return this === other
   }
 }
 
 class Just extends Maybe {
-  constructor (v) {
-    super();
+  constructor(v) {
+    super()
 
-    this.inner = always(v);
+    this.inner = always(v)
 
-    Object.freeze(this);
+    Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoJust'
   }
 
-  toJSON () {
-    const v = this.inner();
+  toJSON() {
+    const v = this.inner()
 
     if (isNothing(v)) {
       return null
     }
 
-    return (v.toJSON)
-      ? v.toJSON()
-      : v
+    return v.toJSON ? v.toJSON() : v
   }
 
-  isEmpty () {
+  isEmpty() {
     return false
   }
 
-  getOrElse (v) {
+  getOrElse() {
     return this.inner()
   }
 
-  map (f) {
+  map(f) {
     return Just.of(f(this.inner()))
   }
 
-  equals (other) {
+  equals(other) {
     if (this === other) {
       return true
     }
@@ -1352,27 +1343,24 @@ class Just extends Maybe {
     return equals(this.inner(), other.inner())
   }
 
-  static of (v) {
+  static of(v) {
     return new Just(v)
   }
 }
 
-Just.displayName = 'Just';
+Just.displayName = 'Just'
 
-Maybe.Nothing = new Nothing();
-Maybe.Just = Just;
+Maybe.Nothing = new Nothing()
+Maybe.Just = Just
 
-var Maybe$1 = Object.freeze(Maybe);
+var Maybe$1 = Object.freeze(Maybe)
 
-const metadataCache = new WeakMap();
+const metadataCache = new WeakMap()
 
-const base = Type =>
-  Object.freeze({type: Type, reviver: reviverFactory(Type)});
+const base = Type => Object.freeze({type: Type, reviver: reviverFactory(Type)})
 
 const raw_ = (Type, innerMetadata) =>
-  Type.metadata
-    ? Type.metadata(...innerMetadata)
-    : base(Type);
+  (Type.metadata ? Type.metadata(...innerMetadata) : base(Type))
 
 const _$1 = (Type, metadata = []) => {
   if (metadata.length > 0) {
@@ -1380,97 +1368,97 @@ const _$1 = (Type, metadata = []) => {
   }
 
   if (!metadataCache.has(Type)) {
-    metadataCache.set(Type, raw_(Type, metadata));
+    metadataCache.set(Type, raw_(Type, metadata))
   }
 
   return metadataCache.get(Type)
-};
+}
 
-const metadata = () => Object.freeze({
-  _: _$1,
-  base,
-  asIs,
-  any,
-  anyOf,
-  number: ({ wrap = false } = {}) => wrap ? ModelicoNumber$1.metadata() : asIs(Number),
+const metadata = () =>
+  Object.freeze({
+    _: _$1,
+    base,
+    asIs,
+    any,
+    anyOf,
+    number: ({wrap = false} = {}) =>
+      (wrap ? ModelicoNumber$1.metadata() : asIs(Number)),
 
-  string: always(asIs(String)),
-  boolean: always(asIs(Boolean)),
+    string: always(asIs(String)),
+    boolean: always(asIs(Boolean)),
 
-  date: ModelicoDate$1.metadata,
-  enumMap: EnumMap$1.metadata,
-  list: List$1.metadata,
-  map: ModelicoMap$1.metadata,
-  stringMap: StringMap$1.metadata,
-  maybe: Maybe$1.metadata,
-  set: ModelicoSet$1.metadata,
+    date: ModelicoDate$1.metadata,
+    enumMap: EnumMap$1.metadata,
+    list: List$1.metadata,
+    map: ModelicoMap$1.metadata,
+    stringMap: StringMap$1.metadata,
+    maybe: Maybe$1.metadata,
+    set: ModelicoSet$1.metadata,
 
-  withDefault: (metadata, def) => {
-    const defaultValue = reviverOrAsIs(metadata)('', def);
+    withDefault: (metadata, def) => {
+      const defaultValue = reviverOrAsIs(metadata)('', def)
 
-    return Object.freeze(Object.assign({}, metadata, { default: defaultValue }))
-  }
-});
+      return Object.freeze(Object.assign({}, metadata, {default: defaultValue}))
+    }
+  })
 
-const enumeratorsReducer = (acc, code) => Object.assign(acc, { [code]: { code } });
+const enumeratorsReducer = (acc, code) => Object.assign(acc, {[code]: {code}})
 
 const reviverFactory$6 = enumerators => (k, v, path = []) => {
-  const enumerator = enumerators[v];
+  const enumerator = enumerators[v]
 
   if (isNothing(enumerator)) {
     throw TypeError(`missing enumerator "${v}" at "${path.join(' -> ')}"`)
   }
 
   return enumerator
-};
+}
 
 class Enum extends Base$1 {
-  constructor (input, Ctor = Enum, displayName = Ctor.displayName) {
+  constructor(input, Ctor = Enum, displayName = Ctor.displayName) {
     const enumerators = Array.isArray(input)
       ? input.reduce(enumeratorsReducer, {})
-      : input;
+      : input
 
     if (Ctor !== Enum) {
-      Ctor.displayName = displayName;
-      Object.freeze(Ctor);
+      Ctor.displayName = displayName
+      Object.freeze(Ctor)
     }
 
-    super(Ctor);
+    super(Ctor)
 
-    Object.getOwnPropertyNames(enumerators)
-      .forEach(enumerator => {
-        this[enumerator] = always(enumerators[enumerator]);
-        enumerators[enumerator][typeSymbol] = always(this);
-        enumerators[enumerator].toJSON = always(enumerator);
-        enumerators[enumerator].equals = other => (enumerators[enumerator] === other);
-      });
+    Object.getOwnPropertyNames(enumerators).forEach(enumerator => {
+      this[enumerator] = always(enumerators[enumerator])
+      enumerators[enumerator][typeSymbol] = always(this)
+      enumerators[enumerator].toJSON = always(enumerator)
+      enumerators[enumerator].equals = other =>
+        enumerators[enumerator] === other
+    })
 
     Object.defineProperty(this, 'metadata', {
-      value: always(Object.freeze({
-        type: Ctor,
-        enumerators,
-        reviver: reviverFactory$6(enumerators)
-      }))
-    });
+      value: always(
+        Object.freeze({
+          type: Ctor,
+          enumerators,
+          reviver: reviverFactory$6(enumerators)
+        })
+      )
+    })
   }
 
-  static fromObject (...args) {
+  static fromObject(...args) {
     return new Enum(...args)
   }
 
-  static fromArray (...args) {
+  static fromArray(...args) {
     return new Enum(...args)
-  }
-
-  static innerTypes () {
-    return emptyObject
   }
 }
 
 Object.defineProperty(Enum, 'displayName', {
   value: 'Enum',
   writable: true
-});
+})
 
 const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   if (!nonMutators.includes(prop)) {
@@ -1478,16 +1466,24 @@ const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   }
 
   return (...args) => {
-    const newObj = target[prop](...args);
+    const newObj = target[prop](...args)
 
     return proxyFactory(nonMutators, mutators, innerCloner, newObj)
   }
-};
+}
 
-const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, target, prop) => {
+const proxyToInner = (
+  inner,
+  candidate,
+  nonMutators,
+  mutators,
+  innerCloner,
+  target,
+  prop
+) => {
   if (nonMutators.includes(prop)) {
     return (...args) => {
-      const newObj = target.setIn([], candidate.apply(inner, args));
+      const newObj = target.setIn([], candidate.apply(inner, args))
 
       return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
@@ -1495,8 +1491,8 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, targ
 
   if (mutators.includes(prop)) {
     return (...args) => {
-      candidate.apply(inner, args);
-      const newObj = target.setIn([], inner);
+      candidate.apply(inner, args)
+      const newObj = target.setIn([], inner)
 
       return proxyFactory(nonMutators, mutators, innerCloner, newObj)
     }
@@ -1505,7 +1501,7 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, targ
   return (...args) => {
     return candidate.apply(inner, args)
   }
-};
+}
 
 const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
   const get = (target, prop) => {
@@ -1513,36 +1509,52 @@ const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
       return proxyToSelf(nonMutators, mutators, innerCloner, target, prop)
     }
 
-    const inner = innerCloner(target.inner());
-    const candidate = inner[prop];
+    const inner = innerCloner(target.inner())
+    const candidate = inner[prop]
 
     if (typeof candidate === 'function') {
-      return proxyToInner(inner, candidate, nonMutators, mutators, innerCloner, target, prop)
+      return proxyToInner(
+        inner,
+        candidate,
+        nonMutators,
+        mutators,
+        innerCloner,
+        target,
+        prop
+      )
     }
 
     return candidate
-  };
+  }
 
   return new Proxy(obj, {get})
-};
+}
 
-const formatError = (ajv, schema, value, path = []) => [
-  'Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n',
-  JSON.stringify(schema, null, 2) + '\n',
-  'the value (data path "' + ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) + '")\n',
-  JSON.stringify(value, null, 2) + '\n'
-].concat(ajv.errors.map(error => error.message)).join('\n');
+const formatError = (ajv, schema, value, path = []) =>
+  [
+    'Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n',
+    JSON.stringify(schema, null, 2) + '\n',
+    'the value (data path "' +
+      ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) +
+      '")\n',
+    JSON.stringify(value, null, 2) + '\n'
+  ]
+    .concat(ajv.errors.map(error => error.message))
+    .join('\n')
 
-const formatDefaultValueError = (ajv, schema, value) => [
-  'Invalid default value. According to the schema\n',
-  JSON.stringify(schema, null, 2) + '\n',
-  'the default value\n',
-  JSON.stringify(value, null, 2) + '\n'
-].concat(ajv.errors.map(error => error.message)).join('\n');
+const formatDefaultValueError = (ajv, schema, value) =>
+  [
+    'Invalid default value. According to the schema\n',
+    JSON.stringify(schema, null, 2) + '\n',
+    'the default value\n',
+    JSON.stringify(value, null, 2) + '\n'
+  ]
+    .concat(ajv.errors.map(error => error.message))
+    .join('\n')
 
-var ajvMetadata = (ajv = { validate: T }) => {
-  const metadata = M.metadata();
-  const ajvMetadata = {};
+var ajvMetadata = (ajv = {validate: T}) => {
+  const metadata = M.metadata()
+  const ajvMetadata = {}
 
   const {
     _,
@@ -1561,16 +1573,20 @@ var ajvMetadata = (ajv = { validate: T }) => {
     set,
     maybe,
     withDefault
-  } = metadata;
+  } = metadata
 
-  const ensure = (metadata, schema, valueTransformer = identity) => (k, value, path) => {
+  const ensure = (metadata, schema, valueTransformer = identity) => (
+    k,
+    value,
+    path
+  ) => {
     if (k !== '') {
       return value
     }
 
-    const valid = (schema === emptyObject)
+    const valid = schema === emptyObject
       ? true
-      : ajv.validate(schema, valueTransformer(value));
+      : ajv.validate(schema, valueTransformer(value))
 
     if (!valid) {
       throw TypeError(formatError(ajv, schema, value, path))
@@ -1578,97 +1594,125 @@ var ajvMetadata = (ajv = { validate: T }) => {
 
     const resolvedMetadata = isFunction(metadata)
       ? metadata(value, path)
-      : metadata;
+      : metadata
 
     return resolvedMetadata.reviver('', value, path)
-  };
+  }
 
   const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
     if (k !== '') {
       return value
     }
 
-    const unwrappedValue = ensure(metadata, schema1)(k, value);
+    const unwrappedValue = ensure(metadata, schema1)(k, value)
 
     return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
-  };
+  }
 
-  const ajvMeta = (metadata, baseSchema, mainSchema = emptyObject, innerSchemaGetter = always(emptyObject)) => {
-    const schemaToCheck = (baseSchema === emptyObject && mainSchema === emptyObject)
+  const ajvMeta = (
+    metadata,
+    baseSchema,
+    mainSchema = emptyObject,
+    innerSchemaGetter = always(emptyObject)
+  ) => {
+    const schemaToCheck = baseSchema === emptyObject &&
+      mainSchema === emptyObject
       ? emptyObject
-      : Object.assign({}, baseSchema, mainSchema);
+      : Object.assign({}, baseSchema, mainSchema)
 
-    const reviver = ensure(metadata, schemaToCheck);
+    const reviver = ensure(metadata, schemaToCheck)
 
-    const schemaGetter = () => Object.assign({}, schemaToCheck, innerSchemaGetter());
+    const schemaGetter = () =>
+      Object.assign({}, schemaToCheck, innerSchemaGetter())
 
-    const baseMetadata = isFunction(metadata)
-      ? { type: metadata }
-      : metadata;
+    const baseMetadata = isFunction(metadata) ? {type: metadata} : metadata
 
-    return Object.assign({}, baseMetadata, { reviver, ownSchema: always(schemaToCheck), schema: schemaGetter })
-  };
+    return Object.assign({}, baseMetadata, {
+      reviver,
+      ownSchema: always(schemaToCheck),
+      schema: schemaGetter
+    })
+  }
 
-  ajvMetadata.ajvMeta = ajvMeta;
+  ajvMetadata.ajvMeta = ajvMeta
 
-  ajvMetadata.ajv_ = (Type, schema = emptyObject, innerMetadata) => {
-    const metadata = _(Type, innerMetadata);
+  ajvMetadata.ajv_ = (
+    Type,
+    schema = emptyObject,
+    innerMetadata,
+    topLevel = false
+  ) => {
+    const metadata = _(Type, innerMetadata)
 
-    return ajvMeta(metadata, emptyObject, schema, () => getSchema(metadata, false))
-  };
+    return ajvMeta(metadata, emptyObject, schema, () =>
+      getSchema(metadata, topLevel)
+    )
+  }
 
-  ajvMetadata.ajvBase = (Type, schema = emptyObject) => {
-    const metadata = base(Type);
+  ajvMetadata.ajvBase = (Type, schema = emptyObject, topLevel = false) => {
+    const metadata = base(Type)
 
-    return ajvMeta(metadata, { type: 'object' }, schema, () => getSchema(metadata, false))
-  };
+    return ajvMeta(metadata, {type: 'object'}, schema, () =>
+      getSchema(metadata, topLevel)
+    )
+  }
 
   ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
-    ajvMeta(asIs(transformer), schema);
+    ajvMeta(asIs(transformer), schema)
 
-  ajvMetadata.ajvAny = schema => ajvMetadata.ajvAsIs(schema);
+  ajvMetadata.ajvAny = schema => ajvMetadata.ajvAsIs(schema)
 
   ajvMetadata.ajvNumber = (schema, options = emptyObject) => {
-    const { wrap = false } = options;
-    const metadata = number(options);
+    const {wrap = false} = options
+    const metadata = number(options)
 
     if (!wrap) {
-      return ajvMeta(metadata, { type: 'number' }, schema)
+      return ajvMeta(metadata, {type: 'number'}, schema)
     }
 
-    const numberMeta = Object.assign({ type: 'number' }, schema);
+    const numberMeta = Object.assign({type: 'number'}, schema)
 
-    const reviver = ensureWrapped(metadata, {
-      anyOf: [
-        { type: 'number' },
-        { enum: ['-0', '-Infinity', 'Infinity', 'NaN'] }
-      ]
-    }, numberMeta);
+    const reviver = ensureWrapped(
+      metadata,
+      {
+        anyOf: [
+          {type: 'number'},
+          {enum: ['-0', '-Infinity', 'Infinity', 'NaN']}
+        ]
+      },
+      numberMeta
+    )
 
-    return Object.assign({}, metadata, { reviver, ownSchema: always(numberMeta), schema: always(numberMeta) })
-  };
+    return Object.assign({}, metadata, {
+      reviver,
+      ownSchema: always(numberMeta),
+      schema: always(numberMeta)
+    })
+  }
 
-  ajvMetadata.ajvString = schema =>
-    ajvMeta(string(), { type: 'string' }, schema);
+  ajvMetadata.ajvString = schema => ajvMeta(string(), {type: 'string'}, schema)
 
   ajvMetadata.ajvBoolean = schema =>
-    ajvMeta(boolean(), { type: 'boolean' }, schema);
+    ajvMeta(boolean(), {type: 'boolean'}, schema)
 
   ajvMetadata.ajvDate = schema =>
-    ajvMeta(date(), { type: 'string', format: 'date-time' }, schema);
+    ajvMeta(date(), {type: 'string', format: 'date-time'}, schema)
 
   ajvMetadata.ajvEnum = Type => {
-    const metadata = _(Type);
+    const metadata = _(Type)
 
-    return ajvMeta(metadata, {enum: Object.keys(metadata.enumerators)})
-  };
+    return ajvMeta(metadata, {
+      enum: Object.keys(metadata.enumerators)
+    })
+  }
 
   ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {
-    const enumeratorsKeys = Object.keys(keyMetadata.enumerators);
-    const keysRegex = `^(${enumeratorsKeys.join('|')})$`;
+    const enumeratorsKeys = Object.keys(keyMetadata.enumerators)
+    const keysRegex = `^(${enumeratorsKeys.join('|')})$`
 
     return ajvMeta(
-      enumMap(keyMetadata, valueMetadata), {
+      enumMap(keyMetadata, valueMetadata),
+      {
         type: 'object',
         maxProperties: enumeratorsKeys.length,
         additionalProperties: false,
@@ -1683,18 +1727,15 @@ var ajvMetadata = (ajv = { validate: T }) => {
         }
       })
     )
-  };
+  }
 
   const ajvList = (schema, itemMetadata) =>
-    ajvMeta(
-      list(itemMetadata),
-      { type: 'array' },
-      schema,
-      () => ({ items: getSchema(itemMetadata, false) })
-    );
+    ajvMeta(list(itemMetadata), {type: 'array'}, schema, () => ({
+      items: getSchema(itemMetadata, false)
+    }))
 
   const ajvTuple = (schema, itemsMetadata) => {
-    const length = itemsMetadata.length;
+    const length = itemsMetadata.length
 
     return ajvMeta(
       list(itemsMetadata),
@@ -1704,13 +1745,16 @@ var ajvMetadata = (ajv = { validate: T }) => {
         maxItems: length
       },
       schema,
-      () => ({ items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false)) })
+      () => ({
+        items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false))
+      })
     )
-  };
+  }
 
-  ajvMetadata.ajvList = (schema, itemMetadata) => Array.isArray(itemMetadata)
-    ? ajvTuple(schema, itemMetadata)
-    : ajvList(schema, itemMetadata);
+  ajvMetadata.ajvList = (schema, itemMetadata) =>
+    (Array.isArray(itemMetadata)
+      ? ajvTuple(schema, itemMetadata)
+      : ajvList(schema, itemMetadata))
 
   ajvMetadata.ajvMap = (schema, keyMetadata, valueMetadata) => {
     const baseSchema = {
@@ -1720,110 +1764,168 @@ var ajvMetadata = (ajv = { validate: T }) => {
         minItems: 2,
         maxItems: 2
       }
-    };
+    }
 
     const keyValueSchemaGetter = () => ({
-      items: Object.assign({
-        items: [
-          getSchema(keyMetadata, false),
-          getSchema(valueMetadata, false)
-        ]
-      }, baseSchema.items)
-    });
+      items: Object.assign(
+        {
+          items: [
+            getSchema(keyMetadata, false),
+            getSchema(valueMetadata, false)
+          ]
+        },
+        baseSchema.items
+      )
+    })
 
-    return ajvMeta(map(keyMetadata, valueMetadata), baseSchema, schema, keyValueSchemaGetter)
-  };
+    return ajvMeta(
+      map(keyMetadata, valueMetadata),
+      baseSchema,
+      schema,
+      keyValueSchemaGetter
+    )
+  }
 
   ajvMetadata.ajvStringMap = (schema, valueMetadata) =>
-    ajvMeta(
-      stringMap(valueMetadata),
-      { type: 'object' },
-      schema,
-      () => ({
-        additionalProperties: false,
-        patternProperties: { '.*': getSchema(valueMetadata, false) }
-      })
-    );
+    ajvMeta(stringMap(valueMetadata), {type: 'object'}, schema, () => ({
+      additionalProperties: false,
+      patternProperties: {
+        '.*': getSchema(valueMetadata, false)
+      }
+    }))
 
   ajvMetadata.ajvSet = (schema, itemMetadata) =>
-    ajvMeta(set(itemMetadata), {
-      type: 'array',
-      uniqueItems: true
-    }, schema, () => ({ items: getSchema(itemMetadata, false) }));
+    ajvMeta(
+      set(itemMetadata),
+      {
+        type: 'array',
+        uniqueItems: true
+      },
+      schema,
+      () => ({items: getSchema(itemMetadata, false)})
+    )
 
-  ajvMetadata.ajvMaybe = (itemMetadata) =>
-    ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () => getSchema(itemMetadata, false));
+  ajvMetadata.ajvMaybe = itemMetadata =>
+    ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () =>
+      getSchema(itemMetadata, false)
+    )
 
   ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
-    const schema = getSchema(metadata, false);
-    const valid = ajv.validate(schema, defaultValue);
+    const schema = getSchema(metadata)
+    const valid = ajv.validate(schema, defaultValue)
 
     if (!valid) {
       throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
     }
 
-    return ajvMeta(withDefault(metadata, defaultValue), {
-      default: defaultValue
-    }, emptyObject, always(schema))
-  };
+    return ajvMeta(
+      withDefault(metadata, defaultValue),
+      {
+        default: defaultValue
+      },
+      emptyObject,
+      always(schema)
+    )
+  }
 
   ajvMetadata.ajvAnyOf = (conditionedMetas, enumField) =>
     ajvMeta(anyOf(conditionedMetas, enumField), {
-      anyOf: conditionedMetas.map(conditionMeta => getSchema(conditionMeta[0], false))
-    });
+      anyOf: conditionedMetas.map(conditionMeta =>
+        getSchema(conditionMeta[0], false)
+      )
+    })
 
   return Object.freeze(Object.assign(ajvMetadata, metadata))
-};
+}
 
-const metadata$2 = metadata();
+const metadata$2 = metadata()
 
 const createModel = (
   innerTypes = emptyObject,
-  {stringTag = 'ModelicoModel', metadata: m = metadata$2} = {}
+  {base = Base$1, stringTag = 'ModelicoModel', metadata: m = metadata$2} = {}
 ) => {
-  return class extends Base$1 {
-    get [Symbol.toStringTag] () {
+  return class extends base {
+    get [Symbol.toStringTag]() {
       return stringTag
     }
 
-    static innerTypes (path, Type) {
+    static innerTypes(path, Type) {
       return isFunction(innerTypes)
-        ? innerTypes({m, path, Type})
+        ? innerTypes(m, {path, Type})
         : Object.freeze(innerTypes)
     }
   }
-};
+}
 
-const { _ } = metadata();
+const {_} = metadata()
 
-const internalNonMutators = ['set', 'setIn'];
+const internalNonMutators = ['set', 'setIn']
 
-const mapNonMutators = internalNonMutators;
-const mapMutators = ['delete', 'clear'];
+const mapNonMutators = internalNonMutators
+const mapMutators = ['delete', 'clear']
 
-const setNonMutators = internalNonMutators;
-const setMutators = ['add', 'delete', 'clear'];
+const setNonMutators = internalNonMutators
+const setMutators = ['add', 'delete', 'clear']
 
-const listNonMutators = internalNonMutators.concat(['concat', 'slice', 'filter']);
-const listMutators = ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'];
+const listNonMutators = internalNonMutators.concat([
+  'concat',
+  'slice',
+  'filter'
+])
+const listMutators = [
+  'copyWithin',
+  'fill',
+  'pop',
+  'push',
+  'reverse',
+  'shift',
+  'sort',
+  'splice',
+  'unshift'
+]
 
-const dateNonMutators = internalNonMutators;
-const dateMutators = ['setDate', 'setFullYear', 'setHours', 'setMinutes', 'setMilliseconds', 'setMonth', 'setSeconds',
-  'setTime', 'setUTCDate', 'setUTCFullYear', 'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth',
-  'setUTCSeconds', 'setYear'];
+const dateNonMutators = internalNonMutators
+const dateMutators = [
+  'setDate',
+  'setFullYear',
+  'setHours',
+  'setMinutes',
+  'setMilliseconds',
+  'setMonth',
+  'setSeconds',
+  'setTime',
+  'setUTCDate',
+  'setUTCFullYear',
+  'setUTCHours',
+  'setUTCMilliseconds',
+  'setUTCMinutes',
+  'setUTCMonth',
+  'setUTCSeconds',
+  'setYear'
+]
 
-const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity);
-const genericsFromJS = (Type, innerMetadata, js) => _(Type, innerMetadata).reviver('', js);
-const fromJS = (Type, js) => genericsFromJS(Type, [], js);
-const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) => _(Type, schema, innerMetadata).reviver('', js);
-const ajvFromJS = (_, Type, schema, js) => ajvGenericsFromJS(_, Type, schema, [], js);
+const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
+const genericsFromJS = (Type, innerMetadata, js) =>
+  _(Type, innerMetadata).reviver('', js)
+const fromJS = (Type, js) => genericsFromJS(Type, [], js)
+const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) =>
+  _(Type, schema, innerMetadata).reviver('', js)
+const ajvFromJS = (_, Type, schema, js) =>
+  ajvGenericsFromJS(_, Type, schema, [], js)
 
-const createAjvModel = (innerTypes, ajv) => {
-  return createModel(innerTypes, {metadata: ajvMetadata(ajv)})
-};
+const createAjvModel = (ajv, innerTypes, options = {}) => {
+  options.metadata = ajvMetadata(ajv)
+
+  return createModel(innerTypes, options)
+}
 
 var M = {
-  about: Object.freeze({ version, author, homepage, license }),
+  about: Object.freeze({
+    version,
+    author,
+    homepage,
+    license
+  }),
   Number: ModelicoNumber$1,
   Date: ModelicoDate$1,
   Enum,
@@ -1843,11 +1945,14 @@ var M = {
   fromJS,
   genericsFromJS,
   fromJSON: (Type, json) => fromJS(Type, JSON.parse(json)),
-  genericsFromJSON: (Type, innerMetadata, json) => genericsFromJS(Type, innerMetadata, JSON.parse(json)),
+  genericsFromJSON: (Type, innerMetadata, json) =>
+    genericsFromJS(Type, innerMetadata, JSON.parse(json)),
   ajvFromJS,
   ajvGenericsFromJS,
-  ajvFromJSON: (_, Type, schema, json) => ajvFromJS(_, Type, schema, JSON.parse(json)),
-  ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) => ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
+  ajvFromJSON: (_, Type, schema, json) =>
+    ajvFromJS(_, Type, schema, JSON.parse(json)),
+  ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) =>
+    ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
   metadata,
   ajvMetadata,
   getSchema,
@@ -1859,6 +1964,6 @@ var M = {
   proxyList: partial(proxyFactory, listNonMutators, listMutators, x => [...x]),
   proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
   proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)
-};
+}
 
-export default M;
+export default M
