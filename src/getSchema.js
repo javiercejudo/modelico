@@ -105,7 +105,8 @@ const getSchema = (metadata: Object, topLevel: boolean = true) => {
     const schemaKeys = Object.keys(schema)
 
     if (
-      !ref || (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))
+      !ref ||
+      (schemaKeys.length <= 1 && !Array.isArray(schema[schemaKeys[0]]))
     ) {
       return schema
     }
