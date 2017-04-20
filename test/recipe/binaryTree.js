@@ -1,7 +1,9 @@
 /* eslint-env mocha */
 
-export default (should, M, fixtures, {Ajv}) => () => {
-  const binaryTreeFactory = (valueMetadata, ajv) => {
+export default (should, M, {Animal}, {Ajv}) => () => {
+  const defaultCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
+
+  const binaryTreeFactory = (valueMetadata, {cmp = defaultCmp, ajv} = {}) => {
     const {_, base, ajvMeta, ajvBase} = M.ajvMetadata(ajv)
 
     const treeReviver = (k, obj, path = []) => {
@@ -22,7 +24,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
 
       static metadata() {
-        const baseMetadata = Object.assign({}, {reviver: treeReviver})
+        const baseMetadata = Object.assign({}, base(Tree), {
+          reviver: treeReviver
+        })
 
         return ajvMeta(baseMetadata, {}, {}, () => ({
           anyOf: [Empty, Node].map(x => M.getSchema(_(x), false))
@@ -82,7 +86,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         return arr
       }
 
-      arr.sort()
+      arr.sort(cmp)
 
       const centre = Math.floor(length / 2)
       const v = arr[centre]
@@ -108,12 +112,13 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
       insert(x) {
         const y = this.value()
+        const comparison = cmp(x, y)
 
-        if (x === y) {
+        if (comparison === 0) {
           return this
         }
 
-        return x > y
+        return comparison === 1
           ? this.set('right', this.right().insert(x))
           : this.set('left', this.left().insert(x))
       }
@@ -166,8 +171,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
   const ajv = Ajv()
   const {_, ajvNumber, ajvString} = M.ajvMetadata(ajv)
 
-  const numberTree = binaryTreeFactory(ajvNumber(), ajv)
-  const stringTree = binaryTreeFactory(ajvString(), ajv)
+  const numberTree = binaryTreeFactory(ajvNumber(), {ajv})
+  const stringTree = binaryTreeFactory(ajvString(), {ajv})
 
   it('Node.of() / empty / serialisation', () => {
     const {empty, Node, Tree} = numberTree
@@ -438,6 +443,119 @@ export default (should, M, fixtures, {Ajv}) => () => {
             }
           },
           required: ['value', 'left', 'right']
+        }
+      },
+      $ref: '#/definitions/1'
+    })
+  })
+
+  it('schema: Tree<Animal>', () => {
+    const ajv = Ajv()
+    const {ajvString} = M.ajvMetadata(ajv)
+
+    class Animal extends M.Base {
+      constructor(props) {
+        super(Animal, props)
+      }
+
+      static innerTypes() {
+        return Object.freeze({
+          name: ajvString({minLength: 1, maxLength: 25})
+        })
+      }
+    }
+
+    const baseCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
+    const cmp = (a, b) => baseCmp(a.name(), b.name())
+
+    const {Tree} = binaryTreeFactory(_(Animal), {cmp, ajv})
+
+    const bane = new Animal({name: 'Bane'})
+    const robbie = new Animal({name: 'Robbie'})
+    const sunny = new Animal({name: 'Sunny'})
+
+    const myTree = Tree.fromArray([bane, robbie, sunny])
+
+    myTree.toJS().should.deepEqual({
+      value: {
+        name: 'Bane'
+      },
+      left: null,
+      right: {
+        value: {
+          name: 'Robbie'
+        },
+        left: null,
+        right: {
+          value: {
+            name: 'Sunny'
+          },
+          left: null,
+          right: null
+        }
+      }
+    })
+
+    myTree.balance().toJS().should.deepEqual({
+      value: {
+        name: 'Robbie'
+      },
+      left: {
+        value: {
+          name: 'Bane'
+        },
+        left: null,
+        right: null
+      },
+      right: {
+        value: {
+          name: 'Sunny'
+        },
+        left: null,
+        right: null
+      }
+    })
+
+    M.getSchema(_(Tree)).should.deepEqual({
+      definitions: {
+        '1': {
+          anyOf: [
+            {
+              type: 'null'
+            },
+            {
+              $ref: '#/definitions/4'
+            }
+          ]
+        },
+        '4': {
+          type: 'object',
+          properties: {
+            value: {
+              $ref: '#/definitions/5'
+            },
+            left: {
+              $ref: '#/definitions/1'
+            },
+            right: {
+              $ref: '#/definitions/1'
+            }
+          },
+          required: ['value', 'left', 'right']
+        },
+        '5': {
+          type: 'object',
+          properties: {
+            name: {
+              $ref: '#/definitions/6'
+            }
+          },
+          required: ['name']
+        },
+        '6': {
+          type: 'string',
+          minLength: 1,
+          maxLength: 25
         }
       },
       $ref: '#/definitions/1'
