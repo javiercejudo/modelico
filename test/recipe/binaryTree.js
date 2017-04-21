@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default (should, M, {Animal}, {Ajv}) => () => {
+export default ({shuffle}, should, M, {Animal}, {Ajv}) => () => {
   const defaultCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
 
   const binaryTreeFactory = (valueMetadata, {cmp = defaultCmp, ajv} = {}) => {
@@ -58,6 +58,18 @@ export default (should, M, {Animal}, {Ajv}) => () => {
         return Node.of(x)
       }
 
+      fold(f, init) {
+        return init
+      }
+
+      has(x) {
+        return false
+      }
+
+      map(f) {
+        return this
+      }
+
       toArray() {
         return []
       }
@@ -111,8 +123,8 @@ export default (should, M, {Animal}, {Ajv}) => () => {
       }
 
       insert(x) {
-        const y = this.value()
-        const comparison = cmp(x, y)
+        const v = this.value()
+        const comparison = cmp(x, v)
 
         if (comparison === 0) {
           return this
@@ -121,6 +133,25 @@ export default (should, M, {Animal}, {Ajv}) => () => {
         return comparison === 1
           ? this.set('right', this.right().insert(x))
           : this.set('left', this.left().insert(x))
+      }
+
+      fold(f, init) {
+        const vInit = f(this.value(), init)
+        const lInit = this.left().fold(f, vInit)
+
+        return this.right().fold(f, lInit)
+      }
+
+      has(x) {
+        if (cmp(x, this.value()) === 0) {
+          return true
+        }
+
+        return this.left().has(x) || this.right().has(x)
+      }
+
+      map(f) {
+        return Node.of(f(this.value()), this.left().map(f), this.right().map(f))
       }
 
       toArray() {
@@ -305,6 +336,22 @@ export default (should, M, {Animal}, {Ajv}) => () => {
     const niceTree = Tree.fromArray([4, 2, 1, 3, 6, 5, 7])
 
     deepTree.balance().toJS().should.deepEqual(niceTree.toJS())
+  })
+
+  it('balance larger tree', () => {
+    const {Tree} = numberTree
+    const power = 6
+
+    const values = Array(2 ** power - 1).fill().map((_, i) => i)
+    const arr = shuffle(values)
+
+    const largeTree = Tree.fromArray(arr)
+    const balancedTree = largeTree.balance()
+
+    const depth = largeTree.depth()
+    const balancedDepth = balancedTree.depth()
+
+    balancedDepth.should.be.lessThan(depth).and.be.exactly(power)
   })
 
   it('.invert()', () => {
