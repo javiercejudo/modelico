@@ -1,7 +1,9 @@
 /* eslint-env mocha */
 
-export default (should, M, fixtures, {Ajv}) => () => {
-  const binaryTreeFactory = (valueMetadata, ajv) => {
+export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
+  const defaultCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
+
+  const binaryTreeFactory = (valueMetadata, {cmp = defaultCmp, ajv} = {}) => {
     const {_, base, ajvMeta, ajvBase} = M.ajvMetadata(ajv)
 
     const treeReviver = (k, obj, path = []) => {
@@ -22,7 +24,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
 
       static metadata() {
-        const baseMetadata = Object.assign({}, {reviver: treeReviver})
+        const baseMetadata = Object.assign({}, base(Tree), {
+          reviver: treeReviver
+        })
 
         return ajvMeta(baseMetadata, {}, {}, () => ({
           anyOf: [Empty, Node].map(x => M.getSchema(_(x), false))
@@ -54,6 +58,18 @@ export default (should, M, fixtures, {Ajv}) => () => {
         return Node.of(x)
       }
 
+      fold(f, init) {
+        return init
+      }
+
+      has(x) {
+        return false
+      }
+
+      map(f) {
+        return this
+      }
+
       toArray() {
         return []
       }
@@ -82,7 +98,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         return arr
       }
 
-      arr.sort()
+      arr.sort(cmp)
 
       const centre = Math.floor(length / 2)
       const v = arr[centre]
@@ -107,15 +123,35 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
 
       insert(x) {
-        const y = this.value()
+        const v = this.value()
+        const comparison = cmp(x, v)
 
-        if (x === y) {
+        if (comparison === 0) {
           return this
         }
 
-        return x > y
+        return comparison === 1
           ? this.set('right', this.right().insert(x))
           : this.set('left', this.left().insert(x))
+      }
+
+      fold(f, init) {
+        const vInit = f(this.value(), init)
+        const lInit = this.left().fold(f, vInit)
+
+        return this.right().fold(f, lInit)
+      }
+
+      has(x) {
+        if (cmp(x, this.value()) === 0) {
+          return true
+        }
+
+        return this.left().has(x) || this.right().has(x)
+      }
+
+      map(f) {
+        return Node.of(f(this.value()), this.left().map(f), this.right().map(f))
       }
 
       toArray() {
@@ -166,8 +202,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
   const ajv = Ajv()
   const {_, ajvNumber, ajvString} = M.ajvMetadata(ajv)
 
-  const numberTree = binaryTreeFactory(ajvNumber(), ajv)
-  const stringTree = binaryTreeFactory(ajvString(), ajv)
+  const numberTree = binaryTreeFactory(ajvNumber(), {ajv})
+  const stringTree = binaryTreeFactory(ajvString(), {ajv})
 
   it('Node.of() / empty / serialisation', () => {
     const {empty, Node, Tree} = numberTree
@@ -218,6 +254,52 @@ export default (should, M, fixtures, {Ajv}) => () => {
         }
       }
     })
+  })
+
+  it('.has()', () => {
+    const {Node} = numberTree
+
+    const myTree = Node.of(2, Node.of(1), Node.of(3))
+
+    myTree.has(1).should.be.exactly(true)
+    myTree.has(2).should.be.exactly(true)
+    myTree.has(3).should.be.exactly(true)
+
+    myTree.has(0).should.be.exactly(false)
+    myTree.has(4).should.be.exactly(false)
+  })
+
+  it('.fold()', () => {
+    const {Tree} = numberTree
+
+    const myTree = Tree.fromArray([4, 2, 1, 3, 6, 5, 7])
+    const add = (a, b) => a + b
+
+    myTree.fold(add, 0).should.be.exactly(28)
+  })
+
+  it('.map()', () => {
+    const {Node} = numberTree
+
+    const myTree = Node.of(2, Node.of(1), Node.of(3))
+    const myMappedTree = myTree.map(x => x ** 2)
+
+    myMappedTree.value().should.be.exactly(4)
+    myMappedTree.left().value().should.be.exactly(1)
+    myMappedTree.right().value().should.be.exactly(9)
+
+    myTree.depth().should.be.exactly(2)
+    myMappedTree.depth().should.be.exactly(2)
+
+    const myConstantTree = myTree.map(() => 1)
+
+    myConstantTree.value().should.be.exactly(1)
+    myConstantTree.left().value().should.be.exactly(1)
+    myConstantTree.right().value().should.be.exactly(1)
+
+    const myBalancedConstantTree = myConstantTree.balance()
+
+    myBalancedConstantTree.depth().should.be.exactly(1)
   })
 
   it('Tree.fromArray() / .toArray() / .depth()', () => {
@@ -300,6 +382,22 @@ export default (should, M, fixtures, {Ajv}) => () => {
     const niceTree = Tree.fromArray([4, 2, 1, 3, 6, 5, 7])
 
     deepTree.balance().toJS().should.deepEqual(niceTree.toJS())
+  })
+
+  it('balance larger tree', () => {
+    const {Tree} = numberTree
+    const power = 6
+
+    const values = Array(2 ** power - 1).fill().map((_, i) => i)
+    const arr = shuffle(values)
+
+    const largeTree = Tree.fromArray(arr)
+    const balancedTree = largeTree.balance()
+
+    const depth = largeTree.depth()
+    const balancedDepth = balancedTree.depth()
+
+    balancedDepth.should.be.lessThan(depth).and.be.exactly(power)
   })
 
   it('.invert()', () => {
@@ -438,6 +536,119 @@ export default (should, M, fixtures, {Ajv}) => () => {
             }
           },
           required: ['value', 'left', 'right']
+        }
+      },
+      $ref: '#/definitions/1'
+    })
+  })
+
+  it('schema: Tree<Animal>', () => {
+    const ajv = Ajv()
+    const {ajvString} = M.ajvMetadata(ajv)
+
+    class Animal extends M.Base {
+      constructor(props) {
+        super(Animal, props)
+      }
+
+      static innerTypes() {
+        return Object.freeze({
+          name: ajvString({minLength: 1, maxLength: 25})
+        })
+      }
+    }
+
+    const baseCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
+    const cmp = (a, b) => baseCmp(a.name(), b.name())
+
+    const {Tree} = binaryTreeFactory(_(Animal), {cmp, ajv})
+
+    const bane = new Animal({name: 'Bane'})
+    const robbie = new Animal({name: 'Robbie'})
+    const sunny = new Animal({name: 'Sunny'})
+
+    const myTree = Tree.fromArray([bane, robbie, sunny])
+
+    myTree.toJS().should.deepEqual({
+      value: {
+        name: 'Bane'
+      },
+      left: null,
+      right: {
+        value: {
+          name: 'Robbie'
+        },
+        left: null,
+        right: {
+          value: {
+            name: 'Sunny'
+          },
+          left: null,
+          right: null
+        }
+      }
+    })
+
+    myTree.balance().toJS().should.deepEqual({
+      value: {
+        name: 'Robbie'
+      },
+      left: {
+        value: {
+          name: 'Bane'
+        },
+        left: null,
+        right: null
+      },
+      right: {
+        value: {
+          name: 'Sunny'
+        },
+        left: null,
+        right: null
+      }
+    })
+
+    M.getSchema(_(Tree)).should.deepEqual({
+      definitions: {
+        '1': {
+          anyOf: [
+            {
+              type: 'null'
+            },
+            {
+              $ref: '#/definitions/4'
+            }
+          ]
+        },
+        '4': {
+          type: 'object',
+          properties: {
+            value: {
+              $ref: '#/definitions/5'
+            },
+            left: {
+              $ref: '#/definitions/1'
+            },
+            right: {
+              $ref: '#/definitions/1'
+            }
+          },
+          required: ['value', 'left', 'right']
+        },
+        '5': {
+          type: 'object',
+          properties: {
+            name: {
+              $ref: '#/definitions/6'
+            }
+          },
+          required: ['name']
+        },
+        '6': {
+          type: 'string',
+          minLength: 1,
+          maxLength: 25
         }
       },
       $ref: '#/definitions/1'

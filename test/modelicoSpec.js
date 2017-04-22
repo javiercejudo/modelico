@@ -68,11 +68,22 @@ const hasToStringTagSymbol = (() => {
   return a + '' === '[object foo]'
 })()
 
+// loosely based on https://bost.ocks.org/mike/shuffle/
+const shuffle = arr => {
+  for (let l = arr.length; l > 0; l -= 1) {
+    const i = Math.floor(l * Math.random())
+    ;[arr[l], arr[i]] = [arr[i], arr[l]]
+  }
+
+  return arr
+}
+
 const buildUtils = () =>
   Object.freeze({
     skipIfNoProxies: fn => (hasProxies ? fn : fn.skip),
     skipIfNoToStringTagSymbol: fn => (hasToStringTagSymbol ? fn : fn.skip),
-    objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
+    objToArr: obj => Object.keys(obj).map(k => [k, obj[k]]),
+    shuffle
   })
 
 export default ({Should, Modelico: M, extensions}) => () => {
@@ -121,7 +132,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))
   describe('Async reviving', asyncReviving(...deps))
-  describe('Binary tree', binaryTree(...deps))
+  describe('Binary tree', binaryTree(U, ...deps))
 
   U.skipIfNoProxies(describe)(
     'Immutable examples (proxied)',
