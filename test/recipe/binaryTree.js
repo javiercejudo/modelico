@@ -269,6 +269,15 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     myTree.has(4).should.be.exactly(false)
   })
 
+  it('.fold()', () => {
+    const {Tree} = numberTree
+
+    const myTree = Tree.fromArray([4, 2, 1, 3, 6, 5, 7])
+    const add = (a, b) => a + b
+
+    myTree.fold(add, 0).should.be.exactly(28)
+  })
+
   it('.map()', () => {
     const {Node} = numberTree
 
