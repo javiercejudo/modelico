@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default ({shuffle}, should, M, {Animal}, {Ajv}) => () => {
+export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
   const defaultCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
 
   const binaryTreeFactory = (valueMetadata, {cmp = defaultCmp, ajv} = {}) => {
@@ -254,6 +254,43 @@ export default ({shuffle}, should, M, {Animal}, {Ajv}) => () => {
         }
       }
     })
+  })
+
+  it('.has()', () => {
+    const {Node} = numberTree
+
+    const myTree = Node.of(2, Node.of(1), Node.of(3))
+
+    myTree.has(1).should.be.exactly(true)
+    myTree.has(2).should.be.exactly(true)
+    myTree.has(3).should.be.exactly(true)
+
+    myTree.has(0).should.be.exactly(false)
+    myTree.has(4).should.be.exactly(false)
+  })
+
+  it('.map()', () => {
+    const {Node} = numberTree
+
+    const myTree = Node.of(2, Node.of(1), Node.of(3))
+    const myMappedTree = myTree.map(x => x ** 2)
+
+    myMappedTree.value().should.be.exactly(4)
+    myMappedTree.left().value().should.be.exactly(1)
+    myMappedTree.right().value().should.be.exactly(9)
+
+    myTree.depth().should.be.exactly(2)
+    myMappedTree.depth().should.be.exactly(2)
+
+    const myConstantTree = myTree.map(() => 1)
+
+    myConstantTree.value().should.be.exactly(1)
+    myConstantTree.left().value().should.be.exactly(1)
+    myConstantTree.right().value().should.be.exactly(1)
+
+    const myBalancedConstantTree = myConstantTree.balance()
+
+    myBalancedConstantTree.depth().should.be.exactly(1)
   })
 
   it('Tree.fromArray() / .toArray() / .depth()', () => {
