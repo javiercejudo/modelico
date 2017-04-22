@@ -21,6 +21,7 @@ import ModelicoSet from './Set'
 import proxyFactory from './proxyFactory'
 import ajvMetadata from './ajvMetadata'
 import createModel from './createModel'
+import createUnionType from './createUnionType'
 
 const {_} = metadata()
 
@@ -85,12 +86,7 @@ const createAjvModel = (ajv, innerTypes, options = {}) => {
 }
 
 export default {
-  about: Object.freeze({
-    version,
-    author,
-    homepage,
-    license
-  }),
+  about: Object.freeze({version, author, homepage, license}),
   Number: ModelicoNumber,
   Date: ModelicoDate,
   Enum,
@@ -105,6 +101,7 @@ export default {
   Set: ModelicoSet,
   createModel,
   createAjvModel,
+  createUnionType,
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
   fromJS,
