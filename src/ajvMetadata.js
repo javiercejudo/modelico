@@ -14,16 +14,6 @@ const formatError = (ajv, schema, value, path = []) =>
     .concat(ajv.errors.map(error => error.message))
     .join('\n')
 
-const formatDefaultValueError = (ajv, schema, value) =>
-  [
-    'Invalid default value. According to the schema\n',
-    JSON.stringify(schema, null, 2) + '\n',
-    'the default value\n',
-    JSON.stringify(value, null, 2) + '\n'
-  ]
-    .concat(ajv.errors.map(error => error.message))
-    .join('\n')
-
 export default (ajv = {validate: T}) => {
   const metadata = M.metadata()
   const ajvMetadata = {}
@@ -43,8 +33,7 @@ export default (ajv = {validate: T}) => {
     map,
     stringMap,
     set,
-    maybe,
-    withDefault
+    maybe
   } = metadata
 
   const ensure = (metadata, schema, valueTransformer = identity) => (
@@ -281,24 +270,6 @@ export default (ajv = {validate: T}) => {
     ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () =>
       getSchema(itemMetadata, false)
     )
-
-  ajvMetadata.ajvWithDefault = (metadata, defaultValue) => {
-    const schema = getSchema(metadata)
-    const valid = ajv.validate(schema, defaultValue)
-
-    if (!valid) {
-      throw TypeError(formatDefaultValueError(ajv, schema, defaultValue))
-    }
-
-    return ajvMeta(
-      withDefault(metadata, defaultValue),
-      {
-        default: defaultValue
-      },
-      emptyObject,
-      always(schema)
-    )
-  }
 
   ajvMetadata.ajvAnyOf = (conditionedMetas, enumField) =>
     ajvMeta(anyOf(conditionedMetas, enumField), {

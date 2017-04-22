@@ -16,12 +16,12 @@ export default (should, M, fixtures, {Ajv}) => () => {
     ajvStringMap,
     ajvSet,
     ajvMaybe,
-    ajvWithDefault,
     ajvAnyOf,
 
     // normal
     _,
-    number
+    number,
+    withDefault
   } = M.ajvMetadata(Ajv())
 
   describe('Animal example', () => {
@@ -32,7 +32,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
       static innerTypes() {
         return Object.freeze({
-          name: ajvWithDefault(
+          name: withDefault(
             ajvString({minLength: 1, maxLength: 25}),
             'unknown'
           ),
@@ -144,7 +144,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
         },
         definitions: {
           '2': {
-            default: 'unknown',
             type: 'string',
             minLength: 1,
             maxLength: 25
@@ -687,7 +686,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
         static innerTypes() {
           return Object.freeze({
-            name: ajvWithDefault(
+            name: withDefault(
               ajvString({minLength: 1, maxLength: 25}),
               'unknown'
             ),
@@ -760,7 +759,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
             required: ['dimensions']
           },
           '4': {
-            default: 'unknown',
             type: 'string',
             minLength: 1,
             maxLength: 25
@@ -994,29 +992,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
   })
 
-  describe('ajvWithDefault', () => {
-    it('should validate the default value', () => {
-      class CountryCode extends M.Base {
-        constructor(props) {
-          super(CountryCode, props)
-        }
-
-        static innerTypes() {
-          return Object.freeze({
-            value: ajvWithDefault(
-              ajvString({minLength: 3, maxLength: 3}),
-              'SPAIN'
-            )
-          })
-        }
-      }
-
-      ;(() => new CountryCode()).should.throw(
-        /should NOT be longer than 3 characters/
-      )
-    })
-  })
-
   describe('recipe: validate within the constructor', () => {
     const ajv = Ajv()
 
@@ -1032,10 +1007,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
         static innerTypes() {
           return Object.freeze({
-            value: ajvWithDefault(
-              ajvString({minLength: 3, maxLength: 3}),
-              'ESP'
-            )
+            value: withDefault(ajvString({minLength: 3, maxLength: 3}), 'ESP')
           })
         }
       }
