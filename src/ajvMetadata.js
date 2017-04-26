@@ -1,6 +1,7 @@
-import {T, identity, always, emptyObject, isFunction} from './U'
-import getSchema from './getSchema'
+import {T, identity, always, emptyObject, isFunction, isPlainObject} from './U'
 import M from './'
+
+const getInnerSchema = metadata => M.getSchema(metadata, false)
 
 const formatError = (ajv, schema, value, path = []) =>
   [
@@ -15,6 +16,7 @@ const formatError = (ajv, schema, value, path = []) =>
     .join('\n')
 
 export default (ajv = {validate: T}) => {
+  const getSchema = M.getSchema
   const metadata = M.metadata()
   const ajvMetadata = {}
 
@@ -24,6 +26,7 @@ export default (ajv = {validate: T}) => {
     asIs,
     any,
     anyOf,
+    union,
     string,
     number,
     boolean,
@@ -184,7 +187,7 @@ export default (ajv = {validate: T}) => {
       schema,
       () => ({
         patternProperties: {
-          [keysRegex]: getSchema(valueMetadata, false)
+          [keysRegex]: getInnerSchema(valueMetadata, false)
         }
       })
     )
@@ -192,7 +195,7 @@ export default (ajv = {validate: T}) => {
 
   const ajvList = (schema, itemMetadata) =>
     ajvMeta(list(itemMetadata), {type: 'array'}, schema, () => ({
-      items: getSchema(itemMetadata, false)
+      items: getInnerSchema(itemMetadata)
     }))
 
   const ajvTuple = (schema, itemsMetadata) => {
@@ -207,7 +210,7 @@ export default (ajv = {validate: T}) => {
       },
       schema,
       () => ({
-        items: itemsMetadata.map(itemMetadata => getSchema(itemMetadata, false))
+        items: itemsMetadata.map(itemMetadata => getInnerSchema(itemMetadata))
       })
     )
   }
@@ -230,10 +233,7 @@ export default (ajv = {validate: T}) => {
     const keyValueSchemaGetter = () => ({
       items: Object.assign(
         {
-          items: [
-            getSchema(keyMetadata, false),
-            getSchema(valueMetadata, false)
-          ]
+          items: [getInnerSchema(keyMetadata), getInnerSchema(valueMetadata)]
         },
         baseSchema.items
       )
@@ -251,7 +251,7 @@ export default (ajv = {validate: T}) => {
     ajvMeta(stringMap(valueMetadata), {type: 'object'}, schema, () => ({
       additionalProperties: false,
       patternProperties: {
-        '.*': getSchema(valueMetadata, false)
+        '.*': getInnerSchema(valueMetadata)
       }
     }))
 
@@ -263,20 +263,29 @@ export default (ajv = {validate: T}) => {
         uniqueItems: true
       },
       schema,
-      () => ({items: getSchema(itemMetadata, false)})
+      () => ({items: getInnerSchema(itemMetadata)})
     )
 
   ajvMetadata.ajvMaybe = itemMetadata =>
     ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () =>
-      getSchema(itemMetadata, false)
+      getInnerSchema(itemMetadata)
     )
 
   ajvMetadata.ajvAnyOf = (conditionedMetas, enumField) =>
     ajvMeta(anyOf(conditionedMetas, enumField), {
       anyOf: conditionedMetas.map(conditionMeta =>
-        getSchema(conditionMeta[0], false)
+        getInnerSchema(conditionMeta[0])
       )
     })
+
+  ajvMetadata.ajvUnion = (Type, metasOrTypes, classifier) => {
+    const metas = metasOrTypes.map(x => (isPlainObject(x) ? x : _(x)))
+    const baseMetadata = union(Type, metas, classifier)
+
+    return ajvMeta(baseMetadata, emptyObject, emptyObject, () => ({
+      oneOf: metas.map(getInnerSchema)
+    }))
+  }
 
   return Object.freeze(Object.assign(ajvMetadata, metadata))
 }

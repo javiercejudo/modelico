@@ -1,9 +1,10 @@
-import {always, isNothing} from './U'
+import {always, isNothing, isPlainObject} from './U'
 
 import asIs from './asIs'
 import any from './any'
 import anyOf from './anyOf'
 import reviverFactory from './reviverFactory'
+import inferUnionClassifier from './inferUnionClassifier'
 
 import ModelicoMap from './Map'
 import StringMap from './StringMap'
@@ -50,6 +51,24 @@ const withDefault = (metadata, def) => {
   )
 }
 
+const union = (Type, metasOrTypes, classifier) => {
+  const metas = metasOrTypes.map(x => (isPlainObject(x) ? x : _(x)))
+
+  classifier = classifier === undefined
+    ? inferUnionClassifier(metas)
+    : classifier
+
+  const reviver = (k, obj, path = []) => {
+    if (k !== '') {
+      return obj
+    }
+
+    return classifier(obj).reviver(k, obj, path)
+  }
+
+  return Object.assign({}, base(Type), {reviver})
+}
+
 const metadata = () =>
   Object.freeze({
     _,
@@ -57,6 +76,7 @@ const metadata = () =>
     asIs,
     any,
     anyOf,
+    union,
     number: ({wrap = false} = {}) =>
       (wrap ? ModelicoNumber.metadata() : asIs(Number)),
 

@@ -22,7 +22,7 @@ describe('Modelico', () => {
       }
     })
   )
-  describe.skip(
+  describe(
     'Modelico Min',
     modelicoSpec({
       Should: Should,

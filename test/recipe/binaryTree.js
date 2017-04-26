@@ -4,18 +4,9 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
   const defaultCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
 
   const binaryTreeFactory = (valueMetadata, {cmp = defaultCmp, ajv} = {}) => {
-    const {_, base, ajvMeta, ajvBase} = M.ajvMetadata(ajv)
+    const {_, base, ajvBase, ajvUnion} = M.ajvMetadata(ajv)
 
-    const treeReviver = (k, obj, path = []) => {
-      if (k !== '') {
-        return obj
-      }
-
-      const subType = obj === null ? Empty : Node
-
-      return _(subType).reviver(k, obj, path)
-    }
-
+    const objClassifier = obj => _(obj === null ? Empty : Node)
     const insertReducer = (acc, x) => acc.insert(x)
 
     class Tree extends M.Base {
@@ -24,13 +15,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
 
       static metadata() {
-        const baseMetadata = Object.assign({}, base(Tree), {
-          reviver: treeReviver
-        })
-
-        return ajvMeta(baseMetadata, {}, {}, () => ({
-          anyOf: [Empty, Node].map(x => M.getSchema(_(x), false))
-        }))
+        return ajvUnion(Tree, [Empty, Node], objClassifier)
       }
     }
 
@@ -478,7 +463,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {
         '1': {
-          anyOf: [
+          oneOf: [
             {
               type: 'null'
             },
@@ -513,7 +498,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {
         '1': {
-          anyOf: [
+          oneOf: [
             {
               type: 'null'
             },
@@ -612,7 +597,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {
         '1': {
-          anyOf: [
+          oneOf: [
             {
               type: 'null'
             },
