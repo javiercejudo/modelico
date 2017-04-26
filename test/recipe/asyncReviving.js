@@ -63,7 +63,7 @@ export default (should, M) => () => {
         },
         {
           title: 'La colmena',
-          author: 'Camilo José Cela'
+          author: 'Camilo Jose Cela'
         }
       ]
     }

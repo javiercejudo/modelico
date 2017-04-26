@@ -11,9 +11,9 @@ var modelicoSpec = require('../dist/modelico-spec.js')
 var Modelico = require('../dist/modelico.js')
 var ModelicoMin = require('../dist/modelico.min.js')
 
-describe('Modélico', () => {
+describe('Modelico', () => {
   describe(
-    'Modélico Dev',
+    'Modelico Dev',
     modelicoSpec({
       Should: Should,
       Modelico: Modelico,
@@ -22,8 +22,8 @@ describe('Modélico', () => {
       }
     })
   )
-  describe(
-    'Modélico Min',
+  describe.skip(
+    'Modelico Min',
     modelicoSpec({
       Should: Should,
       Modelico: ModelicoMin,

@@ -45,7 +45,8 @@ import fixerIoFactory from './api-examples/fixer-io/index'
 import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 
 import ajvMetadata from './metadata/ajv'
-import baseMetadataExample from './metadata/base'
+import baseMetadata from './metadata/base'
+import withDefaultMetadata from './metadata/withDefault'
 
 import asyncReviving from './recipe/asyncReviving'
 import binaryTree from './recipe/binaryTree'
@@ -121,7 +122,8 @@ export default ({Should, Modelico: M, extensions}) => () => {
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
   describe('ajvMetadata', ajvMetadata(...deps))
-  describe('base metadata example', baseMetadataExample(...deps))
+  describe('base metadata', baseMetadata(...deps))
+  describe('withDefault metadata', withDefaultMetadata(...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))
