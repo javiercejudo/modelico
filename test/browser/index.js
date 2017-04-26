@@ -5,9 +5,9 @@
 
 var ModelicoMin = Modelico.noConflict()
 
-describe('Modélico', function() {
+describe('Modelico', function() {
   describe(
-    'Modélico Dev',
+    'Modelico Dev',
     modelicoSpec({
       Should: Should,
       Modelico: Modelico,
@@ -17,7 +17,7 @@ describe('Modélico', function() {
     })
   )
   describe(
-    'Modélico Min',
+    'Modelico Min',
     modelicoSpec({
       Should: Should,
       Modelico: ModelicoMin,

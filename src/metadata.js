@@ -1,4 +1,4 @@
-import {always, reviverOrAsIs} from './U'
+import {always, isNothing} from './U'
 
 import asIs from './asIs'
 import any from './any'
@@ -33,6 +33,23 @@ const _ = (Type, metadata = []) => {
   return metadataCache.get(Type)
 }
 
+const withDefault = (metadata, def) => {
+  const reviver = (k, v) => {
+    if (k !== '') {
+      return v
+    }
+
+    return metadata.reviver(k, isNothing(v) ? def : v)
+  }
+
+  return Object.freeze(
+    Object.assign({}, metadata, {
+      default: reviver('', def),
+      reviver
+    })
+  )
+}
+
 const metadata = () =>
   Object.freeze({
     _,
@@ -54,11 +71,7 @@ const metadata = () =>
     maybe: Maybe.metadata,
     set: ModelicoSet.metadata,
 
-    withDefault: (metadata, def) => {
-      const defaultValue = reviverOrAsIs(metadata)('', def)
-
-      return Object.freeze(Object.assign({}, metadata, {default: defaultValue}))
-    }
+    withDefault
   })
 
 export default metadata
