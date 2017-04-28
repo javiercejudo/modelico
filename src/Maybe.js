@@ -13,14 +13,15 @@ const reviverFactory = itemMetadata => (k, v, path) => {
     return v
   }
 
+  if (v === null) {
+    return new Nothing()
+  }
+
   const metadata = isFunction(itemMetadata)
     ? itemMetadata(v, path)
     : itemMetadata
 
-  const revive = v === null
-    ? always(null)
-    : defaultTo(metadata.reviver)(metadata.maybeReviver)
-
+  const revive = defaultTo(metadata.reviver)(metadata.maybeReviver)
   const revivedValue = revive(k, v, path)
 
   return Maybe.of(revivedValue)
@@ -31,9 +32,9 @@ class Maybe extends Base {
     super(Maybe)
   }
 
-  get(fieldOrFallbackPair) {
-    const fallback = fieldOrFallbackPair[0]
-    const field = fieldOrFallbackPair[1]
+  get(fallbackFieldPair) {
+    const fallback = fallbackFieldPair[0]
+    const field = fallbackFieldPair[1]
     const item = this.getOrElse(fallback)
 
     return item.get ? item.get(field) : item

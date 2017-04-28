@@ -16,6 +16,7 @@ describe('Modelico', function() {
       }
     })
   )
+
   describe(
     'Modelico Min',
     modelicoSpec({
