@@ -117,7 +117,11 @@ class Nothing extends Maybe {
     return v
   }
 
-  map() {
+  map(f) {
+    return this
+  }
+
+  flatMap(f) {
     return this
   }
 
@@ -159,6 +163,16 @@ class Just extends Maybe {
 
   map(f) {
     return Just.of(f(this.inner()))
+  }
+
+  flatMap(f) {
+    const res = f(this.inner())
+
+    if (!(res instanceof Maybe)) {
+      throw TypeError('Maybe.flatMap expects a Maybe-returning function')
+    }
+
+    return res
   }
 
   equals(other) {

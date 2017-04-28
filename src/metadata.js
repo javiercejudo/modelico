@@ -35,12 +35,12 @@ const _ = (Type, metadata = []) => {
 }
 
 const withDefault = (metadata, def) => {
-  const reviver = (k, v) => {
+  const reviver = (k, v, path = []) => {
     if (k !== '') {
       return v
     }
 
-    return metadata.reviver(k, isNothing(v) ? def : v)
+    return metadata.reviver(k, isNothing(v) ? def : v, path)
   }
 
   return Object.freeze(
@@ -66,7 +66,7 @@ const union = (Type, metasOrTypes, classifier) => {
     return classifier(obj).reviver(k, obj, path)
   }
 
-  return Object.assign({}, base(Type), {reviver})
+  return Object.assign({}, base(Type), {reviver, subtypes: metas})
 }
 
 const metadata = () =>
