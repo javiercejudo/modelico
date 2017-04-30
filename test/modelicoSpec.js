@@ -19,6 +19,7 @@ import featuresAdvanced from './features/advanced'
 import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
 import featuresPolymorphic from './features/polymorphic'
+import featuresValidate from './features/validate'
 import ImmutableExamples from './Immutable/index'
 import ImmutableProxied from './Immutable/proxied'
 
@@ -132,6 +133,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps))
   describe('Deep nesting features', featuresDeepNesting(...deps))
   describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
+  describe('Validate', featuresValidate(...deps))
   describe('Immutable examples', ImmutableExamples(U, ...deps))
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))

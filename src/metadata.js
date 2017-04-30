@@ -1,4 +1,4 @@
-import {always, isNothing, isPlainObject} from './U'
+import {always, isNothing, isPlainObject, defaultTo} from './U'
 
 import asIs from './asIs'
 import any from './any'
@@ -40,12 +40,18 @@ const withDefault = (metadata, def) => {
       return v
     }
 
-    return metadata.reviver(k, isNothing(v) ? def : v, path)
+    if (isNothing(v)) {
+      const defMetadata = defaultTo(metadata)(metadata.baseMetadata)
+
+      return defMetadata.reviver(k, def, path)
+    }
+
+    return metadata.reviver(k, v, path)
   }
 
   return Object.freeze(
     Object.assign({}, metadata, {
-      default: reviver('', def),
+      default: reviver('', undefined),
       reviver
     })
   )
