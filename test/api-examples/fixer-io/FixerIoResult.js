@@ -29,7 +29,6 @@ export default (
         base: ajvEnum(Currency),
         date: _(LocalDate),
         rates: ajvEnumMap(
-          {},
           ajvEnum(Currency),
           ajvNumber({minimum: 0, exclusiveMinimum: true})
         )
