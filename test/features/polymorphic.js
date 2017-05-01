@@ -166,10 +166,21 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    class Shape
-      extends M.createAjvModel(ajv, m => ({
-        relatedShape: m.ajvMaybe(m._(Shape))
-      })) {
+    // ensure we only have a single object to represent a maybe-shape
+    let maybeShapeMetadata
+    const maybeShape = m => {
+      if (!maybeShapeMetadata) {
+        maybeShapeMetadata = m.ajvMaybe(m._(Shape))
+      }
+
+      return maybeShapeMetadata
+    }
+
+    const BaseShape = M.createAjvModel(ajv, m => ({
+      relatedShape: maybeShape(m)
+    }))
+
+    class Shape extends BaseShape {
       toJSON() {
         const fields = M.fields(this)
         let type
@@ -337,20 +348,23 @@ export default (should, M, fixtures, {Ajv}) => () => {
             type: 'object',
             properties: {
               relatedShape: {
-                anyOf: [
-                  {
-                    type: 'null'
-                  },
-                  {
-                    $ref: '#/definitions/3'
-                  }
-                ]
+                $ref: '#/definitions/5'
               },
               radius: {
                 $ref: '#/definitions/6'
               }
             },
             required: ['radius']
+          },
+          '5': {
+            anyOf: [
+              {
+                type: 'null'
+              },
+              {
+                $ref: '#/definitions/3'
+              }
+            ]
           },
           '6': {
             type: 'number',
@@ -361,14 +375,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
             type: 'object',
             properties: {
               relatedShape: {
-                anyOf: [
-                  {
-                    type: 'null'
-                  },
-                  {
-                    $ref: '#/definitions/3'
-                  }
-                ]
+                $ref: '#/definitions/5'
               },
               width: {
                 $ref: '#/definitions/6'

@@ -14,16 +14,38 @@ const defaultState = () => ({
   metadataRefCache: new WeakMap()
 })
 
-const getSchemaImpl = (metadata: Object) => {
+const enhanceSchemaWithDefault = (metadata: Object, schema: Object): Object => {
+  if (metadata.default === undefined) {
+    return schema
+  }
+
+  const def = {default: metadata.default}
+
+  if (schema === emptyObject) {
+    return Object.assign({}, {type: emptyObject}, def)
+  }
+
+  return Object.assign(
+    {},
+    {
+      anyOf: [{type: 'null'}, schema]
+    },
+    metadata.type === M.Maybe ? undefined : def
+  )
+}
+
+const getSchemaImpl = (metadata: Object): Object => {
   if (metadata.schema) {
-    return metadata.schema()
+    return enhanceSchemaWithDefault(metadata, metadata.schema())
   }
 
   const hasInnerTypes = metadata.type && metadata.type.innerTypes
 
-  const innerTypes = hasInnerTypes
-    ? getInnerTypes([], metadata.type)
-    : emptyObject
+  if (!hasInnerTypes) {
+    return enhanceSchemaWithDefault(metadata, emptyObject)
+  }
+
+  const innerTypes = getInnerTypes([], metadata.type)
 
   if (Object.keys(innerTypes).length === 0) {
     return emptyObject
@@ -35,24 +57,12 @@ const getSchemaImpl = (metadata: Object) => {
   const properties = Object.keys(innerTypes).reduce((acc, fieldName) => {
     const fieldMetadata = innerTypes[fieldName]
     const fieldSchema = getSchema(fieldMetadata, false)
-    let schema
 
     if (fieldMetadata.default === undefined) {
       required.push(fieldName)
-      schema = fieldSchema
-    } else {
-      schema = Object.assign(
-        {},
-        {
-          anyOf: [{type: 'null'}, fieldSchema]
-        },
-        fieldMetadata.type === M.Maybe
-          ? undefined
-          : {default: fieldMetadata.default}
-      )
     }
 
-    return Object.assign(acc, {[fieldName]: schema})
+    return Object.assign(acc, {[fieldName]: fieldSchema})
   }, {})
 
   const schema = Object.assign({}, baseSchema, {properties})
@@ -61,10 +71,10 @@ const getSchemaImpl = (metadata: Object) => {
     schema.required = required
   }
 
-  return schema
+  return enhanceSchemaWithDefault(metadata, schema)
 }
 
-const getUsedDefinitions = () => {
+const getUsedDefinitions = (): Object => {
   const {definitions, usedDefinitions} = state
 
   return Object.keys(definitions).map(Number).reduce((acc, ref) => {
@@ -76,9 +86,9 @@ const getUsedDefinitions = () => {
   }, {})
 }
 
-const getSchema = (metadata: Object, topLevel: boolean = true) => {
+const getSchema = (metadata: Object, topLevel: boolean = true): Object => {
   if (metadataSchemaCache.has(metadata)) {
-    return metadataSchemaCache.get(metadata)
+    return metadataSchemaCache.get(metadata) || emptyObject
   }
 
   if (topLevel) {

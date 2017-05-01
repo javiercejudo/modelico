@@ -2,7 +2,7 @@
 
 export default (U, should, M, fixtures) => () => {
   const {Person, PartOfDay, Sex, Animal, Friend} = fixtures
-  const {_, number, string, withDefault} = M.metadata()
+  const {_, number, withDefault} = M.metadata()
   const ModelicoDate = M.Date
 
   const author1Json =
@@ -384,70 +384,6 @@ export default (U, should, M, fixtures) => () => {
       })
 
       marc.bestFriend().getOrElse(Friend.EMPTY).name().should.be.exactly('John')
-    })
-  })
-
-  describe('withDefault', () => {
-    it('should allow enhancing metadata to have default values', () => {
-      class Book
-        extends M.createModel(
-          {
-            title: string(),
-            author: withDefault(string(), 'anonymous')
-          },
-          {
-            stringTag: 'Book'
-          }
-        ) {
-        constructor(props) {
-          super(Book, props)
-        }
-
-        getTitleBy() {
-          return `"${this.title()}" by ${this.author()}`
-        }
-
-        static innerTypes() {
-          return super.innerTypes()
-        }
-      }
-
-      const lazarillo1 = M.fromJS(Book, {
-        title: 'Lazarillo de Tormes'
-      })
-
-      lazarillo1
-        .getTitleBy()
-        .should.be.exactly('"Lazarillo de Tormes" by anonymous')
-
-      const lazarillo2 = new Book({
-        title: 'Lazarillo de Tormes'
-      })
-
-      lazarillo2
-        .getTitleBy()
-        .should.be.exactly('"Lazarillo de Tormes" by anonymous')
-    })
-  })
-
-  describe('withDefault', () => {
-    it('should use the metadata to coerce the value if necessary', () => {
-      class CountryCallingCode
-        extends M.createModel(() => ({
-          code: withDefault(number(), '34')
-        })) {
-        constructor(props) {
-          super(CountryCallingCode, props)
-        }
-
-        static innerTypes() {
-          return super.innerTypes()
-        }
-      }
-
-      const spain = M.fromJS(CountryCallingCode, {})
-
-      spain.code().should.be.exactly(34)
     })
   })
 

@@ -92,6 +92,7 @@ export default (ajv = {validate: T}) => {
     const baseMetadata = isFunction(metadata) ? {type: metadata} : metadata
 
     return Object.assign({}, baseMetadata, {
+      baseMetadata,
       reviver,
       ownSchema: always(schemaToCheck),
       schema: schemaGetter

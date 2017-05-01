@@ -121,32 +121,31 @@ export default (should, M, fixtures, {Ajv}) => () => {
         type: 'object',
         properties: {
           name: {
-            anyOf: [
-              {
-                type: 'null'
-              },
-              {
-                $ref: '#/definitions/2'
-              }
-            ],
-            default: 'unknown'
+            $ref: '#/definitions/2'
           },
           dimensions: {
-            anyOf: [
-              {
-                type: 'null'
-              },
-              {
-                $ref: '#/definitions/4'
-              }
-            ]
+            $ref: '#/definitions/3'
           }
         },
         definitions: {
           '2': {
-            type: 'string',
-            minLength: 1,
-            maxLength: 25
+            anyOf: [
+              {type: 'null'},
+              {
+                type: 'string',
+                minLength: 1,
+                maxLength: 25
+              }
+            ],
+            default: 'unknown'
+          },
+          '3': {
+            anyOf: [
+              {type: 'null'},
+              {
+                $ref: '#/definitions/4'
+              }
+            ]
           },
           '4': {
             type: 'array',
@@ -176,14 +175,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
                 $ref: '#/definitions/3'
               },
               dimensions: {
-                anyOf: [
-                  {
-                    type: 'null'
-                  },
-                  {
-                    $ref: '#/definitions/5'
-                  }
-                ]
+                $ref: '#/definitions/4'
               }
             },
             required: ['name']
@@ -192,6 +184,16 @@ export default (should, M, fixtures, {Ajv}) => () => {
             type: 'string',
             minLength: 1,
             maxLength: 25
+          },
+          '4': {
+            anyOf: [
+              {
+                type: 'null'
+              },
+              {
+                $ref: '#/definitions/5'
+              }
+            ]
           },
           '5': {
             type: 'array',
@@ -742,15 +744,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
             type: 'object',
             properties: {
               name: {
-                anyOf: [
-                  {
-                    type: 'null'
-                  },
-                  {
-                    $ref: '#/definitions/4'
-                  }
-                ],
-                default: 'unknown'
+                $ref: '#/definitions/4'
               },
               dimensions: {
                 $ref: '#/definitions/5'
@@ -759,9 +753,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
             required: ['dimensions']
           },
           '4': {
-            type: 'string',
-            minLength: 1,
-            maxLength: 25
+            anyOf: [
+              {
+                type: 'null'
+              },
+              {
+                type: 'string',
+                minLength: 1,
+                maxLength: 25
+              }
+            ],
+            default: 'unknown'
           },
           '5': {
             type: 'array',
@@ -1254,13 +1256,18 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   describe('Circular innerTypes', () => {
     it('self reference', () => {
-      class Chain
-        extends M.createAjvModel(Ajv(), m => ({
+      const ChainBase = M.createAjvModel(Ajv(), m => {
+        const maybeChain = m.ajvMaybe(m._(Chain))
+
+        return {
           description: m.ajvString({minLength: 1}),
-          previous: m.ajvMaybe(m._(Chain)),
-          next: m.ajvMaybe(m._(Chain)),
+          previous: maybeChain,
+          next: maybeChain,
           relatedChains: m.ajvList({}, m._(Chain))
-        })) {
+        }
+      })
+
+      class Chain extends ChainBase {
         constructor(props) {
           super(Chain, props)
         }
@@ -1275,27 +1282,13 @@ export default (should, M, fixtures, {Ajv}) => () => {
                 $ref: '#/definitions/2'
               },
               previous: {
-                anyOf: [
-                  {
-                    type: 'null'
-                  },
-                  {
-                    $ref: '#/definitions/1'
-                  }
-                ]
+                $ref: '#/definitions/3'
               },
               next: {
-                anyOf: [
-                  {
-                    type: 'null'
-                  },
-                  {
-                    $ref: '#/definitions/1'
-                  }
-                ]
+                $ref: '#/definitions/3'
               },
               relatedChains: {
-                $ref: '#/definitions/5'
+                $ref: '#/definitions/4'
               }
             },
             required: ['description', 'relatedChains']
@@ -1304,7 +1297,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
             type: 'string',
             minLength: 1
           },
-          '5': {
+          '3': {
+            anyOf: [
+              {
+                type: 'null'
+              },
+              {
+                $ref: '#/definitions/1'
+              }
+            ]
+          },
+          '4': {
             type: 'array',
             items: {
               $ref: '#/definitions/1'
@@ -1377,14 +1380,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
             $ref: '#/definitions/3'
           },
           child: {
-            anyOf: [
-              {
-                type: 'null'
-              },
-              {
-                $ref: '#/definitions/4'
-              }
-            ]
+            $ref: '#/definitions/4'
           }
         },
         required: ['name', 'parent'],
@@ -1400,20 +1396,20 @@ export default (should, M, fixtures, {Ajv}) => () => {
                 $ref: '#/definitions/2'
               },
               child: {
-                anyOf: [
-                  {
-                    type: 'null'
-                  },
-                  {
-                    $ref: '#/definitions/5'
-                  }
-                ]
+                $ref: '#/definitions/4'
               }
             },
             required: ['name']
           },
           '4': {
-            $ref: '#/definitions/5'
+            anyOf: [
+              {
+                type: 'null'
+              },
+              {
+                $ref: '#/definitions/5'
+              }
+            ]
           },
           '5': {
             type: 'object',

@@ -246,20 +246,23 @@ yields:
       type: 'object',
       properties: {
         relatedShape: {
-          anyOf: [
-            {
-              type: 'null'
-            },
-            {
-              $ref: '#/definitions/3'
-            }
-          ]
+          $ref: '#/definitions/5'
         },
         radius: {
           $ref: '#/definitions/6'
         }
       },
       required: ['radius']
+    },
+    '5': {
+      anyOf: [
+        {
+          type: 'null'
+        },
+        {
+          $ref: '#/definitions/3'
+        }
+      ]
     },
     '6': {
       type: 'number',
@@ -270,14 +273,7 @@ yields:
       type: 'object',
       properties: {
         relatedShape: {
-          anyOf: [
-            {
-              type: 'null'
-            },
-            {
-              $ref: '#/definitions/3'
-            }
-          ]
+          $ref: '#/definitions/5'
         },
         width: {
           $ref: '#/definitions/6'
