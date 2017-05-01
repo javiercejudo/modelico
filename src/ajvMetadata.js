@@ -171,7 +171,7 @@ export default (ajv = {validate: T}) => {
     })
   }
 
-  ajvMetadata.ajvEnumMap = (schema, keyMetadata, valueMetadata) => {
+  ajvMetadata.ajvEnumMap = (keyMetadata, valueMetadata, schema) => {
     const enumeratorsKeys = Object.keys(keyMetadata.enumerators)
     const keysRegex = `^(${enumeratorsKeys.join('|')})$`
 
@@ -194,12 +194,12 @@ export default (ajv = {validate: T}) => {
     )
   }
 
-  const ajvList = (schema, itemMetadata) =>
+  const ajvList = (itemMetadata, schema) =>
     ajvMeta(list(itemMetadata), {type: 'array'}, schema, () => ({
       items: getInnerSchema(itemMetadata)
     }))
 
-  const ajvTuple = (schema, itemsMetadata) => {
+  const ajvTuple = (itemsMetadata, schema) => {
     const length = itemsMetadata.length
 
     return ajvMeta(
@@ -216,12 +216,12 @@ export default (ajv = {validate: T}) => {
     )
   }
 
-  ajvMetadata.ajvList = (schema, itemMetadata) =>
+  ajvMetadata.ajvList = (itemMetadata, schema) =>
     (Array.isArray(itemMetadata)
-      ? ajvTuple(schema, itemMetadata)
-      : ajvList(schema, itemMetadata))
+      ? ajvTuple(itemMetadata, schema)
+      : ajvList(itemMetadata, schema))
 
-  ajvMetadata.ajvMap = (schema, keyMetadata, valueMetadata) => {
+  ajvMetadata.ajvMap = (keyMetadata, valueMetadata, schema) => {
     const baseSchema = {
       type: 'array',
       items: {
@@ -248,7 +248,7 @@ export default (ajv = {validate: T}) => {
     )
   }
 
-  ajvMetadata.ajvStringMap = (schema, valueMetadata) =>
+  ajvMetadata.ajvStringMap = (valueMetadata, schema) =>
     ajvMeta(stringMap(valueMetadata), {type: 'object'}, schema, () => ({
       additionalProperties: false,
       patternProperties: {
@@ -256,7 +256,7 @@ export default (ajv = {validate: T}) => {
       }
     }))
 
-  ajvMetadata.ajvSet = (schema, itemMetadata) =>
+  ajvMetadata.ajvSet = (itemMetadata, schema) =>
     ajvMeta(
       set(itemMetadata),
       {

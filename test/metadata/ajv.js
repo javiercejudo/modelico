@@ -38,11 +38,11 @@ export default (should, M, fixtures, {Ajv}) => () => {
           ),
           dimensions: ajvMaybe(
             ajvList(
-              {minItems: 3, maxItems: 3},
               ajvNumber({
                 minimum: 0,
                 exclusiveMinimum: true
-              })
+              }),
+              {minItems: 3, maxItems: 3}
             )
           )
         })
@@ -57,7 +57,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       static innerTypes() {
         return Object.freeze({
           name: ajvString({minLength: 1, maxLength: 25}),
-          dimensions: ajvMaybe(ajvList({minItems: 3, maxItems: 3}, number()))
+          dimensions: ajvMaybe(ajvList(number(), {minItems: 3, maxItems: 3}))
         })
       }
     }
@@ -225,7 +225,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
           ajv_,
           M.List,
           {},
-          [ajvList({}, ajvList({}, ajvNumber({minimum: 5})))],
+          [ajvList(ajvList(ajvNumber({minimum: 5})))],
           '[[[10], [6, 7, 4]]]'
         )
       )
@@ -237,7 +237,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.Set,
-          [ajvSet({}, ajvSet({}, ajvNumber({minimum: 5})))],
+          [ajvSet(ajvSet(ajvNumber({minimum: 5})))],
           [[[10], [6, 7, 9, 4]]]
         )
       )
@@ -249,7 +249,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.StringMap,
-          [ajvStringMap({}, ajvStringMap({}, ajvNumber({minimum: 5})))],
+          [ajvStringMap(ajvStringMap(ajvNumber({minimum: 5})))],
           {a: {b1: {c: 10}, b2: {d1: 6, d2: 7, d3: 4}}}
         )
       )
@@ -261,7 +261,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.Map,
-          [ajvString(), ajvMap({}, ajvString(), ajvNumber({minimum: 5}))],
+          [ajvString(), ajvMap(ajvString(), ajvNumber({minimum: 5}))],
           [['A', [['A', 6], ['B', 7], ['C', 4]]]]
         )
       )
@@ -271,7 +271,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.Map,
-          [ajvString(), ajvMap({}, ajvString(), ajvNumber({minimum: 5}))],
+          [ajvString(), ajvMap(ajvString(), ajvNumber({minimum: 5}))],
           [['A', [['A', 6], ['B', 7], [2, 7]]]]
         )
       )
@@ -288,9 +288,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
           [
             ajv_(SideEnum),
             ajvEnumMap(
-              {},
               ajv_(SideEnum),
-              ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5}))
+              ajvEnumMap(ajv_(SideEnum), ajvNumber({minimum: 5}))
             )
           ],
           {A: {A: {A: 10}, B: {A: 4, B: 7}}}
@@ -305,9 +304,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
           [
             ajv_(SideEnum),
             ajvEnumMap(
-              {},
               ajv_(SideEnum),
-              ajvEnumMap({}, ajv_(SideEnum), ajvNumber({minimum: 5}))
+              ajvEnumMap(ajv_(SideEnum), ajvNumber({minimum: 5}))
             )
           ],
           {A: {A: {A: 10}, B: {D: 5, B: 7}}}
@@ -544,7 +542,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     const SideEnum = M.Enum.fromArray(['A', 'B'], Side, 'Side')
 
     it('reports its full schema', () => {
-      const meta = ajvEnumMap({}, ajv_(SideEnum), ajvNumber())
+      const meta = ajvEnumMap(ajv_(SideEnum), ajvNumber())
 
       M.getSchema(meta).should.deepEqual({
         type: 'object',
@@ -557,7 +555,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         }
       })
 
-      const meta2 = ajvEnumMap({}, ajv_(SideEnum), number())
+      const meta2 = ajvEnumMap(ajv_(SideEnum), number())
 
       M.getSchema(meta2).should.deepEqual({
         type: 'object',
@@ -570,7 +568,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
 
     it('reports the right types', () => {
-      const meta = ajvEnumMap({}, ajv_(SideEnum), ajvNumber())
+      const meta = ajvEnumMap(ajv_(SideEnum), ajvNumber())
 
       meta.type.should.be.exactly(M.EnumMap)
       meta.subtypes[0].type.should.be.exactly(Side)
@@ -581,7 +579,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(
         JSON.parse(
           '{"B": 100}',
-          ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver
+          ajvEnumMap(ajv_(SideEnum), ajvNumber()).reviver
         ).get(SideEnum.B())
       ).be.exactly(100)
     })
@@ -590,7 +588,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(
         JSON.parse(
           '{"B": 100}',
-          ajvEnumMap({minProperties: 1}, ajv_(SideEnum), ajvNumber()).reviver
+          ajvEnumMap(ajv_(SideEnum), ajvNumber(), {minProperties: 1}).reviver
         ).get(SideEnum.B())
       ).be.exactly(100)
     })
@@ -599,21 +597,21 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         JSON.parse(
           '{"A": 100}',
-          ajvEnumMap({minProperties: 2}, ajv_(SideEnum), ajvNumber()).reviver
+          ajvEnumMap(ajv_(SideEnum), ajvNumber(), {minProperties: 2}).reviver
         )
       ).throw(/should NOT have less than 2 properties/)
 
       should(() =>
         JSON.parse(
           '{"A": 100, "B": 200, "C": 300}',
-          ajvEnumMap({}, ajv_(SideEnum), ajvNumber()).reviver
+          ajvEnumMap(ajv_(SideEnum), ajvNumber()).reviver
         )
       ).throw(/should NOT have more than 2 properties/)
 
       should(() =>
         JSON.parse(
           '{"A": 100, "B": 200, "C": 300}',
-          ajvEnumMap({maxProperties: 3}, ajv_(SideEnum), ajvNumber()).reviver
+          ajvEnumMap(ajv_(SideEnum), ajvNumber(), {maxProperties: 3}).reviver
         )
       )
         .throw(/Invalid JSON at ""/)
@@ -624,7 +622,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
   describe('list', () => {
     it('list', () => {
       M.getSchema(
-        ajvList({minItems: 2}, ajvNumber({minimum: 5}))
+        ajvList(ajvNumber({minimum: 5}), {minItems: 2})
       ).should.deepEqual({
         type: 'array',
         minItems: 2,
@@ -641,32 +639,32 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
 
     it('reports the right types', () => {
-      ajvList({}, ajvString()).type.should.be.exactly(M.List)
-      ajvList({}, ajvString()).subtypes[0].type.should.be.exactly(String)
+      ajvList(ajvString()).type.should.be.exactly(M.List)
+      ajvList(ajvString()).subtypes[0].type.should.be.exactly(String)
     })
 
     it('supports empty schema', () => {
-      JSON.parse('[2,5]', ajvList({}, ajvNumber()).reviver)
+      JSON.parse('[2,5]', ajvList(ajvNumber()).reviver)
         .equals(M.List.of(2, 5))
         .should.be.exactly(true)
     })
 
     it('supports valid lists with schema', () => {
-      JSON.parse('[2,5]', ajvList({maxItems: 3}, ajvNumber()).reviver)
+      JSON.parse('[2,5]', ajvList(ajvNumber(), {maxItems: 3}).reviver)
         .equals(M.List.of(2, 5))
         .should.be.exactly(true)
     })
 
     it('rejects invalid lists', () => {
       should(() =>
-        JSON.parse('[2,5,7,1]', ajvList({maxItems: 3}, ajvNumber()).reviver)
+        JSON.parse('[2,5,7,1]', ajvList(ajvNumber(), {maxItems: 3}).reviver)
       ).throw(/should NOT have more than 3 items/)
     })
   })
 
   describe('tuple', () => {
     it('valid data', () => {
-      const metadata = ajvList({}, [ajvString(), ajvNumber()])
+      const metadata = ajvList([ajvString(), ajvNumber()])
 
       JSON.parse('["a",5]', metadata.reviver)
         .equals(M.List.of('a', 5))
@@ -693,17 +691,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
               'unknown'
             ),
             dimensions: ajvList(
-              {minItems: 3, maxItems: 3},
               ajvNumber({
                 minimum: 0,
                 exclusiveMinimum: true
-              })
+              }),
+              {minItems: 3, maxItems: 3}
             )
           })
         }
       }
 
-      const metadata = ajvList({}, [ajvString(), _(Animal)])
+      const metadata = ajvList([ajvString(), _(Animal)])
 
       M.genericsFromJS(
         M.List,
@@ -783,7 +781,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
 
     it('invalid data', () => {
-      const metadata = ajvList({}, [ajvString(), ajvNumber()])
+      const metadata = ajvList([ajvString(), ajvNumber()])
 
       should(() => JSON.parse('["a",true]', metadata.reviver)).throw(
         /should be number/
@@ -819,7 +817,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   describe('map', () => {
     it('reports its full schema', () => {
-      const meta = ajvMap({}, ajvNumber(), ajvString())
+      const meta = ajvMap(ajvNumber(), ajvString())
 
       M.getSchema(meta).should.deepEqual({
         type: 'array',
@@ -833,7 +831,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
 
     it('reports the right types', () => {
-      const meta = ajvMap({}, ajvNumber(), ajvString())
+      const meta = ajvMap(ajvNumber(), ajvString())
 
       meta.type.should.be.exactly(M.Map)
       meta.subtypes[0].type.should.be.exactly(Number)
@@ -843,7 +841,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     it('supports empty schema', () => {
       JSON.parse(
         '[[2, "dos"],[5, "cinco"]]',
-        ajvMap({}, ajvNumber(), ajvString()).reviver
+        ajvMap(ajvNumber(), ajvString()).reviver
       )
         .equals(M.Map.of(2, 'dos', 5, 'cinco'))
         .should.be.exactly(true)
@@ -852,7 +850,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     it('supports valid maps with schema', () => {
       JSON.parse(
         '[[2, "dos"],[5, "cinco"]]',
-        ajvMap({minItems: 2}, ajvNumber(), ajvString()).reviver
+        ajvMap(ajvNumber(), ajvString(), {minItems: 2}).reviver
       )
         .equals(M.Map.of(2, 'dos', 5, 'cinco'))
         .should.be.exactly(true)
@@ -862,18 +860,18 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         JSON.parse(
           '[[2, "dos", "extra"]]',
-          ajvMap({}, ajvNumber(), ajvString()).reviver
+          ajvMap(ajvNumber(), ajvString()).reviver
         )
       ).throw(/should NOT have more than 2 items/)
 
       should(() =>
-        JSON.parse('[[2]]', ajvMap({}, ajvNumber(), ajvString()).reviver)
+        JSON.parse('[[2]]', ajvMap(ajvNumber(), ajvString()).reviver)
       ).throw(/should NOT have less than 2 items/)
 
       should(() =>
         JSON.parse(
           '[[1, "uno"], [2, "dos"], [3, "tres"]]',
-          ajvMap({minItems: 4}, ajvNumber(), ajvString()).reviver
+          ajvMap(ajvNumber(), ajvString(), {minItems: 4}).reviver
         )
       ).throw(/should NOT have less than 4 items/)
     })
@@ -881,7 +879,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   describe('stringMap', () => {
     it('reports its full schema', () => {
-      const meta = ajvStringMap({}, ajvNumber())
+      const meta = ajvStringMap(ajvNumber())
 
       M.getSchema(meta).should.deepEqual({
         type: 'object',
@@ -895,7 +893,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
 
     it('reports the right types', () => {
-      const meta = ajvStringMap({}, ajvNumber())
+      const meta = ajvStringMap(ajvNumber())
 
       meta.type.should.be.exactly(M.StringMap)
       meta.subtypes[0].type.should.be.exactly(Number)
@@ -903,9 +901,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     it('supports empty schema', () => {
       should(
-        JSON.parse('{"uno": 1}', ajvStringMap({}, ajvNumber()).reviver).get(
-          'uno'
-        )
+        JSON.parse('{"uno": 1}', ajvStringMap(ajvNumber()).reviver).get('uno')
       ).be.exactly(1)
     })
 
@@ -913,7 +909,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(
         JSON.parse(
           '{"uno": 1}',
-          ajvStringMap({minProperties: 1}, ajvNumber()).reviver
+          ajvStringMap(ajvNumber(), {minProperties: 1}).reviver
         ).get('uno')
       ).be.exactly(1)
     })
@@ -922,7 +918,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         JSON.parse(
           '{"uno": 1}',
-          ajvStringMap({minProperties: 2}, ajvNumber()).reviver
+          ajvStringMap(ajvNumber(), {minProperties: 2}).reviver
         )
       ).throw(/should NOT have less than 2 properties/)
     })
@@ -930,7 +926,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   describe('set', () => {
     it('reports its full schema', () => {
-      const meta = ajvSet({}, ajvNumber())
+      const meta = ajvSet(ajvNumber())
 
       M.getSchema(meta).should.deepEqual({
         type: 'array',
@@ -942,36 +938,36 @@ export default (should, M, fixtures, {Ajv}) => () => {
     })
 
     it('reports the right types', () => {
-      ajvSet({}, ajvNumber()).type.should.be.exactly(M.Set)
-      ajvSet({}, ajvNumber()).subtypes[0].type.should.be.exactly(Number)
+      ajvSet(ajvNumber()).type.should.be.exactly(M.Set)
+      ajvSet(ajvNumber()).subtypes[0].type.should.be.exactly(Number)
     })
 
     it('supports empty schema', () => {
-      JSON.parse('[2,5]', ajvSet({}, ajvNumber()).reviver)
+      JSON.parse('[2,5]', ajvSet(ajvNumber()).reviver)
         .equals(M.Set.of(2, 5))
         .should.be.exactly(true)
     })
 
     it('supports valid sets with schema', () => {
-      JSON.parse('[2,5]', ajvSet({maxItems: 3}, ajvNumber()).reviver)
+      JSON.parse('[2,5]', ajvSet(ajvNumber(), {maxItems: 3}).reviver)
         .equals(M.Set.of(2, 5))
         .should.be.exactly(true)
     })
 
     it('rejects invalid sets', () => {
       should(() =>
-        JSON.parse('[2,5,7,1]', ajvSet({maxItems: 3}, ajvNumber()).reviver)
+        JSON.parse('[2,5,7,1]', ajvSet(ajvNumber(), {maxItems: 3}).reviver)
       ).throw(/should NOT have more than 3 items/)
     })
 
     it('rejects duplicated values by default', () => {
-      should(() =>
-        JSON.parse('[2,5,5]', ajvSet({}, ajvNumber()).reviver)
-      ).throw(/should NOT have duplicate items/)
+      should(() => JSON.parse('[2,5,5]', ajvSet(ajvNumber()).reviver)).throw(
+        /should NOT have duplicate items/
+      )
     })
 
     it('supports duplicates when explicitly told', () => {
-      JSON.parse('[2,5,5]', ajvSet({uniqueItems: false}, ajvNumber()).reviver)
+      JSON.parse('[2,5,5]', ajvSet(ajvNumber(), {uniqueItems: false}).reviver)
         .equals(M.Set.of(2, 5))
         .should.be.exactly(true)
     })
@@ -1263,7 +1259,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
           description: m.ajvString({minLength: 1}),
           previous: maybeChain,
           next: maybeChain,
-          relatedChains: m.ajvList({}, m._(Chain))
+          relatedChains: m.ajvList(m._(Chain))
         }
       })
 

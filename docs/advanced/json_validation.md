@@ -15,11 +15,11 @@ To validate the JSON strictly, you have the following options:
 ## `M.ajvMetadata` and JSON schema
 
 This variation of `M.metadata()` takes an optional `Ajv` instance parameter
-and returns metadata functions that take an additional initial parameter in
-the form of JSON schema for the current field. When no instance of `Ajv` is
-passed in, it returns metadata functions with the same API but no validation
-is performed. This can be leveraged to only enable validation during
-development in favour of faster parsing in production:
+and returns metadata functions that take an additional parameter in the form of
+JSON schema for the current field. When no instance of `Ajv` is passed in, it
+returns metadata functions with the same API but no validation is performed.
+This can be leveraged to only enable validation during development in favour of
+faster parsing in production:
 
 ```js
 import Ajv from 'ajv'
