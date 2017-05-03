@@ -28,10 +28,6 @@ const reviverFactory = itemMetadata => (k, v, path) => {
 }
 
 class Maybe extends Base {
-  constructor() {
-    super(Maybe)
-  }
-
   get(fallbackFieldPair) {
     const fallback = fallbackFieldPair[0]
     const field = fallbackFieldPair[1]
@@ -92,7 +88,7 @@ let nothing
 
 class Nothing extends Maybe {
   constructor() {
-    super()
+    super(Nothing)
 
     if (!nothing) {
       this.inner = always(TypeError('nothing holds no value'))
@@ -133,7 +129,7 @@ class Nothing extends Maybe {
 
 class Just extends Maybe {
   constructor(v) {
-    super()
+    super(Just)
 
     this.inner = always(v)
 
