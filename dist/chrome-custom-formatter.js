@@ -45,23 +45,23 @@ var customFormatter = (function (M) {
     var objStr = obj.stringify();
     var snippet = objStr.slice(0, PREVIEW_MAX_LENGTH);
 
-    var preview = objStr.length > PREVIEW_MAX_LENGTH ? snippet + '...' : snippet;
+    var preview = PREVIEW_MAX_LENGTH > 0 && objStr.length > PREVIEW_MAX_LENGTH ? snippet + '...' : snippet;
 
-    var typeName = obj[M.symbols.typeSymbol]().name;
+    var typeName = obj[M.symbols.typeSymbol]().displayName;
 
     var subtypeNames = void 0;
 
     try {
       subtypeNames = '<' + parentType.innerTypes()[key].subtypes.map(function (x) {
-        return x.type.name;
-      }).join(', ') + '> ';
+        return x.type.displayName;
+      }).join(', ') + '>';
     } catch (ignore) {
-      subtypeNames = ' ';
+      subtypeNames = '';
     }
 
-    var sizeStr = obj.hasOwnProperty('size') ? '(' + obj.size + ')' : '';
+    var sizeStr = obj.hasOwnProperty('size') ? '(' + obj.size + ') ' : ' ';
 
-    return ['div', {}].concat([['span', {}, key ? formatKey(key) : ''], ['span', {}, typeName + sizeStr + subtypeNames], ['span', {}, preview]]);
+    return ['div', {}].concat([['span', {}, key ? formatKey(key) : ''], ['span', {}, typeName + subtypeNames + sizeStr], ['span', {}, preview]]);
   };
 
   var modelicoChild = function modelicoChild(obj, fields, key) {
@@ -74,8 +74,8 @@ var customFormatter = (function (M) {
     }];
   };
 
-  var nativeChild = function nativeChild(obj, fields, key) {
-    return ['div', { style: styles.childNative }].concat([formatKey(key), obj[M.symbols.typeSymbol]().innerTypes()[key].type.name + ' ', ['object', { object: fields[key] }]]);
+  var nativeChild = function nativeChild(fields, key) {
+    return ['div', { style: styles.childNative }].concat([formatKey(key), ['object', { object: fields[key] }]]);
   };
 
   var body = function body(obj) {
@@ -89,7 +89,7 @@ var customFormatter = (function (M) {
       children = [['div', { style: styles.childObject }, ['object', { object: json }]]];
     } else {
       children = fieldsKeys.sort().reduce(function (acc, key) {
-        var child = isModelico(fields[key]) ? modelicoChild(obj, fields, key) : nativeChild(obj, fields, key);
+        var child = isModelico(fields[key]) ? modelicoChild(obj, fields, key) : nativeChild(fields, key);
 
         acc.push(['div', { style: styles.childwrapper }, child]);
 
@@ -104,9 +104,7 @@ var customFormatter = (function (M) {
     header: function header(obj, config) {
       return isModelico(obj) ? _header(obj, config) : null;
     },
-    hasBody: function hasBody(obj) {
-      return isModelico(obj);
-    },
+    hasBody: isModelico,
     body: body
   });
 });

@@ -127,6 +127,8 @@ class Nothing extends Maybe {
   }
 }
 
+Nothing.displayName = 'Nothing'
+
 class Just extends Maybe {
   constructor(v) {
     super(Just)

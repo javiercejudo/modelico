@@ -26,14 +26,17 @@ export default M => {
       ? snippet + '...'
       : snippet
 
-    const typeName = obj[M.symbols.typeSymbol]().name
+    const typeName = obj[M.symbols.typeSymbol]().displayName
 
     let subtypeNames
 
     try {
       subtypeNames =
         '<' +
-        parentType.innerTypes()[key].subtypes.map(x => x.type.name).join(', ') +
+        parentType
+          .innerTypes()[key]
+          .subtypes.map(x => x.type.displayName)
+          .join(', ') +
         '>'
     } catch (ignore) {
       subtypeNames = ''
