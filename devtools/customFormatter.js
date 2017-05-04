@@ -22,7 +22,7 @@ export default M => {
     const objStr = obj.stringify()
     const snippet = objStr.slice(0, PREVIEW_MAX_LENGTH)
 
-    const preview = objStr.length > PREVIEW_MAX_LENGTH
+    const preview = PREVIEW_MAX_LENGTH > 0 && objStr.length > PREVIEW_MAX_LENGTH
       ? snippet + '...'
       : snippet
 
@@ -34,16 +34,16 @@ export default M => {
       subtypeNames =
         '<' +
         parentType.innerTypes()[key].subtypes.map(x => x.type.name).join(', ') +
-        '> '
+        '>'
     } catch (ignore) {
-      subtypeNames = ' '
+      subtypeNames = ''
     }
 
-    const sizeStr = obj.hasOwnProperty('size') ? `(${obj.size})` : ''
+    const sizeStr = obj.hasOwnProperty('size') ? `(${obj.size}) ` : ' '
 
     return ['div', {}].concat([
       ['span', {}, key ? formatKey(key) : ''],
-      ['span', {}, typeName + sizeStr + subtypeNames],
+      ['span', {}, typeName + subtypeNames + sizeStr],
       ['span', {}, preview]
     ])
   }
@@ -59,10 +59,9 @@ export default M => {
     }
   ]
 
-  const nativeChild = (obj, fields, key) =>
+  const nativeChild = (fields, key) =>
     ['div', {style: styles.childNative}].concat([
       formatKey(key),
-      obj[M.symbols.typeSymbol]().innerTypes()[key].type.name + ' ',
       ['object', {object: fields[key]}]
     ])
 
@@ -81,7 +80,7 @@ export default M => {
       children = fieldsKeys.sort().reduce((acc, key) => {
         const child = isModelico(fields[key])
           ? modelicoChild(obj, fields, key)
-          : nativeChild(obj, fields, key)
+          : nativeChild(fields, key)
 
         acc.push(['div', {style: styles.childwrapper}, child])
 
@@ -94,7 +93,7 @@ export default M => {
 
   return Object.freeze({
     header: (obj, config) => (isModelico(obj) ? header(obj, config) : null),
-    hasBody: obj => isModelico(obj),
+    hasBody: isModelico,
     body
   })
 }
