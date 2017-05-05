@@ -1,5 +1,6 @@
 export default M => {
   const PREVIEW_MAX_LENGTH = 100
+  const FIELDS_POSTFIX = '()'
 
   const isPlainObject = x => typeof x === 'object' && !!x
   const isModelico = obj => obj instanceof M.Base
@@ -7,10 +8,12 @@ export default M => {
   const styles = {
     keys: 'color: purple',
     normal: 'color: #444',
-    childwrapper: 'margin-left: 15px; line-height: 1.5',
+    childwrapper: 'margin-left: 15px; padding: 2px 0 1px',
     childObject: 'margin-left: 26px;',
     childNative: 'margin-left: 14px;'
   }
+
+  const getTypeName = type => type.displayName || type.name
 
   const formatKey = key =>
     ['span', {}].concat([
@@ -26,7 +29,7 @@ export default M => {
       ? snippet + '...'
       : snippet
 
-    const typeName = obj[M.symbols.typeSymbol]().displayName
+    const typeName = getTypeName(obj[M.symbols.typeSymbol]())
 
     let subtypeNames
 
@@ -34,8 +37,8 @@ export default M => {
       subtypeNames =
         '<' +
         parentType
-          .innerTypes()[key]
-          .subtypes.map(x => x.type.displayName)
+          .innerTypes()[key.slice(0, -FIELDS_POSTFIX.length)]
+          .subtypes.map(x => getTypeName(x.type))
           .join(', ') +
         '>'
     } catch (ignore) {
@@ -68,16 +71,38 @@ export default M => {
       ['object', {object: fields[key]}]
     ])
 
-  const body = obj => {
+  const withMethods = obj => {
     const json = obj.toJSON()
-    const fields = isPlainObject(json) ? json : {}
+    const base = isPlainObject(json) ? Object.assign({}, json) : {':': json}
+
+    const res = Object.keys(base).reduce((acc, key) => {
+      const keyName = obj instanceof M.List
+        ? `get(${key})`
+        : key === ':' || Array.isArray(json) ? key : key + FIELDS_POSTFIX
+
+      acc[keyName] = base[key]
+
+      return acc
+    }, {})
+
+    return Object.keys(obj).reduce((acc, key) => {
+      if (!(key + FIELDS_POSTFIX in res)) {
+        res[key] = obj[key]
+      }
+
+      return acc
+    }, res)
+  }
+
+  const body = obj => {
+    const fields = withMethods(obj)
     const fieldsKeys = Object.keys(fields)
 
     let children
 
     if (fieldsKeys.length === 0) {
       children = [
-        ['div', {style: styles.childObject}, ['object', {object: json}]]
+        ['div', {style: styles.childObject}, ['object', {object: fields}]]
       ]
     } else {
       children = fieldsKeys.sort().reduce((acc, key) => {

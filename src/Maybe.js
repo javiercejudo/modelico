@@ -69,7 +69,7 @@ class Maybe extends Base {
   }
 
   static of(v) {
-    return isNothing(v) ? new Nothing() : new Just(v)
+    return isNothing(v) || v instanceof Nothing ? new Nothing() : new Just(v)
   }
 
   static metadata(itemMetadata) {
@@ -91,7 +91,10 @@ class Nothing extends Maybe {
     super(Nothing)
 
     if (!nothing) {
-      this.inner = always(TypeError('nothing holds no value'))
+      this.inner = () => {
+        throw TypeError('nothing holds no value')
+      }
+
       nothing = this
     }
 

@@ -22,7 +22,7 @@
     "send-coverage": "./scripts/coverage_reporter.sh",
     "prettier-base": "prettier --write --print-width 80 --no-semi --single-quote --bracket-spacing false --parser flow",
     "prettier": "npm run prettier-base -- \"{src,test,devtools}/**/*.js\"",
-    "prettier-dist": "npm run prettier-base -- \"dist/{modelico,modelico.es2015,modelico-spec,modelico-spec.es2015}.js\"",
+    "prettier-dist": "npm run prettier-base -- \"dist/!(*.min).js\"",
     "prebuild": "npm run fix && npm run flow && rm -rf dist && mkdir dist",
     "build": "npm run build-src && npm run build-browser-spec && npm run build-formatter",
     "build-src": "npm run build-src-dev && npm run build-src-min",

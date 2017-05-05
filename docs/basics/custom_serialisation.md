@@ -6,14 +6,10 @@ we will create a `Point` class that can revive strings like `"5,8"`. Let's see
 how the reviver looks like:
 
 ```js
-const reviver = (k, v, path = []) => {
-  const [x, y] = v.split(',')
-
-  return new Point(x, y)
-}
+const reviver = (k, v) => new Point(...v.split(','))
 ```
 
-_Note: the additional `path` argument forwarded by the built-in revivers is
+_Note: a third `path` argument is forwarded by the built-in revivers,
 mostly to help display more informative error messages when necessary.
 `JSON.parse(..., reviver)` would not forward a path as it is not part of the
 native API._
@@ -33,16 +29,11 @@ class Point extends M.Base {
     const { x: x1, y: y1 } = this
     const { x: x2, y: y2 } = point
 
-    return Math.sqrt(
-      ((x2() - x1()) ** 2) +
-      ((y2() - y1()) ** 2)
-    )
+    return Math.sqrt((x2() - x1()) ** 2 + (y2() - y1()) ** 2)
   }
 
   toJSON () {
-    const { x, y } = this
-
-    return `${x()},${y()}`
+    return `${this.x()},${this.y()}`
   }
 
   static metadata () {
