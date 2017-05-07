@@ -27,9 +27,7 @@ const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
 
   const itemMetadataGetter = isTuple
     ? i =>
-        (isFunction(itemMetadata[i])
-          ? itemMetadata[i](v, path)
-          : itemMetadata[i])
+        isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
     : isFunction(itemMetadata)
         ? always(itemMetadata(v, path))
         : always(itemMetadata)

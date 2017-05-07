@@ -47,12 +47,12 @@ export const haveSameValues = (a: any, b: any): boolean =>
   a === b || Object.is(a, b)
 
 export const haveSameType = (a: any, b: any): boolean =>
-  (a == null || b == null ? a === b : a.constructor === b.constructor)
+  a == null || b == null ? a === b : a.constructor === b.constructor
 
 export const haveDifferentTypes = pipe2(haveSameType, not)
 
 export const equals = (a: any, b: any): boolean =>
-  (isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b))
+  isSomething(a) && a.equals ? a.equals(b) : haveSameValues(a, b)
 
 export const unsupported = (message: string) => {
   throw Error(message)

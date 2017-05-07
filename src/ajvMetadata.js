@@ -217,9 +217,9 @@ export default (ajv = {validate: T}) => {
   }
 
   ajvMetadata.ajvList = (itemMetadata, schema) =>
-    (Array.isArray(itemMetadata)
+    Array.isArray(itemMetadata)
       ? ajvTuple(itemMetadata, schema)
-      : ajvList(itemMetadata, schema))
+      : ajvList(itemMetadata, schema)
 
   ajvMetadata.ajvMap = (keyMetadata, valueMetadata, schema) => {
     const baseSchema = {

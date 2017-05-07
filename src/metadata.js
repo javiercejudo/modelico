@@ -20,7 +20,7 @@ const metadataCache = new WeakMap()
 const base = Type => Object.freeze({type: Type, reviver: reviverFactory(Type)})
 
 const raw_ = (Type, innerMetadata) =>
-  (Type.metadata ? Type.metadata(...innerMetadata) : base(Type))
+  Type.metadata ? Type.metadata(...innerMetadata) : base(Type)
 
 const _ = (Type, metadata = []) => {
   if (metadata.length > 0) {
@@ -84,7 +84,7 @@ const metadata = () =>
     anyOf,
     union,
     number: ({wrap = false} = {}) =>
-      (wrap ? ModelicoNumber.metadata() : asIs(Number)),
+      wrap ? ModelicoNumber.metadata() : asIs(Number),
 
     string: always(asIs(String)),
     boolean: always(asIs(Boolean)),

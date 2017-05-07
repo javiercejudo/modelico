@@ -418,7 +418,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       static innerTypes() {
         return Object.freeze({
           collection: v =>
-            (Array.isArray(v.collection) ? list(number()) : stringMap(number()))
+            Array.isArray(v.collection) ? list(number()) : stringMap(number())
         })
       }
     }
