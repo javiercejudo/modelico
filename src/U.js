@@ -13,10 +13,14 @@ export const pipe = (...fns: Array<Function>) =>
 
 export const partial = (fn: Function, ...args: Array<mixed>) =>
   fn.bind(undefined, ...args)
+
 export const asIsReviver = (transform: Function) => (k: string, v: mixed) =>
   transform(v)
+
 export const always = <T>(x: T) => (): T => x
-export const isNothing = (v: mixed): boolean => v == null || Number.isNaN(v)
+
+export const isNothing = (v: any): boolean => v == null || Number.isNaN(v)
+
 export const isSomething = pipe2(isNothing, not)
 
 export const assertSomethingIdentity = <T>(x: T): T => {
@@ -29,10 +33,12 @@ export const assertSomethingIdentity = <T>(x: T): T => {
 
 export const defaultTo = (d: mixed) => (v: mixed) => (isNothing(v) ? d : v)
 export const objToArr = (obj: Object) => Object.keys(obj).map(k => [k, obj[k]])
+
 export const reviverOrAsIs = pipe2(
   get('reviver'),
   defaultTo(asIsReviver(assertSomethingIdentity))
 )
+
 export const isPlainObject = (x: mixed): boolean => typeof x === 'object' && !!x
 export const isFunction = (x: mixed): boolean => typeof x === 'function'
 export const emptyObject: Object = Object.freeze({})

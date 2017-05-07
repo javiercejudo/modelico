@@ -101,6 +101,20 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
     })
   })
 
+  describe('Nothing', () => {
+    it('holds no value', () => {
+      should(() => M.Maybe.of().inner()).throw('nothing holds no value')
+    })
+
+    it('generates a Nothing when used with Maybe.of', () => {
+      M.Maybe.of(M.Nothing).should.be.exactly(M.Nothing)
+    })
+
+    it('can be contained in a Just like everything else', () => {
+      M.Just.of(M.Nothing).inner().should.be.exactly(M.Nothing)
+    })
+  })
+
   describe('isEmpty', () => {
     it('should return false if there is a value', () => {
       const maybe = M.Just.of(5)

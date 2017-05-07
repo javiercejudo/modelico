@@ -20,6 +20,7 @@ import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
 import featuresPolymorphic from './features/polymorphic'
 import featuresValidate from './features/validate'
+import featuresCustomSerialisation from './features/customSerialisation'
 import ImmutableExamples from './Immutable/index'
 import ImmutableProxied from './Immutable/proxied'
 
@@ -134,6 +135,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
   describe('Deep nesting features', featuresDeepNesting(...deps))
   describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
   describe('Validate', featuresValidate(...deps))
+  describe('Custom serialisation', featuresCustomSerialisation(...deps))
   describe('Immutable examples', ImmutableExamples(U, ...deps))
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))
