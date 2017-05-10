@@ -90,7 +90,7 @@ debugging complex deep objects.
 
 ```js
 const noNumbers = M.withValidation(
-  x => /^[^0-9]+$/.test(v),
+  v => /^[^0-9]*$/.test(v),
   (v, path) => `string ${v} at "${path.join(' > ')}" contains numbers`
 )
 

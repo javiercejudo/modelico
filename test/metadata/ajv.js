@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-export default (should, M, fixtures, {Ajv}) => () => {
+export default (U, should, M, fixtures, {Ajv}) => () => {
   const {
     ajv_,
     ajvBase,
@@ -1130,6 +1130,31 @@ export default (should, M, fixtures, {Ajv}) => () => {
       should(() =>
         JSON.parse('"aBc123"', lowerCaseString({minLength: 5}).reviver)
       ).throw(/string aBc123 at "" is not all lower case/)
+    })
+
+    it('should compose well', () => {
+      const noNumbers = M.withValidation(
+        v => /^[^0-9]*$/.test(v),
+        (v, path) => `string ${v} at "${path.join(' > ')}" contains numbers`
+      )
+
+      const lowercase = M.withValidation(
+        v => v.toLowerCase() === v,
+        (v, path) =>
+          `string ${v} at "${path.join(' > ')}" is not all lower case`
+      )
+
+      const specialString = U.pipe(ajvString, noNumbers, lowercase)
+      const specialReviver = x => specialString({minLength: 1}).reviver('', x)
+
+      should(() => specialReviver('')).throw(
+        /should NOT be shorter than 1 characters/
+      )
+
+      should(() => specialReviver('a1')).throw(/contains numbers/)
+      should(() => specialReviver('abcAd')).throw(/is not all lower case/)
+
+      specialReviver('abc').should.be.exactly('abc')
     })
 
     it('should have a default error message', () => {
