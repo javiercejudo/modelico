@@ -72,6 +72,10 @@ const hasToStringTagSymbol = (() => {
   return a + '' === '[object foo]'
 })()
 
+const identity = x => x
+const pipe2 = (f, g) => x => g(f(x))
+const pipe = (...fns) => [...fns, identity].reduce(pipe2)
+
 // loosely based on https://bost.ocks.org/mike/shuffle/
 const shuffle = arr => {
   for (let l = arr.length; l > 0; l -= 1) {
@@ -87,6 +91,7 @@ const buildUtils = () =>
     skipIfNoProxies: fn => (hasProxies ? fn : fn.skip),
     skipIfNoToStringTagSymbol: fn => (hasToStringTagSymbol ? fn : fn.skip),
     objToArr: obj => Object.keys(obj).map(k => [k, obj[k]]),
+    pipe,
     shuffle
   })
 
@@ -124,7 +129,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
 
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
-  describe('ajvMetadata', ajvMetadata(...deps))
+  describe('ajvMetadata', ajvMetadata(U, ...deps))
   describe('base metadata', baseMetadata(...deps))
   describe('withDefault metadata', withDefaultMetadata(...deps))
   describe('union metadata', unionMetadata(...deps))
