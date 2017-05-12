@@ -20,7 +20,7 @@ Here is how `Animal` would look like:
 
 ```js
 const M = require('modelico') // window.Modelico in the browser
-const { string } = M.metadata()
+const {string} = M.metadata()
 
 class Animal extends M.Base {
   constructor (props) {

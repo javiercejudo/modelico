@@ -371,6 +371,18 @@ export default (U, should, M, fixtures) => () => {
     })
   })
 
+  describe('M.new', () => {
+    it('helps create Modelico instances in composition with map and others', () => {
+      const results = [M.Number.of(10), M.Number.of(20), M.Number.of(Infinity)]
+
+      should(
+        [10, 20, Infinity].map(M.new(M.Number)).reduce((eq, x, i) => {
+          return eq && results[i].equals(x)
+        }, true)
+      ).be.exactly(true)
+    })
+  })
+
   describe('circular innerTypes', () => {
     it('a Modelico type can have a key that is a Maybe of its own type', () => {
       const bestFriend = new Friend({

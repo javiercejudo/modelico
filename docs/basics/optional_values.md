@@ -19,7 +19,7 @@ be used only if the property is `null` or missing.
 
 ```js
 import M from 'modelico'
-const { string, maybe } = M.metadata()
+const {string, maybe} = M.metadata()
 
 class Animal extends M.Base {
 
@@ -49,7 +49,7 @@ pet3.name() // => Unknown
 
 ```js
 import M from 'modelico'
-const { string, maybe } = M.metadata()
+const {string, maybe} = M.metadata()
 
 class Animal extends M.Base {
 

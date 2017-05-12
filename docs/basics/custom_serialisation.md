@@ -6,7 +6,7 @@ we will create a `Point` class that can revive strings like `"5,8"`. Let's see
 how the reviver looks like:
 
 ```js
-const reviver = (k, v) => new Point(...v.split(','))
+const reviver = (k, v) => Point.of(...v.split(','))
 ```
 
 _Note: a third `path` argument is forwarded by the built-in revivers,
@@ -18,26 +18,30 @@ With that, we are ready to create our `Point` class:
 
 ```js
 class Point extends M.Base {
-  constructor (x, y) {
-    super(Point, { x, y })
+  constructor(props) {
+    super(Point, props)
 
-    this.x = () => x
-    this.y = () => y
+    this.x = () => props.x
+    this.y = () => props.y
   }
 
-  distanceTo (point) {
-    const { x: x1, y: y1 } = this
-    const { x: x2, y: y2 } = point
+  distanceTo(point) {
+    const {x: x1, y: y1} = this
+    const {x: x2, y: y2} = point
 
     return Math.sqrt((x2() - x1()) ** 2 + (y2() - y1()) ** 2)
   }
 
-  toJSON () {
+  toJSON() {
     return `${this.x()},${this.y()}`
   }
 
-  static metadata () {
-    return Object.freeze({ type: Point, reviver })
+  static of(x, y) {
+    return new Point({x, y})
+  }
+
+  static metadata() {
+    return Object.freeze({type: Point, reviver})
   }
 }
 ```
@@ -46,7 +50,7 @@ We can now use it as follows:
 
 ```js
 const pointA = M.fromJSON(Point, '"2,3"')
-const pointB = new Point(3, 4)
+const pointB = Point.of(3, 4)
 
 pointA.distanceTo(pointB)
 // => 1.4142135623730951 = Math.SQRT2 ≈ √2

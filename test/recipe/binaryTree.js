@@ -463,7 +463,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {
         '1': {
-          oneOf: [
+          anyOf: [
             {
               type: 'null'
             },
@@ -498,7 +498,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {
         '1': {
-          oneOf: [
+          anyOf: [
             {
               type: 'null'
             },
@@ -597,7 +597,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {
         '1': {
-          oneOf: [
+          anyOf: [
             {
               type: 'null'
             },
