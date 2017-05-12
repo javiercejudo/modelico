@@ -158,13 +158,8 @@ export default (ajv = {validate: T}) => {
 
     const reviver = ensureWrapped(metadata, baseSchema, numberMeta)
 
-    const maybeReviver = metadata.maybeReviver
-      ? ensureWrapped(metadata, baseSchema, numberMeta, 'maybeReviver')
-      : reviver
-
     return Object.assign({}, metadata, {
       reviver,
-      maybeReviver,
       ownSchema: always(numberMeta),
       schema: always(numberMeta)
     })

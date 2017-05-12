@@ -988,6 +988,38 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
         .getOrElse('fallback')
         .should.be.exactly('Javier')
     })
+
+    it('honours its inner metadata constraints', () => {
+      should(() => ajvMaybe(ajvString({minLength: 1})).reviver('', '')).throw(
+        /should NOT be shorter than 1 characters/
+      )
+
+      ajvMaybe(ajvString({minLength: 0}))
+        .reviver('', '')
+        .equals(M.Just.of(''))
+        .should.be.exactly(true)
+
+      ajvMaybe(ajvString({minLength: 0}))
+        .reviver('', null)
+        .isEmpty()
+        .should.be.exactly(true)
+    })
+
+    it('honours its inner metadata constraints (2)', () => {
+      should(() =>
+        ajvMaybe(ajvNumber({minimum: 1}, {wrap: true})).reviver('', 0)
+      ).throw(/should be >= 1/)
+
+      ajvMaybe(ajvNumber({minimum: 0}, {wrap: true}))
+        .reviver('', 0)
+        .equals(M.Just.of(M.Number.of(0)))
+        .should.be.exactly(true)
+
+      ajvMaybe(ajvNumber({minimum: 0}, {wrap: true}))
+        .reviver('', null)
+        .isEmpty()
+        .should.be.exactly(true)
+    })
   })
 
   describe('recipe: validate within the constructor', () => {

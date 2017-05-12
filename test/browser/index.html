@@ -23,6 +23,12 @@
   <script>
     ModelicoMin = Modelico.noConflict()
 
+    M = Modelico
+    m = M.ajvMetadata(Ajv())
+
+    console.log('M =', M)
+    console.log('m =', m)
+
     // Chrome devtools custom formatters
     window.devtoolsFormatters = window.devtoolsFormatters || []
 
