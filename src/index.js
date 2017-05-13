@@ -102,6 +102,7 @@ export default {
   createModel,
   createAjvModel,
   createUnionType,
+  new: Type => x => new Type(x),
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
   fromJS,

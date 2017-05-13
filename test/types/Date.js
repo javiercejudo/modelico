@@ -33,7 +33,7 @@ export default (U, should, M) => () => {
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
-      ;(() => M.Date.of(null)).should.throw()
+      should(() => M.Date.of(null)).throw()
     })
 
     it('should set dates correctly', () => {

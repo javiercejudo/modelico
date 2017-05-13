@@ -34,7 +34,7 @@ const CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY'])
 Now, we can create our `NumberCollection` class:
 
 ```js
-const { _, number, stringMap, list, anyOf } = M.metadata()
+const {_, number, stringMap, list, anyOf} = M.metadata()
 
 class NumberCollection extends M.Base {
   constructor (props) {
@@ -42,7 +42,7 @@ class NumberCollection extends M.Base {
   }
 
   getNumbers () {
-    const { collectionType, collection } = this
+    const {collectionType, collection} = this
 
     switch (collectionType()) {
       case CollectionType.OBJECT():
@@ -122,7 +122,7 @@ In this example, we are going to revive the same polymorphic JSON as the one
 above, but without an enumerated field to hint the type of the collection.
 
 ```js
-const { number, stringMap, list } = M.metadata()
+const {number, stringMap, list} = M.metadata()
 
 class NumberCollection extends M.Base {
   constructor (props) {

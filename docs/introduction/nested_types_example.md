@@ -39,7 +39,7 @@ inner types using the `M.metadata()._` function.
 ```js
 import M from 'modelico'
 
-const { _, string, list } = M.metadata()
+const {_, string, list} = M.metadata()
 
 class Person extends M.Base {
   constructor (fields) {

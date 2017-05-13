@@ -26,7 +26,7 @@ import Ajv from 'ajv'
 
 const ajvOptions = {}
 const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined
-const { ajvString, ajvList, ajvNumber } = M.ajvMetadata(ajvIfProd)
+const {ajvString, ajvList, ajvNumber} = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -35,8 +35,11 @@ class Animal extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: ajvString({ minLength: 1, maxLength: 25 }),
-      dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+      name: ajvString({minLength: 1, maxLength: 25}),
+      dimensions: ajvList(
+        ajvNumber({minimum: 0, exclusiveMinimum: true}),
+        {minItems: 3, maxItems: 3}
+      )
     })
   }
 }
@@ -53,7 +56,7 @@ not covered by what JSON schema can validate, you may write your own metadata.
 `M.withValidation` facilitates this use case.
 
 ```js
-const { string, list, number } = M.metadata()
+const {string, list, number} = M.metadata()
 
 // lowerCaseString is going to return metadata that validates the string
 // before reviving it by overriding the string metadata reviver
@@ -124,7 +127,7 @@ validity of some fields depends on other fields. In the following example,
 we make sure that `min <= max` in a `Range` class:
 
 ```js
-const { base } = M.metadata()
+const {base} = M.metadata()
 
 const customReviver = baseReviver => (k, v, path = []) => {
   if (k !== '') {
@@ -139,8 +142,8 @@ const customReviver = baseReviver => (k, v, path = []) => {
 }
 
 class Range extends M.Base {
-  constructor ({ min = -Infinity, max = Infinity } = {}) {
-    super(Range, { min, max })
+  constructor ({min = -Infinity, max = Infinity} = {}) {
+    super(Range, {min, max})
   }
 
   length () {
@@ -158,7 +161,7 @@ class Range extends M.Base {
     const baseMetadata = base(Range)
     const baseReviver = baseMetadata.reviver
 
-    return Object.assign({}, baseMetadata, { reviver: customReviver(baseReviver) })
+    return Object.assign({}, baseMetadata, {reviver: customReviver(baseReviver) })
   }
 }
 ```
@@ -176,16 +179,16 @@ validation was not successful.
 Using the class:
 
 ```js
-M.fromJS(Range, { min: 4, max: 3.5 })
+M.fromJS(Range, {min: 4, max: 3.5})
 // => RangeError: "min" must be less than or equal to "max"
 
-const myRange = new Range({ min: 4, max: 3.5 })
+const myRange = new Range({min: 4, max: 3.5})
 // => No error, but...
 
 M.validate(myRange)
 // => [false, RangeError("min" must be less than or equal to "max")]
 
-const myRange2 = new Range({ min: 4, max: 6.5 })
+const myRange2 = new Range({min: 4, max: 6.5})
 
 M.validate(myRange2)
 // => [true, undefined]

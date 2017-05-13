@@ -45,7 +45,7 @@ revive the catalogue, which is a `Modelico.List` of `Books`.
 const library = await asyncMap(
   book => M.fromJS(Book, book),
   libraryObj.catalogue,
-  { batchSize: 50 }
+  {batchSize: 50}
 )
   .then(catalogueArr => {
     const catalogue = M.List.fromArray(catalogueArr)

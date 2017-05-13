@@ -39,11 +39,12 @@ export default (ajv = {validate: T}) => {
     maybe
   } = metadata
 
-  const ensure = (metadata, schema, valueTransformer = identity) => (
-    k,
-    value,
-    path
-  ) => {
+  const ensure = (
+    metadata,
+    schema,
+    valueTransformer = identity,
+    reviverName = 'reviver'
+  ) => (k, value, path) => {
     if (k !== '') {
       return value
     }
@@ -60,17 +61,26 @@ export default (ajv = {validate: T}) => {
       ? metadata(value, path)
       : metadata
 
-    return resolvedMetadata.reviver('', value, path)
+    return resolvedMetadata[reviverName]('', value, path)
   }
 
-  const ensureWrapped = (metadata, schema1, schema2) => (k, value) => {
+  const ensureWrapped = (metadata, schema1, schema2, reviverName) => (
+    k,
+    value
+  ) => {
     if (k !== '') {
       return value
     }
 
-    const unwrappedValue = ensure(metadata, schema1)(k, value)
+    const unwrappedValue = ensure(metadata, schema1, identity, reviverName)(
+      k,
+      value
+    )
 
-    return ensure(any(), schema2, x => x.inner())(k, unwrappedValue)
+    return ensure(any(), schema2, x => x.inner(), reviverName)(
+      k,
+      unwrappedValue
+    )
   }
 
   const ajvMeta = (
@@ -86,6 +96,10 @@ export default (ajv = {validate: T}) => {
 
     const reviver = ensure(metadata, schemaToCheck)
 
+    const maybeReviver = metadata.maybeReviver
+      ? ensure(metadata, schemaToCheck, identity, 'maybeReviver')
+      : reviver
+
     const schemaGetter = () =>
       Object.assign({}, schemaToCheck, innerSchemaGetter())
 
@@ -94,6 +108,7 @@ export default (ajv = {validate: T}) => {
     return Object.assign({}, baseMetadata, {
       baseMetadata,
       reviver,
+      maybeReviver,
       ownSchema: always(schemaToCheck),
       schema: schemaGetter
     })
@@ -137,16 +152,11 @@ export default (ajv = {validate: T}) => {
 
     const numberMeta = Object.assign({type: 'number'}, schema)
 
-    const reviver = ensureWrapped(
-      metadata,
-      {
-        anyOf: [
-          {type: 'number'},
-          {enum: ['-0', '-Infinity', 'Infinity', 'NaN']}
-        ]
-      },
-      numberMeta
-    )
+    const baseSchema = {
+      anyOf: [{type: 'number'}, {enum: ['-0', '-Infinity', 'Infinity', 'NaN']}]
+    }
+
+    const reviver = ensureWrapped(metadata, baseSchema, numberMeta)
 
     return Object.assign({}, metadata, {
       reviver,
@@ -284,7 +294,9 @@ export default (ajv = {validate: T}) => {
     const baseMetadata = union(Type, metas, classifier)
 
     return ajvMeta(baseMetadata, emptyObject, emptyObject, () => ({
-      oneOf: metas.map(getInnerSchema)
+      // The classifier might determine how multiple matches resolve, hence the
+      // use of anyOf instead of oneOf. Ambiguities will still be caught.
+      anyOf: metas.map(getInnerSchema)
     }))
   }
 
