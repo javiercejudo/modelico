@@ -20,7 +20,6 @@ export const asIsReviver = (transform: Function) => (k: string, v: mixed) =>
 export const always = <T>(x: T) => (): T => x
 
 export const isNothing = (v: any): boolean => v == null || Number.isNaN(v)
-
 export const isSomething = pipe2(isNothing, not)
 
 export const assertSomethingIdentity = <T>(x: T): T => {
@@ -57,3 +56,23 @@ export const equals = (a: any, b: any): boolean =>
 export const unsupported = (message: string) => {
   throw Error(message)
 }
+
+export const metaOrTypeMapper = (_: Function) => (x: any) =>
+  isPlainObject(x) ? x : _(x)
+
+export const formatAjvError = (
+  ajv: Object,
+  schema: Object,
+  value: any,
+  path: Array<any> = []
+) =>
+  [
+    'Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n',
+    JSON.stringify(schema, null, 2) + '\n',
+    'the value (data path "' +
+      ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) +
+      '")\n',
+    JSON.stringify(value, null, 2) + '\n'
+  ]
+    .concat(ajv.errors.map(error => error.message))
+    .join('\n')

@@ -311,7 +311,7 @@ export default (U, should, M, {Person}) => () => {
     })
   })
 
-  describe('EMPTY / of / fromArray', () => {
+  describe('EMPTY / of / fromArray / toArray', () => {
     it('should have a static property for the empty list', () => {
       should([...M.List.EMPTY()].length).be.exactly(0)
 
@@ -332,6 +332,12 @@ export default (U, should, M, {Person}) => () => {
       const modelicoList = M.List.fromArray(fibArray)
 
       Array.from(modelicoList).should.eql([0, 1, 1, 2, 3, 5, 8])
+    })
+
+    it('should be able to convert a list to an array', () => {
+      const modelicoList = M.List.of(1, 2, 3)
+
+      modelicoList.toArray().should.eql([1, 2, 3])
     })
   })
 

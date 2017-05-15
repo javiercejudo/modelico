@@ -9,7 +9,10 @@ import {
 } from './U'
 
 type Path = Array<string | number>
-
+type BaseListMetadata = Object | Array<Object>
+type ListMetadata =
+  | BaseListMetadata
+  | ((v: any, path: Path) => BaseListMetadata)
 const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
   k,
   v,
@@ -42,7 +45,7 @@ const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
 
 export const iterableMetadata = (
   IterableType: any,
-  itemMetadata: Object | ((v: any, path: Path) => Object)
+  itemMetadata: ListMetadata
 ) => {
   return Object.freeze({
     type: IterableType,

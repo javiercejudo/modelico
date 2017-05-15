@@ -399,6 +399,21 @@ export default (U, should, M, fixtures) => () => {
     })
   })
 
+  describe('createSimpleModel', () => {
+    it('should create a model without boilerplate', () => {
+      const Book = M.createSimpleModel(m => ({title: m.string()}), 'Book')
+
+      const myBook = new Book({title: 'Some title'})
+
+      myBook.title().should.be.exactly('Some title')
+      myBook.stringify().should.be.exactly('{"title":"Some title"}')
+
+      M.fromJSON(Book, '{"title":"Some title"}')
+        .equals(myBook)
+        .should.be.exactly(true)
+    })
+  })
+
   U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should use the metadata to coerce the value if necessary', () => {
       class CountryCallingCode

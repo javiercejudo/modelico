@@ -72,6 +72,10 @@ class List extends Base {
     return this.inner()
   }
 
+  toArray() {
+    return this.toJSON()
+  }
+
   equals(other) {
     return iterableEquals(this, other)
   }

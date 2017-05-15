@@ -1,5 +1,7 @@
 /* eslint-env mocha */
 export default (U, should, M, fixtures, {Ajv}) => () => {
+  const ajv = Ajv()
+
   const {
     ajv_,
     ajvBase,
@@ -22,7 +24,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     _,
     number,
     withDefault
-  } = M.ajvMetadata(Ajv())
+  } = M.ajvMetadata(ajv)
 
   describe('Animal example', () => {
     class Animal extends M.Base {
@@ -51,7 +53,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
     class Animal2 extends M.Base {
       constructor(props) {
-        super(Animal, props)
+        super(Animal2, props)
       }
 
       static innerTypes() {
@@ -990,6 +992,10 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     })
 
     it('honours its inner metadata constraints', () => {
+      should(() => ajvMaybe(ajvString({minLength: 1})).reviver('', 42)).throw(
+        /should be string/
+      )
+
       should(() => ajvMaybe(ajvString({minLength: 1})).reviver('', '')).throw(
         /should NOT be shorter than 1 characters/
       )
@@ -1167,13 +1173,14 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     it('should compose well', () => {
       const noNumbers = M.withValidation(
         v => /^[^0-9]*$/.test(v),
-        (v, path) => `string ${v} at "${path.join(' > ')}" contains numbers`
+        (v, path) =>
+          `string ${v} at "${path.join(' > ')}" should NOT contain numbers`
       )
 
       const lowercase = M.withValidation(
         v => v.toLowerCase() === v,
         (v, path) =>
-          `string ${v} at "${path.join(' > ')}" is not all lower case`
+          `string ${v} at "${path.join(' > ')}" should NOT have uppercase characters`
       )
 
       const specialString = U.pipe(ajvString, noNumbers, lowercase)
@@ -1183,8 +1190,11 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
         /should NOT be shorter than 1 characters/
       )
 
-      should(() => specialReviver('a1')).throw(/contains numbers/)
-      should(() => specialReviver('abcAd')).throw(/is not all lower case/)
+      should(() => specialReviver('a1')).throw(/should NOT contain numbers/)
+
+      should(() => specialReviver('abcAd')).throw(
+        /should NOT have uppercase characters/
+      )
 
       specialReviver('abc').should.be.exactly('abc')
     })
@@ -1398,7 +1408,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
       class Child extends M.Base {
         constructor(props) {
-          super(Parent, props)
+          super(Child, props)
         }
 
         static innerTypes() {
@@ -1411,7 +1421,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
       class Person extends M.Base {
         constructor(props) {
-          super(Parent, props)
+          super(Person, props)
         }
 
         static innerTypes() {
@@ -1478,6 +1488,18 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           }
         }
       })
+    })
+  })
+
+  describe('formatAjvError', () => {
+    it('does not require a path', () => {
+      const meta = ajvString({minLength: 1})
+
+      should(() => JSON.parse('""', ajvString({minLength: 1}).reviver)).throw()
+
+      M.util
+        .formatAjvError(ajv, M.getSchema(meta), '')
+        .should.match(/Invalid JSON at ""/)
     })
   })
 }

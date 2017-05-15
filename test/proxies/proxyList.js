@@ -235,6 +235,6 @@ export default (should, M) => () => {
   it('map()', () => {
     const list = p(M.List.of(1, 2, 3))
 
-    list.map(x => x + 10).should.eql([11, 12, 13])
+    list.map(x => x + 10).equals(M.List.of(11, 12, 13)).should.be.exactly(true)
   })
 }

@@ -1,9 +1,20 @@
 import {version, author, homepage, license} from '../package.json'
 import * as symbols from './symbols'
-import {partial, identity} from './U'
+
+import {
+  T,
+  always,
+  formatAjvError,
+  identity,
+  isNothing,
+  partial,
+  pipe
+} from './U'
+
 import getSchema from './getSchema'
 import validate from './validate'
 import withValidation from './withValidation'
+import withCache from './withCache'
 import metadata from './metadata'
 
 import Base from './Base'
@@ -34,6 +45,7 @@ const setNonMutators = internalNonMutators
 const setMutators = ['add', 'delete', 'clear']
 
 const listNonMutators = internalNonMutators.concat([
+  'map',
   'concat',
   'slice',
   'filter'
@@ -71,11 +83,15 @@ const dateMutators = [
 ]
 
 const proxyMap = partial(proxyFactory, mapNonMutators, mapMutators, identity)
+
 const genericsFromJS = (Type, innerMetadata, js) =>
   _(Type, innerMetadata).reviver('', js)
+
 const fromJS = (Type, js) => genericsFromJS(Type, [], js)
+
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) =>
   _(Type, schema, innerMetadata).reviver('', js)
+
 const ajvFromJS = (_, Type, schema, js) =>
   ajvGenericsFromJS(_, Type, schema, [], js)
 
@@ -85,8 +101,12 @@ const createAjvModel = (ajv, innerTypes, options = {}) => {
   return createModel(innerTypes, options)
 }
 
+const createSimpleModel = (innerTypes, name) =>
+  createModel(innerTypes, {stringTag: name})
+
 export default {
   about: Object.freeze({version, author, homepage, license}),
+
   Number: ModelicoNumber,
   Date: ModelicoDate,
   Enum,
@@ -99,32 +119,50 @@ export default {
   Nothing: Maybe.Nothing,
   Base,
   Set: ModelicoSet,
+
   createModel,
+  createSimpleModel,
   createAjvModel,
   createUnionType,
+
   new: Type => x => new Type(x),
   fields: x => x[symbols.fieldsSymbol](),
   symbols,
+
   fromJS,
   genericsFromJS,
   fromJSON: (Type, json) => fromJS(Type, JSON.parse(json)),
   genericsFromJSON: (Type, innerMetadata, json) =>
     genericsFromJS(Type, innerMetadata, JSON.parse(json)),
+
   ajvFromJS,
   ajvGenericsFromJS,
   ajvFromJSON: (_, Type, schema, json) =>
     ajvFromJS(_, Type, schema, JSON.parse(json)),
   ajvGenericsFromJSON: (_, Type, schema, innerMetadata, json) =>
     ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
+
   metadata,
   ajvMetadata,
   getSchema,
   validate,
   withValidation,
+  withCache,
   proxyMap,
+
   proxyEnumMap: proxyMap,
   proxyStringMap: proxyMap,
   proxyList: partial(proxyFactory, listNonMutators, listMutators, x => [...x]),
   proxySet: partial(proxyFactory, setNonMutators, setMutators, identity),
-  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity)
+  proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity),
+
+  util: {
+    T,
+    always,
+    formatAjvError,
+    identity,
+    isNothing,
+    partial,
+    pipe
+  }
 }
