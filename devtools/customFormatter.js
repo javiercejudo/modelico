@@ -72,7 +72,8 @@ export default M => {
     ])
 
   const withMethods = obj => {
-    const json = obj.toJSON()
+    const fields = M.fields(obj)
+    const json = Object.keys(fields).length === 0 ? obj.toJSON() : fields
     const base = isPlainObject(json) ? Object.assign({}, json) : {':': json}
 
     const res = Object.keys(base).reduce((acc, key) => {

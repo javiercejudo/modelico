@@ -77,7 +77,7 @@ class Maybe extends Base {
       type: Maybe,
       subtypes: [itemMetadata],
       reviver: reviverFactory(itemMetadata),
-      default: new Nothing()
+      default: null
     })
   }
 }

@@ -1,4 +1,4 @@
-import {always, isNothing, isPlainObject, defaultTo} from './U'
+import {always, isNothing, metaOrTypeMapper, defaultTo} from './U'
 
 import asIs from './asIs'
 import any from './any'
@@ -34,7 +34,7 @@ const _ = (Type, metadata = []) => {
   return metadataCache.get(Type)
 }
 
-const withDefault = (metadata, def) => {
+const withDefaultImpl = (metadata, def) => {
   const reviver = (k, v, path = []) => {
     if (k !== '') {
       return v
@@ -51,14 +51,30 @@ const withDefault = (metadata, def) => {
 
   return Object.freeze(
     Object.assign({}, metadata, {
-      default: reviver('', undefined),
+      default: JSON.parse(JSON.stringify(def)),
       reviver
     })
   )
 }
 
+const withDefaultCacheRegistry = new WeakMap()
+
+const withDefault = (metadata, def) => {
+  if (!withDefaultCacheRegistry.has(metadata)) {
+    withDefaultCacheRegistry.set(metadata, new Map())
+  }
+
+  const cache = withDefaultCacheRegistry.get(metadata)
+
+  if (!cache.has(def)) {
+    cache.set(def, withDefaultImpl(metadata, def))
+  }
+
+  return cache.get(def)
+}
+
 const union = (Type, metasOrTypes, classifier) => {
-  const metas = metasOrTypes.map(x => (isPlainObject(x) ? x : _(x)))
+  const metas = metasOrTypes.map(metaOrTypeMapper(_))
 
   classifier = classifier === undefined
     ? inferUnionClassifier(metas)
@@ -75,7 +91,9 @@ const union = (Type, metasOrTypes, classifier) => {
   return Object.assign({}, base(Type), {reviver, subtypes: metas})
 }
 
-const metadata = () =>
+const number = asIs(Number)
+
+const metadata = always(
   Object.freeze({
     _,
     base,
@@ -84,7 +102,7 @@ const metadata = () =>
     anyOf,
     union,
     number: ({wrap = false} = {}) =>
-      wrap ? ModelicoNumber.metadata() : asIs(Number),
+      wrap ? ModelicoNumber.metadata() : number,
 
     string: always(asIs(String)),
     boolean: always(asIs(Boolean)),
@@ -99,5 +117,6 @@ const metadata = () =>
 
     withDefault
   })
+)
 
 export default metadata

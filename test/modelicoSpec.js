@@ -20,6 +20,7 @@ import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
 import featuresPolymorphic from './features/polymorphic'
 import featuresValidate from './features/validate'
+import featuresCache from './features/cache'
 import featuresCustomSerialisation from './features/customSerialisation'
 import ImmutableExamples from './Immutable/index'
 import ImmutableProxied from './Immutable/proxied'
@@ -78,8 +79,8 @@ const pipe = (...fns) => [...fns, identity].reduce(pipe2)
 
 // loosely based on https://bost.ocks.org/mike/shuffle/
 const shuffle = arr => {
-  for (let l = arr.length; l > 0; l -= 1) {
-    const i = Math.floor(l * Math.random())
+  for (let l = arr.length - 1; l > 0; l -= 1) {
+    const i = Math.floor((l + 1) * Math.random())
     ;[arr[l], arr[i]] = [arr[i], arr[l]]
   }
 
@@ -140,6 +141,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
   describe('Deep nesting features', featuresDeepNesting(...deps))
   describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
   describe('Validate', featuresValidate(...deps))
+  describe('Cache', featuresCache(...deps))
   describe('Custom serialisation', featuresCustomSerialisation(...deps))
   describe('Immutable examples', ImmutableExamples(U, ...deps))
 
