@@ -96,22 +96,28 @@ export default (ajv = {validate: T}) => {
 
     const reviver = ensure(metadata, schemaToCheck)
 
-    const maybeReviver = metadata.maybeReviver
-      ? ensure(metadata, schemaToCheck, identity, 'maybeReviver')
-      : reviver
-
     const schemaGetter = () =>
       Object.assign({}, schemaToCheck, innerSchemaGetter())
 
     const baseMetadata = isFunction(metadata) ? {type: metadata} : metadata
 
-    return Object.assign({}, baseMetadata, {
+    const enhancedMeta = Object.assign({}, baseMetadata, {
       baseMetadata,
       reviver,
-      maybeReviver,
       ownSchema: always(schemaToCheck),
       schema: schemaGetter
     })
+
+    if (metadata.maybeReviver) {
+      enhancedMeta.maybeReviver = ensure(
+        metadata,
+        schemaToCheck,
+        identity,
+        'maybeReviver'
+      )
+    }
+
+    return enhancedMeta
   }
 
   ajvMetadata.ajvMeta = ajvMeta
