@@ -70,7 +70,7 @@ class StringMap extends AbstractMap {
   }
 
   static metadata(valueMetadata) {
-    return metadata(StringMap, reviverFactory, valueMetadata)
+    return metadata(StringMap)(reviverFactory)(valueMetadata)()
   }
 
   static EMPTY() {

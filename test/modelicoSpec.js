@@ -51,6 +51,7 @@ import ajvMetadata from './metadata/ajv'
 import baseMetadata from './metadata/base'
 import withDefaultMetadata from './metadata/withDefault'
 import unionMetadata from './metadata/union'
+import singletonMetadata from './metadata/singleton'
 
 import asyncReviving from './recipe/asyncReviving'
 import binaryTree from './recipe/binaryTree'
@@ -134,6 +135,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
   describe('base metadata', baseMetadata(...deps))
   describe('withDefault metadata', withDefaultMetadata(...deps))
   describe('union metadata', unionMetadata(...deps))
+  describe('Metadata as singletons', singletonMetadata(...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))

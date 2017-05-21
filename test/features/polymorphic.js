@@ -144,13 +144,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
 
-    const greaterThanZero = number(
-      {},
-      {
-        minimum: 0,
-        exclusiveMinimum: true
-      }
-    )
+    const greaterThanZero = number({
+      minimum: 0,
+      exclusiveMinimum: true
+    })
 
     const reviver = (k, v) => {
       if (k !== '') {

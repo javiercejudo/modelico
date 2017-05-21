@@ -5,14 +5,18 @@ import {
   reviverOrAsIs,
   equals,
   haveDifferentTypes,
-  isFunction
+  isFunction,
+  mem
 } from './U'
 
 type Path = Array<string | number>
 type BaseListMetadata = Object | Array<Object>
+
 type ListMetadata =
   | BaseListMetadata
   | ((v: any, path: Path) => BaseListMetadata)
+//
+
 const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
   k,
   v,
@@ -43,16 +47,15 @@ const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
   return new IterableType(iterable)
 }
 
-export const iterableMetadata = (
-  IterableType: any,
-  itemMetadata: ListMetadata
-) => {
-  return Object.freeze({
-    type: IterableType,
-    subtypes: Object.freeze([itemMetadata]),
-    reviver: iterableReviverFactory(IterableType, itemMetadata)
+export const iterableMetadata = mem((IterableType: any) =>
+  mem((itemMetadata: ListMetadata) => {
+    return Object.freeze({
+      type: IterableType,
+      subtypes: Object.freeze([itemMetadata]),
+      reviver: iterableReviverFactory(IterableType, itemMetadata)
+    })
   })
-}
+)
 
 export const iterableEquals = (
   thisArg: any,

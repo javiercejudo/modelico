@@ -30,7 +30,7 @@ export default (
         date: _(LocalDate),
         rates: enumMap(
           _enum(Currency),
-          number({}, {minimum: 0, exclusiveMinimum: true})
+          number({minimum: 0, exclusiveMinimum: true})
         )
       })
     }

@@ -41,6 +41,7 @@ export const reviverOrAsIs = pipe2(
 export const isPlainObject = (x: mixed): boolean => typeof x === 'object' && !!x
 export const isFunction = (x: mixed): boolean => typeof x === 'function'
 export const emptyObject: Object = Object.freeze({})
+export const emptyArray: Array<any> = Object.freeze([])
 
 export const haveSameValues = (a: any, b: any): boolean =>
   a === b || Object.is(a, b)
@@ -72,7 +73,34 @@ export const formatAjvError = (
     'the value (data path "' +
       ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) +
       '")\n',
-    JSON.stringify(value, null, 2) + '\n'
+    JSON.stringify(value, null, 2) +
+      ' ' +
+      Object.prototype.toString.call(value) +
+      '\n'
   ]
     .concat(ajv.errors.map(error => error.message))
     .join('\n')
+
+const memCacheRegistry = new WeakMap()
+const memDefaultCacheFn = () => new WeakMap()
+export const mem = (f: Function, cacheFn: Function = memDefaultCacheFn) => (
+  a: mixed,
+  ...args: Array<mixed>
+) => {
+  if (args.length > 0) {
+    return f(a, ...args)
+  }
+
+  if (!memCacheRegistry.has(f)) {
+    memCacheRegistry.set(f, cacheFn())
+  }
+
+  const cache = memCacheRegistry.get(f) || cacheFn()
+  const key = a === undefined ? emptyObject : a
+
+  if (!cache.has(key)) {
+    cache.set(key, f(a, ...args))
+  }
+
+  return cache.get(key)
+}

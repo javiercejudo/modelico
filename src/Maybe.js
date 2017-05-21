@@ -4,7 +4,8 @@ import {
   haveDifferentTypes,
   equals,
   defaultTo,
-  isFunction
+  isFunction,
+  mem
 } from './U'
 import Base from './Base'
 
@@ -26,6 +27,15 @@ const reviverFactory = itemMetadata => (k, v, path) => {
 
   return Maybe.of(revivedValue)
 }
+
+const metadata = mem(itemMetadata =>
+  Object.freeze({
+    type: Maybe,
+    subtypes: [itemMetadata],
+    reviver: reviverFactory(itemMetadata),
+    default: null
+  })
+)
 
 class Maybe extends Base {
   get(fallbackFieldPair) {
@@ -73,12 +83,7 @@ class Maybe extends Base {
   }
 
   static metadata(itemMetadata) {
-    return Object.freeze({
-      type: Maybe,
-      subtypes: [itemMetadata],
-      reviver: reviverFactory(itemMetadata),
-      default: null
-    })
+    return metadata(itemMetadata)
   }
 }
 

@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  const {number} = M.metadata()
+  const {wrappedNumber} = M.metadata()
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
@@ -75,35 +75,35 @@ export default (U, should, M) => () => {
 
   describe('parsing', () => {
     it('should parse values correctly', () => {
-      const myNumber = JSON.parse('2', number({wrap: true}).reviver)
+      const myNumber = JSON.parse('2', wrappedNumber().reviver)
 
       should(myNumber.inner()).be.exactly(2)
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      ;(() => JSON.parse('null', number({wrap: true}).reviver)).should.throw()
+      ;(() => JSON.parse('null', wrappedNumber().reviver)).should.throw()
     })
 
     it('should support -0', () => {
-      const myNumber = JSON.parse('"-0"', number({wrap: true}).reviver)
+      const myNumber = JSON.parse('"-0"', wrappedNumber().reviver)
 
       Object.is(myNumber.inner(), -0).should.be.exactly(true)
     })
 
     it('should support Infinity', () => {
-      const myNumber = JSON.parse('"Infinity"', number({wrap: true}).reviver)
+      const myNumber = JSON.parse('"Infinity"', wrappedNumber().reviver)
 
       Object.is(myNumber.inner(), Infinity).should.be.exactly(true)
     })
 
     it('should support -Infinity', () => {
-      const myNumber = JSON.parse('"-Infinity"', number({wrap: true}).reviver)
+      const myNumber = JSON.parse('"-Infinity"', wrappedNumber().reviver)
 
       Object.is(myNumber.inner(), -Infinity).should.be.exactly(true)
     })
 
     it('should support NaN', () => {
-      const myNumber = JSON.parse('"NaN"', number({wrap: true}).reviver)
+      const myNumber = JSON.parse('"NaN"', wrappedNumber().reviver)
 
       Object.is(myNumber.inner(), NaN).should.be.exactly(true)
     })

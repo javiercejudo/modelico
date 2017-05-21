@@ -214,7 +214,7 @@ export default (should, M) => () => {
       }
     }
 
-    const Shape = M.createUnionType([Square, Hexagon].map(_))
+    const Shape = M.createUnionType([Square, Hexagon].map(x => _(x)))
 
     Shape.area = Shape.caseOf(
       [Square, x => x.side() ** 2],

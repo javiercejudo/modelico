@@ -8,7 +8,8 @@ import {
   identity,
   isNothing,
   partial,
-  pipe
+  pipe,
+  mem
 } from './U'
 
 import getSchema from './getSchema'
@@ -163,6 +164,7 @@ export default {
     identity,
     isNothing,
     partial,
-    pipe
+    pipe,
+    mem
   }
 }

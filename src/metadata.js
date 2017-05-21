@@ -1,4 +1,11 @@
-import {always, isNothing, metaOrTypeMapper, defaultTo} from './U'
+import {
+  always,
+  isNothing,
+  metaOrTypeMapper,
+  defaultTo,
+  emptyArray,
+  mem
+} from './U'
 
 import asIs from './asIs'
 import any from './any'
@@ -15,24 +22,15 @@ import List from './List'
 import ModelicoSet from './Set'
 import Maybe from './Maybe'
 
-const metadataCache = new WeakMap()
+const base = mem(Type =>
+  Object.freeze({type: Type, reviver: reviverFactory(Type)})
+)
 
-const base = Type => Object.freeze({type: Type, reviver: reviverFactory(Type)})
-
-const raw_ = (Type, innerMetadata) =>
+const _impl = (Type, innerMetadata) =>
   Type.metadata ? Type.metadata(...innerMetadata) : base(Type)
 
-const _ = (Type, metadata = []) => {
-  if (metadata.length > 0) {
-    return raw_(Type, metadata)
-  }
-
-  if (!metadataCache.has(Type)) {
-    metadataCache.set(Type, raw_(Type, metadata))
-  }
-
-  return metadataCache.get(Type)
-}
+const _implMem = mem(Type => mem(innerMetadata => _impl(Type, innerMetadata)))
+const _ = (Type, innerMetadata = emptyArray) => _implMem(Type)(innerMetadata)
 
 const withDefaultImpl = (metadata, def) => {
   const reviver = (k, v, path = []) => {
@@ -57,21 +55,11 @@ const withDefaultImpl = (metadata, def) => {
   )
 }
 
-const withDefaultCacheRegistry = new WeakMap()
+const withDefaultMem = mem(metadata =>
+  mem(def => withDefaultImpl(metadata, def), () => new Map())
+)
 
-const withDefault = (metadata, def) => {
-  if (!withDefaultCacheRegistry.has(metadata)) {
-    withDefaultCacheRegistry.set(metadata, new Map())
-  }
-
-  const cache = withDefaultCacheRegistry.get(metadata)
-
-  if (!cache.has(def)) {
-    cache.set(def, withDefaultImpl(metadata, def))
-  }
-
-  return cache.get(def)
-}
+const withDefault = (metadata, def) => withDefaultMem(metadata)(def)
 
 const union = (Type, metasOrTypes, classifier) => {
   const metas = metasOrTypes.map(metaOrTypeMapper(_))
@@ -85,13 +73,11 @@ const union = (Type, metasOrTypes, classifier) => {
       return obj
     }
 
-    return classifier(obj).reviver(k, obj, path)
+    return classifier(obj, metas).reviver(k, obj, path)
   }
 
   return Object.assign({}, base(Type), {reviver, subtypes: metas})
 }
-
-const number = asIs(Number)
 
 const metadata = always(
   Object.freeze({
@@ -101,12 +87,12 @@ const metadata = always(
     any,
     anyOf,
     union,
-    number: ({wrap = false} = {}) =>
-      wrap ? ModelicoNumber.metadata() : number,
 
+    number: always(asIs(Number)),
     string: always(asIs(String)),
     boolean: always(asIs(Boolean)),
 
+    wrappedNumber: ModelicoNumber.metadata,
     date: ModelicoDate.metadata,
     enumMap: EnumMap.metadata,
     list: List.metadata,

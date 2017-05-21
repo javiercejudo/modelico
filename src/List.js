@@ -89,7 +89,7 @@ class List extends Base {
   }
 
   static metadata(itemMetadata) {
-    return iterableMetadata(List, itemMetadata)
+    return iterableMetadata(List)(itemMetadata)
   }
 
   static EMPTY() {

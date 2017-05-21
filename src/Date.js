@@ -1,4 +1,4 @@
-import {isNothing, unsupported, haveDifferentTypes} from './U'
+import {isNothing, unsupported, haveDifferentTypes, mem} from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
@@ -6,6 +6,13 @@ const reviver = (k, v) => {
 
   return new ModelicoDate(date)
 }
+
+const metadata = mem(() =>
+  Object.freeze({
+    type: ModelicoDate,
+    reviver
+  })
+)
 
 class ModelicoDate extends Base {
   constructor(dateOrig = new Date()) {
@@ -59,10 +66,7 @@ class ModelicoDate extends Base {
   }
 
   static metadata() {
-    return Object.freeze({
-      type: ModelicoDate,
-      reviver
-    })
+    return metadata()
   }
 }
 

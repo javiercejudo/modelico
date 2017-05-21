@@ -26,7 +26,7 @@ import Ajv from 'ajv'
 
 const ajvOptions = {}
 const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined
-const {ajvString, ajvList, ajvNumber} = M.ajvMetadata(ajvIfProd)
+const {string, list, number} = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -35,9 +35,9 @@ class Animal extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: ajvString({minLength: 1, maxLength: 25}),
-      dimensions: ajvList(
-        ajvNumber({minimum: 0, exclusiveMinimum: true}),
+      name: string({minLength: 1, maxLength: 25}),
+      dimensions: list(
+        number({minimum: 0, exclusiveMinimum: true}),
         {minItems: 3, maxItems: 3}
       )
     })
@@ -81,8 +81,9 @@ class Animal extends M.Base {
 
 ## Why not both?
 
-In the example above, we could have based `lowerCaseString` on `ajvString`
-instead of the normal `string` to combine custom and JSON schema rules.
+In the example above, we could have based `lowerCaseString` on the
+`ajvMetadata`-`string` instead of the normal `string` to combine custom and
+JSON schema rules.
 
 `M.withValidation` works with any metadata, including the `Ajv` variant and
 can be composed, since it returns a function that takes metadata and returns
@@ -105,7 +106,7 @@ const lowercase = M.withValidation(
 // see pipe function at
 // https://gist.github.com/javiercejudo/98ab1f0742387e8aca0646adb325059f
 const stringWithoutNumbersAndLowerCase = pipe(
-  ajvString,
+  string,
   noNumbers,
   lowercase
 )
