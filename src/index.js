@@ -90,7 +90,7 @@ const genericsFromJS = (Type, innerMetadata, js) =>
 const fromJS = (Type, js) => genericsFromJS(Type, [], js)
 
 const ajvGenericsFromJS = (_, Type, schema, innerMetadata, js) =>
-  _(Type, schema, innerMetadata).reviver('', js)
+  _(Type, innerMetadata, schema).reviver('', js)
 
 const ajvFromJS = (_, Type, schema, js) =>
   ajvGenericsFromJS(_, Type, schema, [], js)

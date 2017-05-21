@@ -4,7 +4,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
   const defaultCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
 
   const binaryTreeFactory = (valueMetadata, {cmp = defaultCmp, ajv} = {}) => {
-    const {_, base, ajvBase, ajvUnion} = M.ajvMetadata(ajv)
+    const {_, base, union} = M.ajvMetadata(ajv)
 
     const objClassifier = obj => _(obj === null ? Empty : Node)
     const insertReducer = (acc, x) => acc.insert(x)
@@ -15,7 +15,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
 
       static metadata() {
-        return ajvUnion(Tree, [Empty, Node], objClassifier)
+        return union(Tree, [Empty, Node], objClassifier)
       }
     }
 
@@ -72,7 +72,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
 
       static metadata() {
-        return ajvBase(Empty, {type: 'null'})
+        return base(Empty, {type: 'null'})
       }
     }
 
@@ -185,10 +185,10 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
   // ============================================================
 
   const ajv = Ajv()
-  const {_, ajvNumber, ajvString} = M.ajvMetadata(ajv)
+  const {_, number, string} = M.ajvMetadata(ajv)
 
-  const numberTree = binaryTreeFactory(ajvNumber(), {ajv})
-  const stringTree = binaryTreeFactory(ajvString(), {ajv})
+  const numberTree = binaryTreeFactory(number(), {ajv})
+  const stringTree = binaryTreeFactory(string(), {ajv})
 
   it('Node.of() / empty / serialisation', () => {
     const {empty, Node, Tree} = numberTree
@@ -529,7 +529,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
 
   it('schema: Tree<Animal>', () => {
     const ajv = Ajv()
-    const {ajvString} = M.ajvMetadata(ajv)
+    const {string} = M.ajvMetadata(ajv)
 
     class Animal extends M.Base {
       constructor(props) {
@@ -538,7 +538,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
 
       static innerTypes() {
         return Object.freeze({
-          name: ajvString({minLength: 1, maxLength: 25})
+          name: string({minLength: 1, maxLength: 25})
         })
       }
     }

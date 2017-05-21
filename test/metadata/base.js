@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 export default (should, M, fixtures, {Ajv}) => () => {
-  const {base, number, ajvAny, ajvNumber} = M.ajvMetadata(Ajv())
+  const {base, number, any} = M.ajvMetadata(Ajv())
 
   it('should return the base metadata for standard models', () => {
     const customReviver = baseReviver => (k, v, path = []) => {
@@ -60,15 +60,15 @@ export default (should, M, fixtures, {Ajv}) => () => {
       '"min" must be less than or equal to "max"'
     )
 
-    M.validate(M.List.of(3, 2), [ajvNumber()])[0].should.be.exactly(true)
+    M.validate(M.List.of(3, 2), [number()])[0].should.be.exactly(true)
 
     const listWithMixedData = M.List.of(3, 'a')
 
-    M.validate(listWithMixedData, [ajvAny()])[0].should.be.exactly(true)
+    M.validate(listWithMixedData, [any()])[0].should.be.exactly(true)
 
-    M.validate(listWithMixedData, [ajvNumber()])[0].should.be.exactly(false)
+    M.validate(listWithMixedData, [number()])[0].should.be.exactly(false)
 
-    M.validate(listWithMixedData, [ajvNumber()])[1].message.should.match(
+    M.validate(listWithMixedData, [number()])[1].message.should.match(
       /should be number/
     )
   })

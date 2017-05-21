@@ -12,6 +12,7 @@
     "eslint": "eslint src/ test/",
     "fix": "npm run prettier && npm run eslint",
     "mocha": "mocha test/index.js",
+    "mochab": "mocha --bail test/index.js",
     "prenyc": "rm -rf coverage",
     "nyc": "nyc npm run mocha",
     "isparta": "isparta cover --report text --report text-summary --report html mocha test/index.next.js",
