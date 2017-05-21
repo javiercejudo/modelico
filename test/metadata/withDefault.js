@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (should, M, fixtures, {Ajv}) => () => {
-  const {any, number, string, withDefault, ajvNumber} = M.ajvMetadata(Ajv())
+  const {any, number, string, withDefault} = M.ajvMetadata(Ajv())
 
   it('should allow enhancing metadata to have default values', () => {
     class Book
@@ -46,8 +46,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   it('should use the metadata to coerce the value if necessary', () => {
     class CountryCallingCode
-      extends M.createModel(() => ({
-        code: withDefault(number(), '34')
+      extends M.createModel(m => ({
+        code: withDefault(m.number(), '34')
       })) {
       constructor(props) {
         super(CountryCallingCode, props)
@@ -82,35 +82,37 @@ export default (should, M, fixtures, {Ajv}) => () => {
     let res
 
     should(() => {
-      res = JSON.parse('null', withDefault(ajvNumber({minimum: 5}), 1).reviver)
+      res = JSON.parse('null', withDefault(number({}, {minimum: 5}), 1).reviver)
     }).not.throw()
 
     res.should.be.exactly(1)
   })
 
   it('should work well with ajvMetadata', () => {
-    JSON.parse('null', withDefault(ajvNumber(), 1).reviver).should.be.exactly(1)
-    JSON.parse('2', withDefault(ajvNumber(), 1).reviver).should.be.exactly(2)
+    JSON.parse('null', withDefault(number(), 1).reviver).should.be.exactly(1)
+    JSON.parse('2', withDefault(number(), 1).reviver).should.be.exactly(2)
 
     should(() => {
-      JSON.parse('2', withDefault(ajvNumber({minimum: 5}), 1).reviver)
+      JSON.parse('2', withDefault(number({}, {minimum: 5}), 1).reviver)
     }).throw(/should be >= 5/)
   })
 
   it('should work well with getSchema', () => {
-    M.getSchema(withDefault(string(), '')).should.deepEqual({
+    const nm = M.metadata()
+
+    M.getSchema(withDefault(nm.string(), '')).should.deepEqual({
       type: {},
       default: ''
     })
 
-    M.getSchema(withDefault(ajvNumber(), 1)).should.deepEqual({
+    M.getSchema(withDefault(number(), 1)).should.deepEqual({
       anyOf: [{type: 'null'}, {type: 'number'}],
       default: 1
     })
 
-    M.getSchema(number()).should.deepEqual({})
+    M.getSchema(nm.number()).should.deepEqual({})
 
-    M.getSchema(ajvNumber()).should.deepEqual({
+    M.getSchema(number()).should.deepEqual({
       type: 'number'
     })
   })

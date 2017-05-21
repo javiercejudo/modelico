@@ -2,7 +2,7 @@ export default (
   {M, Ajv, validationEnabled, ajvOptions},
   [Currency, LocalDate]
 ) => {
-  const {_, ajvEnum, ajvEnumMap, ajvNumber} = M.ajvMetadata(
+  const {_, _enum, enumMap, number} = M.ajvMetadata(
     validationEnabled ? Ajv(ajvOptions) : undefined
   )
 
@@ -26,11 +26,11 @@ export default (
 
     static innerTypes() {
       return Object.freeze({
-        base: ajvEnum(Currency),
+        base: _enum(Currency),
         date: _(LocalDate),
-        rates: ajvEnumMap(
-          ajvEnum(Currency),
-          ajvNumber({minimum: 0, exclusiveMinimum: true})
+        rates: enumMap(
+          _enum(Currency),
+          number({}, {minimum: 0, exclusiveMinimum: true})
         )
       })
     }

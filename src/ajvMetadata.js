@@ -142,37 +142,40 @@ export default (ajv = {validate: T}) => {
 
   ajvMetadata.ajvMeta = ajvMeta
 
-  ajvMetadata.ajv_ = (
+  ajvMetadata._ = (
     Type,
-    schema = emptyObject,
     innerMetadata,
+    schema = emptyObject,
     topLevel = false
   ) => {
     const metadata = _(Type, innerMetadata)
 
-    return ajvMeta(metadata, emptyObject, schema, () =>
-      getSchema(metadata, topLevel)
-    )
+    return schema === emptyObject
+      ? metadata
+      : ajvMeta(metadata, emptyObject, schema, () =>
+          getSchema(metadata, topLevel)
+        )
   }
 
-  ajvMetadata.ajvBase = (Type, schema = emptyObject, topLevel = false) => {
+  ajvMetadata.base = (Type, schema = emptyObject, topLevel = false) => {
     const metadata = base(Type)
 
-    return ajvMeta(metadata, {type: 'object'}, schema, () =>
-      getSchema(metadata, topLevel)
-    )
+    return schema === emptyObject
+      ? metadata
+      : ajvMeta(metadata, {type: 'object'}, schema, () =>
+          getSchema(metadata, topLevel)
+        )
   }
 
-  ajvMetadata.ajvAsIs = (schema, transformer = identity) =>
-    ajvMeta(asIs(transformer), schema)
+  ajvMetadata.asIs = (transformer, schema) => ajvMeta(asIs(transformer), schema)
 
-  ajvMetadata.ajvAny = schema => ajvMetadata.ajvAsIs(schema)
+  ajvMetadata.any = schema => ajvMetadata.asIs(identity, schema)
 
   const ajvPrimitiveNumber = mem(schema =>
     ajvMeta(number(), {type: 'number'}, schema)
   )
 
-  ajvMetadata.ajvNumber = (schema, options = emptyObject) => {
+  ajvMetadata.number = (options = emptyObject, schema) => {
     const {wrap = false} = options
 
     if (!wrap) {
@@ -195,19 +198,19 @@ export default (ajv = {validate: T}) => {
     })
   }
 
-  ajvMetadata.ajvString = mem(schema =>
+  ajvMetadata.string = mem(schema =>
     ajvMeta(string(), {type: 'string'}, schema)
   )
 
-  ajvMetadata.ajvBoolean = mem(schema =>
+  ajvMetadata.boolean = mem(schema =>
     ajvMeta(boolean(), {type: 'boolean'}, schema)
   )
 
-  ajvMetadata.ajvDate = mem(schema =>
+  ajvMetadata.date = mem(schema =>
     ajvMeta(date(), {type: 'string', format: 'date-time'}, schema)
   )
 
-  ajvMetadata.ajvEnum = mem(Type => {
+  ajvMetadata._enum = mem(Type => {
     const metadata = _(Type)
 
     return ajvMeta(metadata, {
@@ -215,7 +218,7 @@ export default (ajv = {validate: T}) => {
     })
   })
 
-  ajvMetadata.ajvEnumMap = (keyMetadata, valueMetadata, schema) => {
+  ajvMetadata.enumMap = (keyMetadata, valueMetadata, schema) => {
     const enumeratorsKeys = Object.keys(keyMetadata.enumerators)
     const keysRegex = `^(${enumeratorsKeys.join('|')})$`
 
@@ -260,7 +263,7 @@ export default (ajv = {validate: T}) => {
     )
   }
 
-  ajvMetadata.ajvList = mem(
+  ajvMetadata.list = mem(
     (itemMetadata, schema) =>
       Array.isArray(itemMetadata)
         ? ajvTuple(itemMetadata, schema)
@@ -300,10 +303,10 @@ export default (ajv = {validate: T}) => {
     )
   )
 
-  ajvMetadata.ajvMap = (keyMetadata, valueMetadata, schema) =>
+  ajvMetadata.map = (keyMetadata, valueMetadata, schema) =>
     ajvMap(keyMetadata)(valueMetadata)(schema)
 
-  ajvMetadata.ajvStringMap = mem((valueMetadata, schema) =>
+  ajvMetadata.stringMap = mem((valueMetadata, schema) =>
     ajvMeta(stringMap(valueMetadata), {type: 'object'}, schema, () => ({
       additionalProperties: false,
       patternProperties: {
@@ -312,7 +315,7 @@ export default (ajv = {validate: T}) => {
     }))
   )
 
-  ajvMetadata.ajvSet = mem((itemMetadata, schema) =>
+  ajvMetadata.set = mem((itemMetadata, schema) =>
     ajvMeta(
       set(itemMetadata),
       {
@@ -324,20 +327,20 @@ export default (ajv = {validate: T}) => {
     )
   )
 
-  ajvMetadata.ajvMaybe = mem(itemMetadata =>
+  ajvMetadata.maybe = mem(itemMetadata =>
     ajvMeta(maybe(itemMetadata), emptyObject, emptyObject, () =>
       getInnerSchema(itemMetadata)
     )
   )
 
-  ajvMetadata.ajvAnyOf = (conditionedMetas, enumField) =>
+  ajvMetadata.anyOf = (conditionedMetas, enumField) =>
     ajvMeta(anyOf(conditionedMetas, enumField), {
       anyOf: conditionedMetas.map(conditionMeta =>
         getInnerSchema(conditionMeta[0])
       )
     })
 
-  ajvMetadata.ajvUnion = (Type, metasOrTypes, classifier) => {
+  ajvMetadata.union = (Type, metasOrTypes, classifier) => {
     const metas = metasOrTypes.map(metaOrTypeMapper(_))
     const baseMetadata = union(Type, metas, classifier)
 
@@ -348,5 +351,5 @@ export default (ajv = {validate: T}) => {
     }))
   }
 
-  return Object.freeze(Object.assign(ajvMetadata, metadata))
+  return Object.freeze(Object.assign({}, metadata, ajvMetadata))
 }

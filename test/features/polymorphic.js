@@ -140,14 +140,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   describe('Based on runtime type field', () => {
     const ajv = Ajv()
-    const {_, base, ajvMeta, ajvNumber} = M.ajvMetadata(ajv)
+    const {_, base, ajvMeta, number} = M.ajvMetadata(ajv)
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
 
-    const greaterThanZero = ajvNumber({
-      minimum: 0,
-      exclusiveMinimum: true
-    })
+    const greaterThanZero = number(
+      {},
+      {
+        minimum: 0,
+        exclusiveMinimum: true
+      }
+    )
 
     const reviver = (k, v) => {
       if (k !== '') {
@@ -170,7 +173,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     let maybeShapeMetadata
     const maybeShape = m => {
       if (!maybeShapeMetadata) {
-        maybeShapeMetadata = m.ajvMaybe(m._(Shape))
+        maybeShapeMetadata = m.maybe(m._(Shape))
       }
 
       return maybeShapeMetadata
@@ -245,7 +248,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     class Geometer
       extends M.createAjvModel(ajv, m => ({
-        name: m.ajvString({
+        name: m.string({
           minLength: 1
         }),
         favouriteShape: m._(Shape)
