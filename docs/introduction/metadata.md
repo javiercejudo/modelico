@@ -18,6 +18,7 @@ const {
   boolean,
   date,
 
+  wrappedNumber,
   map,
   enumMap,
   stringMap,
@@ -59,14 +60,21 @@ for an example. Note that `anyOf` does not return metadata, but a
 metadata-returning function. This is something you can use as well to revive
 some cases of polymorphic JSON.
 
-##### number({wrap = false} = {})
+##### number()
 
-For native numbers, but optionally wraps to support `-0`, `NaN` and
-±`Infinity`.
+For native numbers
+
+##### wrappedNumber()
+
+Wraps numbers with `ModelicoNumber` to support `-0`, `NaN` and ±`Infinity`.
 
 ##### string()
 
+For native numbers
+
 ##### boolean()
+
+For native booleans
 
 ##### date()
 

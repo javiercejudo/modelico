@@ -20,7 +20,7 @@ class Geometer extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: ajvString({minLength: 1}),
+      name: string({minLength: 1}),
       // Shape has multiple subclasses
       favouriteShape: _(Shape)
     })
@@ -37,7 +37,7 @@ const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
 // We are going to use this metadata in several places, so by reusing it, we
 // not only save unnecessary processing, but our generated JSON schema will
 // also be more compact.
-const greaterThanZero = ajvNumber({
+const greaterThanZero = number({
   minimum: 0,
   exclusiveMinimum: true
 })

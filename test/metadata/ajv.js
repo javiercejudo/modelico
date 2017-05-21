@@ -9,6 +9,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     any,
     string,
     number,
+    wrappedNumber,
     boolean,
     date,
     _enum,
@@ -35,13 +36,10 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           name: withDefault(string({minLength: 1, maxLength: 25}), 'unknown'),
           dimensions: maybe(
             list(
-              number(
-                {},
-                {
-                  minimum: 0,
-                  exclusiveMinimum: true
-                }
-              ),
+              number({
+                minimum: 0,
+                exclusiveMinimum: true
+              }),
               {minItems: 3, maxItems: 3}
             )
           )
@@ -124,7 +122,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
             $ref: '#/definitions/2'
           },
           dimensions: {
-            $ref: '#/definitions/3'
+            $ref: '#/definitions/4'
           }
         },
         definitions: {
@@ -132,30 +130,33 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
             anyOf: [
               {type: 'null'},
               {
-                type: 'string',
-                minLength: 1,
-                maxLength: 25
+                $ref: '#/definitions/3'
               }
             ],
             default: 'unknown'
           },
           '3': {
+            type: 'string',
+            minLength: 1,
+            maxLength: 25
+          },
+          '4': {
             anyOf: [
               {type: 'null'},
               {
-                $ref: '#/definitions/4'
+                $ref: '#/definitions/5'
               }
             ]
           },
-          '4': {
+          '5': {
             type: 'array',
             minItems: 3,
             maxItems: 3,
             items: {
-              $ref: '#/definitions/5'
+              $ref: '#/definitions/6'
             }
           },
-          '5': {
+          '6': {
             type: 'number',
             minimum: 0,
             exclusiveMinimum: true
@@ -224,7 +225,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           _,
           M.List,
           {},
-          [list(list(number({}, {minimum: 5})))],
+          [list(list(number({minimum: 5})))],
           '[[[10], [6, 7, 4]]]'
         )
       )
@@ -236,7 +237,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.Set,
-          [set(set(number({}, {minimum: 5})))],
+          [set(set(number({minimum: 5})))],
           [[[10], [6, 7, 9, 4]]]
         )
       )
@@ -248,7 +249,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.StringMap,
-          [stringMap(stringMap(number({}, {minimum: 5})))],
+          [stringMap(stringMap(number({minimum: 5})))],
           {a: {b1: {c: 10}, b2: {d1: 6, d2: 7, d3: 4}}}
         )
       )
@@ -260,7 +261,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.Map,
-          [string(), map(string(), number({}, {minimum: 5}))],
+          [string(), map(string(), number({minimum: 5}))],
           [['A', [['A', 6], ['B', 7], ['C', 4]]]]
         )
       )
@@ -270,7 +271,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       should(() =>
         M.genericsFromJS(
           M.Map,
-          [string(), map(string(), number({}, {minimum: 5}))],
+          [string(), map(string(), number({minimum: 5}))],
           [['A', [['A', 6], ['B', 7], [2, 7]]]]
         )
       )
@@ -286,7 +287,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           M.EnumMap,
           [
             _(SideEnum),
-            enumMap(_(SideEnum), enumMap(_(SideEnum), number({}, {minimum: 5})))
+            enumMap(_(SideEnum), enumMap(_(SideEnum), number({minimum: 5})))
           ],
           {A: {A: {A: 10}, B: {A: 4, B: 7}}}
         )
@@ -299,7 +300,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           M.EnumMap,
           [
             _(SideEnum),
-            enumMap(_(SideEnum), enumMap(_(SideEnum), number({}, {minimum: 5})))
+            enumMap(_(SideEnum), enumMap(_(SideEnum), number({minimum: 5})))
           ],
           {A: {A: {A: 10}, B: {D: 5, B: 7}}}
         )
@@ -388,11 +389,11 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     })
 
     it('supports valid numbers with schema', () => {
-      should(JSON.parse('4', number({}, {minimum: 3}).reviver)).be.exactly(4)
+      should(JSON.parse('4', number({minimum: 3}).reviver)).be.exactly(4)
     })
 
     it('rejects invalid numbers', () => {
-      should(() => JSON.parse('2', number({}, {minimum: 3}).reviver)).throw(
+      should(() => JSON.parse('2', number({minimum: 3}).reviver)).throw(
         /should be >= 3/
       )
     })
@@ -400,24 +401,22 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
   describe('number: wrapped json-compatible', () => {
     it('reports the right type', () => {
-      number({wrap: true}).type.should.be.exactly(M.Number)
+      wrappedNumber().type.should.be.exactly(M.Number)
     })
 
     it('supports missing schema', () => {
-      should(JSON.parse('1', number({wrap: true}).reviver).inner()).be.exactly(
-        1
-      )
+      should(JSON.parse('1', wrappedNumber().reviver).inner()).be.exactly(1)
     })
 
     it('supports valid numbers with schema', () => {
       should(
-        JSON.parse('4', number({wrap: true}, {minimum: 3}).reviver).inner()
+        JSON.parse('4', wrappedNumber({minimum: 3}).reviver).inner()
       ).be.exactly(4)
     })
 
     it('rejects invalid numbers', () => {
       should(() =>
-        JSON.parse('2', number({wrap: true}, {minimum: 3}).reviver).inner()
+        JSON.parse('2', wrappedNumber({minimum: 3}).reviver).inner()
       ).throw(/should be >= 3/)
     })
   })
@@ -425,36 +424,27 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
   describe('number: wrapped non-json-compatible', () => {
     it('supports missing schema', () => {
       should(
-        JSON.parse('"-Infinity"', number({wrap: true}).reviver).inner()
+        JSON.parse('"-Infinity"', wrappedNumber().reviver).inner()
       ).be.exactly(-Infinity)
     })
 
     it('supports valid numbers with schema', () => {
       should(
-        JSON.parse(
-          '"Infinity"',
-          number({wrap: true}, {minimum: 3}).reviver
-        ).inner()
+        JSON.parse('"Infinity"', wrappedNumber({minimum: 3}).reviver).inner()
       ).be.exactly(Infinity)
     })
 
     it('rejects invalid numbers', () => {
       should(() =>
-        JSON.parse(
-          '"-Infinity"',
-          number({wrap: true}, {minimum: 3}).reviver
-        ).inner()
+        JSON.parse('"-Infinity"', wrappedNumber({minimum: 3}).reviver).inner()
       ).throw(/should be >= 3/)
 
       should(() =>
-        JSON.parse('"1"', number({wrap: true}, {minimum: 3}).reviver).inner()
+        JSON.parse('"1"', wrappedNumber({minimum: 3}).reviver).inner()
       ).throw(/should be number/)
 
       should(() =>
-        JSON.parse(
-          '{"a": 1}',
-          number({wrap: true}, {minimum: 3}).reviver
-        ).inner()
+        JSON.parse('{"a": 1}', wrappedNumber({minimum: 3}).reviver).inner()
       ).throw(/should be number/)
     })
   })
@@ -568,7 +558,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       const meta = enumMap(_(SideEnum), number())
 
       meta.type.should.be.exactly(M.EnumMap)
-      meta.subtypes[0].type.should.be.exactly(Side)
+      meta.subtypes[0].type.should.be.exactly(SideEnum)
       meta.subtypes[1].type.should.be.exactly(Number)
     })
 
@@ -617,9 +607,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
   describe('list', () => {
     it('list', () => {
-      M.getSchema(
-        list(number({}, {minimum: 5}), {minItems: 2})
-      ).should.deepEqual({
+      M.getSchema(list(number({minimum: 5}), {minItems: 2})).should.deepEqual({
         type: 'array',
         minItems: 2,
         items: {
@@ -684,13 +672,10 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           return Object.freeze({
             name: withDefault(string({minLength: 1, maxLength: 25}), 'unknown'),
             dimensions: list(
-              number(
-                {},
-                {
-                  minimum: 0,
-                  exclusiveMinimum: true
-                }
-              ),
+              number({
+                minimum: 0,
+                exclusiveMinimum: true
+              }),
               {minItems: 3, maxItems: 3}
             )
           })
@@ -741,7 +726,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
                 $ref: '#/definitions/4'
               },
               dimensions: {
-                $ref: '#/definitions/5'
+                $ref: '#/definitions/6'
               }
             },
             required: ['dimensions']
@@ -752,22 +737,25 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
                 type: 'null'
               },
               {
-                type: 'string',
-                minLength: 1,
-                maxLength: 25
+                $ref: '#/definitions/5'
               }
             ],
             default: 'unknown'
           },
           '5': {
+            type: 'string',
+            minLength: 1,
+            maxLength: 25
+          },
+          '6': {
             type: 'array',
             minItems: 3,
             maxItems: 3,
             items: {
-              $ref: '#/definitions/6'
+              $ref: '#/definitions/7'
             }
           },
-          '6': {
+          '7': {
             type: 'number',
             minimum: 0,
             exclusiveMinimum: true
@@ -992,16 +980,16 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     })
 
     it('honours its inner metadata constraints (2)', () => {
-      should(() =>
-        maybe(number({wrap: true}, {minimum: 1})).reviver('', 0)
-      ).throw(/should be >= 1/)
+      should(() => maybe(wrappedNumber({minimum: 1})).reviver('', 0)).throw(
+        /should be >= 1/
+      )
 
-      maybe(number({wrap: true}, {minimum: 0}))
+      maybe(wrappedNumber({minimum: 0}))
         .reviver('', 0)
         .equals(M.Just.of(M.Number.of(0)))
         .should.be.exactly(true)
 
-      maybe(number({wrap: true}, {minimum: 0}))
+      maybe(wrappedNumber({minimum: 0}))
         .reviver('', null)
         .isEmpty()
         .should.be.exactly(true)
@@ -1249,7 +1237,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
         return Object.freeze({
           type: _enum(ScoreTypeEnum),
           score: anyOf([
-            [number({}, {minimum: 0}), ScoreTypeEnum.Numeric()],
+            [number({minimum: 0}), ScoreTypeEnum.Numeric()],
             [string({minLength: 1}), ScoreTypeEnum.Alphabetic()]
           ])
         })

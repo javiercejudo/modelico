@@ -77,7 +77,7 @@ class ModelicoSet extends Base {
   }
 
   static metadata(itemMetadata) {
-    return iterableMetadata(ModelicoSet, itemMetadata)
+    return iterableMetadata(ModelicoSet)(itemMetadata)
   }
 
   static EMPTY() {

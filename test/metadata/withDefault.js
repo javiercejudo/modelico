@@ -64,6 +64,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
   })
 
   it('should have a proper reviver', () => {
+    const nm = M.metadata()
+
     JSON.parse('null', withDefault(number(), 1).reviver).should.be.exactly(1)
     JSON.parse('2', withDefault(number(), 1).reviver).should.be.exactly(2)
 
@@ -74,7 +76,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     JSON.parse(
       '{"foo": 1}',
-      withDefault(any(), {foo: 0}).reviver
+      nm.withDefault(any(), {foo: 0}).reviver
     ).foo.should.be.exactly(1)
   })
 
@@ -82,7 +84,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     let res
 
     should(() => {
-      res = JSON.parse('null', withDefault(number({}, {minimum: 5}), 1).reviver)
+      res = JSON.parse('null', withDefault(number({minimum: 5}), 1).reviver)
     }).not.throw()
 
     res.should.be.exactly(1)
@@ -93,14 +95,14 @@ export default (should, M, fixtures, {Ajv}) => () => {
     JSON.parse('2', withDefault(number(), 1).reviver).should.be.exactly(2)
 
     should(() => {
-      JSON.parse('2', withDefault(number({}, {minimum: 5}), 1).reviver)
+      JSON.parse('2', withDefault(number({minimum: 5}), 1).reviver)
     }).throw(/should be >= 5/)
   })
 
   it('should work well with getSchema', () => {
     const nm = M.metadata()
 
-    M.getSchema(withDefault(nm.string(), '')).should.deepEqual({
+    M.getSchema(nm.withDefault(nm.string(), '')).should.deepEqual({
       type: {},
       default: ''
     })

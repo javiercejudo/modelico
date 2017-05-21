@@ -4,11 +4,11 @@ import metadataFactory from './metadata'
 import inferUnionClassifier from './inferUnionClassifier'
 import M from './'
 
-const {union} = metadataFactory()
+const {union: defaultUnion} = metadataFactory()
 
-const createUnionType = (metasOrTypes, classifier) => {
+const createUnionType = (metasOrTypes, classifier, union = defaultUnion) => {
   const metas = metasOrTypes.map(
-    x => (isPlainObject(x) ? x : M.metadata()._(x))
+    x => (isPlainObject(x) && !(x instanceof M.Enum) ? x : M.metadata()._(x))
   )
 
   classifier = classifier === undefined
@@ -30,9 +30,14 @@ const createUnionType = (metasOrTypes, classifier) => {
         throw Error('caseOf does not cover all cases')
       }
 
-      return instance => {
-        const Type = instance[typeSymbol]()
-        const typeCase = casesMap.get(Type)
+      return (instance, def) => {
+        const typeGetter = instance[typeSymbol]
+        const Type = typeGetter ? typeGetter() : instance.constructor
+        const typeCaseCandidate = casesMap.get(Type)
+
+        const typeCase = typeCaseCandidate !== undefined
+          ? typeCaseCandidate
+          : def
 
         return isFunction(typeCase) ? typeCase(instance) : typeCase
       }

@@ -3,13 +3,21 @@ import {
   unsupported,
   always,
   haveDifferentTypes,
-  haveSameValues
+  haveSameValues,
+  mem
 } from './U'
 import Base from './Base'
 
 const reviver = (k, v) => {
   return ModelicoNumber.of(v)
 }
+
+const metadata = mem(() =>
+  Object.freeze({
+    type: ModelicoNumber,
+    reviver
+  })
+)
 
 class ModelicoNumber extends Base {
   constructor(number = 0) {
@@ -67,10 +75,7 @@ class ModelicoNumber extends Base {
   }
 
   static metadata() {
-    return Object.freeze({
-      type: ModelicoNumber,
-      reviver
-    })
+    return metadata()
   }
 }
 

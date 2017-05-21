@@ -1,4 +1,4 @@
-import {always, isNothing, equals, haveDifferentTypes} from './U'
+import {always, isNothing, equals, haveDifferentTypes, mem} from './U'
 import {typeSymbol, innerOrigSymbol} from './symbols'
 import Base from './Base'
 
@@ -27,13 +27,19 @@ export const of = (Type, args) => {
   return Type.fromMap(map)
 }
 
-export const metadata = (Type, reviverFactory, keyMetadata, valueMetadata) => {
-  return Object.freeze({
-    type: Type,
-    subtypes: Object.freeze([keyMetadata, valueMetadata]),
-    reviver: reviverFactory(keyMetadata, valueMetadata)
-  })
-}
+export const metadata = mem(Type =>
+  mem(reviverFactory =>
+    mem(keyMetadata =>
+      mem(valueMetadata => {
+        return Object.freeze({
+          type: Type,
+          subtypes: Object.freeze([keyMetadata, valueMetadata]),
+          reviver: reviverFactory(keyMetadata, valueMetadata)
+        })
+      })
+    )
+  )
+)
 
 const equalPairs = (pairA, pairB) =>
   pairA.every((pairPart, index) => equals(pairPart, pairB[index]))

@@ -73,7 +73,7 @@ class EnumMap extends AbstractMap {
   }
 
   static metadata(keyMetadata, valueMetadata) {
-    return metadata(EnumMap, reviverFactory, keyMetadata, valueMetadata)
+    return metadata(EnumMap)(reviverFactory)(keyMetadata)(valueMetadata)
   }
 
   static EMPTY() {
