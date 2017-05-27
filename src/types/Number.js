@@ -5,7 +5,8 @@ import {
   haveDifferentTypes,
   haveSameValues,
   mem
-} from './U'
+} from '../U'
+
 import Base from './Base'
 
 const reviver = (k, v) => {

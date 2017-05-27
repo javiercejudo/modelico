@@ -6,7 +6,8 @@ import {
   defaultTo,
   isFunction,
   mem
-} from './U'
+} from '../U'
+
 import Base from './Base'
 
 const reviverFactory = itemMetadata => (k, v, path) => {

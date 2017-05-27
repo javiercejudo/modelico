@@ -1,6 +1,6 @@
 // @flow
 
-import {typeSymbol} from './symbols'
+import {typeSymbol} from '../symbols'
 import any from './any'
 
 type Path = Array<string | number>

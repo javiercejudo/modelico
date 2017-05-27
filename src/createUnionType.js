@@ -1,6 +1,6 @@
 import {isFunction, isPlainObject} from './U'
 import {typeSymbol} from './symbols'
-import metadataFactory from './metadata'
+import metadataFactory from './metadata/metadata'
 import inferUnionClassifier from './inferUnionClassifier'
 import M from './'
 

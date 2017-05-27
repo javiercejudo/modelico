@@ -1,5 +1,5 @@
-import {always, isNothing, equals, haveDifferentTypes, mem} from './U'
-import {typeSymbol, innerOrigSymbol} from './symbols'
+import {always, isNothing, equals, haveDifferentTypes, mem} from '../U'
+import {typeSymbol, innerOrigSymbol} from '../symbols'
 import Base from './Base'
 
 export const set = (thisArg, Type, key, value) => {

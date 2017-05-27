@@ -1,5 +1,5 @@
-import {always, isNothing} from './U'
-import {typeSymbol} from './symbols'
+import {always, isNothing} from '../U'
+import {typeSymbol} from '../symbols'
 import Base from './Base'
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, {[code]: {code}})

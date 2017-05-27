@@ -1,6 +1,6 @@
 import {emptyObject, isFunction} from './U'
-import metadataFactory from './metadata'
-import Base from './Base'
+import metadataFactory from './metadata/metadata'
+import Base from './types/Base'
 
 const metadata = metadataFactory()
 

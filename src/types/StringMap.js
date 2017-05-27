@@ -1,4 +1,4 @@
-import {objToArr, reviverOrAsIs, isFunction} from './U'
+import {objToArr, reviverOrAsIs, isFunction} from '../U'
 import AbstractMap, {set, of, metadata} from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {

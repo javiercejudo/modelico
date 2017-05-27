@@ -1,4 +1,4 @@
-import {isNothing, unsupported, haveDifferentTypes, mem} from './U'
+import {isNothing, unsupported, haveDifferentTypes, mem} from '../U'
 import Base from './Base'
 
 const reviver = (k, v) => {

@@ -6,10 +6,10 @@ import {
   emptyObject,
   haveDifferentTypes,
   equals
-} from './U'
+} from '../U'
 
-import {typeSymbol, fieldsSymbol} from './symbols'
-import getInnerTypes from './getInnerTypes'
+import {typeSymbol, fieldsSymbol} from '../symbols'
+import getInnerTypes from '../getInnerTypes'
 
 const getPathReducer = (result, part) => result.get(part)
 

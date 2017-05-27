@@ -1,6 +1,6 @@
-import {always, isNothing, unsupported} from './U'
-import {iterableMetadata, iterableEquals} from './iterableHelpers'
-import {innerOrigSymbol} from './symbols'
+import {always, isNothing, unsupported} from '../U'
+import {iterableMetadata, iterableEquals} from '../iterableHelpers'
+import {innerOrigSymbol} from '../symbols'
 import Base from './Base'
 
 let EMPTY_SET

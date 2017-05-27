@@ -5,22 +5,22 @@ import {
   defaultTo,
   emptyArray,
   mem
-} from './U'
+} from '../U'
 
 import asIs from './asIs'
 import any from './any'
 import anyOf from './anyOf'
-import reviverFactory from './reviverFactory'
-import inferUnionClassifier from './inferUnionClassifier'
+import reviverFactory from '../reviverFactory'
+import inferUnionClassifier from '../inferUnionClassifier'
 
-import ModelicoMap from './Map'
-import StringMap from './StringMap'
-import EnumMap from './EnumMap'
-import ModelicoNumber from './Number'
-import ModelicoDate from './Date'
-import List from './List'
-import ModelicoSet from './Set'
-import Maybe from './Maybe'
+import ModelicoMap from '../types/Map'
+import StringMap from '../types/StringMap'
+import EnumMap from '../types/EnumMap'
+import ModelicoNumber from '../types/Number'
+import ModelicoDate from '../types/Date'
+import List from '../types/List'
+import ModelicoSet from '../types/Set'
+import Maybe from '../types/Maybe'
 
 const base = mem(Type =>
   Object.freeze({type: Type, reviver: reviverFactory(Type)})

@@ -16,22 +16,23 @@ import getSchema from './getSchema'
 import validate from './validate'
 import withValidation from './withValidation'
 import withCache from './withCache'
-import metadata from './metadata'
+import metadata from './metadata/metadata'
+import ajvMetadata from './metadata/ajvMetadata'
 
-import Base from './Base'
+import Base from './types/Base'
 
-import Maybe from './Maybe'
-import Enum from './Enum'
+import Maybe from './types/Maybe'
+import Enum from './types/Enum'
 
-import ModelicoMap from './Map'
-import StringMap from './StringMap'
-import EnumMap from './EnumMap'
-import ModelicoNumber from './Number'
-import ModelicoDate from './Date'
-import List from './List'
-import ModelicoSet from './Set'
+import ModelicoMap from './types/Map'
+import StringMap from './types/StringMap'
+import EnumMap from './types/EnumMap'
+import ModelicoNumber from './types/Number'
+import ModelicoDate from './types/Date'
+import List from './types/List'
+import ModelicoSet from './types/Set'
+
 import proxyFactory from './proxyFactory'
-import ajvMetadata from './ajvMetadata'
 import createModel from './createModel'
 import createUnionType from './createUnionType'
 
@@ -51,6 +52,7 @@ const listNonMutators = internalNonMutators.concat([
   'slice',
   'filter'
 ])
+
 const listMutators = [
   'copyWithin',
   'fill',
@@ -64,6 +66,7 @@ const listMutators = [
 ]
 
 const dateNonMutators = internalNonMutators
+
 const dateMutators = [
   'setDate',
   'setFullYear',

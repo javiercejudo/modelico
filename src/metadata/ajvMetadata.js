@@ -7,9 +7,9 @@ import {
   isFunction,
   metaOrTypeMapper,
   mem
-} from './U'
+} from '../U'
 
-import M from './'
+import M from '../'
 
 const getInnerSchema = metadata => M.getSchema(metadata, false)
 

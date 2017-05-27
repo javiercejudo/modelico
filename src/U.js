@@ -3,6 +3,7 @@
 const get = (field: string) => (obj: Object) => obj[field]
 const pipe2 = (f: Function, g: Function) => (...args: Array<mixed>) =>
   g(f(...args))
+
 const not = (x: boolean): boolean => !x
 
 export const T = () => true
