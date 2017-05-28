@@ -1,33 +1,39 @@
 export default ({M, Ajv, validationEnabled, ajvOptions}) => {
-  const {
-    base, ajvMeta
-  } = M.ajvMetadata(validationEnabled ? Ajv(ajvOptions) : undefined)
+  const {base, ajvMeta} = M.ajvMetadata(
+    validationEnabled ? Ajv(ajvOptions) : undefined
+  )
 
-  const reviver = (k, v) =>
-    new LocalDate(...v.split('-').map(Number))
+  const pad0 = n => {
+    const nStr = '' + n
+
+    return n < 10 ? '0' + nStr : nStr
+  }
+
+  const reviver = (k, v) => LocalDate.of(...v.split('-').map(Number))
 
   class LocalDate extends M.Base {
-    constructor (year, month, day) {
-      super(LocalDate, {year, month, day})
+    constructor(props) {
+      super(LocalDate, props)
 
-      this.year = () => year
-      this.month = () => month
-      this.day = () => day
+      this.year = () => props.year
+      this.month = () => props.month
+      this.day = () => props.day
 
       Object.freeze(this)
     }
 
-    toJSON () {
-      const { year, month, day } = this
+    toJSON() {
+      const {year, month, day} = this
+      const monthAndDay = [month(), day()].map(pad0)
 
-      return `${year()}-${month()}-${day()}`
+      return [year()].concat(monthAndDay).join('-')
     }
 
-    static innerTypes () {
-      return Object.freeze({})
+    static of(year, month, day) {
+      return new LocalDate({year, month, day})
     }
 
-    static metadata () {
+    static metadata() {
       const baseMetadata = Object.assign({}, base(LocalDate), {reviver})
 
       // baseMetadata as a function for testing purposes

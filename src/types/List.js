@@ -1,14 +1,14 @@
-import Immutable from 'immutable'
+import * as Immutable from 'immutable'
 
-import { always, isNothing, emptyObject } from './U'
-import { iterableMetadata, iterableEquals } from './iterableHelpers'
-import { innerOrigSymbol } from './symbols'
+import {always, isNothing} from '../U'
+import {iterableMetadata, iterableEquals} from '../iterableHelpers'
+import {innerOrigSymbol} from '../symbols'
 import Base from './Base'
 
 let EMPTY_LIST
 
 class List extends Base {
-  constructor (innerListOrig = []) {
+  constructor(innerListOrig = []) {
     super(List)
 
     if (isNothing(innerListOrig)) {
@@ -33,29 +33,29 @@ class List extends Base {
     Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoList'
   }
 
-  [Symbol.iterator] () {
+  [Symbol.iterator]() {
     return this.inner()[Symbol.iterator]()
   }
 
-  includes (...args) {
+  includes(...args) {
     return this.inner().includes(...args)
   }
 
-  get (index) {
+  get(index) {
     return this.inner().get(index)
   }
 
-  set (index, value) {
+  set(index, value) {
     const newList = [...this.inner().set(index, value)]
 
     return List.fromArray(newList)
   }
 
-  setIn (path, value) {
+  setIn(path, value) {
     if (path.length === 0) {
       return List.fromArray(value)
     }
@@ -70,31 +70,31 @@ class List extends Base {
     return this.set(key, item.setIn(restPath, value))
   }
 
-  toJSON () {
+  toJSON() {
     return [...this.inner()]
   }
 
-  equals (other) {
+  toArray() {
+    return this.toJSON()
+  }
+
+  equals(other) {
     return iterableEquals(this, other)
   }
 
-  static fromArray (arr) {
+  static fromArray(arr) {
     return new List(arr)
   }
 
-  static of (...arr) {
+  static of(...arr) {
     return List.fromArray(arr)
   }
 
-  static metadata (itemMetadata) {
-    return iterableMetadata(List, itemMetadata)
+  static metadata(itemMetadata) {
+    return iterableMetadata(List)(itemMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_LIST || List.of()
   }
 }

@@ -40,9 +40,9 @@ const json = `
 }
 `
 
-export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
-  const { _ } = M.metadata()
-  const { FixerIoResult, Currency } = fixerIoFactory({M, Ajv})
+export default (should, M, {fixerIoFactory}, {Ajv}) => () => {
+  const {_} = M.metadata()
+  const {FixerIoResult, Currency} = fixerIoFactory({M, Ajv})
 
   it('should parse results from fixer.io', () => {
     const fixerIoResult = M.fromJSON(FixerIoResult, json)
@@ -57,17 +57,23 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
   })
 
   it('should convert between any available currencies', () => {
-    const { GBP, USD, EUR, AUD, CNY } = Currency
+    const {GBP, USD, EUR, AUD, CNY} = Currency
 
     const fixerIoResult = M.fromJSON(FixerIoResult, json)
 
-    fixerIoResult.convert(GBP(), USD(), 7.20).toFixed(2)
+    fixerIoResult
+      .convert(GBP(), USD(), 7.20)
+      .toFixed(2)
       .should.be.exactly('8.85')
 
-    fixerIoResult.convert(EUR(), AUD(), 15).toFixed(2)
+    fixerIoResult
+      .convert(EUR(), AUD(), 15)
+      .toFixed(2)
       .should.be.exactly('20.76')
 
-    fixerIoResult.convert(CNY(), EUR(), 500).toFixed(2)
+    fixerIoResult
+      .convert(CNY(), EUR(), 500)
+      .toFixed(2)
       .should.be.exactly('69.06')
   })
 
@@ -78,6 +84,18 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
       type: 'object',
       properties: {
         base: {
+          $ref: '#/definitions/2'
+        },
+        date: {
+          $ref: '#/definitions/3'
+        },
+        rates: {
+          $ref: '#/definitions/4'
+        }
+      },
+      required: ['base', 'date', 'rates'],
+      definitions: {
+        '2': {
           enum: [
             'AUD',
             'BGN',
@@ -113,33 +131,30 @@ export default (should, M, { fixerIoFactory }, { Ajv }) => () => {
             'ZAR'
           ]
         },
-        date: {
+        '3': {
           type: 'string',
           pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
         },
-        rates: {
+        '4': {
           type: 'object',
           maxProperties: 32,
           additionalProperties: false,
           patternProperties: {
             '^(AUD|BGN|BRL|CAD|CHF|CNY|CZK|DKK|EUR|GBP|HKD|HRK|HUF|IDR|ILS|INR|JPY|KRW|MXN|MYR|NOK|NZD|PHP|PLN|RON|RUB|SEK|SGD|THB|TRY|USD|ZAR)$': {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
+              $ref: '#/definitions/5'
             }
           }
+        },
+        '5': {
+          type: 'number',
+          minimum: 0,
+          exclusiveMinimum: true
         }
-      },
-      required: [
-        'base',
-        'date',
-        'rates'
-      ]
+      }
     }
 
     schema.should.deepEqual(expectedSchema)
 
-    Ajv().validate(schema, JSON.parse(json))
-      .should.be.exactly(true)
+    Ajv().validate(schema, JSON.parse(json)).should.be.exactly(true)
   })
 }

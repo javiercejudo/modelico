@@ -15,18 +15,18 @@ To validate the JSON strictly, you have the following options:
 ## `M.ajvMetadata` and JSON schema
 
 This variation of `M.metadata()` takes an optional `Ajv` instance parameter
-and returns metadata functions that take an additional initial parameter in
-the form of JSON schema for the current field. When no instance of `Ajv` is
-passed in, it returns metadata functions with the same API but no validation
-is performed. This can be leveraged to only enable validation during
-development in favour of faster parsing in production:
+and returns metadata functions that take an additional parameter in the form of
+JSON schema for the current field. When no instance of `Ajv` is passed in, it
+returns metadata functions with the same API but no validation is performed.
+This can be leveraged to only enable validation during development in favour of
+faster parsing in production:
 
 ```js
 import Ajv from 'ajv'
 
 const ajvOptions = {}
 const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined
-const { ajvString, ajvList, ajvNumber } = M.ajvMetadata(ajvIfProd)
+const {string, list, number} = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
   constructor (fields) {
@@ -35,8 +35,11 @@ class Animal extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: ajvString({ minLength: 1, maxLength: 25 }),
-      dimensions: ajvList({ minItems: 3, maxItems: 3 }, ajvNumber({ minimum: 0, exclusiveMinimum: true }))
+      name: string({minLength: 1, maxLength: 25}),
+      dimensions: list(
+        number({minimum: 0, exclusiveMinimum: true}),
+        {minItems: 3, maxItems: 3}
+      )
     })
   }
 }
@@ -53,7 +56,7 @@ not covered by what JSON schema can validate, you may write your own metadata.
 `M.withValidation` facilitates this use case.
 
 ```js
-const { string, list, number } = M.metadata()
+const {string, list, number} = M.metadata()
 
 // lowerCaseString is going to return metadata that validates the string
 // before reviving it by overriding the string metadata reviver
@@ -78,8 +81,9 @@ class Animal extends M.Base {
 
 ## Why not both?
 
-In the example above, we could have based `lowerCaseString` on `ajvString`
-instead of the normal `string` to combine custom and JSON schema rules.
+In the example above, we could have based `lowerCaseString` on the
+`ajvMetadata`-`string` instead of the normal `string` to combine custom and
+JSON schema rules.
 
 `M.withValidation` works with any metadata, including the `Ajv` variant and
 can be composed, since it returns a function that takes metadata and returns
@@ -90,7 +94,7 @@ debugging complex deep objects.
 
 ```js
 const noNumbers = M.withValidation(
-  x => /^[^0-9]+$/.test(v),
+  v => /^[^0-9]*$/.test(v),
   (v, path) => `string ${v} at "${path.join(' > ')}" contains numbers`
 )
 
@@ -102,7 +106,7 @@ const lowercase = M.withValidation(
 // see pipe function at
 // https://gist.github.com/javiercejudo/98ab1f0742387e8aca0646adb325059f
 const stringWithoutNumbersAndLowerCase = pipe(
-  ajvString,
+  string,
   noNumbers,
   lowercase
 )
@@ -124,7 +128,7 @@ validity of some fields depends on other fields. In the following example,
 we make sure that `min <= max` in a `Range` class:
 
 ```js
-const { base } = M.metadata()
+const {base} = M.metadata()
 
 const customReviver = baseReviver => (k, v, path = []) => {
   if (k !== '') {
@@ -139,8 +143,8 @@ const customReviver = baseReviver => (k, v, path = []) => {
 }
 
 class Range extends M.Base {
-  constructor ({ min = -Infinity, max = Infinity } = {}) {
-    super(Range, { min, max })
+  constructor ({min = -Infinity, max = Infinity} = {}) {
+    super(Range, {min, max})
   }
 
   length () {
@@ -158,7 +162,7 @@ class Range extends M.Base {
     const baseMetadata = base(Range)
     const baseReviver = baseMetadata.reviver
 
-    return Object.assign({}, baseMetadata, { reviver: customReviver(baseReviver) })
+    return Object.assign({}, baseMetadata, {reviver: customReviver(baseReviver) })
   }
 }
 ```
@@ -176,16 +180,16 @@ validation was not successful.
 Using the class:
 
 ```js
-M.fromJS(Range, { min: 4, max: 3.5 })
+M.fromJS(Range, {min: 4, max: 3.5})
 // => RangeError: "min" must be less than or equal to "max"
 
-const myRange = new Range({ min: 4, max: 3.5 })
+const myRange = new Range({min: 4, max: 3.5})
 // => No error, but...
 
 M.validate(myRange)
 // => [false, RangeError("min" must be less than or equal to "max")]
 
-const myRange2 = new Range({ min: 4, max: 6.5 })
+const myRange2 = new Range({min: 4, max: 6.5})
 
 M.validate(myRange2)
 // => [true, undefined]

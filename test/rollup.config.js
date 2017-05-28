@@ -5,6 +5,6 @@ export default {
   format: 'umd',
   moduleName: 'modelicoSpec',
   noConflict: true,
-  plugins: [ babel() ],
+  plugins: [babel()],
   dest: './dist/modelico-spec.js'
 }

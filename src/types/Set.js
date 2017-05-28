@@ -1,14 +1,14 @@
-import Immutable from 'immutable'
+import * as Immutable from 'immutable'
 
-import { always, isNothing, unsupported, emptyObject } from './U'
-import { iterableMetadata, iterableEquals } from './iterableHelpers'
-import { innerOrigSymbol } from './symbols'
+import {always, isNothing, unsupported} from '../U'
+import {iterableMetadata, iterableEquals} from '../iterableHelpers'
+import {innerOrigSymbol} from '../symbols'
 import Base from './Base'
 
 let EMPTY_SET
 
 class ModelicoSet extends Base {
-  constructor (innerSetOrig = new Set()) {
+  constructor(innerSetOrig = new Set()) {
     super(ModelicoSet)
 
     if (isNothing(innerSetOrig)) {
@@ -32,23 +32,23 @@ class ModelicoSet extends Base {
     Object.freeze(this)
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoSet'
   }
 
-  [Symbol.iterator] () {
+  [Symbol.iterator]() {
     return this.inner()[Symbol.iterator]()
   }
 
-  has (key) {
+  has(key) {
     return this[innerOrigSymbol]().has(key)
   }
 
-  set () {
+  set() {
     unsupported('Set.set is not supported')
   }
 
-  setIn (path, set) {
+  setIn(path, set) {
     if (path.length === 0) {
       return new ModelicoSet(set)
     }
@@ -56,35 +56,31 @@ class ModelicoSet extends Base {
     unsupported('Set.setIn is not supported for non-empty paths')
   }
 
-  toJSON () {
+  toJSON() {
     return [...this]
   }
 
-  equals (...args) {
+  equals(...args) {
     return iterableEquals(this, ...args)
   }
 
-  static fromSet (set) {
+  static fromSet(set) {
     return new ModelicoSet(set)
   }
 
-  static fromArray (arr) {
+  static fromArray(arr) {
     return ModelicoSet.fromSet(new Set(arr))
   }
 
-  static of (...arr) {
+  static of(...arr) {
     return ModelicoSet.fromArray(arr)
   }
 
-  static metadata (itemMetadata) {
-    return iterableMetadata(ModelicoSet, itemMetadata)
+  static metadata(itemMetadata) {
+    return iterableMetadata(ModelicoSet)(itemMetadata)
   }
 
-  static innerTypes () {
-    return emptyObject
-  }
-
-  static EMPTY () {
+  static EMPTY() {
     return EMPTY_SET || ModelicoSet.of()
   }
 }

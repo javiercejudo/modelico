@@ -1,21 +1,28 @@
 import {
-  always, defaultTo, isPlainObject, isSomething,
-  emptyObject, haveDifferentTypes, equals
-} from './U'
+  always,
+  defaultTo,
+  isPlainObject,
+  isSomething,
+  emptyObject,
+  haveDifferentTypes,
+  equals
+} from '../U'
 
-import { typeSymbol, fieldsSymbol } from './symbols'
-import getInnerTypes from './getInnerTypes'
+import {typeSymbol, fieldsSymbol} from '../symbols'
+import getInnerTypes from '../getInnerTypes'
 
 const getPathReducer = (result, part) => result.get(part)
 
 class Base {
-  constructor (Type, fields = emptyObject, thisArg) {
+  constructor(Type, fields = emptyObject, thisArg) {
     if (!isPlainObject(fields)) {
-      throw TypeError(`expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`)
+      throw TypeError(
+        `expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`
+      )
     }
 
     // This slows down the benchmarks by a lot, but it isn't clear whether
-    // real usage would benefit from emoving it.
+    // real usage would benefit from removing it.
     // See: https://github.com/javiercejudo/modelico-benchmarks
     Object.freeze(fields)
 
@@ -32,8 +39,8 @@ class Base {
 
       if (isSomething(valueCandidate)) {
         value = valueCandidate
-      } else if (isSomething(defaultCandidate)) {
-        value = innerTypes[key].default
+      } else if (defaultCandidate !== undefined) {
+        value = innerTypes[key].reviver('', defaultCandidate)
         defaults[key] = value
       } else {
         throw TypeError(`no value for key "${key}"`)
@@ -42,32 +49,34 @@ class Base {
       thisArg[key] = always(value)
     })
 
-    thisArg[fieldsSymbol] = always(Object.freeze(Object.assign(defaults, fields)))
+    thisArg[fieldsSymbol] = always(
+      Object.freeze(Object.assign(defaults, fields))
+    )
   }
 
-  get [Symbol.toStringTag] () {
+  get [Symbol.toStringTag]() {
     return 'ModelicoModel'
   }
 
-  get (field) {
+  get(field) {
     return this[fieldsSymbol]()[field]
   }
 
-  getIn (path) {
+  getIn(path) {
     return path.reduce(getPathReducer, this)
   }
 
-  copy (fields) {
+  copy(fields) {
     const newFields = Object.assign({}, this[fieldsSymbol](), fields)
 
     return new (this[typeSymbol]())(newFields)
   }
 
-  set (field, value) {
+  set(field, value) {
     return this.copy({[field]: value})
   }
 
-  setIn (path, value) {
+  setIn(path, value) {
     if (path.length === 0) {
       return this.copy(value)
     }
@@ -82,7 +91,7 @@ class Base {
     return this.set(key, item.setIn(restPath, value))
   }
 
-  equals (other) {
+  equals(other) {
     if (this === other) {
       return true
     }
@@ -104,19 +113,23 @@ class Base {
     return thisKeys.every(key => equals(thisFields[key], otherFields[key]))
   }
 
-  toJSON () {
+  toJSON() {
     return this[fieldsSymbol]()
   }
 
-  toJS () {
+  toJS() {
     return JSON.parse(JSON.stringify(this))
   }
 
-  stringify (n) {
+  stringify(n) {
     return JSON.stringify(this, null, n)
   }
 
-  static factory (...args) {
+  static innerTypes() {
+    return emptyObject
+  }
+
+  static factory(...args) {
     return new Base(...args)
   }
 }

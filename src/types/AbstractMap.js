@@ -1,7 +1,7 @@
-import Immutable from 'immutable'
+import * as Immutable from 'immutable'
 
-import { always, isNothing, haveDifferentTypes, identity } from './U'
-import { typeSymbol, innerOrigSymbol } from './symbols'
+import {always, isNothing, haveDifferentTypes, identity, mem} from '../U'
+import {typeSymbol, innerOrigSymbol} from '../symbols'
 import Base from './Base'
 
 export const set = (thisArg, Type, key, value) => {
@@ -19,7 +19,9 @@ export const of = (Type, args) => {
   const len = args.length
 
   if (len % 2 === 1) {
-    throw TypeError(`${Type.displayName}.of requires an even number of arguments`)
+    throw TypeError(
+      `${Type.displayName}.of requires an even number of arguments`
+    )
   }
 
   const map = new Map()
@@ -31,16 +33,22 @@ export const of = (Type, args) => {
   return Type.fromMap(map)
 }
 
-export const metadata = (Type, reviverFactory, keyMetadata, valueMetadata) => {
-  return Object.freeze({
-    type: Type,
-    subtypes: Object.freeze([keyMetadata, valueMetadata]),
-    reviver: reviverFactory(keyMetadata, valueMetadata)
-  })
-}
+export const metadata = mem(Type =>
+  mem(reviverFactory =>
+    mem(keyMetadata =>
+      mem(valueMetadata => {
+        return Object.freeze({
+          type: Type,
+          subtypes: Object.freeze([keyMetadata, valueMetadata]),
+          reviver: reviverFactory(keyMetadata, valueMetadata)
+        })
+      })
+    )
+  )
+)
 
 class AbstractMap extends Base {
-  constructor (Type, innerMapOrig = new Map(), EMPTY) {
+  constructor(Type, innerMapOrig = new Map(), EMPTY) {
     super(Type)
 
     if (isNothing(innerMapOrig)) {
@@ -58,19 +66,19 @@ class AbstractMap extends Base {
     this.size = innerMap.size
   }
 
-  [Symbol.iterator] () {
+  [Symbol.iterator]() {
     return this[innerOrigSymbol]()[Symbol.iterator]()
   }
 
-  has (key) {
+  has(key) {
     return this[innerOrigSymbol]().has(key)
   }
 
-  get (key) {
+  get(key) {
     return this[innerOrigSymbol]().get(key)
   }
 
-  setIn (path, value) {
+  setIn(path, value) {
     if (path.length === 0) {
       return new (this[typeSymbol]())(value)
     }
@@ -85,7 +93,7 @@ class AbstractMap extends Base {
     return this.set(key, item.setIn(restPath, value))
   }
 
-  equals (other, asUnordered = false) {
+  equals(other, asUnordered = false) {
     if (this === other) {
       return true
     }

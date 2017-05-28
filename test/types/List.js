@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
-export default (U, should, M, { Person }) => () => {
-  const { _, list, date, string, number, maybe } = M.metadata()
+export default (U, should, M, {Person}) => () => {
+  const {_, list, date, string, number, maybe} = M.metadata()
 
   describe('immutability', () => {
     it('must freeze the input', () => {
@@ -9,21 +9,21 @@ export default (U, should, M, { Person }) => () => {
 
       M.List.fromArray(input)
 
-      ;(() => { input[1] = 'B' })
-        .should.throw()
+      should(() => {
+        input[1] = 'B'
+      }).throw()
     })
   })
 
   describe('instantiation', () => {
     it('must be instantiated with new', () => {
-      (() => M.List()).should.throw()
+      ;(() => M.List()).should.throw()
     })
   })
 
   describe('get', () => {
     it('should return the nth item', () => {
-      M.List.of('a', 'b', 'c').get(1)
-        .should.be.exactly('b')
+      M.List.of('a', 'b', 'c').get(1).should.be.exactly('b')
     })
   })
 
@@ -31,13 +31,11 @@ export default (U, should, M, { Person }) => () => {
     it('should implement Symbol.iterator', () => {
       const list = M.List.fromArray([1, 2, 3, 4])
 
-      Array.from(list)
-        .should.eql([1, 2, 3, 4])
+      Array.from(list).should.eql([1, 2, 3, 4])
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => new M.List(null))
-        .should.throw()
+      ;(() => new M.List(null)).should.throw()
     })
 
     it('should set items in the list correctly', () => {
@@ -47,14 +45,15 @@ export default (U, should, M, { Person }) => () => {
       ]
 
       const modelicoList1 = M.List.fromArray(list)
-      const modelicoList2 = modelicoList1.set(0, M.Date.of(new Date('1989-04-16T00:00:00.000Z')))
+      const modelicoList2 = modelicoList1.set(
+        0,
+        M.Date.of(new Date('1989-04-16T00:00:00.000Z'))
+      )
 
-      should(modelicoList2.get(0).inner().getFullYear())
-        .be.exactly(1989)
+      should(modelicoList2.get(0).inner().getFullYear()).be.exactly(1989)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.get(0).inner().getFullYear())
-        .be.exactly(1988)
+      should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988)
     })
 
     it('should set items in the list correctly when part of a path', () => {
@@ -64,14 +63,15 @@ export default (U, should, M, { Person }) => () => {
       ]
 
       const modelicoList1 = M.List.fromArray(list)
-      const modelicoList2 = modelicoList1.setIn([0], new Date('1989-04-16T00:00:00.000Z'))
+      const modelicoList2 = modelicoList1.setIn(
+        [0],
+        new Date('1989-04-16T00:00:00.000Z')
+      )
 
-      should(modelicoList2.get(0).inner().getFullYear())
-        .be.exactly(1989)
+      should(modelicoList2.get(0).inner().getFullYear()).be.exactly(1989)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.get(0).inner().getFullYear())
-        .be.exactly(1988)
+      should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988)
     })
 
     it('should set items in the list correctly when part of a path with a single element', () => {
@@ -81,18 +81,20 @@ export default (U, should, M, { Person }) => () => {
       ]
 
       const modelicoList1 = M.List.fromArray(list)
-      const modelicoList2 = modelicoList1.setIn([0], new Date('2000-04-16T00:00:00.000Z'))
+      const modelicoList2 = modelicoList1.setIn(
+        [0],
+        new Date('2000-04-16T00:00:00.000Z')
+      )
 
-      should(modelicoList2.get(0).inner().getFullYear())
-        .be.exactly(2000)
+      should(modelicoList2.get(0).inner().getFullYear()).be.exactly(2000)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.get(0).inner().getFullYear())
-        .be.exactly(1988)
+      should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988)
     })
 
     it('should be able to set a whole list', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
+      const authorJson =
+        '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author1 = JSON.parse(authorJson, _(Person).reviver)
 
       const newListArray = [...author1.importantDatesList()]
@@ -104,13 +106,23 @@ export default (U, should, M, { Person }) => () => {
       )
 
       should(author1.importantDatesList().size).be.exactly(2)
-      should(author1.importantDatesList().get(0).inner().getFullYear()).be.exactly(2013)
-      should(author1.importantDatesList().get(1).inner().getFullYear()).be.exactly(2012)
+      should(
+        author1.importantDatesList().get(0).inner().getFullYear()
+      ).be.exactly(2013)
+      should(
+        author1.importantDatesList().get(1).inner().getFullYear()
+      ).be.exactly(2012)
 
       should([...author2.importantDatesList()].length).be.exactly(3)
-      should(author2.importantDatesList().get(0).inner().getFullYear()).be.exactly(2013)
-      should(author2.importantDatesList().get(1).inner().getFullYear()).be.exactly(2016)
-      should(author2.importantDatesList().get(2).inner().getFullYear()).be.exactly(2012)
+      should(
+        author2.importantDatesList().get(0).inner().getFullYear()
+      ).be.exactly(2013)
+      should(
+        author2.importantDatesList().get(1).inner().getFullYear()
+      ).be.exactly(2016)
+      should(
+        author2.importantDatesList().get(2).inner().getFullYear()
+      ).be.exactly(2012)
     })
 
     it('edge case when List setIn is called with an empty path', () => {
@@ -124,13 +136,18 @@ export default (U, should, M, { Person }) => () => {
       ]
 
       const listOfListOfDates1 = M.List.of(modelicoDatesList1)
-      const listOfListOfDates2 = listOfListOfDates1.setIn([0], modelicoDatesList2)
+      const listOfListOfDates2 = listOfListOfDates1.setIn(
+        [0],
+        modelicoDatesList2
+      )
 
-      should(listOfListOfDates1.get(0).get(0).inner().getFullYear())
-        .be.exactly(1988)
+      should(listOfListOfDates1.get(0).get(0).inner().getFullYear()).be.exactly(
+        1988
+      )
 
-      should(listOfListOfDates2.get(0).get(0).inner().getFullYear())
-        .be.exactly(2016)
+      should(listOfListOfDates2.get(0).get(0).inner().getFullYear()).be.exactly(
+        2016
+      )
     })
   })
 
@@ -143,8 +160,9 @@ export default (U, should, M, { Person }) => () => {
 
       const modelicoList = M.List.fromArray(list)
 
-      JSON.stringify(modelicoList)
-        .should.be.exactly('["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]')
+      JSON.stringify(modelicoList).should.be.exactly(
+        '["1988-04-16T00:00:00.000Z","2012-12-25T00:00:00.000Z"]'
+      )
     })
   })
 
@@ -155,61 +173,79 @@ export default (U, should, M, { Person }) => () => {
         list(date()).reviver
       )
 
-      should(modelicoList.get(0).inner().getFullYear())
-        .be.exactly(1988)
+      should(modelicoList.get(0).inner().getFullYear()).be.exactly(1988)
 
-      should(modelicoList.get(1).inner().getMonth())
-        .be.exactly(11)
+      should(modelicoList.get(1).inner().getMonth()).be.exactly(11)
     })
 
     it('should be parsed correctly when used within another class', () => {
-      const authorJson = '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
+      const authorJson =
+        '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":["2013-03-28T00:00:00.000Z","2012-12-03T00:00:00.000Z"],"importantDatesSet":[],"sex":"MALE"}'
       const author = JSON.parse(authorJson, _(Person).reviver)
 
-      should(author.importantDatesList().get(0).inner().getFullYear()).be.exactly(2013)
+      should(
+        author.importantDatesList().get(0).inner().getFullYear()
+      ).be.exactly(2013)
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      should(() => JSON.parse('null', list(date()).reviver))
-        .throw('missing list')
+      should(() => JSON.parse('null', list(date()).reviver)).throw(
+        'missing list'
+      )
 
-      should(() => M.genericsFromJS(M.List, [date()], [null]))
-        .throw(/missing date/)
+      should(() => M.genericsFromJS(M.List, [date()], [null])).throw(
+        /missing date/
+      )
 
-      should(() => M.genericsFromJS(M.List, [string()], [null]))
-        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+      should(() => M.genericsFromJS(M.List, [string()], [null])).throw(
+        /expected a value but got nothing \(null, undefined or NaN\)/
+      )
 
-      should(() => M.genericsFromJS(M.List, [string()], [undefined]))
-        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+      should(() => M.genericsFromJS(M.List, [string()], [undefined])).throw(
+        /expected a value but got nothing \(null, undefined or NaN\)/
+      )
 
-      should(() => M.genericsFromJS(M.List, [string()], [NaN]))
-        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+      should(() => M.genericsFromJS(M.List, [string()], [NaN])).throw(
+        /expected a value but got nothing \(null, undefined or NaN\)/
+      )
     })
   })
 
   describe('tuples', () => {
     it('should support tuples', () => {
-      M.genericsFromJS(M.List, [[string(), date()]], ['a', new Date('1988-04-16T00:00:00.000Z')])
+      M.genericsFromJS(
+        M.List,
+        [[string(), date()]],
+        ['a', new Date('1988-04-16T00:00:00.000Z')]
+      )
         .equals(M.List.of('a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))))
         .should.be.exactly(true)
     })
 
     it('should require all values', () => {
-      should(() => M.genericsFromJS(M.List, [[string(), number()]], ['a']))
-        .throw(/tuple has missing or extra items/)
+      should(() =>
+        M.genericsFromJS(M.List, [[string(), number()]], ['a'])
+      ).throw(/tuple has missing or extra items/)
 
-      should(() => M.genericsFromJS(M.List, [[string(), number()]], []))
-        .throw(/tuple has missing or extra items/)
+      should(() => M.genericsFromJS(M.List, [[string(), number()]], [])).throw(
+        /tuple has missing or extra items/
+      )
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      should(() => M.genericsFromJS(M.List, [[string(), number()]], [undefined, NaN]))
-        .throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+      should(() =>
+        M.genericsFromJS(M.List, [[string(), number()]], [undefined, NaN])
+      ).throw(/expected a value but got nothing \(null, undefined or NaN\)/)
     })
 
     it('should support missing maybes', () => {
-      should(() => M.genericsFromJS(M.List, [[maybe(string()), maybe(number())]], [undefined, NaN]))
-        .not.throw()
+      should(() =>
+        M.genericsFromJS(
+          M.List,
+          [[maybe(string()), maybe(number())]],
+          [undefined, NaN]
+        )
+      ).not.throw()
     })
   })
 
@@ -220,15 +256,17 @@ export default (U, should, M, { Person }) => () => {
         list(() => date()).reviver
       )
 
-      should(modelicoList.get(0).inner().getFullYear())
-        .be.exactly(1988)
+      should(modelicoList.get(0).inner().getFullYear()).be.exactly(1988)
 
-      should(modelicoList.get(1).inner().getMonth())
-        .be.exactly(11)
+      should(modelicoList.get(1).inner().getMonth()).be.exactly(11)
     })
 
     it('should support tuples', () => {
-      M.genericsFromJS(M.List, [[() => string(), () => date()]], ['a', new Date('1988-04-16T00:00:00.000Z')])
+      M.genericsFromJS(
+        M.List,
+        [[() => string(), () => date()]],
+        ['a', new Date('1988-04-16T00:00:00.000Z')]
+      )
         .equals(M.List.of('a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))))
         .should.be.exactly(true)
     })
@@ -250,8 +288,12 @@ export default (U, should, M, { Person }) => () => {
     })
 
     it('should support non-primitive types', () => {
-      const modelicoList1 = M.List.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')))
-      const modelicoList2 = M.List.of(M.Date.of(new Date('1988-04-16T00:00:00.000Z')))
+      const modelicoList1 = M.List.of(
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
+      )
+      const modelicoList2 = M.List.of(
+        M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
+      )
 
       modelicoList1.should.not.be.exactly(modelicoList2)
       modelicoList1.should.not.equal(modelicoList2)
@@ -269,23 +311,19 @@ export default (U, should, M, { Person }) => () => {
     })
   })
 
-  describe('EMPTY / of / fromArray', () => {
+  describe('EMPTY / of / fromArray / toArray', () => {
     it('should have a static property for the empty list', () => {
-      should([...M.List.EMPTY()].length)
-        .be.exactly(0)
+      should([...M.List.EMPTY()].length).be.exactly(0)
 
-      M.List.EMPTY().toJSON()
-        .should.eql([])
+      M.List.EMPTY().toJSON().should.eql([])
 
-      new M.List()
-        .should.be.exactly(M.List.EMPTY())
+      new M.List().should.be.exactly(M.List.EMPTY())
     })
 
     it('should be able to create a list from arbitrary parameters', () => {
       const modelicoList = M.List.of(0, 1, 1, 2, 3, 5, 8)
 
-      Array.from(modelicoList)
-        .should.eql([0, 1, 1, 2, 3, 5, 8])
+      Array.from(modelicoList).should.eql([0, 1, 1, 2, 3, 5, 8])
     })
 
     it('should be able to create a list from an array', () => {
@@ -293,14 +331,20 @@ export default (U, should, M, { Person }) => () => {
 
       const modelicoList = M.List.fromArray(fibArray)
 
-      Array.from(modelicoList)
-        .should.eql([0, 1, 1, 2, 3, 5, 8])
+      Array.from(modelicoList).should.eql([0, 1, 1, 2, 3, 5, 8])
+    })
+
+    it('should be able to convert a list to an array', () => {
+      const modelicoList = M.List.of(1, 2, 3)
+
+      modelicoList.toArray().should.eql([1, 2, 3])
     })
   })
 
   U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
-      Object.prototype.toString.call(M.List.of())
+      Object.prototype.toString
+        .call(M.List.of())
         .should.be.exactly('[object ModelicoList]')
     })
   })

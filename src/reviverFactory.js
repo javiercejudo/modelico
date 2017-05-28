@@ -1,7 +1,16 @@
-import { isPlainObject, reviverOrAsIs, isFunction } from './U'
+// @flow
+
+import {isPlainObject, reviverOrAsIs, isFunction} from './U'
 import getInnerTypes from './getInnerTypes'
 
-const plainObjectReviverFactory = (Type, k, v, prevPath) =>
+type Path = Array<string | number>
+
+const plainObjectReviverFactory = (
+  Type: any,
+  k: string,
+  v: any,
+  prevPath: Path
+) =>
   Object.keys(v).reduce((acc, field) => {
     const path = prevPath.concat(field)
     const innerTypes = getInnerTypes(prevPath, Type)
@@ -20,7 +29,7 @@ const plainObjectReviverFactory = (Type, k, v, prevPath) =>
     return acc
   }, {})
 
-const reviverFactory = Type => (k, v, path = []) => {
+const reviverFactory = (Type: any) => (k: string, v: any, path: Path = []) => {
   if (k !== '') {
     return v
   }

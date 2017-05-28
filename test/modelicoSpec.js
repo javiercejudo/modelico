@@ -19,8 +19,11 @@ import featuresAdvanced from './features/advanced'
 import featuresAdvancedES5 from './features/advanced.es5'
 import featuresDeepNesting from './features/deepNesting'
 import featuresPolymorphic from './features/polymorphic'
-import ImmutableExamples from './Immutable.js/index'
-import ImmutableProxied from './Immutable.js/proxied'
+import featuresValidate from './features/validate'
+import featuresCache from './features/cache'
+import featuresCustomSerialisation from './features/customSerialisation'
+import ImmutableExamples from './Immutable/index'
+import ImmutableProxied from './Immutable/proxied'
 
 import proxyMap from './proxies/proxyMap'
 import proxyList from './proxies/proxyList'
@@ -38,18 +41,27 @@ import friendFactory from './types/fixtures/Friend'
 import cityFactory from './types/fixtures/nested/City'
 import countryFactory from './types/fixtures/nested/Country'
 import regionFactory from './types/fixtures/nested/Region'
-import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
+import regionIncompatibleNameKeyFactory
+  from './types/fixtures/nested/RegionIncompatibleNameKey'
 
 import fixerIoFactory from './api-examples/fixer-io/index'
 import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 
 import ajvMetadata from './metadata/ajv'
-import baseMetadataExample from './metadata/base'
+import baseMetadata from './metadata/base'
+import withDefaultMetadata from './metadata/withDefault'
+import unionMetadata from './metadata/union'
+import singletonMetadata from './metadata/singleton'
+
+import asyncReviving from './recipe/asyncReviving'
+import binaryTree from './recipe/binaryTree'
 
 const hasProxies = (() => {
   try {
     return new Proxy({}, {}) && true
-  } catch (ignore) {}
+  } catch (ignore) {
+    // ignore
+  }
 
   return false
 })()
@@ -59,14 +71,31 @@ const hasToStringTagSymbol = (() => {
 
   a[Symbol.toStringTag] = 'foo'
 
-  return (a + '') === '[object foo]'
+  return a + '' === '[object foo]'
 })()
 
-const buildUtils = () => Object.freeze({
-  skipIfNoProxies: fn => hasProxies ? fn : fn.skip,
-  skipIfNoToStringTagSymbol: fn => hasToStringTagSymbol ? fn : fn.skip,
-  objToArr: obj => Object.keys(obj).map(k => [k, obj[k]])
-})
+const identity = x => x
+const pipe2 = (f, g) => x => g(f(x))
+const pipe = (...fns) => [...fns, identity].reduce(pipe2)
+
+// loosely based on https://bost.ocks.org/mike/shuffle/
+const shuffle = arr => {
+  for (let l = arr.length - 1; l > 0; l -= 1) {
+    const i = Math.floor((l + 1) * Math.random())
+    ;[arr[l], arr[i]] = [arr[i], arr[l]]
+  }
+
+  return arr
+}
+
+const buildUtils = () =>
+  Object.freeze({
+    skipIfNoProxies: fn => (hasProxies ? fn : fn.skip),
+    skipIfNoToStringTagSymbol: fn => (hasToStringTagSymbol ? fn : fn.skip),
+    objToArr: obj => Object.keys(obj).map(k => [k, obj[k]]),
+    pipe,
+    shuffle
+  })
 
 export default ({Should, Modelico: M, extensions}) => () => {
   const U = buildUtils()
@@ -102,20 +131,28 @@ export default ({Should, Modelico: M, extensions}) => () => {
 
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
-  describe('ajvMetadata', ajvMetadata(...deps))
-  describe('base metadata example', baseMetadataExample(...deps))
+  describe('ajvMetadata', ajvMetadata(U, ...deps))
+  describe('base metadata', baseMetadata(...deps))
+  describe('withDefault metadata', withDefaultMetadata(...deps))
+  describe('union metadata', unionMetadata(...deps))
+  describe('Metadata as singletons', singletonMetadata(...deps))
 
   describe('Readme simple features', featuresSimple(...deps))
   describe('Readme advanced features', featuresAdvanced(...deps))
   describe('Readme advanced features ES5', featuresAdvancedES5(...deps))
   describe('Deep nesting features', featuresDeepNesting(...deps))
   describe('Reviving polymrphic JSON', featuresPolymorphic(...deps))
-  describe('Immutable.js examples', ImmutableExamples(U, ...deps))
+  describe('Validate', featuresValidate(...deps))
+  describe('Cache', featuresCache(...deps))
+  describe('Custom serialisation', featuresCustomSerialisation(...deps))
+  describe('Immutable examples', ImmutableExamples(U, ...deps))
 
   describe('Api Example: Fixer IO', fixerIoSpec(...deps))
+  describe('Async reviving', asyncReviving(...deps))
+  describe('Binary tree', binaryTree(U, ...deps))
 
   U.skipIfNoProxies(describe)(
-    'Immutable.js examples (proxied)',
+    'Immutable examples (proxied)',
     ImmutableProxied(U, ...deps)
   )
 

@@ -20,7 +20,7 @@ class Geometer extends M.Base {
 
   static innerTypes () {
     return Object.freeze({
-      name: ajvString({minLength: 1}),
+      name: string({minLength: 1}),
       // Shape has multiple subclasses
       favouriteShape: _(Shape)
     })
@@ -33,6 +33,14 @@ look at their definitions:
 
 ```js
 const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
+
+// We are going to use this metadata in several places, so by reusing it, we
+// not only save unnecessary processing, but our generated JSON schema will
+// also be more compact.
+const greaterThanZero = number({
+  minimum: 0,
+  exclusiveMinimum: true
+})
 
 const reviver = (k, v) => {
   if (k !== '') {
@@ -106,7 +114,7 @@ class Circle extends Shape {
 
   static innerTypes () {
     return Object.freeze(Object.assign({}, super.innerTypes(), {
-      radius: ajvNumber({minimum: 0, exclusiveMinimum: true})
+      radius: greaterThanZero
     }))
   }
 }
@@ -124,8 +132,8 @@ class Diamond extends Shape {
 
   static innerTypes () {
     return Object.freeze(Object.assign({}, super.innerTypes(), {
-      width: ajvNumber({minimum: 0, exclusiveMinimum: true}),
-      height: ajvNumber({minimum: 0, exclusiveMinimum: true})
+      width: greaterThanZero
+      height: greaterThanZero
     }))
   }
 }
@@ -196,13 +204,10 @@ Now remember how we have been using `ajvMetadata` and even enhanced the Shape
 metadata to account for its subtypes. This is going to allow us to get a very
 detailed schema that would not be easy to write by hand.
 
-_Note: in this example, significant reduction is possible, but Modélico always
-inlines the first level properties for each object since it uses it for
-validating during deserialisation. Definitions are only used when circular
-references appear, and are sequentially named to avoid collisions. In the
-example below, the definition is `3`: the reason is that `1` and `2` got
-reserved in case of circular reference of other entities, but were dropped
-eventually._
+_Note: definitions are sequentially named to avoid collisions. In the example
+below, the definition numbers have gaps because some of them got reserved in
+case they'd be reused. Short sub-schemas (less than 2 keys and not arrays) are
+always inlined._
 
 ```js
 M.getSchema(_(Geometer))
@@ -215,126 +220,69 @@ yields:
   type: 'object',
   properties: {
     name: {
+      $ref: '#/definitions/2'
+    },
+    favouriteShape: {
+      $ref: '#/definitions/3'
+    }
+  },
+  required: ['name', 'favouriteShape'],
+  definitions: {
+    '2': {
       type: 'string',
       minLength: 1
     },
-    favouriteShape: {
+    '3': {
       anyOf: [
         {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
-            },
-            radius: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
-          },
-          required: [
-            'radius'
-          ]
+          $ref: '#/definitions/4'
         },
         {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
-            },
-            width: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            },
-            height: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
-          },
-          required: [
-            'width',
-            'height'
-          ]
+          $ref: '#/definitions/7'
         }
       ]
-    }
-  },
-  required: [
-    'name',
-    'favouriteShape'
-  ],
-  definitions: {
-    3: {
+    },
+    '4': {
+      type: 'object',
+      properties: {
+        relatedShape: {
+          $ref: '#/definitions/5'
+        },
+        radius: {
+          $ref: '#/definitions/6'
+        }
+      },
+      required: ['radius']
+    },
+    '5': {
       anyOf: [
         {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
-            },
-            radius: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
-          },
-          required: [
-            'radius'
-          ]
+          type: 'null'
         },
         {
-          type: 'object',
-          properties: {
-            relatedShape: {
-              anyOf: [
-                {
-                  type: 'null'
-                },
-                {
-                  $ref: '#/definitions/3'
-                }
-              ]
-            },
-            width: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            },
-            height: {
-              type: 'number',
-              minimum: 0,
-              exclusiveMinimum: true
-            }
-          },
-          required: [
-            'width',
-            'height'
-          ]
+          $ref: '#/definitions/3'
         }
       ]
+    },
+    '6': {
+      type: 'number',
+      minimum: 0,
+      exclusiveMinimum: true
+    },
+    '7': {
+      type: 'object',
+      properties: {
+        relatedShape: {
+          $ref: '#/definitions/5'
+        },
+        width: {
+          $ref: '#/definitions/6'
+        },
+        height: {
+          $ref: '#/definitions/6'
+        }
+      },
+      required: ['width', 'height']
     }
   }
 }

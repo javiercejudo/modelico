@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 export default (U, should, M) => () => {
-  const { date } = M.metadata()
+  const {date} = M.metadata()
 
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
@@ -10,8 +10,7 @@ export default (U, should, M) => () => {
 
       input.setFullYear(2017)
 
-      should(myDate.inner().getFullYear())
-        .be.exactly(1988)
+      should(myDate.inner().getFullYear()).be.exactly(1988)
     })
   })
 
@@ -20,50 +19,40 @@ export default (U, should, M) => () => {
       const mDate = new M.Date()
       const nativeDate = new Date()
 
-      should(mDate.inner().getFullYear())
-        .be.exactly(nativeDate.getFullYear())
+      should(mDate.inner().getFullYear()).be.exactly(nativeDate.getFullYear())
 
-      should(mDate.inner().getMonth())
-        .be.exactly(nativeDate.getMonth())
+      should(mDate.inner().getMonth()).be.exactly(nativeDate.getMonth())
 
-      should(mDate.inner().getDate())
-        .be.exactly(nativeDate.getDate())
+      should(mDate.inner().getDate()).be.exactly(nativeDate.getDate())
     })
 
     it('must be instantiated with new', () => {
-      (() => M.Date()).should.throw()
+      ;(() => M.Date()).should.throw()
     })
   })
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
-      (() => M.Date.of(null))
-        .should.throw()
+      should(() => M.Date.of(null)).throw()
     })
 
     it('should set dates correctly', () => {
       const date1 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
       const date2 = date1.setIn([], new Date('1989-04-16T00:00:00.000Z'))
 
-      should(date2.inner().getFullYear())
-        .be.exactly(1989)
+      should(date2.inner().getFullYear()).be.exactly(1989)
 
-      should(date1.inner().getFullYear())
-        .be.exactly(1988)
+      should(date1.inner().getFullYear()).be.exactly(1988)
     })
 
     it('should not support the set operation', () => {
-      const myDate = M.Date.of(new Date());
-
-      (() => myDate.set())
-        .should.throw()
+      const myDate = M.Date.of(new Date())
+      ;(() => myDate.set()).should.throw()
     })
 
     it('should not support the setIn operation with non-empty paths', () => {
-      const myDate = M.Date.of(new Date());
-
-      (() => myDate.setIn([0], new Date()))
-        .should.throw()
+      const myDate = M.Date.of(new Date())
+      ;(() => myDate.setIn([0], new Date())).should.throw()
     })
   })
 
@@ -83,10 +72,7 @@ export default (U, should, M) => () => {
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      (() => JSON.parse(
-        'null',
-        date().reviver
-      )).should.throw()
+      ;(() => JSON.parse('null', date().reviver)).should.throw()
     })
   })
 
@@ -106,7 +92,8 @@ export default (U, should, M) => () => {
 
   U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
-      Object.prototype.toString.call(M.Date.of())
+      Object.prototype.toString
+        .call(M.Date.of())
         .should.be.exactly('[object ModelicoDate]')
     })
   })

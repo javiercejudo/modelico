@@ -1,7 +1,14 @@
-import { typeSymbol } from './symbols'
+// @flow
+
+import {typeSymbol} from '../symbols'
 import any from './any'
 
-export default (conditionedMetas = [], enumField = 'type') => (v, path) => {
+type Path = Array<string | number>
+
+export default (
+  conditionedMetas: Array<any> = [],
+  enumField: string = 'type'
+) => (v: any, path: Path) => {
   if (conditionedMetas.length === 0) {
     return any
   }
@@ -21,5 +28,7 @@ export default (conditionedMetas = [], enumField = 'type') => (v, path) => {
 
   const prevPath = path.slice(0, -1)
 
-  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`)
+  throw TypeError(
+    `unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`
+  )
 }

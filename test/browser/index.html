@@ -19,8 +19,24 @@
   <script src="../../dist/modelico.min.js"></script>
   <script src="../../dist/modelico-spec.js"></script>
 
+  <script src="../../dist/chrome-custom-formatter.js"></script>
+
   <script>
     ModelicoMin = Modelico.noConflict()
+
+    M = Modelico
+    m = M.ajvMetadata(Ajv())
+
+    console.log('M =', M)
+    console.log('m =', m)
+
+    // Chrome devtools custom formatters
+    window.devtoolsFormatters = window.devtoolsFormatters || []
+
+    devtoolsFormatters.push(
+      modelicoCustomFormatter(Modelico),
+      modelicoCustomFormatter(ModelicoMin)
+    )
 
     mocha.setup('bdd')
 

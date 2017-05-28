@@ -1,3 +1,5 @@
+// @flow
+
 const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   if (!nonMutators.includes(prop)) {
     return target[prop]
@@ -10,7 +12,15 @@ const proxyToSelf = (nonMutators, mutators, innerCloner, target, prop) => {
   }
 }
 
-const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, target, prop) => {
+const proxyToInner = (
+  inner,
+  candidate,
+  nonMutators,
+  mutators,
+  innerCloner,
+  target,
+  prop
+) => {
   if (nonMutators.includes(prop)) {
     return (...args) => {
       const newObj = target.setIn([], candidate.apply(inner, args))
@@ -33,7 +43,12 @@ const proxyToInner = (inner, candidate, nonMutators, mutators, innerCloner, targ
   }
 }
 
-const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
+const proxyFactory = (
+  nonMutators: Array<string>,
+  mutators: Array<string>,
+  innerCloner: any,
+  obj: any
+) => {
   const get = (target, prop) => {
     if (prop in target) {
       return proxyToSelf(nonMutators, mutators, innerCloner, target, prop)
@@ -43,7 +58,15 @@ const proxyFactory = (nonMutators, mutators, innerCloner, obj) => {
     const candidate = inner[prop]
 
     if (typeof candidate === 'function') {
-      return proxyToInner(inner, candidate, nonMutators, mutators, innerCloner, target, prop)
+      return proxyToInner(
+        inner,
+        candidate,
+        nonMutators,
+        mutators,
+        innerCloner,
+        target,
+        prop
+      )
     }
 
     return candidate

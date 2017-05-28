@@ -4,7 +4,7 @@
   "structure": {
     "summary": "SUMMARY.md"
   },
-  "plugins": ["versions", "edit-link", "prism", "-highlight", "github", "anchorjs", "advanced-emoji"],
+  "plugins": ["versions", "edit-link", "highlight", "github", "anchorjs", "advanced-emoji"],
   "pluginsConfig": {
     "versions": {
       "gitbookConfigURL": "https://raw.githubusercontent.com/javiercejudo/modelico/master/book.json",
@@ -17,6 +17,26 @@
         {
             "value": "https://modelico.javiercejudo.com/",
             "text": "snapshot"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v23.0.0/",
+            "text": "23.0.0"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v22.1.0/",
+            "text": "22.1.0"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v22.0.0/",
+            "text": "22.0.0"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v21.6.0/",
+            "text": "21.6.0"
+        },
+        {
+            "value": "https://modelico.javiercejudo.com/v/v21.5.0/",
+            "text": "21.5.0"
         },
         {
             "value": "https://modelico.javiercejudo.com/v/v21.4.0/",

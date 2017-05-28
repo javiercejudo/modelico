@@ -3,15 +3,15 @@
 export default (should, M, fixtures, {Ajv}) => () => {
   describe('Enumerated: default type field', () => {
     const CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER'])
-    const { _, number, stringMap, list, anyOf } = M.metadata()
+    const {_, number, stringMap, list, anyOf} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(NumberCollection, props)
       }
 
-      getNumbers () {
-        const { type, collection } = this
+      getNumbers() {
+        const {type, collection} = this
 
         switch (type()) {
           case CollectionType.OBJECT():
@@ -19,15 +19,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
           case CollectionType.ARRAY():
             return [...collection()]
           default:
-            throw TypeError(`Unsupported NumberCollection with type ${type().toJSON()}`)
+            throw TypeError(
+              `Unsupported NumberCollection with type ${type().toJSON()}`
+            )
         }
       }
 
-      sum () {
+      sum() {
         return this.getNumbers().reduce((acc, x) => acc + x, 0)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
           type: _(CollectionType),
           collection: anyOf([
@@ -41,11 +43,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
     it('should revive polymorphic JSON (1)', () => {
       const col1 = M.fromJS(NumberCollection, {
         type: 'OBJECT',
-        collection: {'a': 10, 'b': 25, 'c': 4000}
+        collection: {a: 10, b: 25, c: 4000}
       })
 
-      should(col1.sum())
-        .be.exactly(4035)
+      should(col1.sum()).be.exactly(4035)
     })
 
     it('should revive polymorphic JSON (2)', () => {
@@ -54,29 +55,30 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: [1, 2, 3, 4, 3]
       })
 
-      should(col2.sum())
-        .be.exactly(13)
+      should(col2.sum()).be.exactly(13)
     })
 
     it('should revive polymorphic JSON (3)', () => {
-      should(() => M.fromJS(NumberCollection, {
-        type: 'OTHER',
-        collection: '1,2,3,4,5'
-      })).throw(/unsupported enumerator "OTHER" at ""/)
+      should(() =>
+        M.fromJS(NumberCollection, {
+          type: 'OTHER',
+          collection: '1,2,3,4,5'
+        })
+      ).throw(/unsupported enumerator "OTHER" at ""/)
     })
   })
 
   describe('Enumerated: custom field', () => {
     const CollectionType = M.Enum.fromArray(['OBJECT', 'ARRAY', 'OTHER'])
-    const { _, number, stringMap, list, anyOf } = M.metadata()
+    const {_, number, stringMap, list, anyOf} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(NumberCollection, props)
       }
 
-      getNumbers () {
-        const { collectionType, collection } = this
+      getNumbers() {
+        const {collectionType, collection} = this
 
         switch (collectionType()) {
           case CollectionType.OBJECT():
@@ -84,21 +86,26 @@ export default (should, M, fixtures, {Ajv}) => () => {
           case CollectionType.ARRAY():
             return [...collection()]
           default:
-            throw TypeError(`Unsupported NumberCollection with type ${collectionType().toJSON()}`)
+            throw TypeError(
+              `Unsupported NumberCollection with type ${collectionType().toJSON()}`
+            )
         }
       }
 
-      sum () {
+      sum() {
         return this.getNumbers().reduce((acc, x) => acc + x, 0)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
           collectionType: _(CollectionType),
-          collection: anyOf([
-            [stringMap(number()), CollectionType.OBJECT()],
-            [list(number()), CollectionType.ARRAY()]
-          ], 'collectionType')
+          collection: anyOf(
+            [
+              [stringMap(number()), CollectionType.OBJECT()],
+              [list(number()), CollectionType.ARRAY()]
+            ],
+            'collectionType'
+          )
         })
       }
     }
@@ -106,11 +113,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
     it('should revive polymorphic JSON (1)', () => {
       const col1 = M.fromJS(NumberCollection, {
         collectionType: 'OBJECT',
-        collection: {'a': 10, 'b': 25, 'c': 4000}
+        collection: {a: 10, b: 25, c: 4000}
       })
 
-      should(col1.sum())
-        .be.exactly(4035)
+      should(col1.sum()).be.exactly(4035)
     })
 
     it('should revive polymorphic JSON (2)', () => {
@@ -119,22 +125,29 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: [1, 2, 3, 4, 3]
       })
 
-      should(col2.sum())
-        .be.exactly(13)
+      should(col2.sum()).be.exactly(13)
     })
 
     it('should revive polymorphic JSON (3)', () => {
-      should(() => M.fromJS(NumberCollection, {
-        collectionType: 'OTHER',
-        collection: '1,2,3,4,5'
-      })).throw(/unsupported enumerator "OTHER" at ""/)
+      should(() =>
+        M.fromJS(NumberCollection, {
+          collectionType: 'OTHER',
+          collection: '1,2,3,4,5'
+        })
+      ).throw(/unsupported enumerator "OTHER" at ""/)
     })
   })
 
   describe('Based on runtime type field', () => {
-    const { _, base, ajvMeta, ajvNumber, ajvString, ajvMaybe } = M.ajvMetadata(Ajv())
+    const ajv = Ajv()
+    const {_, base, ajvMeta, number} = M.ajvMetadata(ajv)
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
+
+    const greaterThanZero = number({
+      minimum: 0,
+      exclusiveMinimum: true
+    })
 
     const reviver = (k, v) => {
       if (k !== '') {
@@ -147,12 +160,28 @@ export default (should, M, fixtures, {Ajv}) => () => {
         case ShapeType.DIAMOND().toJSON():
           return new Diamond(v)
         default:
-          throw TypeError('Unsupported or missing shape type in the Shape reviver.')
+          throw TypeError(
+            'Unsupported or missing shape type in the Shape reviver.'
+          )
       }
     }
 
-    class Shape extends M.Base {
-      toJSON () {
+    // ensure we only have a single object to represent a maybe-shape
+    let maybeShapeMetadata
+    const maybeShape = m => {
+      if (!maybeShapeMetadata) {
+        maybeShapeMetadata = m.maybe(m._(Shape))
+      }
+
+      return maybeShapeMetadata
+    }
+
+    const BaseShape = M.createAjvModel(ajv, m => ({
+      relatedShape: maybeShape(m)
+    }))
+
+    class Shape extends BaseShape {
+      toJSON() {
         const fields = M.fields(this)
         let type
 
@@ -170,78 +199,59 @@ export default (should, M, fixtures, {Ajv}) => () => {
         return Object.freeze(Object.assign({type}, fields))
       }
 
-      static innerTypes () {
-        return Object.freeze({
-          relatedShape: ajvMaybe(_(Shape))
-        })
-      }
-
-      static metadata () {
+      static metadata() {
         const baseMetadata = Object.assign({}, base(Shape), {reviver})
 
         return ajvMeta(baseMetadata, {}, {}, () => ({
-          anyOf: [
-            Circle,
-            Diamond
-          ].map(x => M.getSchema(base(x), false))
+          anyOf: [Circle, Diamond].map(x => M.getSchema(base(x), false))
         }))
       }
     }
 
-    class Circle extends Shape {
-      constructor (props) {
+    class Circle
+      extends M.createAjvModel(
+        ajv,
+        Object.assign({}, Shape.innerTypes(), {
+          radius: greaterThanZero
+        }),
+        {base: Shape}
+      ) {
+      constructor(props) {
         super(Circle, props)
       }
 
-      area () {
+      area() {
         return Math.PI * this.radius() ** 2
-      }
-
-      static innerTypes () {
-        return Object.freeze(Object.assign({}, super.innerTypes(), {
-          radius: ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          })
-        }))
       }
     }
 
-    class Diamond extends Shape {
-      constructor (props) {
+    class Diamond
+      extends M.createAjvModel(
+        ajv,
+        Object.assign({}, Shape.innerTypes(), {
+          width: greaterThanZero,
+          height: greaterThanZero
+        }),
+        {base: Shape}
+      ) {
+      constructor(props) {
         super(Diamond, props)
       }
 
-      area () {
+      area() {
         return this.width() * this.height() / 2
-      }
-
-      static innerTypes () {
-        return Object.freeze(Object.assign({}, super.innerTypes(), {
-          width: ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          }),
-          height: ajvNumber({
-            minimum: 0,
-            exclusiveMinimum: true
-          })
-        }))
       }
     }
 
-    class Geometer extends M.Base {
-      constructor (props) {
+    class Geometer
+      extends M.createAjvModel(ajv, m => ({
+        name: m.string({
+          minLength: 1
+        }),
+        favouriteShape: m._(Shape)
+      })) {
+      constructor(props) {
         super(Geometer, props)
-      }
-
-      static innerTypes () {
-        return Object.freeze({
-          name: ajvString({
-            minLength: 1
-          }),
-          favouriteShape: _(Shape)
-        })
       }
     }
 
@@ -271,11 +281,10 @@ export default (should, M, fixtures, {Ajv}) => () => {
         })
       })
 
-      should(geometer1.favouriteShape().area())
-        .be.exactly(28)
+      should(geometer1.favouriteShape().area()).be.exactly(28)
 
-      should(geometer2.favouriteShape().area())
-        .be.above(28)
+      should(geometer2.favouriteShape().area()).be
+        .above(28)
         .and.exactly(Math.PI * 3 ** 2)
 
       geometer1.toJS().should.deepEqual({
@@ -313,126 +322,69 @@ export default (should, M, fixtures, {Ajv}) => () => {
         type: 'object',
         properties: {
           name: {
+            $ref: '#/definitions/2'
+          },
+          favouriteShape: {
+            $ref: '#/definitions/3'
+          }
+        },
+        required: ['name', 'favouriteShape'],
+        definitions: {
+          '2': {
             type: 'string',
             minLength: 1
           },
-          favouriteShape: {
+          '3': {
             anyOf: [
               {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
-                  },
-                  radius: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: [
-                  'radius'
-                ]
+                $ref: '#/definitions/4'
               },
               {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
-                  },
-                  width: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  },
-                  height: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: [
-                  'width',
-                  'height'
-                ]
+                $ref: '#/definitions/7'
               }
             ]
-          }
-        },
-        required: [
-          'name',
-          'favouriteShape'
-        ],
-        definitions: {
-          3: {
+          },
+          '4': {
+            type: 'object',
+            properties: {
+              relatedShape: {
+                $ref: '#/definitions/5'
+              },
+              radius: {
+                $ref: '#/definitions/6'
+              }
+            },
+            required: ['radius']
+          },
+          '5': {
             anyOf: [
               {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
-                  },
-                  radius: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: [
-                  'radius'
-                ]
+                type: 'null'
               },
               {
-                type: 'object',
-                properties: {
-                  relatedShape: {
-                    anyOf: [
-                      {
-                        type: 'null'
-                      },
-                      {
-                        $ref: '#/definitions/3'
-                      }
-                    ]
-                  },
-                  width: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  },
-                  height: {
-                    type: 'number',
-                    minimum: 0,
-                    exclusiveMinimum: true
-                  }
-                },
-                required: [
-                  'width',
-                  'height'
-                ]
+                $ref: '#/definitions/3'
               }
             ]
+          },
+          '6': {
+            type: 'number',
+            minimum: 0,
+            exclusiveMinimum: true
+          },
+          '7': {
+            type: 'object',
+            properties: {
+              relatedShape: {
+                $ref: '#/definitions/5'
+              },
+              width: {
+                $ref: '#/definitions/6'
+              },
+              height: {
+                $ref: '#/definitions/6'
+              }
+            },
+            required: ['width', 'height']
           }
         }
       }
@@ -444,30 +396,29 @@ export default (should, M, fixtures, {Ajv}) => () => {
   })
 
   describe('Based on value only', () => {
-    const { number, stringMap, list } = M.metadata()
+    const {number, stringMap, list} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor (props) {
+      constructor(props) {
         super(NumberCollection, props)
       }
 
-      getNumbers () {
+      getNumbers() {
         const collection = this.collection()
 
-        return (collection[M.symbols.typeSymbol]() === M.List)
+        return collection[M.symbols.typeSymbol]() === M.List
           ? [...collection]
           : [...collection[M.symbols.innerOrigSymbol]().values()]
       }
 
-      sum () {
+      sum() {
         return this.getNumbers().reduce((acc, x) => acc + x, 0)
       }
 
-      static innerTypes () {
+      static innerTypes() {
         return Object.freeze({
-          collection: v => Array.isArray(v.collection)
-            ? list(number())
-            : stringMap(number())
+          collection: v =>
+            Array.isArray(v.collection) ? list(number()) : stringMap(number())
         })
       }
     }
@@ -477,8 +428,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: {a: 10, b: 25, c: 4000}
       })
 
-      should(col1.sum())
-        .be.exactly(4035)
+      should(col1.sum()).be.exactly(4035)
     })
 
     it('should revive polymorphic JSON (2)', () => {
@@ -486,8 +436,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         collection: [1, 2, 3, 4, 3]
       })
 
-      should(col2.sum())
-        .be.exactly(13)
+      should(col2.sum()).be.exactly(13)
     })
   })
 }

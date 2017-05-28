@@ -20,7 +20,7 @@ Here is how `Animal` would look like:
 
 ```js
 const M = require('modelico') // window.Modelico in the browser
-const { string } = M.metadata()
+const {string} = M.metadata()
 
 class Animal extends M.Base {
   constructor (props) {
@@ -39,6 +39,25 @@ class Animal extends M.Base {
     return Object.freeze({
       name: string()
     })
+  }
+}
+```
+
+A convenient way to declare the inner types and have access to the metadata
+functions is to extend from `M.createModel(...)`:
+
+```js
+const M = require('modelico')
+
+class Animal extends M.createModel(m => ({
+  name: m.string()
+})) {
+  constructor (props) {
+    super(Animal, props)
+  }
+
+  speak () {
+    // same as above
   }
 }
 ```

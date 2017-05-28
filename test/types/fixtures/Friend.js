@@ -1,14 +1,14 @@
 /* eslint-env mocha */
 
 export default M => {
-  const { _, string, maybe } = M.metadata()
+  const {_, string, maybe} = M.metadata()
 
   class Friend extends M.Base {
-    constructor (props) {
+    constructor(props) {
       super(Friend, props)
     }
 
-    static innerTypes () {
+    static innerTypes() {
       return Object.freeze({
         name: string(),
         bestFriend: maybe(_(Friend))
@@ -18,7 +18,7 @@ export default M => {
 
   Friend.EMPTY = new Friend({
     name: '',
-    bestFriend: M.Maybe.EMPTY
+    bestFriend: M.Nothing
   })
 
   return Object.freeze(Friend)
