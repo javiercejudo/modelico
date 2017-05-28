@@ -2,6 +2,7 @@
 .*/node_modules/config-chain/.*
 .*/node_modules/read-package-tree/.*
 .*/node_modules/npm/test/fixtures/.*
+.*/_book/.*
 
 [include]
 

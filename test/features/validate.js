@@ -4,10 +4,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
   it('only works with Modelico instances', () => {
     const {withDefault, number} = M.ajvMetadata(Ajv())
 
-    const res = JSON.parse(
-      'null',
-      withDefault(number({}, {minimum: 5}), 1).reviver
-    )
+    const res = JSON.parse('null', withDefault(number({minimum: 5}), 1).reviver)
 
     res.should.be.exactly(1)
 

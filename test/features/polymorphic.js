@@ -143,11 +143,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
     const {_, base, ajvMeta, number} = M.ajvMetadata(ajv)
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
-
-    const greaterThanZero = number({
-      minimum: 0,
-      exclusiveMinimum: true
-    })
+    const greaterThanZero = number({exclusiveMinimum: 0})
 
     const reviver = (k, v) => {
       if (k !== '') {
@@ -368,8 +364,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
           },
           '6': {
             type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
+            exclusiveMinimum: 0
           },
           '7': {
             type: 'object',

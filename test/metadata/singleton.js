@@ -1,6 +1,27 @@
 /* eslint-env mocha */
 
 export default (should, M, {Person}, {Ajv}) => () => {
+  describe('M.util.mem', () => {
+    const state = {counter: 0}
+
+    const fn = M.util.mem(n => {
+      state.counter += n
+      return state.counter
+    }, () => new Map())
+
+    fn(2).should.be.exactly(2)
+    fn(1).should.be.exactly(3)
+    fn(2).should.be.exactly(2)
+    fn(1).should.be.exactly(3)
+    fn(5).should.be.exactly(8)
+    fn(1).should.be.exactly(3)
+
+    // incidentally, any memoised function with M.util.mem can bypass the
+    // cache by passing 2 or more
+    fn(1, {anyOtherArg: true}).should.be.exactly(9)
+    fn(1, undefined).should.be.exactly(10)
+  })
+
   describe('normal metadata', () => {
     const m = M.metadata()
 

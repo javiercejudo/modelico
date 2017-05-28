@@ -28,10 +28,7 @@ export default (
       return Object.freeze({
         base: _enum(Currency),
         date: _(LocalDate),
-        rates: enumMap(
-          _enum(Currency),
-          number({minimum: 0, exclusiveMinimum: true})
-        )
+        rates: enumMap(_enum(Currency), number({exclusiveMinimum: 0}))
       })
     }
   }

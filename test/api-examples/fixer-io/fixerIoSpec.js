@@ -147,8 +147,7 @@ export default (should, M, {fixerIoFactory}, {Ajv}) => () => {
         },
         '5': {
           type: 'number',
-          minimum: 0,
-          exclusiveMinimum: true
+          exclusiveMinimum: 0
         }
       }
     }

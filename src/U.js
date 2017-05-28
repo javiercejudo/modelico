@@ -82,7 +82,7 @@ export const formatAjvError = (
     .concat(ajv.errors.map(error => error.message))
     .join('\n')
 
-const memCacheRegistry = new WeakMap()
+let memCacheRegistry = new WeakMap()
 const memDefaultCacheFn = () => new WeakMap()
 export const mem = (f: Function, cacheFn: Function = memDefaultCacheFn) => (
   a: mixed,
@@ -105,3 +105,8 @@ export const mem = (f: Function, cacheFn: Function = memDefaultCacheFn) => (
 
   return cache.get(key)
 }
+
+// mem.cache = () => memCacheRegistry
+// mem.clear = () => {
+//   memCacheRegistry = new WeakMap()
+// }

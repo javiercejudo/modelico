@@ -1,13 +1,6 @@
 // @flow
 
-import {
-  always,
-  reviverOrAsIs,
-  equals,
-  haveDifferentTypes,
-  isFunction,
-  mem
-} from './U'
+import {reviverOrAsIs, equals, haveDifferentTypes, isFunction, mem} from './U'
 
 type Path = Array<string | number>
 type BaseListMetadata = Object | Array<Object>
@@ -35,9 +28,7 @@ const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
   const itemMetadataGetter = isTuple
     ? i =>
         isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
-    : isFunction(itemMetadata)
-        ? always(itemMetadata(v, path))
-        : always(itemMetadata)
+    : isFunction(itemMetadata) ? _ => itemMetadata(v, path) : _ => itemMetadata
 
   const revive = (x, i) =>
     reviverOrAsIs(itemMetadataGetter(i))('', x, path.concat(i))

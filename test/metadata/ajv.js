@@ -35,13 +35,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
         return Object.freeze({
           name: withDefault(string({minLength: 1, maxLength: 25}), 'unknown'),
           dimensions: maybe(
-            list(
-              number({
-                minimum: 0,
-                exclusiveMinimum: true
-              }),
-              {minItems: 3, maxItems: 3}
-            )
+            list(number({exclusiveMinimum: 0}), {minItems: 3, maxItems: 3})
           )
         })
       }
@@ -158,8 +152,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           },
           '6': {
             type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
+            exclusiveMinimum: 0
           }
         }
       })
@@ -671,13 +664,10 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
         static innerTypes() {
           return Object.freeze({
             name: withDefault(string({minLength: 1, maxLength: 25}), 'unknown'),
-            dimensions: list(
-              number({
-                minimum: 0,
-                exclusiveMinimum: true
-              }),
-              {minItems: 3, maxItems: 3}
-            )
+            dimensions: list(number({exclusiveMinimum: 0}), {
+              minItems: 3,
+              maxItems: 3
+            })
           })
         }
       }
@@ -757,8 +747,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
           },
           '7': {
             type: 'number',
-            minimum: 0,
-            exclusiveMinimum: true
+            exclusiveMinimum: 0
           }
         }
       })
