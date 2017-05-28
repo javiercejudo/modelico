@@ -1,5 +1,4 @@
 import { List, Map as Map$1, OrderedMap, OrderedSet, Set as Set$1 } from 'immutable';
-import * as Immutable from 'immutable';
 
 var version = "23.0.0";
 

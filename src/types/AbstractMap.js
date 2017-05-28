@@ -1,4 +1,4 @@
-import * as Immutable from 'immutable'
+import {OrderedMap, Map as ImmutableMap} from 'immutable'
 
 import {always, isNothing, haveDifferentTypes, identity, mem} from '../U'
 import {typeSymbol, innerOrigSymbol} from '../symbols'
@@ -59,7 +59,7 @@ class AbstractMap extends Base {
       return EMPTY
     }
 
-    const innerMap = Immutable.OrderedMap(innerMapOrig)
+    const innerMap = OrderedMap(innerMapOrig)
 
     this[innerOrigSymbol] = always(innerMap)
     this.inner = always(innerMap)
@@ -102,7 +102,7 @@ class AbstractMap extends Base {
       return false
     }
 
-    const transform = asUnordered ? Immutable.Map : identity
+    const transform = asUnordered ? ImmutableMap : identity
 
     return transform(this.inner()).equals(transform(other.inner()))
   }

@@ -1,4 +1,4 @@
-import * as Immutable from 'immutable'
+import {OrderedSet} from 'immutable'
 
 import {always, isNothing, unsupported} from '../U'
 import {iterableMetadata, iterableEquals} from '../iterableHelpers'
@@ -19,7 +19,7 @@ class ModelicoSet extends Base {
       return EMPTY_SET
     }
 
-    const innerSet = Immutable.OrderedSet(innerSetOrig)
+    const innerSet = OrderedSet(innerSetOrig)
 
     this[innerOrigSymbol] = always(innerSet)
     this.inner = always(innerSet)

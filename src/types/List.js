@@ -1,4 +1,4 @@
-import * as Immutable from 'immutable'
+import {List as ImmutableList} from 'immutable'
 
 import {always, isNothing} from '../U'
 import {iterableMetadata, iterableEquals} from '../iterableHelpers'
@@ -20,7 +20,7 @@ class List extends Base {
     }
 
     Object.freeze(innerListOrig)
-    const innerList = Immutable.List(innerListOrig)
+    const innerList = ImmutableList(innerListOrig)
 
     this.inner = always(innerList)
     this[innerOrigSymbol] = this.inner

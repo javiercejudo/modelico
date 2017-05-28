@@ -7,7 +7,7 @@
 		global.Modelico = exports;
 		exports.noConflict = function() { global.Modelico = current; return exports; };
 	})();
-}(this, (function (Immutable) { 'use strict';
+}(this, (function (immutable) { 'use strict';
 
 var version = "23.0.0";
 
@@ -838,7 +838,7 @@ var AbstractMap = function (_Base) {
       return _ret = EMPTY, possibleConstructorReturn(_this, _ret);
     }
 
-    var innerMap = Immutable.OrderedMap(innerMapOrig);
+    var innerMap = immutable.OrderedMap(innerMapOrig);
 
     _this[innerOrigSymbol] = always(innerMap);
     _this.inner = always(innerMap);
@@ -893,7 +893,7 @@ var AbstractMap = function (_Base) {
         return false;
       }
 
-      var transform = asUnordered ? Immutable.Map : identity;
+      var transform = asUnordered ? immutable.Map : identity;
 
       return transform(this.inner()).equals(transform(other.inner()));
     }
@@ -1435,7 +1435,7 @@ var iterableEquals = function iterableEquals(thisArg, other) {
     return false;
   }
 
-  var transform = asUnordered ? Immutable.Set : identity;
+  var transform = asUnordered ? immutable.Set : identity;
 
   return transform(thisArg.inner()).equals(transform(other.inner()));
 };
@@ -1462,7 +1462,7 @@ var List$1 = function (_Base) {
     }
 
     Object.freeze(innerListOrig);
-    var innerList = Immutable.List(innerListOrig);
+    var innerList = immutable.List(innerListOrig);
 
     _this.inner = always(innerList);
     _this[innerOrigSymbol] = _this.inner;
@@ -1592,7 +1592,7 @@ var ModelicoSet = function (_Base) {
       return _ret = EMPTY_SET, possibleConstructorReturn(_this, _ret);
     }
 
-    var innerSet = Immutable.OrderedSet(innerSetOrig);
+    var innerSet = immutable.OrderedSet(innerSetOrig);
 
     _this[innerOrigSymbol] = always(innerSet);
     _this.inner = always(innerSet);

@@ -1,6 +1,6 @@
 // @flow
 
-import * as Immutable from 'immutable'
+import {Set as ImmutableSet} from 'immutable'
 
 import {
   always,
@@ -72,7 +72,7 @@ export const iterableEquals = (
     return false
   }
 
-  const transform: any = asUnordered ? Immutable.Set : identity
+  const transform: any = asUnordered ? ImmutableSet : identity
 
   return transform(thisArg.inner()).equals(transform(other.inner()))
 }
