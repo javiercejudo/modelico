@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/should.js/11.1.2/should.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.20.0/polyfill.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.1/immutable.js"></script>
+  <script src="https://unpkg.com/immutable-devtools@0.0.7/dist/index.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/4.11.2/ajv.bundle.js"></script>
 
   <script src="../../dist/modelico.js"></script>
@@ -37,6 +38,8 @@
       modelicoCustomFormatter(Modelico),
       modelicoCustomFormatter(ModelicoMin)
     )
+
+    immutableDevTools(Immutable)
 
     mocha.setup('bdd')
 
