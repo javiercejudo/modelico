@@ -40,7 +40,7 @@ class Base {
       if (isSomething(valueCandidate)) {
         value = valueCandidate
       } else if (defaultCandidate !== undefined) {
-        value = innerTypes[key].reviver('', defaultCandidate)
+        value = defaultCandidate
         defaults[key] = value
       } else {
         throw TypeError(`no value for key "${key}"`)

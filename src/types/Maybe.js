@@ -34,7 +34,7 @@ const metadata = mem(itemMetadata =>
     type: Maybe,
     subtypes: [itemMetadata],
     reviver: reviverFactory(itemMetadata),
-    default: null
+    default: new Nothing()
   })
 )
 

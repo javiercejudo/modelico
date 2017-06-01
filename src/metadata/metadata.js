@@ -49,7 +49,7 @@ const withDefaultImpl = (metadata, def) => {
 
   return Object.freeze(
     Object.assign({}, metadata, {
-      default: JSON.parse(JSON.stringify(def)),
+      default: def,
       reviver
     })
   )

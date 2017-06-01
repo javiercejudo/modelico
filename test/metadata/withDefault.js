@@ -44,7 +44,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       .should.be.exactly('"Lazarillo de Tormes" by anonymous')
   })
 
-  it('should use the metadata to coerce the value if necessary', () => {
+  it('should take the default value as it is, even if it would not validate', () => {
     class CountryCallingCode
       extends M.createModel(m => ({
         code: withDefault(m.number(), '34')
@@ -60,7 +60,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
     const spain = M.fromJS(CountryCallingCode, {})
 
-    spain.code().should.be.exactly(34)
+    spain.code().should.be.exactly('34')
   })
 
   it('should have a proper reviver', () => {

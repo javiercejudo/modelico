@@ -19,7 +19,7 @@ const enhanceSchemaWithDefault = (metadata: Object, schema: Object): Object => {
     return schema
   }
 
-  const def = {default: metadata.default}
+  const def = {default: JSON.parse(JSON.stringify(metadata.default))}
 
   if (schema === emptyObject) {
     return Object.assign({}, {type: emptyObject}, def)
