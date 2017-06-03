@@ -82,31 +82,41 @@ export const formatAjvError = (
     .concat(ajv.errors.map(error => error.message))
     .join('\n')
 
-let memCacheRegistry = new WeakMap()
 const memDefaultCacheFn = () => new WeakMap()
-export const mem = (f: Function, cacheFn: Function = memDefaultCacheFn) => (
-  a: mixed,
-  ...args: Array<mixed>
+export const memFactory = (
+  memCacheRegistry: WeakMap<Function, any> = new WeakMap()
 ) => {
-  if (args.length > 0) {
-    return f(a, ...args)
+  const mem = (f: Function, cacheFn: Function = memDefaultCacheFn) => (
+    a: mixed,
+    ...args: Array<mixed>
+  ) => {
+    if (args.length > 0) {
+      return f(a, ...args)
+    }
+
+    if (!memCacheRegistry.has(f)) {
+      memCacheRegistry.set(f, cacheFn())
+    }
+
+    const cache = memCacheRegistry.get(f) || cacheFn()
+    const key = a === undefined ? emptyObject : a
+
+    if (!cache.has(key)) {
+      cache.set(key, f(a, ...args))
+    }
+
+    return cache.get(key)
   }
 
-  if (!memCacheRegistry.has(f)) {
-    memCacheRegistry.set(f, cacheFn())
+  mem.cache = () => memCacheRegistry
+
+  mem.clear = () => {
+    memCacheRegistry = new WeakMap()
+
+    return mem
   }
 
-  const cache = memCacheRegistry.get(f) || cacheFn()
-  const key = a === undefined ? emptyObject : a
-
-  if (!cache.has(key)) {
-    cache.set(key, f(a, ...args))
-  }
-
-  return cache.get(key)
+  return mem
 }
 
-// mem.cache = () => memCacheRegistry
-// mem.clear = () => {
-//   memCacheRegistry = new WeakMap()
-// }
+export const mem = memFactory()

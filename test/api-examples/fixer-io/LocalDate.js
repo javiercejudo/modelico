@@ -1,5 +1,5 @@
 export default ({M, Ajv, validationEnabled, ajvOptions}) => {
-  const {base, ajvMeta} = M.ajvMetadata(
+  const {base, meta} = M.ajvMetadata(
     validationEnabled ? Ajv(ajvOptions) : undefined
   )
 
@@ -37,7 +37,7 @@ export default ({M, Ajv, validationEnabled, ajvOptions}) => {
       const baseMetadata = Object.assign({}, base(LocalDate), {reviver})
 
       // baseMetadata as a function for testing purposes
-      return ajvMeta(() => baseMetadata, {
+      return meta(() => baseMetadata, {
         type: 'string',
         pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
       })
