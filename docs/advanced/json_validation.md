@@ -37,7 +37,7 @@ class Animal extends M.Base {
     return Object.freeze({
       name: string({minLength: 1, maxLength: 25}),
       dimensions: list(
-        number({minimum: 0, exclusiveMinimum: true}),
+        number({exclusiveMinimum: 0}),
         {minItems: 3, maxItems: 3}
       )
     })

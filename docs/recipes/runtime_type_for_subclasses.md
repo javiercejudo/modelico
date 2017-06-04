@@ -38,8 +38,7 @@ const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
 // not only save unnecessary processing, but our generated JSON schema will
 // also be more compact.
 const greaterThanZero = number({
-  minimum: 0,
-  exclusiveMinimum: true
+  exclusiveMinimum: 0
 })
 
 const reviver = (k, v) => {
@@ -266,8 +265,7 @@ yields:
     },
     '6': {
       type: 'number',
-      minimum: 0,
-      exclusiveMinimum: true
+      exclusiveMinimum: 0
     },
     '7': {
       type: 'object',
