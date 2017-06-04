@@ -47,6 +47,7 @@ import regionIncompatibleNameKeyFactory
 import fixerIoFactory from './api-examples/fixer-io/index'
 import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'
 
+import jsonSchemaMetadata from './metadata/jsonSchema'
 import ajvMetadata from './metadata/ajv'
 import baseMetadata from './metadata/base'
 import withDefaultMetadata from './metadata/withDefault'
@@ -131,6 +132,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
 
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
+  describe('jsonSchemaMetadata', jsonSchemaMetadata(...deps))
   describe('ajvMetadata', ajvMetadata(U, ...deps))
   describe('base metadata', baseMetadata(...deps))
   describe('withDefault metadata', withDefaultMetadata(...deps))

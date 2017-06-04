@@ -1,4 +1,4 @@
-/* global modelicoSpec, Should, Modelico, Ajv */
+/* global modelicoSpec, Should, Modelico, Ajv, isMyJsonValid */
 /* eslint-env mocha */
 
 'use strict'
@@ -12,7 +12,8 @@ describe('Modelico', function() {
       Should: Should,
       Modelico: Modelico,
       extensions: {
-        Ajv: Ajv
+        Ajv: Ajv,
+        isMyJsonValid: isMyJsonValid
       }
     })
   )
@@ -23,7 +24,8 @@ describe('Modelico', function() {
       Should: Should,
       Modelico: ModelicoMin,
       extensions: {
-        Ajv: Ajv
+        Ajv: Ajv,
+        isMyJsonValid: isMyJsonValid
       }
     })
   )
