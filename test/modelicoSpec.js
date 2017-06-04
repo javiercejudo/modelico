@@ -132,7 +132,7 @@ export default ({Should, Modelico: M, extensions}) => () => {
 
   describe('asIs', asIs(U, ...deps))
   describe('setIn', setIn(U, ...deps))
-  describe('jsonSchemaMetadata', jsonSchemaMetadata(...deps))
+  describe('jsonSchemaMetadata (other than Ajv)', jsonSchemaMetadata(...deps))
   describe('ajvMetadata', ajvMetadata(U, ...deps))
   describe('base metadata', baseMetadata(...deps))
   describe('withDefault metadata', withDefaultMetadata(...deps))

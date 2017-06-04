@@ -14,6 +14,7 @@ module.exports = function(config) {
       'node_modules/should/should.js',
       'node_modules/babel-polyfill/dist/polyfill.js',
       'node_modules/ajv/dist/ajv.bundle.js',
+      'node_modules/tv4/tv4.js',
       'lib/is-my-json-valid-2.16.0.js',
       'dist/modelico.js',
       'dist/modelico.min.js',

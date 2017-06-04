@@ -1,4 +1,4 @@
-/* global modelicoSpec, Should, Modelico, Ajv, isMyJsonValid */
+/* global modelicoSpec, Should, Modelico, Ajv, isMyJsonValid, tv4 */
 /* eslint-env mocha */
 
 'use strict'
@@ -13,7 +13,8 @@ describe('Modelico', function() {
       Modelico: Modelico,
       extensions: {
         Ajv: Ajv,
-        isMyJsonValid: isMyJsonValid
+        isMyJsonValid: isMyJsonValid,
+        tv4: tv4
       }
     })
   )
@@ -25,7 +26,8 @@ describe('Modelico', function() {
       Modelico: ModelicoMin,
       extensions: {
         Ajv: Ajv,
-        isMyJsonValid: isMyJsonValid
+        isMyJsonValid: isMyJsonValid,
+        tv4: tv4
       }
     })
   )

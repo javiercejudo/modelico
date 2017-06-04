@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/should.js/11.2.1/should.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/5.1.5/ajv.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tv4/1.3.0/tv4.js"></script>
   <script src="../../lib/is-my-json-valid-2.16.0.js"></script>
 
   <script src="../../dist/modelico.js"></script>
@@ -46,7 +47,8 @@
         Modelico: Modelico,
         extensions: {
           Ajv: Ajv,
-          isMyJsonValid: isMyJsonValid
+          isMyJsonValid: isMyJsonValid,
+          tv4: tv4
         }
       }))
       describe('Modélico Min', modelicoSpec({
@@ -54,7 +56,8 @@
         Modelico: ModelicoMin,
         extensions: {
           Ajv: Ajv,
-          isMyJsonValid: isMyJsonValid
+          isMyJsonValid: isMyJsonValid,
+          tv4: tv4
         }
       }))
     })

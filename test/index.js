@@ -6,6 +6,7 @@
 var Should = require('should')
 var Ajv = require('ajv')
 var isMyJsonValid = require('is-my-json-valid')
+var tv4 = require('tv4')
 
 var modelicoSpec = require('../dist/modelico-spec.js')
 var Modelico = require('../dist/modelico.js')
@@ -17,7 +18,8 @@ describe(
     Modelico: Modelico,
     extensions: {
       Ajv: Ajv,
-      isMyJsonValid: isMyJsonValid
+      isMyJsonValid: isMyJsonValid,
+      tv4: tv4
     }
   })
 )
