@@ -4,7 +4,7 @@ set -e
 
 BROWSERS=PhantomJS
 
-if [[ "$TRAVIS_NODE_VERSION" = "6" && "$SAUCE_ACCESS_KEY" && "$TRAVIS_PULL_REQUEST" != "false" ]]; then
+if [[ "$TRAVIS_NODE_VERSION" = "8" && "$SAUCE_ACCESS_KEY" && "$TRAVIS_PULL_REQUEST" != "false" ]]; then
   BROWSERS=$SL_BROWSERS
 fi
 

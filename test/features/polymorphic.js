@@ -140,7 +140,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   describe('Based on runtime type field', () => {
     const ajv = Ajv()
-    const {_, base, ajvMeta, number} = M.ajvMetadata(ajv)
+    const {_, base, meta, number} = M.ajvMetadata(ajv)
 
     const ShapeType = M.Enum.fromArray(['CIRCLE', 'DIAMOND'])
     const greaterThanZero = number({exclusiveMinimum: 0})
@@ -198,7 +198,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
       static metadata() {
         const baseMetadata = Object.assign({}, base(Shape), {reviver})
 
-        return ajvMeta(baseMetadata, {}, {}, () => ({
+        return meta(baseMetadata, {}, {}, () => ({
           anyOf: [Circle, Diamond].map(x => M.getSchema(base(x), false))
         }))
       }

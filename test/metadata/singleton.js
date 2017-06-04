@@ -1,27 +1,6 @@
 /* eslint-env mocha */
 
 export default (should, M, {Person}, {Ajv}) => () => {
-  describe('M.util.mem', () => {
-    const state = {counter: 0}
-
-    const fn = M.util.mem(n => {
-      state.counter += n
-      return state.counter
-    }, () => new Map())
-
-    fn(2).should.be.exactly(2)
-    fn(1).should.be.exactly(3)
-    fn(2).should.be.exactly(2)
-    fn(1).should.be.exactly(3)
-    fn(5).should.be.exactly(8)
-    fn(1).should.be.exactly(3)
-
-    // incidentally, any memoised function with M.util.mem can bypass the
-    // cache by passing 2 or more
-    fn(1, {anyOtherArg: true}).should.be.exactly(9)
-    fn(1, undefined).should.be.exactly(10)
-  })
-
   describe('normal metadata', () => {
     const m = M.metadata()
 
@@ -270,6 +249,55 @@ export default (should, M, {Person}, {Ajv}) => () => {
       m
         .withDefault(m.number(nonNegative), 0, schema)
         .should.be.exactly(m.withDefault(m.number(nonNegative), 0, schema))
+    })
+  })
+
+  describe('M.util.mem', () => {
+    it('memoises nullary & unary functions', () => {
+      const state = {counter: 0}
+
+      const fn = M.util.mem(n => {
+        state.counter += n
+        return state.counter
+      }, () => new Map())
+
+      fn(2).should.be.exactly(2)
+      fn(1).should.be.exactly(3)
+      fn(2).should.be.exactly(2)
+      fn(1).should.be.exactly(3)
+      fn(5).should.be.exactly(8)
+      fn(1).should.be.exactly(3)
+
+      // incidentally, any memoised function with M.util.mem can bypass the
+      // cache by passing 2 or more
+      fn(1, {anyOtherArg: true}).should.be.exactly(9)
+      fn(1, undefined).should.be.exactly(10)
+    })
+
+    it('exposes a way retrieve the cache and reset it', () => {
+      const mem = M.util.memFactory()
+      const state = {counter: 5}
+
+      const counter = n => {
+        state.counter += n
+        return state.counter
+      }
+
+      const fn = mem(counter, () => new Map())
+
+      fn(1).should.be.exactly(6)
+      fn(2).should.be.exactly(8)
+      fn(1).should.be.exactly(6)
+
+      const cacheRegistry = mem.cache()
+
+      cacheRegistry.has(counter).should.be.exactly(true)
+      const fnCache = cacheRegistry.get(counter)
+
+      fnCache.has(1).should.be.exactly(true)
+      fnCache.has(4).should.be.exactly(false)
+
+      mem.clear().cache().has(counter).should.be.exactly(false)
     })
   })
 }

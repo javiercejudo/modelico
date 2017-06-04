@@ -9,7 +9,8 @@ import {
   isNothing,
   partial,
   pipe,
-  mem
+  mem,
+  memFactory
 } from './U'
 
 import getSchema from './getSchema'
@@ -17,6 +18,7 @@ import validate from './validate'
 import withValidation from './withValidation'
 import withCache from './withCache'
 import metadata from './metadata/metadata'
+import jsonSchemaMetadata from './metadata/jsonSchemaMetadata'
 import ajvMetadata from './metadata/ajvMetadata'
 
 import Base from './types/Base'
@@ -147,6 +149,7 @@ export default {
     ajvGenericsFromJS(_, Type, schema, innerMetadata, JSON.parse(json)),
 
   metadata,
+  jsonSchemaMetadata,
   ajvMetadata,
   getSchema,
   validate,
@@ -168,6 +171,7 @@ export default {
     isNothing,
     partial,
     pipe,
-    mem
+    mem,
+    memFactory
   }
 }

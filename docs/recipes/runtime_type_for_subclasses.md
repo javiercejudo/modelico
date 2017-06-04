@@ -82,17 +82,17 @@ class Shape extends M.Base {
     return Object.freeze({
       // notice the self-reference here and how the subclasses are
       // going to extend Shape's inner types
-      relatedShape: ajvMaybe(_(Shape))
+      relatedShape: maybe(_(Shape))
     })
   }
 
   static metadata () {
-    // We are going to use ajvMeta so that M.getSchema can give us a more
+    // We are going to use meta so that M.getSchema can give us a more
     // robust JSON schema. If you don't need that, you could return the
     // baseMetadata directly.
     const baseMetadata = Object.assign({}, base(Shape), {reviver})
 
-    return ajvMeta(baseMetadata, {}, {}, () => ({
+    return meta(baseMetadata, {}, {}, () => ({
       anyOf: [
         Circle,
         Diamond
