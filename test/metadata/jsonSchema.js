@@ -4,10 +4,10 @@ export default (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
     let m
 
     beforeEach(() => {
-      const validate = (schema, value) => {
+      const validate = (schema, value, path) => {
         const implValidate = isMyJsonValid(schema)
 
-        const formatError = path =>
+        const formatError = () =>
           [
             `Invalid JSON at "${path.join(' -> ')}". The value`,
             JSON.stringify(value),
@@ -35,10 +35,10 @@ export default (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
     let m
 
     beforeEach(() => {
-      const validate = (schema, value) => {
+      const validate = (schema, value, path) => {
         const result = tv4.validateResult(value, schema)
 
-        const formatError = path =>
+        const formatError = () =>
           [
             `Invalid JSON at "${path.join(' -> ')}" for the value`,
             JSON.stringify(value),

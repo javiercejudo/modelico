@@ -1,13 +1,13 @@
-import {T, formatAjvError, mem, partial} from '../U'
+import {formatAjvError, mem, partial} from '../U'
 import jsonSchemaMetadata from './jsonSchemaMetadata'
 
-const ajvMetadata = mem((ajv = {validate: T}) => {
-  const validate = (schema, value) => [
+const ajvMetadata = mem(ajv => {
+  const validate = (schema, value, path) => [
     ajv.validate(schema, value),
-    partial(formatAjvError, ajv, schema, value)
+    partial(formatAjvError, ajv, schema, value, path)
   ]
 
-  return jsonSchemaMetadata(validate)
+  return jsonSchemaMetadata(ajv === undefined ? undefined : validate)
 })
 
 export default ajvMetadata

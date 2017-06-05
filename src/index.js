@@ -2,7 +2,6 @@ import {version, author, homepage, license} from '../package.json'
 import * as symbols from './symbols'
 
 import {
-  T,
   always,
   formatAjvError,
   identity,
@@ -164,7 +163,6 @@ export default {
   proxyDate: partial(proxyFactory, dateNonMutators, dateMutators, identity),
 
   util: {
-    T,
     always,
     formatAjvError,
     identity,

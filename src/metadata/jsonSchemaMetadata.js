@@ -51,10 +51,10 @@ const jsonSchemaMetadata = validate => {
 
     const validationResult = schema === emptyObject
       ? triviallyValidResult
-      : validate(schema, valueTransformer(value))
+      : validate(schema, valueTransformer(value), path)
 
     if (!validationResult[0]) {
-      throw TypeError(validationResult[1](path))
+      throw TypeError(validationResult[1]())
     }
 
     const resolvedMetadata = isFunction(metadata)

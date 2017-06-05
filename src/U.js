@@ -6,7 +6,6 @@ const pipe2 = (f: Function, g: Function) => (...args: Array<mixed>) =>
 
 const not = (x: boolean): boolean => !x
 
-export const T = () => true
 export const identity = <T>(x: T): T => x
 
 export const pipe = (...fns: Array<Function>) =>
