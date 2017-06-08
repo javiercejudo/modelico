@@ -55,8 +55,8 @@ class ModelicoNumber extends Base {
     return Object.is(v, -0)
       ? '-0'
       : v === Infinity
-          ? 'Infinity'
-          : v === -Infinity ? '-Infinity' : Number.isNaN(v) ? 'NaN' : v
+        ? 'Infinity'
+        : v === -Infinity ? '-Infinity' : Number.isNaN(v) ? 'NaN' : v
   }
 
   equals(other) {

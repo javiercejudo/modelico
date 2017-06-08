@@ -4,16 +4,15 @@ export default (should, M, fixtures, {Ajv}) => () => {
   const {any, number, string, withDefault} = M.ajvMetadata(Ajv())
 
   it('should allow enhancing metadata to have default values', () => {
-    class Book
-      extends M.createModel(
-        {
-          title: string(),
-          author: withDefault(string(), 'anonymous')
-        },
-        {
-          stringTag: 'Book'
-        }
-      ) {
+    class Book extends M.createModel(
+      {
+        title: string(),
+        author: withDefault(string(), 'anonymous')
+      },
+      {
+        stringTag: 'Book'
+      }
+    ) {
       constructor(props) {
         super(Book, props)
       }
@@ -45,10 +44,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
   })
 
   it('should take the default value as it is, even if it would not validate', () => {
-    class CountryCallingCode
-      extends M.createModel(m => ({
-        code: withDefault(m.number(), '34')
-      })) {
+    class CountryCallingCode extends M.createModel(m => ({
+      code: withDefault(m.number(), '34')
+    })) {
       constructor(props) {
         super(CountryCallingCode, props)
       }

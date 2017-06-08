@@ -29,6 +29,8 @@ export default (
   const prevPath = path.slice(0, -1)
 
   throw TypeError(
-    `unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`
+    `unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(
+      ' -> '
+    )}"`
   )
 }

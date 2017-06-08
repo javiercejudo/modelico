@@ -401,7 +401,7 @@ export default (U, should, M, fixtures) => () => {
 
   describe('createSimpleModel', () => {
     it('should create a model without boilerplate', () => {
-      const Book = M.createSimpleModel(m => ({title: m.string()}), 'Book')
+      const Book = M.createSimpleModel('Book', m => ({title: m.string()}))
 
       const myBook = new Book({title: 'Some title'})
 
@@ -416,10 +416,9 @@ export default (U, should, M, fixtures) => () => {
 
   U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should use the metadata to coerce the value if necessary', () => {
-      class CountryCallingCode
-        extends M.createModel(() => ({
-          code: withDefault(number(), '34')
-        })) {
+      class CountryCallingCode extends M.createModel(() => ({
+        code: withDefault(number(), '34')
+      })) {
         constructor(props) {
           super(CountryCallingCode, props)
         }

@@ -24,20 +24,18 @@ const asyncMap = (fn, arr, {batchSize = arr.length} = {}) =>
 
 export default (should, M) => () => {
   it('should revive data asynchronously', () => {
-    class Book
-      extends M.createModel(m => ({
-        title: m.string(),
-        author: m.string()
-      })) {
+    class Book extends M.createModel(m => ({
+      title: m.string(),
+      author: m.string()
+    })) {
       constructor(props) {
         super(Book, props)
       }
     }
 
-    class Library
-      extends M.createModel(m => ({
-        catalogue: m.list(m._(Book))
-      })) {
+    class Library extends M.createModel(m => ({
+      catalogue: m.list(m._(Book))
+    })) {
       constructor(props) {
         super(Library, props)
       }

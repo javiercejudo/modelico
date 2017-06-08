@@ -106,7 +106,7 @@ const createAjvModel = (ajv, innerTypes, options = {}) => {
   return createModel(innerTypes, options)
 }
 
-const createSimpleModel = (innerTypes, name) =>
+const createSimpleModel = (name, innerTypes) =>
   createModel(innerTypes, {stringTag: name})
 
 export default {

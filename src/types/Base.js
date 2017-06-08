@@ -17,7 +17,8 @@ class Base {
   constructor(Type, fields = emptyObject, thisArg) {
     if (!isPlainObject(fields)) {
       throw TypeError(
-        `expected an object with fields for ${Type.displayName || Type.name} but got ${fields}`
+        `expected an object with fields for ${Type.displayName ||
+          Type.name} but got ${fields}`
       )
     }
 

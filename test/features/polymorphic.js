@@ -204,14 +204,13 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    class Circle
-      extends M.createAjvModel(
-        ajv,
-        Object.assign({}, Shape.innerTypes(), {
-          radius: greaterThanZero
-        }),
-        {base: Shape}
-      ) {
+    class Circle extends M.createAjvModel(
+      ajv,
+      Object.assign({}, Shape.innerTypes(), {
+        radius: greaterThanZero
+      }),
+      {base: Shape}
+    ) {
       constructor(props) {
         super(Circle, props)
       }
@@ -221,15 +220,14 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    class Diamond
-      extends M.createAjvModel(
-        ajv,
-        Object.assign({}, Shape.innerTypes(), {
-          width: greaterThanZero,
-          height: greaterThanZero
-        }),
-        {base: Shape}
-      ) {
+    class Diamond extends M.createAjvModel(
+      ajv,
+      Object.assign({}, Shape.innerTypes(), {
+        width: greaterThanZero,
+        height: greaterThanZero
+      }),
+      {base: Shape}
+    ) {
       constructor(props) {
         super(Diamond, props)
       }
@@ -239,13 +237,12 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    class Geometer
-      extends M.createAjvModel(ajv, m => ({
-        name: m.string({
-          minLength: 1
-        }),
-        favouriteShape: m._(Shape)
-      })) {
+    class Geometer extends M.createAjvModel(ajv, m => ({
+      name: m.string({
+        minLength: 1
+      }),
+      favouriteShape: m._(Shape)
+    })) {
       constructor(props) {
         super(Geometer, props)
       }

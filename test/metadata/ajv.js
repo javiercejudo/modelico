@@ -1137,7 +1137,9 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       const lowercase = M.withValidation(
         v => v.toLowerCase() === v,
         (v, path) =>
-          `string ${v} at "${path.join(' > ')}" should NOT have uppercase characters`
+          `string ${v} at "${path.join(
+            ' > '
+          )}" should NOT have uppercase characters`
       )
 
       const specialString = U.pipe(string, noNumbers, lowercase)

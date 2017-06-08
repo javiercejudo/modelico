@@ -41,8 +41,7 @@ import friendFactory from './types/fixtures/Friend'
 import cityFactory from './types/fixtures/nested/City'
 import countryFactory from './types/fixtures/nested/Country'
 import regionFactory from './types/fixtures/nested/Region'
-import regionIncompatibleNameKeyFactory
-  from './types/fixtures/nested/RegionIncompatibleNameKey'
+import regionIncompatibleNameKeyFactory from './types/fixtures/nested/RegionIncompatibleNameKey'
 
 import fixerIoFactory from './api-examples/fixer-io/index'
 import fixerIoSpec from './api-examples/fixer-io/fixerIoSpec'

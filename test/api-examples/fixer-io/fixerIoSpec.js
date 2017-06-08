@@ -62,7 +62,7 @@ export default (should, M, {fixerIoFactory}, {Ajv}) => () => {
     const fixerIoResult = M.fromJSON(FixerIoResult, json)
 
     fixerIoResult
-      .convert(GBP(), USD(), 7.20)
+      .convert(GBP(), USD(), 7.2)
       .toFixed(2)
       .should.be.exactly('8.85')
 
