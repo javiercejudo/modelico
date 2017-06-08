@@ -179,7 +179,7 @@ const jsonSchemaMetadata = validate => {
   )
 
   jscMetadata.asIs = (transformer, schema) => jscAsIs(transformer)(schema)
-  jscMetadata.any = schema => jscMetadata.asIs(identity, schema)
+  jscMetadata.any = mem(schema => jscMeta(any(), schema))
 
   jscMetadata.wrappedNumber = mem(schema => {
     const metadata = wrappedNumber()
