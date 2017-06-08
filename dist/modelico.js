@@ -15,7 +15,7 @@
 })(this, function() {
   'use strict'
 
-  var version = '24.0.0'
+  var version = '24.0.1'
 
   var author =
     'Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)'
@@ -765,7 +765,12 @@
           value = defaultCandidate
           defaults$$1[key] = value
         } else {
-          throw TypeError('no value for key "' + key + '"')
+          throw TypeError(
+            'no value for key "' +
+              key +
+              '" of ' +
+              (Type.displayName || Type.name)
+          )
         }
 
         thisArg[key] = always(value)
