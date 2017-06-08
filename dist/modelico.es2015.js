@@ -1,4 +1,4 @@
-var version = '24.0.1'
+var version = '24.0.2'
 
 var author =
   'Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)'
@@ -343,7 +343,13 @@ var asIs = mem((transformer = identity) =>
   })
 )
 
-var any = always(asIs(identity))
+var any = always(
+  Object.freeze({
+    type: identity,
+    reviver: asIsReviver(identity),
+    default: null
+  })
+)
 
 var anyOf = (conditionedMetas = [], enumField = 'type') => (v, path) => {
   if (conditionedMetas.length === 0) {
@@ -1774,7 +1780,7 @@ const jsonSchemaMetadata = validate => {
   )
 
   jscMetadata.asIs = (transformer, schema) => jscAsIs(transformer)(schema)
-  jscMetadata.any = schema => jscMetadata.asIs(identity, schema)
+  jscMetadata.any = mem(schema => jscMeta(any(), schema))
 
   jscMetadata.wrappedNumber = mem(schema => {
     const metadata = wrappedNumber()

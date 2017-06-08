@@ -15,7 +15,7 @@
 })(this, function() {
   'use strict'
 
-  var version = '24.0.1'
+  var version = '24.0.2'
 
   var author =
     'Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)'
@@ -601,7 +601,13 @@
     })
   })
 
-  var any = always(asIs(identity))
+  var any = always(
+    Object.freeze({
+      type: identity,
+      reviver: asIsReviver(identity),
+      default: null
+    })
+  )
 
   var anyOf = function() {
     var conditionedMetas = arguments.length > 0 && arguments[0] !== undefined
@@ -2734,9 +2740,9 @@
     jscMetadata.asIs = function(transformer, schema) {
       return jscAsIs(transformer)(schema)
     }
-    jscMetadata.any = function(schema) {
-      return jscMetadata.asIs(identity, schema)
-    }
+    jscMetadata.any = mem(function(schema) {
+      return jscMeta(any(), schema)
+    })
 
     jscMetadata.wrappedNumber = mem(function(schema) {
       var metadata = wrappedNumber()
