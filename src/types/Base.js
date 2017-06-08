@@ -44,7 +44,9 @@ class Base {
         value = defaultCandidate
         defaults[key] = value
       } else {
-        throw TypeError(`no value for key "${key}"`)
+        throw TypeError(
+          `no value for key "${key}" of ${Type.displayName || Type.name}`
+        )
       }
 
       thisArg[key] = always(value)
