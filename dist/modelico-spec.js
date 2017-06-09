@@ -1921,19 +1921,19 @@
           should(function() {
             return M.genericsFromJS(M.List, [string()], [null])
           }).throw(
-            /expected a value but got nothing \(null, undefined or NaN\)/
+            /expected a value at "0" but got nothing \(null, undefined or NaN\)/
           )
 
           should(function() {
             return M.genericsFromJS(M.List, [string()], [undefined])
           }).throw(
-            /expected a value but got nothing \(null, undefined or NaN\)/
+            /expected a value at "0" but got nothing \(null, undefined or NaN\)/
           )
 
           should(function() {
             return M.genericsFromJS(M.List, [string()], [NaN])
           }).throw(
-            /expected a value but got nothing \(null, undefined or NaN\)/
+            /expected a value at "0" but got nothing \(null, undefined or NaN\)/
           )
         })
       })
@@ -1963,13 +1963,9 @@
 
         it('should not support null (wrap with Maybe)', function() {
           should(function() {
-            return M.genericsFromJS(
-              M.List,
-              [[string(), number()]],
-              [undefined, NaN]
-            )
+            return M.genericsFromJS(M.List, [[string(), number()]], ['', NaN])
           }).throw(
-            /expected a value but got nothing \(null, undefined or NaN\)/
+            /expected a value at "1" but got nothing \(null, undefined or NaN\)/
           )
         })
 
@@ -2693,7 +2689,7 @@
           should(function() {
             return asIs(String).reviver('', null)
           }).throw(
-            /expected a value but got nothing \(null, undefined or NaN\)/
+            /expected a value at "" but got nothing \(null, undefined or NaN\)/
           )
 
           maybe(asIs(String))

@@ -1,4 +1,4 @@
-var version = '24.0.2'
+var version = '24.0.3'
 
 var author =
   'Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)'
@@ -27,16 +27,20 @@ const pipe = (...fns) => [...fns, identity].reduce(pipe2)
 
 const partial = (fn, ...args) => fn.bind(undefined, ...args)
 
-const asIsReviver = transform => (k, v) => transform(v)
+const asIsReviver = transform => (k, v, path = []) => transform(v, path)
 
 const always = x => () => x
 
 const isNothing = v => v == null || Number.isNaN(v)
 const isSomething = pipe2(isNothing, not)
 
-const assertSomethingIdentity = x => {
+const assertSomethingIdentity = (x, path = []) => {
   if (isNothing(x)) {
-    throw TypeError(`expected a value but got nothing (null, undefined or NaN)`)
+    throw TypeError(
+      `expected a value at "${path.join(
+        ' -> '
+      )}" but got nothing (null, undefined or NaN)`
+    )
   }
 
   return x
@@ -389,7 +393,7 @@ const plainObjectReviverFactory = (Type, k, v, prevPath) =>
       : metadataCandidate
 
     if (metadata) {
-      acc[field] = reviverOrAsIs(metadata)(k, v[field], path)
+      acc[field] = reviverOrAsIs(metadata)(k, v[field], path, Type)
     } else {
       acc[field] = v[field]
     }

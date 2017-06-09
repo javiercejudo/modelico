@@ -15,7 +15,7 @@
 })(this, function() {
   'use strict'
 
-  var version = '24.0.2'
+  var version = '24.0.3'
 
   var author =
     'Javier Cejudo <javier@javiercejudo.com> (http://www.javiercejudo.com)'
@@ -182,7 +182,10 @@
 
   var asIsReviver = function asIsReviver(transform) {
     return function(k, v) {
-      return transform(v)
+      var path = arguments.length > 2 && arguments[2] !== undefined
+        ? arguments[2]
+        : []
+      return transform(v, path)
     }
   }
 
@@ -198,9 +201,15 @@
   var isSomething = pipe2(isNothing, not)
 
   var assertSomethingIdentity = function assertSomethingIdentity(x) {
+    var path = arguments.length > 1 && arguments[1] !== undefined
+      ? arguments[1]
+      : []
+
     if (isNothing(x)) {
       throw TypeError(
-        'expected a value but got nothing (null, undefined or NaN)'
+        'expected a value at "' +
+          path.join(' -> ') +
+          '" but got nothing (null, undefined or NaN)'
       )
     }
 
@@ -662,7 +671,7 @@
         : metadataCandidate
 
       if (metadata) {
-        acc[field] = reviverOrAsIs(metadata)(k, v[field], path)
+        acc[field] = reviverOrAsIs(metadata)(k, v[field], path, Type)
       } else {
         acc[field] = v[field]
       }
