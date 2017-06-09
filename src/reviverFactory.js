@@ -21,7 +21,7 @@ const plainObjectReviverFactory = (
       : metadataCandidate
 
     if (metadata) {
-      acc[field] = reviverOrAsIs(metadata)(k, v[field], path, Type)
+      acc[field] = reviverOrAsIs(metadata)(k, v[field], path)
     } else {
       acc[field] = v[field]
     }
