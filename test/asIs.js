@@ -26,7 +26,7 @@ export default (U, should, M) => () => {
 
     it('should not support null (wrap with Maybe)', () => {
       should(() => asIs(String).reviver('', null)).throw(
-        /expected a value but got nothing \(null, undefined or NaN\)/
+        /expected a value at "" but got nothing \(null, undefined or NaN\)/
       )
 
       maybe(asIs(String))

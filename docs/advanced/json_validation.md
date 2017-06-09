@@ -103,9 +103,7 @@ const lowercase = M.withValidation(
   (v, path) => `string ${v} at "${path.join(' > ')}" is not all lower case`
 )
 
-// see pipe function at
-// https://gist.github.com/javiercejudo/98ab1f0742387e8aca0646adb325059f
-const stringWithoutNumbersAndLowerCase = pipe(
+const stringWithoutNumbersAndLowerCase = M.util.pipe(
   string,
   noNumbers,
   lowercase

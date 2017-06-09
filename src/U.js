@@ -14,17 +14,24 @@ export const pipe = (...fns: Array<Function>) =>
 export const partial = (fn: Function, ...args: Array<mixed>) =>
   fn.bind(undefined, ...args)
 
-export const asIsReviver = (transform: Function) => (k: string, v: mixed) =>
-  transform(v)
+export const asIsReviver = (transform: Function) => (
+  k: string,
+  v: mixed,
+  path: Array<any> = []
+) => transform(v, path)
 
 export const always = <T>(x: T) => (): T => x
 
 export const isNothing = (v: any): boolean => v == null || Number.isNaN(v)
 export const isSomething = pipe2(isNothing, not)
 
-export const assertSomethingIdentity = <T>(x: T): T => {
+export const assertSomethingIdentity = <T>(x: T, path: Array<any> = []): T => {
   if (isNothing(x)) {
-    throw TypeError(`expected a value but got nothing (null, undefined or NaN)`)
+    throw TypeError(
+      `expected a value at "${path.join(
+        ' -> '
+      )}" but got nothing (null, undefined or NaN)`
+    )
   }
 
   return x

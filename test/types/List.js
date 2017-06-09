@@ -198,15 +198,15 @@ export default (U, should, M, {Person}) => () => {
       )
 
       should(() => M.genericsFromJS(M.List, [string()], [null])).throw(
-        /expected a value but got nothing \(null, undefined or NaN\)/
+        /expected a value at "0" but got nothing \(null, undefined or NaN\)/
       )
 
       should(() => M.genericsFromJS(M.List, [string()], [undefined])).throw(
-        /expected a value but got nothing \(null, undefined or NaN\)/
+        /expected a value at "0" but got nothing \(null, undefined or NaN\)/
       )
 
       should(() => M.genericsFromJS(M.List, [string()], [NaN])).throw(
-        /expected a value but got nothing \(null, undefined or NaN\)/
+        /expected a value at "0" but got nothing \(null, undefined or NaN\)/
       )
     })
   })
@@ -234,8 +234,10 @@ export default (U, should, M, {Person}) => () => {
 
     it('should not support null (wrap with Maybe)', () => {
       should(() =>
-        M.genericsFromJS(M.List, [[string(), number()]], [undefined, NaN])
-      ).throw(/expected a value but got nothing \(null, undefined or NaN\)/)
+        M.genericsFromJS(M.List, [[string(), number()]], ['', NaN])
+      ).throw(
+        /expected a value at "1" but got nothing \(null, undefined or NaN\)/
+      )
     })
 
     it('should support missing maybes', () => {
