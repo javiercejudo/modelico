@@ -8,7 +8,7 @@ const reviverFactory = enumerators => (k, v, path = []) => {
   const enumerator = enumerators[v]
 
   if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator "${v}" at "${path.join(' -> ')}"`)
+    throw TypeError(`missing enumerator "${v}" at "${path.join(' → ')}"`)
   }
 
   return enumerator

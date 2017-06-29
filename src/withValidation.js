@@ -1,4 +1,4 @@
-const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' -> ')}"`
+const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' → ')}"`
 
 export default (validateFn, errorMsgFn = defaultErrorMsgFn) => metadata => {
   const reviver = (k, v, path = []) => {

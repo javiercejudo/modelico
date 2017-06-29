@@ -30,7 +30,7 @@ export default (
 
   throw TypeError(
     `unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(
-      ' -> '
+      ' → '
     )}"`
   )
 }

@@ -9,7 +9,7 @@ export default (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
 
         const formatError = () =>
           [
-            `Invalid JSON at "${path.join(' -> ')}". The value`,
+            `Invalid JSON at "${path.join(' → ')}". The value`,
             JSON.stringify(value),
             ...implValidate.errors.map(err => `${err.message}`)
           ].join('\n')
@@ -40,7 +40,7 @@ export default (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
 
         const formatError = () =>
           [
-            `Invalid JSON at "${path.join(' -> ')}" for the value`,
+            `Invalid JSON at "${path.join(' → ')}" for the value`,
             JSON.stringify(value),
             `Error: ${result.error.message}`
           ].join('\n')

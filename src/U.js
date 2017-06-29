@@ -29,7 +29,7 @@ export const assertSomethingIdentity = <T>(x: T, path: Array<any> = []): T => {
   if (isNothing(x)) {
     throw TypeError(
       `expected a value at "${path.join(
-        ' -> '
+        ' → '
       )}" but got nothing (null, undefined or NaN)`
     )
   }
@@ -75,7 +75,7 @@ export const formatAjvError = (
   path: Array<any> = []
 ) =>
   [
-    'Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n',
+    'Invalid JSON at "' + path.join(' → ') + '". According to the schema\n',
     JSON.stringify(schema, null, 2) + '\n',
     'the value (data path "' +
       ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) +
