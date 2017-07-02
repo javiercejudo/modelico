@@ -10,7 +10,7 @@ models.
 
 ## Installation
 
-    npm i modelico
+    npm install modelico
 
 To use it in the browser, grab the
 [minified](https://raw.githubusercontent.com/javiercejudo/modelico/master/dist/modelico.min.js)

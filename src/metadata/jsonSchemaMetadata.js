@@ -325,13 +325,24 @@ const jsonSchemaMetadata = validate => {
   jscMetadata.map = (keyMetadata, valueMetadata, schema) =>
     jscMap(keyMetadata)(valueMetadata)(schema)
 
-  const jscStringMapImpl = (valueMetadata, schema) =>
-    jscMeta(stringMap(valueMetadata), {type: 'object'}, schema, () => ({
+  const jscStringMapImpl = (valueMetadata, schema) => {
+    const baseSchema = {
+      type: 'object',
       additionalProperties: false,
       patternProperties: {
-        '.*': getInnerSchema(valueMetadata)
+        '.*': emptyObject
+      }
+    }
+
+    const combinedSchema = Object.assign(baseSchema, schema)
+    const propertiesPattern = Object.keys(combinedSchema.patternProperties)[0]
+
+    return jscMeta(stringMap(valueMetadata), combinedSchema, undefined, () => ({
+      patternProperties: {
+        [propertiesPattern]: getInnerSchema(valueMetadata)
       }
     }))
+  }
 
   const jscStringMap = mem(valueMetadata =>
     mem(schema => jscStringMapImpl(valueMetadata, schema))

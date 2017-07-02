@@ -4512,7 +4512,7 @@ var jsonSchemaMetadata = (function (should, M, fixtures, _ref) {
           var implValidate = isMyJsonValid(schema);
 
           var formatError = function formatError() {
-            return ['Invalid JSON at "' + path.join(' -> ') + '". The value', JSON.stringify(value)].concat(toConsumableArray(implValidate.errors.map(function (err) {
+            return ['Invalid JSON at "' + path.join(' → ') + '". The value', JSON.stringify(value)].concat(toConsumableArray(implValidate.errors.map(function (err) {
               return '' + err.message;
             }))).join('\n');
           };
@@ -4542,7 +4542,7 @@ var jsonSchemaMetadata = (function (should, M, fixtures, _ref) {
           var result = tv4.validateResult(value, schema);
 
           var formatError = function formatError() {
-            return ['Invalid JSON at "' + path.join(' -> ') + '" for the value', JSON.stringify(value), 'Error: ' + result.error.message].join('\n');
+            return ['Invalid JSON at "' + path.join(' → ') + '" for the value', JSON.stringify(value), 'Error: ' + result.error.message].join('\n');
           };
 
           return [result.valid, formatError];
@@ -4672,7 +4672,7 @@ var ajvMetadata = (function (U, should, M, fixtures, _ref) {
             name: 'Bane',
             dimensions: [20, 55, 0]
           });
-        }).throw(/Invalid JSON at "dimensions -> 2"/).and.throw(/should be > 0/);
+        }).throw(/Invalid JSON at "dimensions → 2"/).and.throw(/should be > 0/);
       });
 
       it('should be able to return the whole schema', function () {
@@ -4789,29 +4789,29 @@ var ajvMetadata = (function (U, should, M, fixtures, _ref) {
       it('list', function () {
         should(function () {
           return M.ajvGenericsFromJSON(_, M.List, {}, [list(list(number({ minimum: 5 })))], '[[[10], [6, 7, 4]]]');
-        }).throw(/Invalid JSON at "0 -> 1 -> 2"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "0 → 1 → 2"/).and.throw(/should be >= 5/);
       });
 
       it('set', function () {
         should(function () {
           return M.genericsFromJS(M.Set, [set$$1(set$$1(number({ minimum: 5 })))], [[[10], [6, 7, 9, 4]]]);
-        }).throw(/Invalid JSON at "0 -> 1 -> 3"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "0 → 1 → 3"/).and.throw(/should be >= 5/);
       });
 
       it('stringMap', function () {
         should(function () {
           return M.genericsFromJS(M.StringMap, [stringMap(stringMap(number({ minimum: 5 })))], { a: { b1: { c: 10 }, b2: { d1: 6, d2: 7, d3: 4 } } });
-        }).throw(/Invalid JSON at "a -> b2 -> d3"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "a → b2 → d3"/).and.throw(/should be >= 5/);
       });
 
       it('map', function () {
         should(function () {
           return M.genericsFromJS(M.Map, [string(), map(string(), number({ minimum: 5 }))], [['A', [['A', 6], ['B', 7], ['C', 4]]]]);
-        }).throw(/Invalid JSON at "0 -> 1 -> 2 -> 1"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "0 → 1 → 2 → 1"/).and.throw(/should be >= 5/);
 
         should(function () {
           return M.genericsFromJS(M.Map, [string(), map(string(), number({ minimum: 5 }))], [['A', [['A', 6], ['B', 7], [2, 7]]]]);
-        }).throw(/Invalid JSON at "0 -> 1 -> 2 -> 0"/).and.throw(/should be string/);
+        }).throw(/Invalid JSON at "0 → 1 → 2 → 0"/).and.throw(/should be string/);
       });
 
       it('enumMap', function () {
@@ -4819,11 +4819,11 @@ var ajvMetadata = (function (U, should, M, fixtures, _ref) {
 
         should(function () {
           return M.genericsFromJS(M.EnumMap, [_(SideEnum), enumMap(_(SideEnum), enumMap(_(SideEnum), number({ minimum: 5 })))], { A: { A: { A: 10 }, B: { A: 4, B: 7 } } });
-        }).throw(/Invalid JSON at "A -> B -> A"/).and.throw(/should be >= 5/);
+        }).throw(/Invalid JSON at "A → B → A"/).and.throw(/should be >= 5/);
 
         should(function () {
           return M.genericsFromJS(M.EnumMap, [_(SideEnum), enumMap(_(SideEnum), enumMap(_(SideEnum), number({ minimum: 5 })))], { A: { A: { A: 10 }, B: { D: 5, B: 7 } } });
-        }).throw(/Invalid JSON at "A -> B"/).and.throw(/should NOT have additional properties/);
+        }).throw(/Invalid JSON at "A → B"/).and.throw(/should NOT have additional properties/);
       });
     });
 
@@ -5547,7 +5547,7 @@ var ajvMetadata = (function (U, should, M, fixtures, _ref) {
           return M.withValidation(function (v) {
             return v.toLowerCase() === v;
           }, function (v, path) {
-            return 'string ' + v + ' at "' + path.join(' -> ') + '" is not all lower case';
+            return 'string ' + v + ' at "' + path.join(' → ') + '" is not all lower case';
           })(string(schema));
         };
 
@@ -5613,7 +5613,7 @@ var ajvMetadata = (function (U, should, M, fixtures, _ref) {
           return M.withValidation(function (v) {
             return v.toLowerCase() === v;
           }, function (v, path) {
-            return 'string ' + v + ' at "' + path.join(' -> ') + '" is not all lower case';
+            return 'string ' + v + ' at "' + path.join(' → ') + '" is not all lower case';
           })(string(schema));
         };
 

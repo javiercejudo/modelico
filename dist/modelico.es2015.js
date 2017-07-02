@@ -40,7 +40,7 @@ const isSomething = pipe2(isNothing, not);
 
 const assertSomethingIdentity = (x, path = []) => {
   if (isNothing(x)) {
-    throw TypeError(`expected a value at "${path.join(' -> ')}" but got nothing (null, undefined or NaN)`);
+    throw TypeError(`expected a value at "${path.join(' → ')}" but got nothing (null, undefined or NaN)`);
   }
 
   return x;
@@ -70,7 +70,7 @@ const unsupported = message => {
 
 const metaOrTypeMapper = _ => x => isPlainObject(x) ? x : _(x);
 
-const formatAjvError = (ajv, schema, value, path = []) => ['Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value (data path "' + ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) + '")\n', JSON.stringify(value, null, 2) + ' ' + Object.prototype.toString.call(value) + '\n'].concat(ajv.errors.map(error => error.message)).join('\n');
+const formatAjvError = (ajv, schema, value, path = []) => ['Invalid JSON at "' + path.join(' → ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value (data path "' + ajv.errors.filter(e => e.dataPath !== '').map(error => error.dataPath) + '")\n', JSON.stringify(value, null, 2) + ' ' + Object.prototype.toString.call(value) + '\n'].concat(ajv.errors.map(error => error.message)).join('\n');
 
 const memDefaultCacheFn = () => new WeakMap();
 const memFactory = (memCacheRegistry = new WeakMap()) => {
@@ -269,7 +269,7 @@ var validate = ((instance, innerMetadata = []) => {
   return [true, undefined];
 });
 
-const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' -> ')}"`;
+const defaultErrorMsgFn = (x, path) => `Invalid value at "${path.join(' → ')}"`;
 
 var withValidation = ((validateFn, errorMsgFn = defaultErrorMsgFn) => metadata => {
   const reviver = (k, v, path = []) => {
@@ -337,7 +337,7 @@ var anyOf = ((conditionedMetas = [], enumField = 'type') => (v, path) => {
 
   const prevPath = path.slice(0, -1);
 
-  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' -> ')}"`);
+  throw TypeError(`unsupported enumerator "${enumeratorToMatch.toJSON()}" at "${prevPath.join(' → ')}"`);
 });
 
 const plainObjectReviverFactory = (Type, k, v, prevPath) => Object.keys(v).reduce((acc, field) => {
@@ -1695,12 +1695,24 @@ const jsonSchemaMetadata = validate => {
 
   jscMetadata.map = (keyMetadata, valueMetadata, schema) => jscMap(keyMetadata)(valueMetadata)(schema);
 
-  const jscStringMapImpl = (valueMetadata, schema) => jscMeta(stringMap(valueMetadata), { type: 'object' }, schema, () => ({
-    additionalProperties: false,
-    patternProperties: {
-      '.*': getInnerSchema(valueMetadata)
-    }
-  }));
+  const jscStringMapImpl = (valueMetadata, schema) => {
+    const baseSchema = {
+      type: 'object',
+      additionalProperties: false,
+      patternProperties: {
+        '.*': emptyObject
+      }
+    };
+
+    const combinedSchema = Object.assign(baseSchema, schema);
+    const propertiesPattern = Object.keys(combinedSchema.patternProperties)[0];
+
+    return jscMeta(stringMap(valueMetadata), combinedSchema, undefined, () => ({
+      patternProperties: {
+        [propertiesPattern]: getInnerSchema(valueMetadata)
+      }
+    }));
+  };
 
   const jscStringMap = mem(valueMetadata => mem(schema => jscStringMapImpl(valueMetadata, schema)));
 
@@ -1759,7 +1771,7 @@ const reviverFactory$6 = enumerators => (k, v, path = []) => {
   const enumerator = enumerators[v];
 
   if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator "${v}" at "${path.join(' -> ')}"`);
+    throw TypeError(`missing enumerator "${v}" at "${path.join(' → ')}"`);
   }
 
   return enumerator;

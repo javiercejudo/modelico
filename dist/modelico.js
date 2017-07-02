@@ -213,7 +213,7 @@ var assertSomethingIdentity = function assertSomethingIdentity(x) {
   var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
 
   if (isNothing(x)) {
-    throw TypeError('expected a value at "' + path.join(' -> ') + '" but got nothing (null, undefined or NaN)');
+    throw TypeError('expected a value at "' + path.join(' → ') + '" but got nothing (null, undefined or NaN)');
   }
 
   return x;
@@ -267,7 +267,7 @@ var metaOrTypeMapper = function metaOrTypeMapper(_) {
 
 var formatAjvError = function formatAjvError(ajv, schema, value) {
   var path = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-  return ['Invalid JSON at "' + path.join(' -> ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value (data path "' + ajv.errors.filter(function (e) {
+  return ['Invalid JSON at "' + path.join(' → ') + '". According to the schema\n', JSON.stringify(schema, null, 2) + '\n', 'the value (data path "' + ajv.errors.filter(function (e) {
     return e.dataPath !== '';
   }).map(function (error) {
     return error.dataPath;
@@ -494,7 +494,7 @@ var validate = (function (instance) {
 });
 
 var defaultErrorMsgFn = function defaultErrorMsgFn(x, path) {
-  return 'Invalid value at "' + path.join(' -> ') + '"';
+  return 'Invalid value at "' + path.join(' → ') + '"';
 };
 
 var withValidation = (function (validateFn) {
@@ -577,7 +577,7 @@ var anyOf = (function () {
 
     var prevPath = path.slice(0, -1);
 
-    throw TypeError('unsupported enumerator "' + enumeratorToMatch.toJSON() + '" at "' + prevPath.join(' -> ') + '"');
+    throw TypeError('unsupported enumerator "' + enumeratorToMatch.toJSON() + '" at "' + prevPath.join(' → ') + '"');
   };
 });
 
@@ -2400,12 +2400,20 @@ var jsonSchemaMetadata = function jsonSchemaMetadata(validate) {
   };
 
   var jscStringMapImpl = function jscStringMapImpl(valueMetadata, schema) {
-    return jscMeta(stringMap(valueMetadata), { type: 'object' }, schema, function () {
+    var baseSchema = {
+      type: 'object',
+      additionalProperties: false,
+      patternProperties: {
+        '.*': emptyObject
+      }
+    };
+
+    var combinedSchema = Object.assign(baseSchema, schema);
+    var propertiesPattern = Object.keys(combinedSchema.patternProperties)[0];
+
+    return jscMeta(stringMap(valueMetadata), combinedSchema, undefined, function () {
       return {
-        additionalProperties: false,
-        patternProperties: {
-          '.*': getInnerSchema(valueMetadata)
-        }
+        patternProperties: defineProperty({}, propertiesPattern, getInnerSchema(valueMetadata))
       };
     });
   };
@@ -2525,7 +2533,7 @@ var reviverFactory$6 = function reviverFactory(enumerators) {
     var enumerator = enumerators[v];
 
     if (isNothing(enumerator)) {
-      throw TypeError('missing enumerator "' + v + '" at "' + path.join(' -> ') + '"');
+      throw TypeError('missing enumerator "' + v + '" at "' + path.join(' → ') + '"');
     }
 
     return enumerator;

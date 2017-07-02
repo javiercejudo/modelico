@@ -4358,7 +4358,7 @@ var jsonSchemaMetadata = (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
 
         const formatError = () =>
           [
-            `Invalid JSON at "${path.join(' -> ')}". The value`,
+            `Invalid JSON at "${path.join(' → ')}". The value`,
             JSON.stringify(value),
             ...implValidate.errors.map(err => `${err.message}`)
           ].join('\n');
@@ -4389,7 +4389,7 @@ var jsonSchemaMetadata = (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
 
         const formatError = () =>
           [
-            `Invalid JSON at "${path.join(' -> ')}" for the value`,
+            `Invalid JSON at "${path.join(' → ')}" for the value`,
             JSON.stringify(value),
             `Error: ${result.error.message}`
           ].join('\n');
@@ -4517,7 +4517,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           dimensions: [20, 55, 0]
         })
       )
-        .throw(/Invalid JSON at "dimensions -> 2"/)
+        .throw(/Invalid JSON at "dimensions → 2"/)
         .and.throw(/should be > 0/);
     });
 
@@ -4655,7 +4655,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           '[[[10], [6, 7, 4]]]'
         )
       )
-        .throw(/Invalid JSON at "0 -> 1 -> 2"/)
+        .throw(/Invalid JSON at "0 → 1 → 2"/)
         .and.throw(/should be >= 5/);
     });
 
@@ -4667,7 +4667,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           [[[10], [6, 7, 9, 4]]]
         )
       )
-        .throw(/Invalid JSON at "0 -> 1 -> 3"/)
+        .throw(/Invalid JSON at "0 → 1 → 3"/)
         .and.throw(/should be >= 5/);
     });
 
@@ -4679,7 +4679,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           {a: {b1: {c: 10}, b2: {d1: 6, d2: 7, d3: 4}}}
         )
       )
-        .throw(/Invalid JSON at "a -> b2 -> d3"/)
+        .throw(/Invalid JSON at "a → b2 → d3"/)
         .and.throw(/should be >= 5/);
     });
 
@@ -4691,7 +4691,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           [['A', [['A', 6], ['B', 7], ['C', 4]]]]
         )
       )
-        .throw(/Invalid JSON at "0 -> 1 -> 2 -> 1"/)
+        .throw(/Invalid JSON at "0 → 1 → 2 → 1"/)
         .and.throw(/should be >= 5/);
 
       should(() =>
@@ -4701,7 +4701,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           [['A', [['A', 6], ['B', 7], [2, 7]]]]
         )
       )
-        .throw(/Invalid JSON at "0 -> 1 -> 2 -> 0"/)
+        .throw(/Invalid JSON at "0 → 1 → 2 → 0"/)
         .and.throw(/should be string/);
     });
 
@@ -4718,7 +4718,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           {A: {A: {A: 10}, B: {A: 4, B: 7}}}
         )
       )
-        .throw(/Invalid JSON at "A -> B -> A"/)
+        .throw(/Invalid JSON at "A → B → A"/)
         .and.throw(/should be >= 5/);
 
       should(() =>
@@ -4731,7 +4731,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
           {A: {A: {A: 10}, B: {D: 5, B: 7}}}
         )
       )
-        .throw(/Invalid JSON at "A -> B"/)
+        .throw(/Invalid JSON at "A → B"/)
         .and.throw(/should NOT have additional properties/);
     });
   });
@@ -5543,7 +5543,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
         M.withValidation(
           v => v.toLowerCase() === v,
           (v, path) =>
-            `string ${v} at "${path.join(' -> ')}" is not all lower case`
+            `string ${v} at "${path.join(' → ')}" is not all lower case`
         )(string(schema));
 
       JSON.parse(
@@ -5605,7 +5605,7 @@ var ajvMetadata = (U, should, M, fixtures, {Ajv}) => () => {
         M.withValidation(
           v => v.toLowerCase() === v,
           (v, path) =>
-            `string ${v} at "${path.join(' -> ')}" is not all lower case`
+            `string ${v} at "${path.join(' → ')}" is not all lower case`
         )(string(schema));
 
       class MagicString extends M.Base {
