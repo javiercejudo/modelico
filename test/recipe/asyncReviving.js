@@ -1,9 +1,12 @@
 /* eslint-env mocha */
 /* global requestIdleCallback, setImmediate, setTimeout */
 
-const schedule = typeof requestIdleCallback !== 'undefined'
-  ? requestIdleCallback
-  : typeof setImmediate !== 'undefined' ? setImmediate : fn => setTimeout(fn, 0)
+const schedule =
+  typeof requestIdleCallback !== 'undefined'
+    ? requestIdleCallback
+    : typeof setImmediate !== 'undefined'
+      ? setImmediate
+      : fn => setTimeout(fn, 0)
 
 const asyncMap = (fn, arr, {batchSize = arr.length} = {}) =>
   arr.reduce((acc, _, i) => {

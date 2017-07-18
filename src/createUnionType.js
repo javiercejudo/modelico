@@ -11,9 +11,8 @@ const createUnionType = (metasOrTypes, classifier, union = defaultUnion) => {
     x => (isPlainObject(x) && !(x instanceof M.Enum) ? x : M.metadata()._(x))
   )
 
-  classifier = classifier === undefined
-    ? inferUnionClassifier(metas)
-    : classifier
+  classifier =
+    classifier === undefined ? inferUnionClassifier(metas) : classifier
 
   const metasCount = metas.length
 
@@ -35,9 +34,8 @@ const createUnionType = (metasOrTypes, classifier, union = defaultUnion) => {
         const Type = typeGetter ? typeGetter() : instance.constructor
         const typeCaseCandidate = casesMap.get(Type)
 
-        const typeCase = typeCaseCandidate !== undefined
-          ? typeCaseCandidate
-          : def
+        const typeCase =
+          typeCaseCandidate !== undefined ? typeCaseCandidate : def
 
         return isFunction(typeCase) ? typeCase(instance) : typeCase
       }

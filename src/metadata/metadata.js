@@ -64,9 +64,8 @@ const withDefault = (metadata, def) => withDefaultMem(metadata)(def)
 const union = (Type, metasOrTypes, classifier) => {
   const metas = metasOrTypes.map(metaOrTypeMapper(_))
 
-  classifier = classifier === undefined
-    ? inferUnionClassifier(metas)
-    : classifier
+  classifier =
+    classifier === undefined ? inferUnionClassifier(metas) : classifier
 
   const reviver = (k, obj, path = []) => {
     if (k !== '') {

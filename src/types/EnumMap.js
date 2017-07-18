@@ -22,17 +22,18 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
   const keyReviver = reviverOrAsIs(
     isFunction(keyMetadata) ? keyMetadata(v, path) : keyMetadata
   )
+
   const valueReviver = reviverOrAsIs(
     isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata
   )
 
-  const innerMap = v === null
-    ? null
-    : new Map(
-        Object.keys(v).map(parseMapper(keyReviver, valueReviver, v, path))
-      )
+  if (v === null) {
+    return new EnumMap(null)
+  }
 
-  return new EnumMap(innerMap)
+  return new EnumMap(
+    new Map(Object.keys(v).map(parseMapper(keyReviver, valueReviver, v, path)))
+  )
 }
 
 let EMPTY_ENUM_MAP

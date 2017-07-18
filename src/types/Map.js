@@ -18,9 +18,10 @@ const reviverFactory = (keyMetadata, valueMetadata) => (k, v, path = []) => {
     isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata
   )
 
-  const innerMap = v === null
-    ? null
-    : new Map(v.map(parseMapper(keyReviver, valueReviver, path)))
+  const innerMap =
+    v === null
+      ? null
+      : new Map(v.map(parseMapper(keyReviver, valueReviver, path)))
 
   return ModelicoMap.fromMap(innerMap)
 }

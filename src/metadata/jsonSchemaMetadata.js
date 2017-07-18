@@ -49,9 +49,10 @@ const jsonSchemaMetadata = validate => {
       return value
     }
 
-    const validationResult = schema === emptyObject
-      ? triviallyValidResult
-      : validate(schema, valueTransformer(value), path)
+    const validationResult =
+      schema === emptyObject
+        ? triviallyValidResult
+        : validate(schema, valueTransformer(value), path)
 
     if (!validationResult[0]) {
       throw TypeError(validationResult[1]())
@@ -91,10 +92,10 @@ const jsonSchemaMetadata = validate => {
     mainSchema = emptyObject,
     innerSchemaGetter = always(emptyObject)
   ) => {
-    const schemaToCheck = baseSchema === emptyObject &&
-      mainSchema === emptyObject
-      ? emptyObject
-      : Object.assign({}, baseSchema, mainSchema)
+    const schemaToCheck =
+      baseSchema === emptyObject && mainSchema === emptyObject
+        ? emptyObject
+        : Object.assign({}, baseSchema, mainSchema)
 
     const reviver = ensure(metadata, schemaToCheck)
 
@@ -127,11 +128,13 @@ const jsonSchemaMetadata = validate => {
   const _jscImpl = (Type, innerMetadata, schema, topLevel) => {
     const metadata = _(Type, innerMetadata)
 
-    return schema === emptyObject
-      ? metadata
-      : jscMeta(metadata, emptyObject, schema, () =>
-          getSchema(metadata, topLevel)
-        )
+    if (schema === emptyObject) {
+      return metadata
+    }
+
+    return jscMeta(metadata, emptyObject, schema, () =>
+      getSchema(metadata, topLevel)
+    )
   }
 
   const _jsc = mem(Type =>
@@ -155,11 +158,13 @@ const jsonSchemaMetadata = validate => {
   const jscBaseImpl = (Type, schema, topLevel) => {
     const metadata = base(Type)
 
-    return schema === emptyObject
-      ? metadata
-      : jscMeta(metadata, {type: 'object'}, schema, () =>
-          getSchema(metadata, topLevel)
-        )
+    if (schema === emptyObject) {
+      return metadata
+    }
+
+    return jscMeta(metadata, {type: 'object'}, schema, () =>
+      getSchema(metadata, topLevel)
+    )
   }
 
   const jscBase = mem(Type =>
@@ -301,9 +306,7 @@ const jsonSchemaMetadata = validate => {
 
     const keyValueSchemaGetter = () => ({
       items: Object.assign(
-        {
-          items: [getInnerSchema(keyMetadata), getInnerSchema(valueMetadata)]
-        },
+        {items: [getInnerSchema(keyMetadata), getInnerSchema(valueMetadata)]},
         baseSchema.items
       )
     })

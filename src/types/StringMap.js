@@ -21,9 +21,10 @@ const reviverFactory = valueMetadata => (k, v, path = []) => {
     isFunction(valueMetadata) ? valueMetadata(v, path) : valueMetadata
   )
 
-  const innerMap = v === null
-    ? null
-    : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []))
+  const innerMap =
+    v === null
+      ? null
+      : new Map(Object.keys(v).reduce(parseReducer(valueReviver, v, path), []))
 
   return StringMap.fromMap(innerMap)
 }

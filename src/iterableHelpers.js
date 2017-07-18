@@ -10,6 +10,9 @@ type ListMetadata =
   | ((v: any, path: Path) => BaseListMetadata)
 //
 
+const tupleItemMetadataGetter = (itemMetadata, v, path) => i =>
+  isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
+
 const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
   k,
   v,
@@ -26,8 +29,7 @@ const iterableReviverFactory = (IterableType: any, itemMetadata: any) => (
   }
 
   const itemMetadataGetter = isTuple
-    ? i =>
-        isFunction(itemMetadata[i]) ? itemMetadata[i](v, path) : itemMetadata[i]
+    ? tupleItemMetadataGetter(itemMetadata, v, path)
     : isFunction(itemMetadata) ? _ => itemMetadata(v, path) : _ => itemMetadata
 
   const revive = (x, i) =>

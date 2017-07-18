@@ -25,9 +25,10 @@ export default M => {
     const objStr = obj.stringify()
     const snippet = objStr.slice(0, PREVIEW_MAX_LENGTH)
 
-    const preview = PREVIEW_MAX_LENGTH > 0 && objStr.length > PREVIEW_MAX_LENGTH
-      ? snippet + '...'
-      : snippet
+    const preview =
+      PREVIEW_MAX_LENGTH > 0 && objStr.length > PREVIEW_MAX_LENGTH
+        ? snippet + '...'
+        : snippet
 
     const typeName = getTypeName(obj[M.symbols.typeSymbol]())
 
@@ -37,8 +38,10 @@ export default M => {
       subtypeNames =
         '<' +
         parentType
-          .innerTypes()[key.slice(0, -FIELDS_POSTFIX.length)]
-          .subtypes.map(x => getTypeName(x.type))
+          .innerTypes()
+          [key.slice(0, -FIELDS_POSTFIX.length)].subtypes.map(x =>
+            getTypeName(x.type)
+          )
           .join(', ') +
         '>'
     } catch (ignore) {
@@ -77,9 +80,10 @@ export default M => {
     const base = isPlainObject(json) ? Object.assign({}, json) : {':': json}
 
     const res = Object.keys(base).reduce((acc, key) => {
-      const keyName = obj instanceof M.List
-        ? `get(${key})`
-        : key === ':' || Array.isArray(json) ? key : key + FIELDS_POSTFIX
+      const keyName =
+        obj instanceof M.List
+          ? `get(${key})`
+          : key === ':' || Array.isArray(json) ? key : key + FIELDS_POSTFIX
 
       acc[keyName] = base[key]
 
