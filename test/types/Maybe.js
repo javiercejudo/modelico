@@ -92,12 +92,21 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
 
       myMaybe.inner().equals(author).should.be.exactly(true)
     })
+
     it('should parse missing keys of Maybe values as Maybe with Nothing', () => {
       const authorJsonWithMissinMaybe =
         '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}'
 
       const author = JSON.parse(authorJsonWithMissinMaybe, _(Person).reviver)
       author.sex().isEmpty().should.be.exactly(true)
+    })
+
+    it('should handle missing Enums', () => {
+      const MyEnum = M.Enum.fromArray(['A', 'B'])
+      const m = M.metadata()
+
+      m.maybe(MyEnum.metadata()).reviver('', 'C').should.be.exactly(M.Nothing)
+      m.maybe(MyEnum.metadata()).reviver('', null).should.be.exactly(M.Nothing)
     })
   })
 
