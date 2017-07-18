@@ -44,7 +44,7 @@ const withDefaultImpl = (metadata, def) => {
       return defMetadata.reviver(k, def, path)
     }
 
-    return metadata.reviver(k, v, path)
+    return metadata.reviver(k, v, path, {default: def})
   }
 
   return Object.freeze(

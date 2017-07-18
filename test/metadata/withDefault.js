@@ -88,6 +88,24 @@ export default (should, M, fixtures, {Ajv}) => () => {
     res.should.be.exactly(1)
   })
 
+  it('should handle missing Enums', () => {
+    const nm = M.metadata()
+    const MyEnum = M.Enum.fromArray(['A', 'B'])
+
+    withDefault(MyEnum.metadata(), 'A')
+      .reviver('', 'C')
+      .should.be.exactly(MyEnum.A())
+
+    nm
+      .withDefault(MyEnum.metadata(), 'A')
+      .reviver('', 'C')
+      .should.be.exactly(MyEnum.A())
+
+    should(() =>
+      nm.withDefault(MyEnum.metadata(), 'INVALID').reviver('', 'C')
+    ).throw(/missing enumerator "C" without valid default at ""/)
+  })
+
   it('should work well with ajvMetadata', () => {
     JSON.parse('null', withDefault(number(), 1).reviver).should.be.exactly(1)
     JSON.parse('2', withDefault(number(), 1).reviver).should.be.exactly(2)

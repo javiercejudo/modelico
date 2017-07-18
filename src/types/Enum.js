@@ -1,17 +1,39 @@
-import {always, isNothing} from '../U'
+import {always} from '../U'
 import {typeSymbol} from '../symbols'
 import Base from './Base'
 
 const enumeratorsReducer = (acc, code) => Object.assign(acc, {[code]: {code}})
 
-const reviverFactory = enumerators => (k, v, path = []) => {
+const reviverFactory = enumerators => (
+  k,
+  v,
+  path = [],
+  {default: def} = {}
+) => {
   const enumerator = enumerators[v]
 
-  if (isNothing(enumerator)) {
-    throw TypeError(`missing enumerator "${v}" at "${path.join(' → ')}"`)
+  if (enumerator !== undefined) {
+    return enumerator
   }
 
-  return enumerator
+  if (def !== undefined) {
+    const defEnumerator = enumerators[def]
+
+    if (defEnumerator !== undefined) {
+      return defEnumerator
+    }
+  }
+
+  throw TypeError(
+    `missing enumerator "${v}" without valid default at "${path.join(' → ')}"`
+  )
+}
+
+const maybeReviverFactory = enumerators => {
+  const reviver = reviverFactory(enumerators)
+
+  return (k, v, path) =>
+    enumerators[v] === undefined ? null : reviver(k, v, path)
 }
 
 class Enum extends Base {
@@ -40,7 +62,8 @@ class Enum extends Base {
         Object.freeze({
           type: this,
           enumerators,
-          reviver: reviverFactory(enumerators)
+          reviver: reviverFactory(enumerators),
+          maybeReviver: maybeReviverFactory(enumerators)
         })
       )
     })
