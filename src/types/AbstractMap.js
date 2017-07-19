@@ -2,13 +2,6 @@ import {always, isNothing, equals, haveDifferentTypes, mem} from '../U'
 import {typeSymbol, innerOrigSymbol} from '../symbols'
 import Base from './Base'
 
-export const set = (thisArg, Type, key, value) => {
-  const newMap = thisArg.inner()
-  newMap.set(key, value)
-
-  return Type.fromMap(newMap)
-}
-
 export const of = (Type, args) => {
   const len = args.length
 
@@ -75,6 +68,13 @@ class AbstractMap extends Base {
 
   get(key) {
     return this[innerOrigSymbol]().get(key)
+  }
+
+  set(key, value) {
+    const newMap = this.inner()
+    newMap.set(key, value)
+
+    return this[typeSymbol]().fromMap(newMap)
   }
 
   setIn(path, value) {

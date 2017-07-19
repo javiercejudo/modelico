@@ -86,10 +86,25 @@ To parse `date-time` strings, as defined by
 
 eg. `map(date(), string())`
 
-For ordered maps with arbitrary keys and values with JSON representation
+For ordered maps with arbitrary keys and values with default JSON
+representation
 
 ```
 [[<key1>, <value1>], [<key2>, <value2>]]
+
+// example
+[["a", 1], ["b", 2]]
+[[0, "a"], [1, "b"]]
+```
+
+It also handles maps serialised as
+
+```
+{"<key1AsJson>": <value1>, <key2AsJson>: <value2>}
+
+// example
+{"\\"a\\"": 1, "\\"b\\"": 2}
+{"0": "a", "1": "b"}
 ```
 
 ##### enumMap(enumMetadata, valueMetadata = any())

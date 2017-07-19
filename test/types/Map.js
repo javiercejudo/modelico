@@ -90,7 +90,7 @@ export default (U, should, M, {Person}) => () => {
   })
 
   describe('stringifying', () => {
-    it('should stringify the map correctly', () => {
+    it('should stringify the map correctly (as array)', () => {
       const map = new Map([
         ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
         ['b', M.Date.of(new Date('2012-12-25T00:00:00.000Z'))]
@@ -102,10 +102,23 @@ export default (U, should, M, {Person}) => () => {
         '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]'
       )
     })
+
+    it('should stringify the map correctly (as object)', () => {
+      const map = new Map([
+        ['a', M.Date.of(new Date('1988-04-16T00:00:00.000Z'))],
+        ['b', M.Date.of(new Date('2012-12-25T00:00:00.000Z'))]
+      ])
+
+      const modelicoMap = M.Map.fromMapWithOptions({asArray: false}, map)
+
+      JSON.stringify(modelicoMap).should.be.exactly(
+        '{"\\"a\\"":"1988-04-16T00:00:00.000Z","\\"b\\"":"2012-12-25T00:00:00.000Z"}'
+      )
+    })
   })
 
   describe('parsing', () => {
-    it('should parse the map correctly', () => {
+    it('should parse the map correctly (as array)', () => {
       const modelicoMap = JSON.parse(
         '[["a","1988-04-16T00:00:00.000Z"],["b","2012-12-25T00:00:00.000Z"]]',
         map(string(), date()).reviver
@@ -125,14 +138,32 @@ export default (U, should, M, {Person}) => () => {
       should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11)
     })
 
+    it('should parse the map correctly (as object)', () => {
+      const myMap = JSON.parse(
+        '{"\\"a\\"":"1988-04-16T00:00:00.000Z","\\"b\\"":"2012-12-25T00:00:00.000Z"}',
+        map(string(), date()).reviver
+      )
+
+      myMap.inner().get('a').inner().getFullYear().should.be.exactly(1988)
+      myMap.inner().get('b').inner().getMonth().should.be.exactly(11)
+
+      const empty = JSON.parse('{}', map(string(), date()).reviver)
+
+      empty.size.should.be.exactly(0)
+    })
+
     it('should be parsed correctly when used within another class', () => {
       const authorJson =
         '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[["wedding","2013-03-28T00:00:00.000Z"],["moved to Australia","2012-12-03T00:00:00.000Z"]],"importantDatesList":[],"importantDatesSet":[],"sex":"MALE"}'
       const author = M.fromJSON(Person, authorJson)
 
-      should(
-        author.lifeEvents().inner().get('wedding').inner().getFullYear()
-      ).be.exactly(2013)
+      author
+        .lifeEvents()
+        .inner()
+        .get('wedding')
+        .inner()
+        .getFullYear()
+        .should.be.exactly(2013)
     })
 
     it('should be able to work with M.genericsFromJSON', () => {

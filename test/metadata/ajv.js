@@ -785,13 +785,19 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       const meta = map(number(), string())
 
       M.getSchema(meta).should.deepEqual({
-        type: 'array',
-        items: {
-          type: 'array',
-          maxItems: 2,
-          minItems: 2,
-          items: [{type: 'number'}, {type: 'string'}]
-        }
+        anyOf: [
+          {
+            type: 'array',
+            items: {
+              items: [{type: 'number'}, {type: 'string'}],
+              type: 'array',
+              minItems: 2,
+              maxItems: 2
+            }
+          },
+          {type: 'object', patternProperties: {'.*': {$ref: '#/definitions/3'}}}
+        ],
+        definitions: {'3': {type: 'string'}}
       })
     })
 
