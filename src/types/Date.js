@@ -23,7 +23,6 @@ class ModelicoDate extends Base {
     }
 
     const date = new Date(dateOrig.getTime())
-
     this.inner = () => new Date(date.getTime())
 
     Object.freeze(this)
@@ -61,8 +60,12 @@ class ModelicoDate extends Base {
     return this.toJSON() === other.toJSON()
   }
 
-  static of(date) {
+  static fromDate(date) {
     return new ModelicoDate(date)
+  }
+
+  static of(...args) {
+    return new ModelicoDate(new Date(...args))
   }
 
   static metadata() {

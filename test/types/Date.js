@@ -6,7 +6,7 @@ export default (U, should, M) => () => {
   describe('immutability', () => {
     it('must not reflect changes in the wrapped input', () => {
       const input = new Date('1988-04-16T00:00:00.000Z')
-      const myDate = M.Date.of(input)
+      const myDate = M.Date.fromDate(input)
 
       input.setFullYear(2017)
 
@@ -20,45 +20,66 @@ export default (U, should, M) => () => {
       const nativeDate = new Date()
 
       should(mDate.inner().getFullYear()).be.exactly(nativeDate.getFullYear())
-
       should(mDate.inner().getMonth()).be.exactly(nativeDate.getMonth())
-
       should(mDate.inner().getDate()).be.exactly(nativeDate.getDate())
     })
 
     it('must be instantiated with new', () => {
-      ;(() => M.Date()).should.throw()
+      should(() => M.Date()).throw()
     })
   })
 
   describe('setting', () => {
     it('should not support null (wrap with Maybe)', () => {
-      should(() => M.Date.of(null)).throw()
+      should(() => M.Date.fromDate(null)).throw()
     })
 
     it('should set dates correctly', () => {
-      const date1 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
+      const date1 = M.Date.fromDate(new Date('1988-04-16T00:00:00.000Z'))
       const date2 = date1.setIn([], new Date('1989-04-16T00:00:00.000Z'))
 
       should(date2.inner().getFullYear()).be.exactly(1989)
-
       should(date1.inner().getFullYear()).be.exactly(1988)
     })
 
     it('should not support the set operation', () => {
-      const myDate = M.Date.of(new Date())
-      ;(() => myDate.set()).should.throw()
+      const myDate = M.Date.fromDate(new Date())
+
+      should(() => myDate.set()).throw()
     })
 
     it('should not support the setIn operation with non-empty paths', () => {
-      const myDate = M.Date.of(new Date())
-      ;(() => myDate.setIn([0], new Date())).should.throw()
+      const myDate = M.Date.fromDate(new Date())
+
+      should(() => myDate.setIn([0], new Date())).throw()
+    })
+  })
+
+  describe('of', () => {
+    it('should default to current date', () => {
+      const justBefore = Date.now()
+      const now = M.Date.of().inner().getTime()
+      const justAfter = Date.now()
+
+      now.should.be.within(justBefore, justAfter)
+    })
+
+    it('should have the same semantics as new Date(...)', () => {
+      M.Date
+        .of(2020, 5, 3, 10, 25, 58, 467)
+        .equals(M.Date.fromDate(new Date(2020, 5, 3, 10, 25, 58, 467)))
+        .should.be.exactly(true)
+
+      M.Date
+        .of(17, 1, 20)
+        .equals(M.Date.fromDate(new Date(17, 1, 20)))
+        .should.be.exactly(true)
     })
   })
 
   describe('stringifying', () => {
     it('should stringify values correctly', () => {
-      const myDate = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
+      const myDate = M.Date.fromDate(new Date('1988-04-16T00:00:00.000Z'))
 
       JSON.stringify(myDate).should.be.exactly('"1988-04-16T00:00:00.000Z"')
     })
@@ -72,14 +93,19 @@ export default (U, should, M) => () => {
     })
 
     it('should not support null (wrap with Maybe)', () => {
-      ;(() => JSON.parse('null', date().reviver)).should.throw()
+      should(() => JSON.parse('null', date().reviver)).throw()
     })
   })
 
   describe('comparing', () => {
     it('should identify equal instances', () => {
-      const modelicoDate1 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
-      const modelicoDate2 = M.Date.of(new Date('1988-04-16T00:00:00.000Z'))
+      const modelicoDate1 = M.Date.fromDate(
+        new Date('1988-04-16T00:00:00.000Z')
+      )
+
+      const modelicoDate2 = M.Date.fromDate(
+        new Date('1988-04-16T00:00:00.000Z')
+      )
 
       modelicoDate1.should.not.be.exactly(modelicoDate2)
       modelicoDate1.should.not.equal(modelicoDate2)
@@ -93,7 +119,7 @@ export default (U, should, M) => () => {
   U.skipIfNoToStringTagSymbol(describe)('toStringTag', () => {
     it('should implement Symbol.toStringTag', () => {
       Object.prototype.toString
-        .call(M.Date.of())
+        .call(M.Date.fromDate())
         .should.be.exactly('[object ModelicoDate]')
     })
   })
