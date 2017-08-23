@@ -39,7 +39,10 @@
       modelicoCustomFormatter(ModelicoMin)
     )
 
-    mocha.setup('bdd')
+    mocha.setup({
+      ui: 'bdd',
+      timeout: 60000 // for debugging
+    })
 
     describe('Modélico', function () {
       describe('Modélico Dev', modelicoSpec({

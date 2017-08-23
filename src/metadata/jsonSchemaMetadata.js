@@ -296,19 +296,39 @@ const jsonSchemaMetadata = validate => {
 
   const jscMapImpl = (keyMetadata, valueMetadata, schema) => {
     const baseSchema = {
-      type: 'array',
-      items: {
-        type: 'array',
-        minItems: 2,
-        maxItems: 2
-      }
+      anyOf: [
+        {
+          type: 'array',
+          items: {
+            type: 'array',
+            minItems: 2,
+            maxItems: 2
+          }
+        },
+        {type: 'object'}
+      ]
     }
 
     const keyValueSchemaGetter = () => ({
-      items: Object.assign(
-        {items: [getInnerSchema(keyMetadata), getInnerSchema(valueMetadata)]},
-        baseSchema.items
-      )
+      anyOf: baseSchema.anyOf.map((s, i) => {
+        if (i === 1) {
+          return Object.assign({}, s, {
+            patternProperties: {'.*': getInnerSchema(valueMetadata)}
+          })
+        }
+
+        return Object.assign({}, s, {
+          items: Object.assign(
+            {
+              items: [
+                getInnerSchema(keyMetadata),
+                getInnerSchema(valueMetadata)
+              ]
+            },
+            baseSchema.anyOf[i].items
+          )
+        })
+      })
     })
 
     return jscMeta(

@@ -1,5 +1,5 @@
 import {objToArr, reviverOrAsIs, isFunction} from '../U'
-import AbstractMap, {set, of, metadata} from './AbstractMap'
+import AbstractMap, {of, metadata} from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0]] = pair[1]
@@ -44,10 +44,6 @@ class StringMap extends AbstractMap {
 
   get [Symbol.toStringTag]() {
     return 'ModelicoStringMap'
-  }
-
-  set(key, value) {
-    return set(this, StringMap, key, value)
   }
 
   toJSON() {

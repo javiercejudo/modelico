@@ -60,28 +60,27 @@ const library = await asyncMap(
 // browsers, except IE and Edge, now have requestIdleCallback,
 // while setImmediate exists in Node, IE and Edge;
 // setTimeout is included as a last resort for other environments
-const schedule = (typeof requestIdleCallback !== 'undefined')
-  ? requestIdleCallback
-  : (typeof setImmediate !== 'undefined')
-  ? setImmediate
-  : fn => setTimeout(fn, 0)
+const schedule =
+  typeof requestIdleCallback !== 'undefined'
+    ? requestIdleCallback
+    : typeof setImmediate !== 'undefined'
+      ? setImmediate
+      : fn => setTimeout(fn, 0)
 
-const asyncMap = (
-  fn,
-  arr,
-  {batchSize = arr.length} = {}
-) => arr.reduce((acc, _, i) => {
-  if (i % batchSize !== 0) {
-    return acc
-  }
+const asyncMap = (fn, arr, {batchSize = arr.length} = {}) =>
+  arr.reduce((acc, _, i) => {
+    if (i % batchSize !== 0) {
+      return acc
+    }
 
-  return acc.then(result =>
-    new Promise(resolve => {
-      schedule(() => {
-        result.push.apply(result, arr.slice(i, i + batchSize).map(fn))
-        resolve(result)
-      })
-    })
-  )
-}, Promise.resolve([]))
+    return acc.then(
+      result =>
+        new Promise(resolve => {
+          schedule(() => {
+            result.push.apply(result, arr.slice(i, i + batchSize).map(fn))
+            resolve(result)
+          })
+        })
+    )
+  }, Promise.resolve([]))
 ```

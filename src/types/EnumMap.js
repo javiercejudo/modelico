@@ -1,5 +1,5 @@
 import {reviverOrAsIs, isFunction} from '../U'
-import AbstractMap, {set, of, metadata} from './AbstractMap'
+import AbstractMap, {of, metadata} from './AbstractMap'
 
 const stringifyReducer = (acc, pair) => {
   acc[pair[0].toJSON()] = pair[1]
@@ -51,10 +51,6 @@ class EnumMap extends AbstractMap {
 
   get [Symbol.toStringTag]() {
     return 'ModelicoEnumMap'
-  }
-
-  set(enumerator, value) {
-    return set(this, EnumMap, enumerator, value)
   }
 
   toJSON() {
