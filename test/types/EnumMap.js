@@ -70,11 +70,19 @@ export default (U, should, M, {PartOfDay}) => () => {
       )
 
       should(
-        greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear()
+        greetings2
+          .inner()
+          .get(PartOfDay.EVENING())
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
 
       should(
-        greetings1.inner().get(PartOfDay.EVENING()).inner().getFullYear()
+        greetings1
+          .inner()
+          .get(PartOfDay.EVENING())
+          .inner()
+          .getFullYear()
       ).be.exactly(2012)
     })
 
@@ -101,11 +109,19 @@ export default (U, should, M, {PartOfDay}) => () => {
       const greetings2 = greetings1.setIn([], map2)
 
       should(
-        greetings2.inner().get(PartOfDay.EVENING()).inner().getFullYear()
+        greetings2
+          .inner()
+          .get(PartOfDay.EVENING())
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
 
       should(
-        greetings1.inner().get(PartOfDay.EVENING()).inner().getFullYear()
+        greetings1
+          .inner()
+          .get(PartOfDay.EVENING())
+          .inner()
+          .getFullYear()
       ).be.exactly(2012)
     })
   })
@@ -159,7 +175,10 @@ export default (U, should, M, {PartOfDay}) => () => {
     it('should have a static property for the empty map', () => {
       should(M.EnumMap.EMPTY().inner().size).be.exactly(0)
 
-      M.EnumMap.EMPTY().toJSON().should.eql({})
+      M.EnumMap
+        .EMPTY()
+        .toJSON()
+        .should.eql({})
 
       new M.EnumMap().should.be.exactly(M.EnumMap.EMPTY())
     })

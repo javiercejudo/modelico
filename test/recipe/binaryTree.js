@@ -217,8 +217,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
     })
 
-    myTree2.right().value().should.be.exactly(6)
-    myTree2.right().right().should.be.exactly(empty)
+    myTree2
+      .right()
+      .value()
+      .should.be.exactly(6)
+    myTree2
+      .right()
+      .right()
+      .should.be.exactly(empty)
 
     const myTree3 = myTree2.insert(3).insert(10)
 
@@ -270,8 +276,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     const myMappedTree = myTree.map(x => x ** 2)
 
     myMappedTree.value().should.be.exactly(4)
-    myMappedTree.left().value().should.be.exactly(1)
-    myMappedTree.right().value().should.be.exactly(9)
+    myMappedTree
+      .left()
+      .value()
+      .should.be.exactly(1)
+    myMappedTree
+      .right()
+      .value()
+      .should.be.exactly(9)
 
     myTree.depth().should.be.exactly(2)
     myMappedTree.depth().should.be.exactly(2)
@@ -279,8 +291,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     const myConstantTree = myTree.map(() => 1)
 
     myConstantTree.value().should.be.exactly(1)
-    myConstantTree.left().value().should.be.exactly(1)
-    myConstantTree.right().value().should.be.exactly(1)
+    myConstantTree
+      .left()
+      .value()
+      .should.be.exactly(1)
+    myConstantTree
+      .right()
+      .value()
+      .should.be.exactly(1)
 
     const myBalancedConstantTree = myConstantTree.balance()
 
@@ -366,14 +384,19 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     const deepTree = Tree.fromArray([1, 2, 3, 4, 5, 6, 7])
     const niceTree = Tree.fromArray([4, 2, 1, 3, 6, 5, 7])
 
-    deepTree.balance().toJS().should.deepEqual(niceTree.toJS())
+    deepTree
+      .balance()
+      .toJS()
+      .should.deepEqual(niceTree.toJS())
   })
 
   it('balance larger tree', () => {
     const {Tree} = numberTree
     const power = 6
 
-    const values = Array(2 ** power - 1).fill().map((_, i) => i)
+    const values = Array(2 ** power - 1)
+      .fill()
+      .map((_, i) => i)
     const arr = shuffle(values)
 
     const largeTree = Tree.fromArray(arr)
@@ -574,25 +597,28 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
     })
 
-    myTree.balance().toJS().should.deepEqual({
-      value: {
-        name: 'Robbie'
-      },
-      left: {
+    myTree
+      .balance()
+      .toJS()
+      .should.deepEqual({
         value: {
-          name: 'Bane'
+          name: 'Robbie'
         },
-        left: null,
-        right: null
-      },
-      right: {
-        value: {
-          name: 'Sunny'
+        left: {
+          value: {
+            name: 'Bane'
+          },
+          left: null,
+          right: null
         },
-        left: null,
-        right: null
-      }
-    })
+        right: {
+          value: {
+            name: 'Sunny'
+          },
+          left: null,
+          right: null
+        }
+      })
 
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {

@@ -11,16 +11,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
 
       getNumbers() {
-        const {type, collection} = this
+        const type = this.type()
+        const collection = this.collection()
 
-        switch (type()) {
+        switch (type) {
           case CollectionType.OBJECT():
-            return [...collection()[M.symbols.innerOrigSymbol]().values()]
+            return [...collection[M.symbols.innerOrigSymbol]().values()]
           case CollectionType.ARRAY():
-            return [...collection()]
+            return [...collection]
           default:
             throw TypeError(
-              `Unsupported NumberCollection with type ${type().toJSON()}`
+              `Unsupported NumberCollection with type ${type.toJSON()}`
             )
         }
       }
@@ -78,16 +79,17 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
 
       getNumbers() {
-        const {collectionType, collection} = this
+        const collectionType = this.collectionType()
+        const collection = this.collection()
 
-        switch (collectionType()) {
+        switch (collectionType) {
           case CollectionType.OBJECT():
-            return [...collection()[M.symbols.innerOrigSymbol]().values()]
+            return [...collection[M.symbols.innerOrigSymbol]().values()]
           case CollectionType.ARRAY():
-            return [...collection()]
+            return [...collection]
           default:
             throw TypeError(
-              `Unsupported NumberCollection with type ${collectionType().toJSON()}`
+              `Unsupported NumberCollection with type ${collectionType.toJSON()}`
             )
         }
       }
@@ -276,8 +278,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
       should(geometer1.favouriteShape().area()).be.exactly(28)
 
-      should(geometer2.favouriteShape().area()).be
-        .above(28)
+      should(geometer2.favouriteShape().area())
+        .be.above(28)
         .and.exactly(Math.PI * 3 ** 2)
 
       geometer1.toJS().should.deepEqual({

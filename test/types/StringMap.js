@@ -15,7 +15,10 @@ export default (should, M, {Person}) => () => {
 
       input.set('A', "g'day!")
 
-      map.inner().get('A').should.be.exactly('Good morning!')
+      map
+        .inner()
+        .get('A')
+        .should.be.exactly('Good morning!')
     })
   })
 
@@ -42,14 +45,22 @@ export default (should, M, {Person}) => () => {
         M.Date.of(new Date('1989-04-16T00:00:00.000Z'))
       )
 
-      should(modelicoMap2.inner().get('a').inner().getFullYear()).be.exactly(
-        1989
-      )
+      should(
+        modelicoMap2
+          .inner()
+          .get('a')
+          .inner()
+          .getFullYear()
+      ).be.exactly(1989)
 
       // verify that modelicoMap1 was not mutated
-      should(modelicoMap1.inner().get('a').inner().getFullYear()).be.exactly(
-        1988
-      )
+      should(
+        modelicoMap1
+          .inner()
+          .get('a')
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
     })
   })
 
@@ -82,11 +93,21 @@ export default (should, M, {Person}) => () => {
 
       modelicoMap.equals(modelicoMapAlt).should.be.exactly(true)
 
-      should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(
-        1988
-      )
+      should(
+        modelicoMap
+          .inner()
+          .get('a')
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
 
-      should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11)
+      should(
+        modelicoMap
+          .inner()
+          .get('b')
+          .inner()
+          .getMonth()
+      ).be.exactly(11)
     })
 
     it('should be parsed correctly when used within another class', () => {
@@ -95,7 +116,12 @@ export default (should, M, {Person}) => () => {
       const author = M.fromJSON(Person, authorJson)
 
       should(
-        author.lifeEvents().inner().get('wedding').inner().getFullYear()
+        author
+          .lifeEvents()
+          .inner()
+          .get('wedding')
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
     })
 
@@ -131,7 +157,10 @@ export default (should, M, {Person}) => () => {
       modelicoMap.equals(modelicoMap2).should.be.exactly(true)
 
       modelicoMap.equals(2).should.be.exactly(false)
-      M.StringMap.EMPTY().equals(modelicoMap).should.be.exactly(false)
+      M.StringMap
+        .EMPTY()
+        .equals(modelicoMap)
+        .should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {
@@ -150,7 +179,10 @@ export default (should, M, {Person}) => () => {
     it('should have a static property for the empty map', () => {
       should(M.StringMap.EMPTY().inner().size).be.exactly(0)
 
-      M.StringMap.EMPTY().toJSON().should.eql({})
+      M.StringMap
+        .EMPTY()
+        .toJSON()
+        .should.eql({})
     })
 
     it('should be able to create a map from an even number of params', () => {

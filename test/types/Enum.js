@@ -18,8 +18,12 @@ export default (should, M, {PartOfDay}) => () => {
         true
       )
 
-      PartOfDay.MORNING().equals(PartOfDay.MORNING()).should.be.exactly(true)
-      PartOfDay.MORNING().equals(PartOfDay.EVENING()).should.be.exactly(false)
+      PartOfDay.MORNING()
+        .equals(PartOfDay.MORNING())
+        .should.be.exactly(true)
+      PartOfDay.MORNING()
+        .equals(PartOfDay.EVENING())
+        .should.be.exactly(false)
     })
   })
 }

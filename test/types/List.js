@@ -23,7 +23,10 @@ export default (U, should, M, {Person}) => () => {
 
   describe('get', () => {
     it('should return the nth item', () => {
-      M.List.of('a', 'b', 'c').get(1).should.be.exactly('b')
+      M.List
+        .of('a', 'b', 'c')
+        .get(1)
+        .should.be.exactly('b')
     })
   })
 
@@ -50,10 +53,20 @@ export default (U, should, M, {Person}) => () => {
         M.Date.of(new Date('1989-04-16T00:00:00.000Z'))
       )
 
-      should(modelicoList2.get(0).inner().getFullYear()).be.exactly(1989)
+      should(
+        modelicoList2
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1989)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988)
+      should(
+        modelicoList1
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
     })
 
     it('should set items in the list correctly when part of a path', () => {
@@ -68,10 +81,20 @@ export default (U, should, M, {Person}) => () => {
         new Date('1989-04-16T00:00:00.000Z')
       )
 
-      should(modelicoList2.get(0).inner().getFullYear()).be.exactly(1989)
+      should(
+        modelicoList2
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1989)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988)
+      should(
+        modelicoList1
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
     })
 
     it('should set items in the list correctly when part of a path with a single element', () => {
@@ -86,10 +109,20 @@ export default (U, should, M, {Person}) => () => {
         new Date('2000-04-16T00:00:00.000Z')
       )
 
-      should(modelicoList2.get(0).inner().getFullYear()).be.exactly(2000)
+      should(
+        modelicoList2
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(2000)
 
       // verify that modelicoList1 was not mutated
-      should(modelicoList1.get(0).inner().getFullYear()).be.exactly(1988)
+      should(
+        modelicoList1
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
     })
 
     it('should be able to set a whole list', () => {
@@ -107,21 +140,41 @@ export default (U, should, M, {Person}) => () => {
 
       should(author1.importantDatesList().size).be.exactly(2)
       should(
-        author1.importantDatesList().get(0).inner().getFullYear()
+        author1
+          .importantDatesList()
+          .get(0)
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
       should(
-        author1.importantDatesList().get(1).inner().getFullYear()
+        author1
+          .importantDatesList()
+          .get(1)
+          .inner()
+          .getFullYear()
       ).be.exactly(2012)
 
       should([...author2.importantDatesList()].length).be.exactly(3)
       should(
-        author2.importantDatesList().get(0).inner().getFullYear()
+        author2
+          .importantDatesList()
+          .get(0)
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
       should(
-        author2.importantDatesList().get(1).inner().getFullYear()
+        author2
+          .importantDatesList()
+          .get(1)
+          .inner()
+          .getFullYear()
       ).be.exactly(2016)
       should(
-        author2.importantDatesList().get(2).inner().getFullYear()
+        author2
+          .importantDatesList()
+          .get(2)
+          .inner()
+          .getFullYear()
       ).be.exactly(2012)
     })
 
@@ -141,13 +194,21 @@ export default (U, should, M, {Person}) => () => {
         modelicoDatesList2
       )
 
-      should(listOfListOfDates1.get(0).get(0).inner().getFullYear()).be.exactly(
-        1988
-      )
+      should(
+        listOfListOfDates1
+          .get(0)
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
 
-      should(listOfListOfDates2.get(0).get(0).inner().getFullYear()).be.exactly(
-        2016
-      )
+      should(
+        listOfListOfDates2
+          .get(0)
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(2016)
     })
   })
 
@@ -173,9 +234,19 @@ export default (U, should, M, {Person}) => () => {
         list(date()).reviver
       )
 
-      should(modelicoList.get(0).inner().getFullYear()).be.exactly(1988)
+      should(
+        modelicoList
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
 
-      should(modelicoList.get(1).inner().getMonth()).be.exactly(11)
+      should(
+        modelicoList
+          .get(1)
+          .inner()
+          .getMonth()
+      ).be.exactly(11)
     })
 
     it('should be parsed correctly when used within another class', () => {
@@ -184,7 +255,11 @@ export default (U, should, M, {Person}) => () => {
       const author = JSON.parse(authorJson, _(Person).reviver)
 
       should(
-        author.importantDatesList().get(0).inner().getFullYear()
+        author
+          .importantDatesList()
+          .get(0)
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
     })
 
@@ -258,9 +333,19 @@ export default (U, should, M, {Person}) => () => {
         list(() => date()).reviver
       )
 
-      should(modelicoList.get(0).inner().getFullYear()).be.exactly(1988)
+      should(
+        modelicoList
+          .get(0)
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
 
-      should(modelicoList.get(1).inner().getMonth()).be.exactly(11)
+      should(
+        modelicoList
+          .get(1)
+          .inner()
+          .getMonth()
+      ).be.exactly(11)
     })
 
     it('should support tuples', () => {
@@ -286,7 +371,10 @@ export default (U, should, M, {Person}) => () => {
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
 
       modelicoList1.equals(() => 1).should.be.exactly(false)
-      M.List.EMPTY().equals(modelicoList1).should.be.exactly(false)
+      M.List
+        .EMPTY()
+        .equals(modelicoList1)
+        .should.be.exactly(false)
     })
 
     it('should support non-primitive types', () => {
@@ -303,13 +391,25 @@ export default (U, should, M, {Person}) => () => {
       modelicoList1.equals(modelicoList1).should.be.exactly(true)
       modelicoList1.equals(modelicoList2).should.be.exactly(true)
 
-      M.List.of(2, 4).equals(M.Set.of(2, 4)).should.be.exactly(false)
-      M.List.of(2, 4).equals(M.List.of(4, 2)).should.be.exactly(false)
+      M.List
+        .of(2, 4)
+        .equals(M.Set.of(2, 4))
+        .should.be.exactly(false)
+      M.List
+        .of(2, 4)
+        .equals(M.List.of(4, 2))
+        .should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {
-      M.List.of(0).equals(M.List.of(-0)).should.be.exactly(true)
-      M.List.of(NaN).equals(M.List.of(NaN)).should.be.exactly(true)
+      M.List
+        .of(0)
+        .equals(M.List.of(-0))
+        .should.be.exactly(true)
+      M.List
+        .of(NaN)
+        .equals(M.List.of(NaN))
+        .should.be.exactly(true)
     })
   })
 
@@ -317,7 +417,10 @@ export default (U, should, M, {Person}) => () => {
     it('should have a static property for the empty list', () => {
       should([...M.List.EMPTY()].length).be.exactly(0)
 
-      M.List.EMPTY().toJSON().should.eql([])
+      M.List
+        .EMPTY()
+        .toJSON()
+        .should.eql([])
 
       new M.List().should.be.exactly(M.List.EMPTY())
     })

@@ -50,7 +50,9 @@ export default (should, M) => () => {
 
     list.includes(3, -1).should.be.exactly(true)
 
-    p(M.List.of(1, 2, NaN)).includes(NaN).should.be.exactly(true)
+    p(M.List.of(1, 2, NaN))
+      .includes(NaN)
+      .should.be.exactly(true)
   })
 
   it('join()', () => {
@@ -94,29 +96,54 @@ export default (should, M) => () => {
   it('concat()', () => {
     const list = p(M.List.of(1, 2, 2, 3))
 
-    list.concat(100).toJSON().should.eql([1, 2, 2, 3, 100])
+    list
+      .concat(100)
+      .toJSON()
+      .should.eql([1, 2, 2, 3, 100])
 
-    list.concat([100, 200]).toJSON().should.eql([1, 2, 2, 3, 100, 200])
+    list
+      .concat([100, 200])
+      .toJSON()
+      .should.eql([1, 2, 2, 3, 100, 200])
   })
 
   it('slice()', () => {
     const list = p(M.List.of(1, 2, 2, 3))
 
-    list.slice(1).toJSON().should.eql([2, 2, 3])
+    list
+      .slice(1)
+      .toJSON()
+      .should.eql([2, 2, 3])
 
-    list.slice(2).set(0, 100).toJSON().should.eql([100, 3])
+    list
+      .slice(2)
+      .set(0, 100)
+      .toJSON()
+      .should.eql([100, 3])
 
-    list.slice(2).toJSON().should.eql([2, 3])
+    list
+      .slice(2)
+      .toJSON()
+      .should.eql([2, 3])
 
-    list.slice(-3).toJSON().should.eql([2, 2, 3])
+    list
+      .slice(-3)
+      .toJSON()
+      .should.eql([2, 2, 3])
 
-    list.slice(0, -2).toJSON().should.eql([1, 2])
+    list
+      .slice(0, -2)
+      .toJSON()
+      .should.eql([1, 2])
   })
 
   it('filter()', () => {
     const list = p(M.List.of(1, 2, 3))
 
-    list.filter(x => x % 2 === 1).toJSON().should.eql([1, 3])
+    list
+      .filter(x => x % 2 === 1)
+      .toJSON()
+      .should.eql([1, 3])
   })
 
   it('forEach()', () => {
@@ -175,7 +202,10 @@ export default (should, M) => () => {
   it('reverse()', () => {
     const list = p(M.List.of(1, 2, 2, 3))
 
-    list.reverse().toJSON().should.eql([3, 2, 2, 1])
+    list
+      .reverse()
+      .toJSON()
+      .should.eql([3, 2, 2, 1])
 
     list.toJSON().should.eql([1, 2, 2, 3])
   })
@@ -183,29 +213,59 @@ export default (should, M) => () => {
   it('copyWithin()', () => {
     const list = p(M.List.of(1, 2, 3, 4, 5))
 
-    list.copyWithin(-2).toJSON().should.eql([1, 2, 3, 1, 2])
+    list
+      .copyWithin(-2)
+      .toJSON()
+      .should.eql([1, 2, 3, 1, 2])
 
-    list.copyWithin(0, 3).toJSON().should.eql([4, 5, 3, 4, 5])
+    list
+      .copyWithin(0, 3)
+      .toJSON()
+      .should.eql([4, 5, 3, 4, 5])
 
-    list.copyWithin(0, 3, 4).toJSON().should.eql([4, 2, 3, 4, 5])
+    list
+      .copyWithin(0, 3, 4)
+      .toJSON()
+      .should.eql([4, 2, 3, 4, 5])
 
-    list.copyWithin(-2, -3, -1).toJSON().should.eql([1, 2, 3, 3, 4])
+    list
+      .copyWithin(-2, -3, -1)
+      .toJSON()
+      .should.eql([1, 2, 3, 3, 4])
   })
 
   it('fill()', () => {
     const list = p(M.List.of(1, 2, 3))
 
-    list.fill(4).toJSON().should.eql([4, 4, 4])
+    list
+      .fill(4)
+      .toJSON()
+      .should.eql([4, 4, 4])
 
-    list.fill(4, 1, 2).toJSON().should.eql([1, 4, 3])
+    list
+      .fill(4, 1, 2)
+      .toJSON()
+      .should.eql([1, 4, 3])
 
-    list.fill(4, 1, 1).toJSON().should.eql([1, 2, 3])
+    list
+      .fill(4, 1, 1)
+      .toJSON()
+      .should.eql([1, 2, 3])
 
-    list.fill(4, -3, -2).toJSON().should.eql([4, 2, 3])
+    list
+      .fill(4, -3, -2)
+      .toJSON()
+      .should.eql([4, 2, 3])
 
-    list.fill(4, NaN, NaN).toJSON().should.eql([1, 2, 3])
+    list
+      .fill(4, NaN, NaN)
+      .toJSON()
+      .should.eql([1, 2, 3])
 
-    p(M.List.fromArray(Array(3))).fill(4).toJSON().should.eql([4, 4, 4])
+    p(M.List.fromArray(Array(3)))
+      .fill(4)
+      .toJSON()
+      .should.eql([4, 4, 4])
   })
 
   it('sort()', () => {
@@ -229,12 +289,18 @@ export default (should, M) => () => {
       return isEven(b) ? 1 : a - b
     }
 
-    list.sort(evensBeforeOdds).toJSON().should.eql([2, 4, 1, 3, 5])
+    list
+      .sort(evensBeforeOdds)
+      .toJSON()
+      .should.eql([2, 4, 1, 3, 5])
   })
 
   it('map()', () => {
     const list = p(M.List.of(1, 2, 3))
 
-    list.map(x => x + 10).equals(M.List.of(11, 12, 13)).should.be.exactly(true)
+    list
+      .map(x => x + 10)
+      .equals(M.List.of(11, 12, 13))
+      .should.be.exactly(true)
   })
 }
