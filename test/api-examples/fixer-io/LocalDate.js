@@ -1,7 +1,5 @@
-export default ({M, Ajv, validationEnabled, ajvOptions}) => {
-  const {base, meta} = M.ajvMetadata(
-    validationEnabled ? Ajv(ajvOptions) : undefined
-  )
+export default ({M, m}) => {
+  const {base, meta} = m
 
   const pad0 = n => {
     const nStr = '' + n

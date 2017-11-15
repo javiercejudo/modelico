@@ -1,6 +1,7 @@
 import {
   always,
   defaultTo,
+  isFunction,
   isPlainObject,
   isSomething,
   emptyObject,
@@ -76,7 +77,7 @@ class Base {
   }
 
   set(field, value) {
-    if (this[field]() === value) {
+    if (isFunction(this[field]) && this[field]() === value) {
       return this
     }
 

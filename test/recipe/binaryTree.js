@@ -80,21 +80,27 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    const balanceArray = arr => {
+    const balanceArray = (arr, sort = true) => {
       const length = arr.length
 
       if (length <= 2) {
         return arr
       }
 
-      arr.sort(cmp)
+      if (sort) {
+        arr.sort(cmp)
+      }
 
       const centre = Math.floor(length / 2)
       const v = arr[centre]
       const leftArr = arr.slice(0, centre)
       const rightArr = arr.slice(centre + 1)
 
-      return [v, ...balanceArray(leftArr), ...balanceArray(rightArr)]
+      return [
+        v,
+        ...balanceArray(leftArr, false),
+        ...balanceArray(rightArr, false)
+      ]
     }
 
     class Node extends Tree {
@@ -154,6 +160,12 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
         const left = this.left()
 
         return left.isEmpty() ? this.value() : left.min()
+      }
+
+      max() {
+        const right = this.right()
+
+        return right.isEmpty() ? this.value() : right.max()
       }
 
       fold(f, init) {
@@ -291,7 +303,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
   })
 
   it('.remove()', () => {
-    const {Node} = numberTree
+    const {empty, Node} = numberTree
+
+    empty.remove(2).should.be.exactly(empty)
+
+    const mySingularTree = Node.of(2)
+
+    mySingularTree.remove(2).should.be.exactly(empty)
+    mySingularTree.remove(1).should.be.exactly(mySingularTree)
 
     let myTree, myTreeRes
 

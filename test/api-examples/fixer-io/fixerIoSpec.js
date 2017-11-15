@@ -42,7 +42,8 @@ const json = `
 
 export default (should, M, {fixerIoFactory}, {Ajv}) => () => {
   const {_} = M.metadata()
-  const {FixerIoResult, Currency} = fixerIoFactory({M, Ajv})
+  const m = M.ajvMetadata(Ajv())
+  const {FixerIoResult, Currency} = fixerIoFactory({M, m})
 
   it('should parse results from fixer.io', () => {
     const fixerIoResult = M.fromJSON(FixerIoResult, json)

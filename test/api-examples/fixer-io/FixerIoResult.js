@@ -1,10 +1,5 @@
-export default (
-  {M, Ajv, validationEnabled, ajvOptions},
-  [Currency, LocalDate]
-) => {
-  const {_, _enum, enumMap, number} = M.ajvMetadata(
-    validationEnabled ? Ajv(ajvOptions) : undefined
-  )
+export default ({M, m}, {Currency, LocalDate}) => {
+  const {_, _enum, enumMap, number} = m
 
   class FixerIoResult extends M.Base {
     constructor(fields) {
