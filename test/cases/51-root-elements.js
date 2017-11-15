@@ -16,6 +16,8 @@ export default (should, M) => () => {
   }
 
   it('should leave root elements that are not plain objects untouched', () => {
-    M.fromJSON(Country, '"ESP"').code().should.be.exactly('ESP')
+    M.fromJSON(Country, '"ESP"')
+      .code()
+      .should.be.exactly('ESP')
   })
 }

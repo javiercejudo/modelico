@@ -137,20 +137,32 @@ export default (U, should, M, {Person}) => () => {
       modelicoSet1.equals(modelicoSet2).should.be.exactly(true)
 
       modelicoSet1.equals(/abc/).should.be.exactly(false)
-      M.Set.EMPTY().equals(modelicoSet1).should.be.exactly(false)
+      M.Set.EMPTY()
+        .equals(modelicoSet1)
+        .should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {
-      M.Set.of(0).equals(M.Set.of(-0)).should.be.exactly(true)
-      M.Set.of(NaN).equals(M.Set.of(NaN)).should.be.exactly(true)
+      M.Set.of(0)
+        .equals(M.Set.of(-0))
+        .should.be.exactly(true)
+      M.Set.of(NaN)
+        .equals(M.Set.of(NaN))
+        .should.be.exactly(true)
     })
 
     it('should support simple unordered checks', () => {
-      M.Set.of(1, 2, 3).equals(M.Set.of(1, 3, 2)).should.be.exactly(false)
+      M.Set.of(1, 2, 3)
+        .equals(M.Set.of(1, 3, 2))
+        .should.be.exactly(false)
 
-      M.Set.of(1, 2, 3).equals(M.Set.of(1, 3, 2), true).should.be.exactly(true)
+      M.Set.of(1, 2, 3)
+        .equals(M.Set.of(1, 3, 2), true)
+        .should.be.exactly(true)
 
-      M.Set.of(1, 2, 3).equals(M.Set.of(1, 4, 2), true).should.be.exactly(false)
+      M.Set.of(1, 2, 3)
+        .equals(M.Set.of(1, 4, 2), true)
+        .should.be.exactly(false)
     })
   })
 
@@ -158,7 +170,9 @@ export default (U, should, M, {Person}) => () => {
     it('should have a static property for the empty set', () => {
       should(M.Set.EMPTY().inner().size).be.exactly(0)
 
-      M.Set.EMPTY().toJSON().should.eql([])
+      M.Set.EMPTY()
+        .toJSON()
+        .should.eql([])
 
       new M.Set().should.be.exactly(M.Set.of()).and.exactly(M.Set.EMPTY())
     })

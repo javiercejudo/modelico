@@ -8,10 +8,6 @@ export default (M, PartOfDay, Sex) => {
   const sex = Sex.metadata
 
   class Person extends M.Base {
-    constructor(props) {
-      super(Person, props)
-    }
-
     fullName() {
       return joinWithSpace(this.givenName(), this.familyName())
     }

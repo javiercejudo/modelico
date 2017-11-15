@@ -14,6 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/5.1.5/ajv.bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tv4/1.3.0/tv4.js"></script>
+  <script src="https://wzrd.in/standalone/asciitree"></script>
   <script src="../../lib/is-my-json-valid-2.16.0.js"></script>
 
   <script src="../../dist/modelico.js"></script>
@@ -48,7 +49,8 @@
         extensions: {
           Ajv: Ajv,
           isMyJsonValid: isMyJsonValid,
-          tv4: tv4
+          tv4: tv4,
+          asciitree: asciitree
         }
       }))
       describe('Modélico Min', modelicoSpec({
@@ -57,7 +59,8 @@
         extensions: {
           Ajv: Ajv,
           isMyJsonValid: isMyJsonValid,
-          tv4: tv4
+          tv4: tv4,
+          asciitree: asciitree
         }
       }))
     })

@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
+export default ({shuffle}, should, M, fixtures, {Ajv, asciitree}) => () => {
   const defaultCmp = (a, b) => (a === b ? 0 : a > b ? 1 : -1)
 
   const binaryTreeFactory = (valueMetadata, {cmp = defaultCmp, ajv} = {}) => {
@@ -10,6 +10,10 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     const insertReducer = (acc, x) => acc.insert(x)
 
     class Tree extends M.Base {
+      toString() {
+        return asciitree(this.toPrintable())
+      }
+
       static fromArray(arr) {
         return arr.reduce(insertReducer, empty)
       }
@@ -71,6 +75,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
         return this
       }
 
+      isBST() {
+        return true
+      }
+
+      toPrintable() {
+        return '☒'
+      }
+
       toJSON() {
         return null
       }
@@ -80,21 +92,27 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    const balanceArray = arr => {
+    const balanceArray = (arr, sort = true) => {
       const length = arr.length
 
       if (length <= 2) {
         return arr
       }
 
-      arr.sort(cmp)
+      if (sort) {
+        arr.sort(cmp)
+      }
 
       const centre = Math.floor(length / 2)
       const v = arr[centre]
       const leftArr = arr.slice(0, centre)
       const rightArr = arr.slice(centre + 1)
 
-      return [v, ...balanceArray(leftArr), ...balanceArray(rightArr)]
+      return [
+        v,
+        ...balanceArray(leftArr, false),
+        ...balanceArray(rightArr, false)
+      ]
     }
 
     class Node extends Tree {
@@ -156,6 +174,12 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
         return left.isEmpty() ? this.value() : left.min()
       }
 
+      max() {
+        const right = this.right()
+
+        return right.isEmpty() ? this.value() : right.max()
+      }
+
       fold(f, init) {
         const vInit = f(this.value(), init)
         const lInit = this.left().fold(f, vInit)
@@ -164,11 +188,13 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
 
       has(x) {
-        if (cmp(x, this.value()) === 0) {
+        const comparison = cmp(x, this.value())
+
+        if (comparison === 0) {
           return true
         }
 
-        return this.left().has(x) || this.right().has(x)
+        return comparison === 1 ? this.right().has(x) : this.left().has(x)
       }
 
       map(f) {
@@ -192,6 +218,31 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
           left: this.right().invert(),
           right: this.left().invert()
         })
+      }
+
+      isBST(min, max) {
+        const v = this.value()
+
+        if (
+          (min !== undefined && v <= min) ||
+          (max !== undefined && v >= max)
+        ) {
+          return false
+        }
+
+        return this.left().isBST(min, v) && this.right().isBST(v, max)
+      }
+
+      toPrintable() {
+        const emptyRep = empty.toPrintable()
+        const left = this.left().toPrintable()
+        const right = this.right().toPrintable()
+
+        if (left === emptyRep && right === emptyRep) {
+          return this.value()
+        }
+
+        return [this.value(), left, right]
       }
 
       static of(value, left, right) {
@@ -253,8 +304,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
     })
 
-    myTree2.right().value().should.be.exactly(6)
-    myTree2.right().right().should.be.exactly(empty)
+    myTree2
+      .right()
+      .value()
+      .should.be.exactly(6)
+    myTree2
+      .right()
+      .right()
+      .should.be.exactly(empty)
 
     const myTree3 = myTree2.insert(3).insert(10)
 
@@ -290,8 +347,34 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     myTree.has(4).should.be.exactly(false)
   })
 
-  it('.remove()', () => {
+  it('.isBST()', () => {
     const {Node} = numberTree
+
+    const tree1 = Node.of(2, Node.of(1), Node.of(3))
+    tree1.isBST().should.be.exactly(true)
+
+    const tree2 = Node.of(2, Node.of(3), Node.of(1))
+    tree2.isBST().should.be.exactly(false)
+
+    const tree3 = Node.of(2, Node.of(1, Node.of(0)), Node.of(4, Node.of(3)))
+    tree3.isBST().should.be.exactly(true)
+
+    const tree4 = Node.of(2, Node.of(1, Node.of(0), Node.of(3)), Node.of(4))
+    tree4.isBST().should.be.exactly(false)
+  })
+
+  it('.remove()', () => {
+    const {empty, Node} = numberTree
+    const count = (_, acc) => acc + 1
+
+    empty.remove(2).should.be.exactly(empty)
+
+    const mySingularTree = Node.of(2)
+    mySingularTree.fold(count, 0).should.be.exactly(1)
+    mySingularTree.isBST().should.be.exactly(true)
+
+    mySingularTree.remove(2).should.be.exactly(empty)
+    mySingularTree.remove(1).should.be.exactly(mySingularTree)
 
     let myTree, myTreeRes
 
@@ -301,19 +384,16 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     myTreeRes.should.be.exactly(myTree)
 
     myTreeRes = myTree.remove(3)
-    myTreeRes.left().value().should.be.exactly(1)
-    myTreeRes.value().should.be.exactly(2)
-    myTreeRes.right().isEmpty().should.be.exactly(true)
+    myTreeRes.fold(count, 0).should.be.exactly(2)
+    myTreeRes.isBST().should.be.exactly(true)
 
     myTreeRes = myTree.remove(1)
-    myTreeRes.value().should.be.exactly(2)
-    myTreeRes.left().isEmpty().should.be.exactly(true)
-    myTreeRes.right().value().should.be.exactly(3)
+    myTreeRes.fold(count, 0).should.be.exactly(2)
+    myTreeRes.isBST().should.be.exactly(true)
 
     myTreeRes = myTree.remove(2)
-    myTreeRes.value().should.be.exactly(3)
-    myTreeRes.left().value().should.be.exactly(1)
-    myTreeRes.right().isEmpty().should.be.exactly(true)
+    myTreeRes.fold(count, 0).should.be.exactly(2)
+    myTreeRes.isBST().should.be.exactly(true)
 
     const myLeftTree = Node.of(2, Node.of(1), Node.of(3))
     const myRightTree = Node.of(6, Node.of(5), Node.of(7))
@@ -323,34 +403,24 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     myTreeRes.should.be.exactly(myTree)
 
     myTreeRes = myTree.remove(4)
-    myTreeRes.left().should.be.exactly(myLeftTree)
-    myTreeRes.value().should.be.exactly(5)
-    myTreeRes.right().value().should.be.exactly(6)
-    myTreeRes.right().right().value().should.be.exactly(7)
+    myTreeRes.fold(count, 0).should.be.exactly(6)
+    myTreeRes.isBST().should.be.exactly(true)
 
     myTreeRes = myTree.remove(1)
-    myTreeRes.value().should.be.exactly(4)
-    myTreeRes.right().should.be.exactly(myRightTree)
-    myTreeRes.left().value().should.be.exactly(2)
-    myTreeRes.left().right().value().should.be.exactly(3)
+    myTreeRes.fold(count, 0).should.be.exactly(6)
+    myTreeRes.isBST().should.be.exactly(true)
 
     myTreeRes = myTree.remove(5)
-    myTreeRes.value().should.be.exactly(4)
-    myTreeRes.left().should.be.exactly(myLeftTree)
-    myTreeRes.right().value().should.be.exactly(6)
-    myTreeRes.right().right().value().should.be.exactly(7)
+    myTreeRes.fold(count, 0).should.be.exactly(6)
+    myTreeRes.isBST().should.be.exactly(true)
 
     myTreeRes = myTree.remove(2)
-    myTreeRes.value().should.be.exactly(4)
-    myTreeRes.right().should.be.exactly(myRightTree)
-    myTreeRes.left().value().should.be.exactly(3)
-    myTreeRes.left().left().value().should.be.exactly(1)
+    myTreeRes.fold(count, 0).should.be.exactly(6)
+    myTreeRes.isBST().should.be.exactly(true)
 
     myTreeRes = myTree.remove(6)
-    myTreeRes.value().should.be.exactly(4)
-    myTreeRes.left().should.be.exactly(myLeftTree)
-    myTreeRes.right().value().should.be.exactly(7)
-    myTreeRes.right().left().value().should.be.exactly(5)
+    myTreeRes.fold(count, 0).should.be.exactly(6)
+    myTreeRes.isBST().should.be.exactly(true)
   })
 
   it('.fold()', () => {
@@ -369,8 +439,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     const myMappedTree = myTree.map(x => x ** 2)
 
     myMappedTree.value().should.be.exactly(4)
-    myMappedTree.left().value().should.be.exactly(1)
-    myMappedTree.right().value().should.be.exactly(9)
+    myMappedTree
+      .left()
+      .value()
+      .should.be.exactly(1)
+    myMappedTree
+      .right()
+      .value()
+      .should.be.exactly(9)
 
     myTree.depth().should.be.exactly(2)
     myMappedTree.depth().should.be.exactly(2)
@@ -378,8 +454,14 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     const myConstantTree = myTree.map(() => 1)
 
     myConstantTree.value().should.be.exactly(1)
-    myConstantTree.left().value().should.be.exactly(1)
-    myConstantTree.right().value().should.be.exactly(1)
+    myConstantTree
+      .left()
+      .value()
+      .should.be.exactly(1)
+    myConstantTree
+      .right()
+      .value()
+      .should.be.exactly(1)
 
     const myBalancedConstantTree = myConstantTree.balance()
 
@@ -465,14 +547,19 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
     const deepTree = Tree.fromArray([1, 2, 3, 4, 5, 6, 7])
     const niceTree = Tree.fromArray([4, 2, 1, 3, 6, 5, 7])
 
-    deepTree.balance().toJS().should.deepEqual(niceTree.toJS())
+    deepTree
+      .balance()
+      .toJS()
+      .should.deepEqual(niceTree.toJS())
   })
 
   it('balance larger tree', () => {
     const {Tree} = numberTree
     const power = 6
 
-    const values = Array(2 ** power - 1).fill().map((_, i) => i)
+    const values = Array(2 ** power - 1)
+      .fill()
+      .map((_, i) => i)
     const arr = shuffle(values)
 
     const largeTree = Tree.fromArray(arr)
@@ -673,25 +760,28 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
       }
     })
 
-    myTree.balance().toJS().should.deepEqual({
-      value: {
-        name: 'Robbie'
-      },
-      left: {
+    myTree
+      .balance()
+      .toJS()
+      .should.deepEqual({
         value: {
-          name: 'Bane'
+          name: 'Robbie'
         },
-        left: null,
-        right: null
-      },
-      right: {
-        value: {
-          name: 'Sunny'
+        left: {
+          value: {
+            name: 'Bane'
+          },
+          left: null,
+          right: null
         },
-        left: null,
-        right: null
-      }
-    })
+        right: {
+          value: {
+            name: 'Sunny'
+          },
+          left: null,
+          right: null
+        }
+      })
 
     M.getSchema(_(Tree)).should.deepEqual({
       definitions: {

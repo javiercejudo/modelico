@@ -23,10 +23,6 @@ const M = require('modelico') // window.Modelico in the browser
 const {string} = M.metadata()
 
 class Animal extends M.Base {
-  constructor (props) {
-    super(Animal, props)
-  }
-
   speak () {
     const name = this.name()
 
@@ -52,10 +48,6 @@ const M = require('modelico')
 class Animal extends M.createModel(m => ({
   name: m.string()
 })) {
-  constructor (props) {
-    super(Animal, props)
-  }
-
   speak () {
     // same as above
   }

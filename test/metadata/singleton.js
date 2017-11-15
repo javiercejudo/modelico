@@ -297,7 +297,11 @@ export default (should, M, {Person}, {Ajv}) => () => {
       fnCache.has(1).should.be.exactly(true)
       fnCache.has(4).should.be.exactly(false)
 
-      mem.clear().cache().has(counter).should.be.exactly(false)
+      mem
+        .clear()
+        .cache()
+        .has(counter)
+        .should.be.exactly(false)
     })
   })
 }

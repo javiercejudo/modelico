@@ -11,13 +11,19 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
       const maybe1 = JSON.parse(authorJson, maybe(_(Person)).reviver)
       const maybe2 = maybe1.set('givenName', 'Javi')
 
-      maybe2.getOrElse('').givenName().should.be.exactly('Javi')
+      maybe2
+        .getOrElse('')
+        .givenName()
+        .should.be.exactly('Javi')
     })
 
     it('should not throw upon setting if empty', () => {
       const maybe = M.Maybe.of(null)
 
-      maybe.set('givenName', 'Javier').isEmpty().should.be.exactly(true)
+      maybe
+        .set('givenName', 'Javier')
+        .isEmpty()
+        .should.be.exactly(true)
     })
 
     it('should return a new maybe with a value when the path is empty', () => {
@@ -40,13 +46,28 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
       const maybe2 = maybe1.setIn([[{a: 1}, 'a']], 200)
 
       maybe2.isEmpty().should.be.exactly(true)
-      M.Just.of(2).set('a', 3).isEmpty().should.be.exactly(true)
+      M.Just.of(2)
+        .set('a', 3)
+        .isEmpty()
+        .should.be.exactly(true)
     })
 
     it('should support Maybe of null or undefined', () => {
-      should(M.Just.of(null).setIn([], 2).toJSON()).be.exactly(2)
-      should(M.Just.of(null).set('a', 2).getOrElse('')).be.exactly(null)
-      should(M.Just.of().set('a', 2).getOrElse('')).be.exactly(undefined)
+      should(
+        M.Just.of(null)
+          .setIn([], 2)
+          .toJSON()
+      ).be.exactly(2)
+      should(
+        M.Just.of(null)
+          .set('a', 2)
+          .getOrElse('')
+      ).be.exactly(null)
+      should(
+        M.Just.of()
+          .set('a', 2)
+          .getOrElse('')
+      ).be.exactly(undefined)
     })
   })
 
@@ -90,7 +111,10 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
       const author = JSON.parse(authorJson, _(Person).reviver)
       const myMaybe = JSON.parse(authorJson, maybe(_(Person)).reviver)
 
-      myMaybe.inner().equals(author).should.be.exactly(true)
+      myMaybe
+        .inner()
+        .equals(author)
+        .should.be.exactly(true)
     })
 
     it('should parse missing keys of Maybe values as Maybe with Nothing', () => {
@@ -98,15 +122,24 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
         '{"givenName":"Javier","familyName":"Cejudo","birthday":"1988-04-16T00:00:00.000Z","favouritePartOfDay":"EVENING","lifeEvents":[],"importantDatesList":[],"importantDatesSet":[]}'
 
       const author = JSON.parse(authorJsonWithMissinMaybe, _(Person).reviver)
-      author.sex().isEmpty().should.be.exactly(true)
+      author
+        .sex()
+        .isEmpty()
+        .should.be.exactly(true)
     })
 
     it('should handle missing Enums', () => {
       const MyEnum = M.Enum.fromArray(['A', 'B'])
       const m = M.metadata()
 
-      m.maybe(MyEnum.metadata()).reviver('', 'C').should.be.exactly(M.Nothing)
-      m.maybe(MyEnum.metadata()).reviver('', null).should.be.exactly(M.Nothing)
+      m
+        .maybe(MyEnum.metadata())
+        .reviver('', 'C')
+        .should.be.exactly(M.Nothing)
+      m
+        .maybe(MyEnum.metadata())
+        .reviver('', null)
+        .should.be.exactly(M.Nothing)
     })
   })
 
@@ -120,7 +153,9 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
     })
 
     it('can be contained in a Just like everything else', () => {
-      M.Just.of(M.Nothing).inner().should.be.exactly(M.Nothing)
+      M.Just.of(M.Nothing)
+        .inner()
+        .should.be.exactly(M.Nothing)
     })
   })
 
@@ -187,11 +222,21 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
       const doublePlus5 = x => plus5(double(x))
       const just10 = M.Just.of(10)
 
-      should(just10.map(doublePlus5).inner()).be
-        .exactly(just10.map(double).map(plus5).inner())
+      should(just10.map(doublePlus5).inner())
+        .be.exactly(
+          just10
+            .map(double)
+            .map(plus5)
+            .inner()
+        )
         .and.exactly(25)
 
-      should(just10.map(() => null).map(plus5).inner()).be.exactly(5)
+      should(
+        just10
+          .map(() => null)
+          .map(plus5)
+          .inner()
+      ).be.exactly(5)
     })
   })
 
@@ -202,10 +247,18 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
 
       const addMaybes = (mX, mY) => mX.flatMap(x => mY.map(y => x + y))
 
-      addMaybes(just5, just10).getOrElse(0).should.be.exactly(15)
-      addMaybes(M.Nothing, just10).getOrElse(0).should.be.exactly(0)
-      addMaybes(just5, M.Nothing).getOrElse(0).should.be.exactly(0)
-      addMaybes(M.Nothing, M.Nothing).getOrElse(0).should.be.exactly(0)
+      addMaybes(just5, just10)
+        .getOrElse(0)
+        .should.be.exactly(15)
+      addMaybes(M.Nothing, just10)
+        .getOrElse(0)
+        .should.be.exactly(0)
+      addMaybes(just5, M.Nothing)
+        .getOrElse(0)
+        .should.be.exactly(0)
+      addMaybes(M.Nothing, M.Nothing)
+        .getOrElse(0)
+        .should.be.exactly(0)
     })
 
     it('should throw a TypeError if f does not return a Maybe', () => {
@@ -251,8 +304,12 @@ export default (U, should, M, {Person, PartOfDay}) => () => {
     })
 
     it('should have same-value-zero semantics', () => {
-      M.Just.of(0).equals(M.Just.of(-0)).should.be.exactly(true)
-      M.Just.of(NaN).equals(M.Just.of(NaN)).should.be.exactly(true)
+      M.Just.of(0)
+        .equals(M.Just.of(-0))
+        .should.be.exactly(true)
+      M.Just.of(NaN)
+        .equals(M.Just.of(NaN))
+        .should.be.exactly(true)
     })
   })
 
