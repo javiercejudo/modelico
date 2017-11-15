@@ -12,7 +12,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     wrappedNumber,
     boolean,
     date,
-    _enum,
+    _enum: enumType,
     enumMap,
     list,
     map,
@@ -508,7 +508,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     it('reports its full schema', () => {
       const Side = M.Enum.fromArray(['A', 'B'])
 
-      M.getSchema(_enum(Side)).should.deepEqual({
+      M.getSchema(enumType(Side)).should.deepEqual({
         enum: ['A', 'B']
       })
     })
@@ -1226,7 +1226,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
       static innerTypes() {
         return Object.freeze({
-          type: _enum(ScoreTypeEnum),
+          type: enumType(ScoreTypeEnum),
           score: anyOf([
             [number({minimum: 0}), ScoreTypeEnum.Numeric()],
             [string({minLength: 1}), ScoreTypeEnum.Alphabetic()]

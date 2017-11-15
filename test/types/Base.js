@@ -153,8 +153,18 @@ export default (U, should, M, fixtures) => () => {
         .setIn(['givenName'], 'Javi')
         .setIn(['birthday'], new Date('1989-04-16T00:00:00.000Z'))
 
-      should(author2.birthday().inner().getFullYear()).be.exactly(1989)
-      should(author1.birthday().inner().getFullYear()).be.exactly(1988)
+      should(
+        author2
+          .birthday()
+          .inner()
+          .getFullYear()
+      ).be.exactly(1989)
+      should(
+        author1
+          .birthday()
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
     })
 
     it('edge case when Modelico setIn is called with an empty path', () => {
@@ -166,9 +176,18 @@ export default (U, should, M, fixtures) => () => {
       const listOfPeople2 = listOfPeople1.setIn([0, 'givenName'], 'Javi')
       const listOfPeople3 = listOfPeople2.setIn([0], M.fields(author))
 
-      listOfPeople1.get(0).givenName().should.be.exactly('Javier')
-      listOfPeople2.get(0).givenName().should.be.exactly('Javi')
-      listOfPeople3.get(0).givenName().should.be.exactly('Javier')
+      listOfPeople1
+        .get(0)
+        .givenName()
+        .should.be.exactly('Javier')
+      listOfPeople2
+        .get(0)
+        .givenName()
+        .should.be.exactly('Javi')
+      listOfPeople3
+        .get(0)
+        .givenName()
+        .should.be.exactly('Javier')
     })
 
     it('should not support null (wrap with Maybe)', () => {
@@ -265,20 +284,30 @@ export default (U, should, M, fixtures) => () => {
       const author1 = M.fromJSON(Person, author1Json)
       const author2 = JSON.parse(author1Json, _(Person).reviver)
 
-      should('Javier Cejudo').be
-        .exactly(author1.fullName())
+      should('Javier Cejudo')
+        .be.exactly(author1.fullName())
         .and.exactly(author2.fullName())
 
-      should(1988).be
-        .exactly(author1.birthday().inner().getFullYear())
-        .and.exactly(author2.birthday().inner().getFullYear())
+      should(1988)
+        .be.exactly(
+          author1
+            .birthday()
+            .inner()
+            .getFullYear()
+        )
+        .and.exactly(
+          author2
+            .birthday()
+            .inner()
+            .getFullYear()
+        )
 
-      should(PartOfDay.EVENING().minTime).be
-        .exactly(author1.favouritePartOfDay().minTime)
+      should(PartOfDay.EVENING().minTime)
+        .be.exactly(author1.favouritePartOfDay().minTime)
         .and.exactly(author2.favouritePartOfDay().minTime)
 
-      should(Sex.MALE().toJSON()).be
-        .exactly(author1.sex().toJSON())
+      should(Sex.MALE().toJSON())
+        .be.exactly(author1.sex().toJSON())
         .and.exactly(author2.sex().toJSON())
     })
 
@@ -395,7 +424,11 @@ export default (U, should, M, fixtures) => () => {
         bestFriend: M.Just.of(bestFriend)
       })
 
-      marc.bestFriend().getOrElse(Friend.EMPTY).name().should.be.exactly('John')
+      marc
+        .bestFriend()
+        .getOrElse(Friend.EMPTY)
+        .name()
+        .should.be.exactly('John')
     })
   })
 

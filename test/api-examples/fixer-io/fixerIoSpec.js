@@ -42,18 +42,31 @@ const json = `
 
 export default (should, M, {fixerIoFactory}, {Ajv}) => () => {
   const {_} = M.metadata()
-  const {FixerIoResult, Currency} = fixerIoFactory({M, Ajv})
+  const m = M.ajvMetadata(Ajv())
+  const {FixerIoResult, Currency} = fixerIoFactory({M, m})
 
   it('should parse results from fixer.io', () => {
     const fixerIoResult = M.fromJSON(FixerIoResult, json)
 
     fixerIoResult.base().should.be.exactly(Currency.EUR())
 
-    fixerIoResult.date().year().should.be.exactly(2017)
-    fixerIoResult.date().month().should.be.exactly(3)
-    fixerIoResult.date().day().should.be.exactly(2)
+    fixerIoResult
+      .date()
+      .year()
+      .should.be.exactly(2017)
+    fixerIoResult
+      .date()
+      .month()
+      .should.be.exactly(3)
+    fixerIoResult
+      .date()
+      .day()
+      .should.be.exactly(2)
 
-    fixerIoResult.rates().get(Currency.AUD()).should.be.exactly(1.384)
+    fixerIoResult
+      .rates()
+      .get(Currency.AUD())
+      .should.be.exactly(1.384)
   })
 
   it('should convert between any available currencies', () => {
@@ -154,6 +167,8 @@ export default (should, M, {fixerIoFactory}, {Ajv}) => () => {
 
     schema.should.deepEqual(expectedSchema)
 
-    Ajv().validate(schema, JSON.parse(json)).should.be.exactly(true)
+    Ajv()
+      .validate(schema, JSON.parse(json))
+      .should.be.exactly(true)
   })
 }

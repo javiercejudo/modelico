@@ -1,6 +1,7 @@
 import {
   always,
   defaultTo,
+  isFunction,
   isPlainObject,
   isSomething,
   emptyObject,
@@ -11,10 +12,19 @@ import {
 import {typeSymbol, fieldsSymbol} from '../symbols'
 import getInnerTypes from '../getInnerTypes'
 
-const getPathReducer = (result, part) => result.get(part)
+const getInReducer = (result, part) => result.get(part)
 
 class Base {
-  constructor(Type, fields = emptyObject, thisArg) {
+  constructor(_, fieldss = emptyObject, thisArg) {
+    let fields = fieldss
+    let Type = this.constructor
+
+    if (isPlainObject(_)) {
+      fields = _
+    } else if (_ !== undefined) {
+      Type = _
+    }
+
     if (!isPlainObject(fields)) {
       throw TypeError(
         `expected an object with fields for ${Type.displayName ||
@@ -66,7 +76,7 @@ class Base {
   }
 
   getIn(path) {
-    return path.reduce(getPathReducer, this)
+    return path.reduce(getInReducer, this)
   }
 
   copy(fields) {
@@ -76,7 +86,7 @@ class Base {
   }
 
   set(field, value) {
-    if (this[field]() === value) {
+    if (isFunction(this[field]) && this[field]() === value) {
       return this
     }
 

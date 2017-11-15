@@ -1,10 +1,5 @@
-export default (
-  {M, Ajv, validationEnabled, ajvOptions},
-  [Currency, LocalDate]
-) => {
-  const {_, _enum, enumMap, number} = M.ajvMetadata(
-    validationEnabled ? Ajv(ajvOptions) : undefined
-  )
+export default ({M, m}, {Currency, LocalDate}) => {
+  const {_, _enum: enumType, enumMap, number} = m
 
   class FixerIoResult extends M.Base {
     constructor(fields) {
@@ -26,9 +21,9 @@ export default (
 
     static innerTypes() {
       return Object.freeze({
-        base: _enum(Currency),
+        base: enumType(Currency),
         date: _(LocalDate),
-        rates: enumMap(_enum(Currency), number({exclusiveMinimum: 0}))
+        rates: enumMap(enumType(Currency), number({exclusiveMinimum: 0}))
       })
     }
   }

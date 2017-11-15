@@ -4,10 +4,6 @@ export default (should, M) => () => {
   const {_, string} = M.metadata()
 
   class Animal extends M.Base {
-    constructor(props) {
-      super(Animal, props)
-    }
-
     speak() {
       const name = this.name()
       return name === '' ? `I don't have a name` : `My name is ${name}!`

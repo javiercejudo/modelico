@@ -77,13 +77,15 @@ const getSchemaImpl = (metadata: Object): Object => {
 const getUsedDefinitions = (): Object => {
   const {definitions, usedDefinitions} = state
 
-  return Object.keys(definitions).map(Number).reduce((acc, ref) => {
-    if (usedDefinitions.has(ref)) {
-      acc[ref] = definitions[ref]
-    }
+  return Object.keys(definitions)
+    .map(Number)
+    .reduce((acc, ref) => {
+      if (usedDefinitions.has(ref)) {
+        acc[ref] = definitions[ref]
+      }
 
-    return acc
-  }, {})
+      return acc
+    }, {})
 }
 
 const getSchema = (metadata: Object, topLevel: boolean = true): Object => {

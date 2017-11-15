@@ -41,14 +41,22 @@ export default (U, should, M, {Person}) => () => {
         M.Date.of(new Date('1989-04-16T00:00:00.000Z'))
       )
 
-      should(modelicoMap2.inner().get('a').inner().getFullYear()).be.exactly(
-        1989
-      )
+      should(
+        modelicoMap2
+          .inner()
+          .get('a')
+          .inner()
+          .getFullYear()
+      ).be.exactly(1989)
 
       // verify that modelicoMap1 was not mutated
-      should(modelicoMap1.inner().get('a').inner().getFullYear()).be.exactly(
-        1988
-      )
+      should(
+        modelicoMap1
+          .inner()
+          .get('a')
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
     })
 
     it('should set fields returning a new map when part of a path', () => {
@@ -61,12 +69,22 @@ export default (U, should, M, {Person}) => () => {
       )
 
       should(
-        author2.lifeEvents().inner().get('wedding').inner().getFullYear()
+        author2
+          .lifeEvents()
+          .inner()
+          .get('wedding')
+          .inner()
+          .getFullYear()
       ).be.exactly(2010)
 
       // verify that author1 was not mutated
       should(
-        author1.lifeEvents().inner().get('wedding').inner().getFullYear()
+        author1
+          .lifeEvents()
+          .inner()
+          .get('wedding')
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
     })
 
@@ -77,7 +95,13 @@ export default (U, should, M, {Person}) => () => {
 
       const map = author.lifeEvents()
 
-      should(map.inner().get('wedding').inner().getFullYear()).be.exactly(2013)
+      should(
+        map
+          .inner()
+          .get('wedding')
+          .inner()
+          .getFullYear()
+      ).be.exactly(2013)
 
       const customMap = new Map([
         ['wedding', M.Date.of(new Date('2010-03-28T00:00:00.000Z'))]
@@ -85,7 +109,13 @@ export default (U, should, M, {Person}) => () => {
 
       const map2 = map.setIn([], customMap)
 
-      should(map2.inner().get('wedding').inner().getFullYear()).be.exactly(2010)
+      should(
+        map2
+          .inner()
+          .get('wedding')
+          .inner()
+          .getFullYear()
+      ).be.exactly(2010)
     })
   })
 
@@ -118,11 +148,21 @@ export default (U, should, M, {Person}) => () => {
 
       modelicoMap.equals(modelicoMapAlt).should.be.exactly(true)
 
-      should(modelicoMap.inner().get('a').inner().getFullYear()).be.exactly(
-        1988
-      )
+      should(
+        modelicoMap
+          .inner()
+          .get('a')
+          .inner()
+          .getFullYear()
+      ).be.exactly(1988)
 
-      should(modelicoMap.inner().get('b').inner().getMonth()).be.exactly(11)
+      should(
+        modelicoMap
+          .inner()
+          .get('b')
+          .inner()
+          .getMonth()
+      ).be.exactly(11)
     })
 
     it('should be parsed correctly when used within another class', () => {
@@ -131,7 +171,12 @@ export default (U, should, M, {Person}) => () => {
       const author = M.fromJSON(Person, authorJson)
 
       should(
-        author.lifeEvents().inner().get('wedding').inner().getFullYear()
+        author
+          .lifeEvents()
+          .inner()
+          .get('wedding')
+          .inner()
+          .getFullYear()
       ).be.exactly(2013)
     })
 
@@ -142,7 +187,10 @@ export default (U, should, M, {Person}) => () => {
         '[[1, "10"], [2, "20"], [3, "30"]]'
       )
 
-      myMap.inner().get(2).should.be.exactly('20')
+      myMap
+        .inner()
+        .get(2)
+        .should.be.exactly('20')
     })
 
     it('should be able to work with M.genericsFromJS', () => {
@@ -152,7 +200,10 @@ export default (U, should, M, {Person}) => () => {
         [[1, '10'], [2, '20'], [3, '30']]
       )
 
-      myMap.inner().get(2).should.be.exactly('20')
+      myMap
+        .inner()
+        .get(2)
+        .should.be.exactly('20')
     })
 
     it('should not support null (wrap with Maybe)', () => {
@@ -177,29 +228,34 @@ export default (U, should, M, {Person}) => () => {
       modelicoMap.equals(modelicoMap2).should.be.exactly(true)
 
       modelicoMap.equals(2).should.be.exactly(false)
-      M.Map.EMPTY().equals(modelicoMap).should.be.exactly(false)
+      M.Map.EMPTY()
+        .equals(modelicoMap)
+        .should.be.exactly(false)
     })
 
     it('should have same-value-zero semantics', () => {
-      M.Map.of('a', 0).equals(M.Map.of('a', -0)).should.be.exactly(true)
-      M.Map.of('a', NaN).equals(M.Map.of('a', NaN)).should.be.exactly(true)
+      M.Map.of('a', 0)
+        .equals(M.Map.of('a', -0))
+        .should.be.exactly(true)
+      M.Map.of('a', NaN)
+        .equals(M.Map.of('a', NaN))
+        .should.be.exactly(true)
 
-      M.Map.of(-0, 33).equals(M.Map.of(0, 33)).should.be.exactly(true)
+      M.Map.of(-0, 33)
+        .equals(M.Map.of(0, 33))
+        .should.be.exactly(true)
     })
 
     it('should support simple unordered checks', () => {
-      M.Map
-        .of('a', 1, 'b', 2)
+      M.Map.of('a', 1, 'b', 2)
         .equals(M.Map.of('b', 2, 'a', 1))
         .should.be.exactly(false)
 
-      M.Map
-        .of('a', 1, 'b', 2)
+      M.Map.of('a', 1, 'b', 2)
         .equals(M.Map.of('b', 2, 'a', 1), true)
         .should.be.exactly(true)
 
-      M.Map
-        .of('a', 1, 'b', 2, 'c', undefined)
+      M.Map.of('a', 1, 'b', 2, 'c', undefined)
         .equals(M.Map.of('b', 2, 'a', 1, 'd', 4), true)
         .should.be.exactly(false)
     })
@@ -209,7 +265,9 @@ export default (U, should, M, {Person}) => () => {
     it('should have a static property for the empty map', () => {
       should(M.Map.EMPTY().inner().size).be.exactly(0)
 
-      M.Map.EMPTY().toJSON().should.eql([])
+      M.Map.EMPTY()
+        .toJSON()
+        .should.eql([])
 
       new M.Map().should.be.exactly(M.Map.EMPTY())
     })

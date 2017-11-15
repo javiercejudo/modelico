@@ -21,7 +21,10 @@ export default (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
     })
 
     it('validates conforming data', () => {
-      m.string({maxLength: 5}).reviver('', 'test').should.be.exactly('test')
+      m
+        .string({maxLength: 5})
+        .reviver('', 'test')
+        .should.be.exactly('test')
     })
 
     it('rejects non-conforming data', () => {
@@ -52,7 +55,10 @@ export default (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
     })
 
     it('validates conforming data', () => {
-      m.string({maxLength: 5}).reviver('', 'test').should.be.exactly('test')
+      m
+        .string({maxLength: 5})
+        .reviver('', 'test')
+        .should.be.exactly('test')
     })
 
     it('rejects non-conforming data', () => {
@@ -70,7 +76,10 @@ export default (should, M, fixtures, {isMyJsonValid, tv4}) => () => {
     })
 
     it('validates conforming data', () => {
-      m.string({maxLength: 5}).reviver('', 'test').should.be.exactly('test')
+      m
+        .string({maxLength: 5})
+        .reviver('', 'test')
+        .should.be.exactly('test')
     })
 
     it('does not reject non-conforming data', () => {

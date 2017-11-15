@@ -41,7 +41,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
       }
     }
 
-    M.fromJS(Range, {min: 4, max: 6.5}).length().should.be.exactly(2.5)
+    M.fromJS(Range, {min: 4, max: 6.5})
+      .length()
+      .should.be.exactly(2.5)
 
     should(() => M.fromJS(Range, {min: 4, max: 3.5})).throw(
       '"min" must be less than or equal to "max"'

@@ -15,7 +15,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
         switch (type()) {
           case CollectionType.OBJECT():
-            return [...collection()[M.symbols.innerOrigSymbol]().values()]
+            const origCollection = collection()[M.symbols.innerOrigSymbol]()
+
+            return [...origCollection.values()]
           case CollectionType.ARRAY():
             return [...collection()]
           default:
@@ -82,7 +84,9 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
         switch (collectionType()) {
           case CollectionType.OBJECT():
-            return [...collection()[M.symbols.innerOrigSymbol]().values()]
+            const origCollection = collection()[M.symbols.innerOrigSymbol]()
+
+            return [...origCollection.values()]
           case CollectionType.ARRAY():
             return [...collection()]
           default:
@@ -276,8 +280,8 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
       should(geometer1.favouriteShape().area()).be.exactly(28)
 
-      should(geometer2.favouriteShape().area()).be
-        .above(28)
+      should(geometer2.favouriteShape().area())
+        .be.above(28)
         .and.exactly(Math.PI * 3 ** 2)
 
       geometer1.toJS().should.deepEqual({

@@ -89,7 +89,10 @@ export default (U, should, M) => () => {
     obj[1].should.be.exactly('one')
 
     const map = M.Map.fromObject(obj)
-    map.inner().get('1').should.be.exactly('one')
+    map
+      .inner()
+      .get('1')
+      .should.be.exactly('one')
     should(map.inner().get(1)).be.exactly(undefined)
   })
 
