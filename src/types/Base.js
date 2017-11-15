@@ -76,6 +76,10 @@ class Base {
   }
 
   set(field, value) {
+    if (this[field]() === value) {
+      return this
+    }
+
     return this.copy({[field]: value})
   }
 

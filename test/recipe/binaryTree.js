@@ -43,6 +43,10 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
         return Node.of(x)
       }
 
+      remove(x) {
+        return this
+      }
+
       fold(f, init) {
         return init
       }
@@ -118,6 +122,38 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
         return comparison === 1
           ? this.set('right', this.right().insert(x))
           : this.set('left', this.left().insert(x))
+      }
+
+      remove(x) {
+        const v = this.value()
+        const comparison = cmp(x, v)
+
+        if (comparison !== 0) {
+          return comparison === 1
+            ? this.set('right', this.right().remove(x))
+            : this.set('left', this.left().remove(x))
+        }
+
+        // A short but expensive alternative
+        // return Tree.fromArray(this.toArray().slice(1))
+
+        if (this.left().isEmpty()) {
+          return this.right()
+        }
+
+        if (this.right().isEmpty()) {
+          return this.left()
+        }
+
+        const min = this.right().min()
+
+        return Node.of(min, this.left(), this.right().remove(min))
+      }
+
+      min() {
+        const left = this.left()
+
+        return left.isEmpty() ? this.value() : left.min()
       }
 
       fold(f, init) {
@@ -252,6 +288,69 @@ export default ({shuffle}, should, M, fixtures, {Ajv}) => () => {
 
     myTree.has(0).should.be.exactly(false)
     myTree.has(4).should.be.exactly(false)
+  })
+
+  it('.remove()', () => {
+    const {Node} = numberTree
+
+    let myTree, myTreeRes
+
+    myTree = Node.of(2, Node.of(1), Node.of(3))
+
+    myTreeRes = myTree.remove(4)
+    myTreeRes.should.be.exactly(myTree)
+
+    myTreeRes = myTree.remove(3)
+    myTreeRes.left().value().should.be.exactly(1)
+    myTreeRes.value().should.be.exactly(2)
+    myTreeRes.right().isEmpty().should.be.exactly(true)
+
+    myTreeRes = myTree.remove(1)
+    myTreeRes.value().should.be.exactly(2)
+    myTreeRes.left().isEmpty().should.be.exactly(true)
+    myTreeRes.right().value().should.be.exactly(3)
+
+    myTreeRes = myTree.remove(2)
+    myTreeRes.value().should.be.exactly(3)
+    myTreeRes.left().value().should.be.exactly(1)
+    myTreeRes.right().isEmpty().should.be.exactly(true)
+
+    const myLeftTree = Node.of(2, Node.of(1), Node.of(3))
+    const myRightTree = Node.of(6, Node.of(5), Node.of(7))
+    myTree = Node.of(4, myLeftTree, myRightTree)
+
+    myTreeRes = myTree.remove(8)
+    myTreeRes.should.be.exactly(myTree)
+
+    myTreeRes = myTree.remove(4)
+    myTreeRes.left().should.be.exactly(myLeftTree)
+    myTreeRes.value().should.be.exactly(5)
+    myTreeRes.right().value().should.be.exactly(6)
+    myTreeRes.right().right().value().should.be.exactly(7)
+
+    myTreeRes = myTree.remove(1)
+    myTreeRes.value().should.be.exactly(4)
+    myTreeRes.right().should.be.exactly(myRightTree)
+    myTreeRes.left().value().should.be.exactly(2)
+    myTreeRes.left().right().value().should.be.exactly(3)
+
+    myTreeRes = myTree.remove(5)
+    myTreeRes.value().should.be.exactly(4)
+    myTreeRes.left().should.be.exactly(myLeftTree)
+    myTreeRes.right().value().should.be.exactly(6)
+    myTreeRes.right().right().value().should.be.exactly(7)
+
+    myTreeRes = myTree.remove(2)
+    myTreeRes.value().should.be.exactly(4)
+    myTreeRes.right().should.be.exactly(myRightTree)
+    myTreeRes.left().value().should.be.exactly(3)
+    myTreeRes.left().left().value().should.be.exactly(1)
+
+    myTreeRes = myTree.remove(6)
+    myTreeRes.value().should.be.exactly(4)
+    myTreeRes.left().should.be.exactly(myLeftTree)
+    myTreeRes.right().value().should.be.exactly(7)
+    myTreeRes.right().left().value().should.be.exactly(5)
   })
 
   it('.fold()', () => {
