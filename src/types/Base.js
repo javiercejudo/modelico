@@ -15,14 +15,14 @@ import getInnerTypes from '../getInnerTypes'
 const getInReducer = (result, part) => result.get(part)
 
 class Base {
-  constructor(_, fieldss = emptyObject, thisArg) {
-    let fields = fieldss
+  constructor(arg1, arg2 = emptyObject, thisArg) {
+    let fields = arg2
     let Type = this.constructor
 
-    if (isPlainObject(_)) {
-      fields = _
-    } else if (_ !== undefined) {
-      Type = _
+    if (isPlainObject(arg1)) {
+      fields = arg1
+    } else if (arg1 !== undefined) {
+      Type = arg1
     }
 
     if (!isPlainObject(fields)) {
