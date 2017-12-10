@@ -37,10 +37,6 @@ Now, we can create our `NumberCollection` class:
 const {_, number, stringMap, list, anyOf} = M.metadata()
 
 class NumberCollection extends M.Base {
-  constructor (props) {
-    super(NumberCollection, props)
-  }
-
   getNumbers () {
     const {collectionType, collection} = this
 
@@ -125,10 +121,6 @@ above, but without an enumerated field to hint the type of the collection.
 const {number, stringMap, list} = M.metadata()
 
 class NumberCollection extends M.Base {
-  constructor (props) {
-    super(NumberCollection, props)
-  }
-
   getNumbers () {
     const collection = this.collection()
 

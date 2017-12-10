@@ -27,10 +27,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
   describe('Animal example', () => {
     class Animal extends M.Base {
-      constructor(props) {
-        super(Animal, props)
-      }
-
       static innerTypes() {
         return Object.freeze({
           name: withDefault(string({minLength: 1, maxLength: 25}), 'unknown'),
@@ -42,10 +38,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     }
 
     class Animal2 extends M.Base {
-      constructor(props) {
-        super(Animal2, props)
-      }
-
       static innerTypes() {
         return Object.freeze({
           name: string({minLength: 1, maxLength: 25}),
@@ -657,10 +649,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
     it('nested modelico object', () => {
       class Animal extends M.Base {
-        constructor(props) {
-          super(Animal, props)
-        }
-
         static innerTypes() {
           return Object.freeze({
             name: withDefault(string({minLength: 1, maxLength: 25}), 'unknown'),
@@ -995,7 +983,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
             throw TypeError(ajv.errors.map(error => error.message).join('\n'))
           }
 
-          super(CountryCode, props)
+          super(props)
         }
 
         static innerTypes() {
@@ -1019,10 +1007,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
 
   describe('recipe: validation at top level', () => {
     class Animal extends M.Base {
-      constructor(props) {
-        super(Animal, props)
-      }
-
       static innerTypes() {
         return Object.freeze({
           name: string()
@@ -1176,10 +1160,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
         )(string(schema))
 
       class MagicString extends M.Base {
-        constructor(props) {
-          super(MagicString, props)
-        }
-
         static innerTypes() {
           return Object.freeze({
             str: lowerCaseString({minLength: 5})
@@ -1220,10 +1200,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
     )
 
     class Score extends M.Base {
-      constructor(props) {
-        super(Score, props)
-      }
-
       static innerTypes() {
         return Object.freeze({
           type: enumType(ScoreTypeEnum),
@@ -1289,11 +1265,7 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
         }
       })
 
-      class Chain extends ChainBase {
-        constructor(props) {
-          super(Chain, props)
-        }
-      }
+      class Chain extends ChainBase {}
 
       M.getSchema(_(Chain)).should.deepEqual({
         definitions: {
@@ -1353,10 +1325,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       }
 
       class Parent extends M.Base {
-        constructor(props) {
-          super(Parent, props)
-        }
-
         static innerTypes() {
           return Object.freeze({
             name: nonEmptyString,
@@ -1366,10 +1334,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       }
 
       class Child extends M.Base {
-        constructor(props) {
-          super(Child, props)
-        }
-
         static innerTypes() {
           return Object.freeze({
             name: nonEmptyString,
@@ -1379,10 +1343,6 @@ export default (U, should, M, fixtures, {Ajv}) => () => {
       }
 
       class Person extends M.Base {
-        constructor(props) {
-          super(Person, props)
-        }
-
         static innerTypes() {
           return Object.freeze({
             name: nonEmptyString,

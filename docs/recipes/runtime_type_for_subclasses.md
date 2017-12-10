@@ -14,10 +14,6 @@ also an example of a schema with circular references.
 
 ```js
 class Geometer extends M.Base {
-  constructor (props) {
-    super(Geometer, props)
-  }
-
   static innerTypes () {
     return Object.freeze({
       name: string({minLength: 1}),

@@ -13,10 +13,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
         stringTag: 'Book'
       }
     ) {
-      constructor(props) {
-        super(Book, props)
-      }
-
       getTitleBy() {
         return `"${this.title()}" by ${this.author()}`
       }
@@ -47,10 +43,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
     class CountryCallingCode extends M.createModel(m => ({
       code: withDefault(m.number(), '34')
     })) {
-      constructor(props) {
-        super(CountryCallingCode, props)
-      }
-
       static innerTypes() {
         return super.innerTypes()
       }

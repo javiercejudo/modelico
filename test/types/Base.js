@@ -35,11 +35,7 @@ export default (U, should, M, fixtures) => () => {
   })
 
   describe('default innerTypes', () => {
-    class Country extends M.Base {
-      constructor(props) {
-        super(Country, props)
-      }
-    }
+    class Country extends M.Base {}
 
     it('should not throw when static innerTypes are missing', () => {
       should(() => M.fromJSON(Country, '{"code": "ESP"}')).not.throw()
@@ -52,11 +48,7 @@ export default (U, should, M, fixtures) => () => {
     })
 
     it('allows simple model creation without inner types (discouraged)', () => {
-      class Book extends M.createModel() {
-        constructor(props) {
-          super(Book, props)
-        }
-      }
+      class Book extends M.createModel() {}
 
       const myBook = new Book()
 
@@ -452,10 +444,6 @@ export default (U, should, M, fixtures) => () => {
       class CountryCallingCode extends M.createModel(() => ({
         code: withDefault(number(), '34')
       })) {
-        constructor(props) {
-          super(CountryCallingCode, props)
-        }
-
         static innerTypes() {
           return super.innerTypes()
         }

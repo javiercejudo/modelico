@@ -4,10 +4,6 @@ export default M => {
   const {_, number, string} = M.metadata()
 
   class Code extends M.Base {
-    constructor(props) {
-      super(Code, props)
-    }
-
     static innerTypes() {
       return Object.freeze({
         id: number(),
@@ -17,10 +13,6 @@ export default M => {
   }
 
   class Region extends M.Base {
-    constructor(props) {
-      super(Region, props)
-    }
-
     customMethod() {
       return `${this.name()} (${this.code().value()})`
     }

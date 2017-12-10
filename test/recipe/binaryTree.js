@@ -26,7 +26,7 @@ export default ({shuffle}, should, M, fixtures, {Ajv, asciitree}) => () => {
     let empty
     class Empty extends Tree {
       constructor() {
-        super(Empty)
+        super()
 
         if (!empty) {
           empty = this
@@ -718,10 +718,6 @@ export default ({shuffle}, should, M, fixtures, {Ajv, asciitree}) => () => {
     const {string} = M.ajvMetadata(ajv)
 
     class Animal extends M.Base {
-      constructor(props) {
-        super(Animal, props)
-      }
-
       static innerTypes() {
         return Object.freeze({
           name: string({minLength: 1, maxLength: 25})

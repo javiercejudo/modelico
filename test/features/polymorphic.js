@@ -6,10 +6,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
     const {_, number, stringMap, list, anyOf} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor(props) {
-        super(NumberCollection, props)
-      }
-
       getNumbers() {
         const {type, collection} = this
 
@@ -75,10 +71,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
     const {_, number, stringMap, list, anyOf} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor(props) {
-        super(NumberCollection, props)
-      }
-
       getNumbers() {
         const {collectionType, collection} = this
 
@@ -246,11 +238,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
         minLength: 1
       }),
       favouriteShape: m._(Shape)
-    })) {
-      constructor(props) {
-        super(Geometer, props)
-      }
-    }
+    })) {}
 
     it('should revive polymorphic JSON', () => {
       const geometer1 = M.fromJS(Geometer, {
@@ -395,10 +383,6 @@ export default (should, M, fixtures, {Ajv}) => () => {
     const {number, stringMap, list} = M.metadata()
 
     class NumberCollection extends M.Base {
-      constructor(props) {
-        super(NumberCollection, props)
-      }
-
       getNumbers() {
         const collection = this.collection()
 

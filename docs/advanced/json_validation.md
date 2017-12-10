@@ -29,11 +29,7 @@ const ajvIfProd = (ENV === 'development') ? Ajv(ajvOptions) : undefined
 const {string, list, number} = M.ajvMetadata(ajvIfProd)
 
 class Animal extends M.Base {
-  constructor (fields) {
-    super(Animal, fields)
-  }
-
-  static innerTypes () {
+  static innerTypes() {
     return Object.freeze({
       name: string({minLength: 1, maxLength: 25}),
       dimensions: list(
@@ -66,10 +62,6 @@ const lowerCaseString = () => M.withValidation(
 )(string())
 
 class Animal extends M.Base {
-  constructor (fields) {
-    super(Animal, fields)
-  }
-
   static innerTypes () {
     return Object.freeze({
       name: lowerCaseString(),
@@ -142,7 +134,7 @@ const customReviver = baseReviver => (k, v, path = []) => {
 
 class Range extends M.Base {
   constructor ({min = -Infinity, max = Infinity} = {}) {
-    super(Range, {min, max})
+    super({min, max})
   }
 
   length () {

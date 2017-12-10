@@ -18,10 +18,6 @@ export default (should, M) => () => {
   }
 
   class Person extends M.Base {
-    constructor(props) {
-      super(Person, props)
-    }
-
     fullName() {
       return [this.givenName(), this.familyName()].join(' ').trim()
     }
