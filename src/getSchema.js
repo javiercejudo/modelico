@@ -1,7 +1,7 @@
 // @flow
 
 import M from './'
-import {emptyObject} from './U'
+import {emptyObject, metaOrTypeMapper} from './U'
 import getInnerTypes from './getInnerTypes'
 
 const metadataSchemaCache = new WeakMap()
@@ -88,7 +88,9 @@ const getUsedDefinitions = (): Object => {
     }, {})
 }
 
-const getSchema = (metadata: Object, topLevel: boolean = true): Object => {
+const getSchema = (metaOrType: Object, topLevel: boolean = true): Object => {
+  const metadata = metaOrTypeMapper(M.metadata()._)(metaOrType)
+
   if (metadataSchemaCache.has(metadata)) {
     return metadataSchemaCache.get(metadata) || emptyObject
   }
