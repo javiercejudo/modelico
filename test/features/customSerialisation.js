@@ -5,7 +5,7 @@ export default (should, M, fixtures, {Ajv}) => () => {
 
   class Point extends M.Base {
     constructor(props) {
-      super(Point, props)
+      super(props)
 
       this.x = () => props.x
       this.y = () => props.y

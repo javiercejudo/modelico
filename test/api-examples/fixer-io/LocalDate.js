@@ -11,7 +11,7 @@ export default ({M, m}) => {
 
   class LocalDate extends M.Base {
     constructor(props) {
-      super(LocalDate, props)
+      super(props)
 
       this.year = () => props.year
       this.month = () => props.month

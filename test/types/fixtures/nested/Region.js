@@ -4,10 +4,6 @@ export default M => {
   const {string} = M.metadata()
 
   class Region extends M.Base {
-    constructor(props) {
-      super(Region, props)
-    }
-
     customMethod() {
       return `${this.name()} (${this.code()})`
     }

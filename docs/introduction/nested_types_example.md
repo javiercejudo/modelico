@@ -42,10 +42,6 @@ import M from 'modelico'
 const {_, string, list} = M.metadata()
 
 class Person extends M.Base {
-  constructor (fields) {
-    super(Person, fields)
-  }
-
   fullName () {
     return `${this.givenName()} ${this.familyName()}`.trim()
   }

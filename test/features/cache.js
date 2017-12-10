@@ -16,10 +16,6 @@ export default (should, M) => () => {
     }))
 
     class Book extends _Book {
-      constructor(props) {
-        super(Book, props)
-      }
-
       getTitleBy() {
         return M.withCache(this, getTitleBy)
       }
@@ -56,10 +52,6 @@ export default (should, M) => () => {
     }
 
     class Book extends _Book {
-      constructor(props) {
-        super(Book, props)
-      }
-
       getTitleByWithPrefix(prefix) {
         return M.withCache(
           this,
@@ -111,10 +103,6 @@ export default (should, M) => () => {
     }))
 
     class Book extends _Book {
-      constructor(props) {
-        super(Book, props)
-      }
-
       static description() {
         return M.withCache(Book, description)
       }

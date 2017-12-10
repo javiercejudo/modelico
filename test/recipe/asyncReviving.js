@@ -30,19 +30,11 @@ export default (should, M) => () => {
     class Book extends M.createModel(m => ({
       title: m.string(),
       author: m.string()
-    })) {
-      constructor(props) {
-        super(Book, props)
-      }
-    }
+    })) {}
 
     class Library extends M.createModel(m => ({
       catalogue: m.list(m._(Book))
-    })) {
-      constructor(props) {
-        super(Library, props)
-      }
-    }
+    })) {}
 
     const libraryObj = {
       catalogue: [

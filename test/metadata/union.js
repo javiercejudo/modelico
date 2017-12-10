@@ -35,10 +35,6 @@ export default (should, M) => () => {
     }
 
     class Named extends User {
-      constructor(props) {
-        super(Named, props)
-      }
-
       isAnonymous() {
         return false
       }
@@ -67,11 +63,7 @@ export default (should, M) => () => {
   it('should have a proper reviver', () => {
     const {union} = M.metadata()
 
-    class Foo extends M.createModel(m => ({a: m.number()})) {
-      constructor(props) {
-        super(Foo, props)
-      }
-    }
+    class Foo extends M.createModel(m => ({a: m.number()})) {}
 
     JSON.parse('{"a": 1}', union(Object, [Foo]).reviver)
       .a()
@@ -92,10 +84,6 @@ export default (should, M) => () => {
     }
 
     class Named extends M.Base {
-      constructor(props) {
-        super(Named, props)
-      }
-
       static innerTypes() {
         return {name: string()}
       }
@@ -145,20 +133,12 @@ export default (should, M) => () => {
     const {number} = M.metadata()
 
     class Circle extends M.Base {
-      constructor(props) {
-        super(Circle, props)
-      }
-
       static innerTypes() {
         return {radius: number()}
       }
     }
 
     class Square extends M.Base {
-      constructor(props) {
-        super(Square, props)
-      }
-
       static innerTypes() {
         return {side: number()}
       }
