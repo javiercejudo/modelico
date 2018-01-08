@@ -69,7 +69,7 @@
   "homepage": "https://github.com/javiercejudo/modelico#readme",
   "devDependencies": {
     "asciitree": "^1.0.2",
-    "babel-eslint": "^7.2.2",
+    "babel-eslint": "^8.2.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-polyfill": "^6.20.0",
