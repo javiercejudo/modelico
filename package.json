@@ -75,7 +75,7 @@
     "babel-polyfill": "^6.20.0",
     "babel-preset-env": "^1.2.1",
     "babili": "^0.1.2",
-    "codecov": "^2.0.1",
+    "codecov": "^3.0.4",
     "eslint": "^4.2.0",
     "eslint-config-prettier": "^2.1.1",
     "eslint-config-standard": "^10.2.1",
