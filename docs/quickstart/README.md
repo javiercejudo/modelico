@@ -1,4 +1,4 @@
-# Introduction
+# Quick start
 
 Modélico's goal is to parse JSON strings like
 
@@ -33,7 +33,7 @@ class Animal extends M.createModel(m => ({
 ```
 
 The name is required by default. See the
-[Optional / null values page](/docs/basics/optional_values.md) to change the
+[Optional / null values page](../basics/optional_values.md) to change the
 default behaviour.
 
 With a bit more effort, we can have a detailed JSON schema, with the benefits
@@ -80,5 +80,5 @@ M.getSchema(Animal);
 // }
 ```
 
-See the [nested types example](/docs/introduction/nested_types_example.md) to
+See the [nested types example](./nested_types_example.md) to
 learn more.
