@@ -6,7 +6,7 @@ models.
 [![Code Climate](https://codeclimate.com/github/javiercejudo/modelico/badges/gpa.svg)](https://codeclimate.com/github/javiercejudo/modelico)
 [![Dependency Status](https://gemnasium.com/badges/github.com/javiercejudo/modelico.svg)](https://gemnasium.com/github.com/javiercejudo/modelico)
 
-**Docs: https://modelico.io/docs/introduction/**
+**Docs: https://modelico.javiercejudo.com/quickstart**
 
 ## Installation
 
